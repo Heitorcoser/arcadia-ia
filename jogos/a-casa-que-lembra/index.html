@@ -1,0 +1,1071 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A Casa Que Lembra</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Special+Elite&display=swap" rel="stylesheet">
+<style>
+  html,body{margin:0;height:100%;overflow:hidden;background:#000;color:#ddd5c8;font-family:"IM Fell English",Georgia,serif;user-select:none}
+  canvas{display:block}
+  .tela{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;text-align:center;z-index:10;padding:24px;box-sizing:border-box}
+  .tela.on{display:flex}
+  #menu{background:radial-gradient(ellipse at 50% 40%,rgba(60,30,20,.55),#000 70%)}
+  #menu h1{font-size:clamp(40px,7vw,84px);font-weight:400;margin:0;letter-spacing:2px;color:#e9dfcf;text-shadow:0 0 30px rgba(200,120,60,.25);animation:tremer 7s infinite}
+  @keyframes tremer{0%,92%,100%{transform:none;opacity:1}93%{transform:translate(2px,-1px);opacity:.7}95%{transform:translate(-3px,1px);opacity:.9}97%{opacity:.4}}
+  #menu .sub{font-style:italic;color:#9c8f7c;margin:8px 0 30px;font-size:19px}
+  #menu .intro{max-width:560px;line-height:1.7;font-size:18px;color:#bdb2a1;margin-bottom:28px}
+  .botao{font-family:"IM Fell English",serif;font-size:22px;background:transparent;color:#e9dfcf;border:1px solid #6b5848;padding:12px 38px;cursor:pointer;letter-spacing:1px;transition:.3s}
+  .botao:hover{background:#e9dfcf;color:#120c08;border-color:#e9dfcf}
+  .botao:disabled{opacity:.4;cursor:wait}
+  .botao + .botao{margin-left:12px}
+  .controles{display:flex;flex-wrap:wrap;gap:8px 22px;justify-content:center;margin-top:30px;font-family:"Special Elite",monospace;font-size:13px;color:#857a6a}
+  .controles b{color:#cfc4b2;font-weight:400;border:1px solid #4a3f35;padding:1px 6px;margin-right:6px}
+  .aviso{margin-top:22px;font-size:13.5px;color:#8a5a4a;font-style:italic}
+  #carregando{font-family:"Special Elite";font-size:14px;color:#857a6a;margin-top:14px;min-height:20px}
+
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:5;display:none}
+  #hud.on{display:block}
+  #mira{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:rgba(230,220,200,.55);transition:.15s}
+  #mira.alvo{width:10px;height:10px;margin:-5px 0 0 -5px;background:transparent;border:1px solid rgba(230,220,200,.8)}
+  #prompt{position:absolute;left:50%;top:calc(50% + 34px);transform:translateX(-50%);font-family:"Special Elite";font-size:15px;color:#e8dcc6;text-shadow:0 0 6px #000;opacity:0;transition:opacity .2s;white-space:nowrap}
+  #prompt b{border:1px solid #cdbfa8;padding:0 6px;margin-right:6px}
+  #pensamento{position:absolute;left:50%;bottom:12%;transform:translateX(-50%);width:min(760px,90vw);text-align:center;font-style:italic;font-size:22px;color:#e6dccb;text-shadow:0 0 8px #000,0 0 2px #000;opacity:0;transition:opacity .8s}
+  #objetivo{position:absolute;left:26px;top:22px;font-family:"Special Elite";font-size:13px;color:#a89c89;text-shadow:0 0 4px #000;line-height:1.6}
+  #objetivo span{color:#e0d4bf}
+  #memorias{display:flex;gap:6px;margin-top:6px}
+  #memorias i{width:12px;height:12px;border:1px solid #8b7f6c;transform:rotate(45deg);display:block}
+  #memorias i.ok{background:#d9c6a5;border-color:#d9c6a5;box-shadow:0 0 8px rgba(217,198,165,.6)}
+  #barras{position:absolute;left:26px;bottom:24px;font-family:"Special Elite";font-size:11px;color:#8a7e6b;letter-spacing:1px}
+  .barra{width:170px;height:4px;background:rgba(255,255,255,.08);margin:4px 0 11px}
+  .barra div{height:100%;background:#cbbda4;transition:width .2s}
+  #b-sanidade div{background:linear-gradient(90deg,#7a1f17,#cbbda4)}
+  #flash{position:fixed;inset:0;background:#000;pointer-events:none;z-index:6;opacity:0}
+
+  #nota{background:rgba(0,0,0,.78);z-index:12}
+  .papel{width:min(560px,92vw);background:#d9ccb2;color:#2a2018;padding:38px 42px;box-shadow:0 20px 70px #000;transform:rotate(-1deg);text-align:left;position:relative;
+    background-image:radial-gradient(circle at 20% 30%,rgba(120,80,40,.18),transparent 40%),radial-gradient(circle at 80% 85%,rgba(90,60,30,.22),transparent 35%)}
+  .papel h2{font-family:"IM Fell English";font-weight:400;font-size:28px;margin:0 0 6px}
+  .papel .n{font-family:"Special Elite";font-size:12px;color:#6b5a48;letter-spacing:2px;margin-bottom:18px}
+  .papel p{font-family:"Special Elite";font-size:16px;line-height:1.75;margin:0 0 12px;white-space:pre-line}
+  .papel .fechar{font-family:"Special Elite";font-size:12px;color:#6b5a48;margin-top:20px;text-align:right}
+
+  #pausa{background:rgba(0,0,0,.82)}
+  #pausa h2{font-weight:400;font-size:44px;margin:0 0 8px}
+  #pausa label{display:block;font-family:"Special Elite";font-size:13px;color:#9c8f7c;margin:16px 0 6px}
+  #pausa input[type=range]{width:240px;accent-color:#cbbda4}
+  #pausa .botoes{margin-top:28px}
+  #escolha{background:rgba(0,0,0,.7)}
+  #escolha h2,#fim h2,#morte h2{font-weight:400;font-size:clamp(30px,5vw,50px);margin:0 0 16px}
+  #escolha p{max-width:540px;line-height:1.7;font-size:19px;color:#c9bea9;margin:0 0 30px}
+  #escolha .botao{display:block;margin:10px auto;width:min(460px,86vw);font-size:19px}
+  #fim{background:#000}
+  #fim p,#morte p{max-width:600px;line-height:1.8;font-size:20px;color:#c9bea9;white-space:pre-line}
+  #fim .creditos{font-family:"Special Elite";font-size:12.5px;color:#6b6152;margin:26px 0;line-height:1.8}
+  #morte{background:radial-gradient(ellipse,#2a0806,#000 70%)}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+
+<div id="menu" class="tela on">
+  <h1>A Casa Que Lembra</h1>
+  <div class="sub">um jogo de terror psicológico</div>
+  <div class="intro">Vinte anos atrás, sua irmã Clara desapareceu dentro desta casa.<br>Hoje você voltou. Encontre as cinco memórias dela.<br>E não deixe o escuro tomar conta de você.</div>
+  <button class="botao" id="btn-comecar" disabled>Carregando…</button>
+  <div id="carregando">preparando a casa…</div>
+  <div class="controles">
+    <span><b>WASD</b>andar</span><span><b>Mouse</b>olhar</span><span><b>Shift</b>correr</span><span><b>F</b>lanterna</span><span><b>E</b>interagir</span><span><b>Esc</b>pausar</span>
+  </div>
+  <div class="aviso">Use fones de ouvido. Contém luzes piscando, sustos e temas de luto.</div>
+</div>
+
+<div id="hud">
+  <div id="objetivo">Encontre as memórias de Clara<div id="memorias"></div></div>
+  <div id="mira"></div>
+  <div id="prompt"></div>
+  <div id="pensamento"></div>
+  <div id="barras">
+    SANIDADE<div class="barra" id="b-sanidade"><div></div></div>
+    LANTERNA<div class="barra" id="b-bateria"><div></div></div>
+    FÔLEGO<div class="barra" id="b-folego"><div></div></div>
+  </div>
+</div>
+<div id="flash"></div>
+
+<div id="nota" class="tela"><div class="papel"><div class="n" id="nota-n"></div><h2 id="nota-t"></h2><p id="nota-p"></p><div class="fechar">[E] continuar</div></div></div>
+
+<div id="pausa" class="tela">
+  <h2>Pausado</h2>
+  <label>Sensibilidade do mouse</label><input type="range" id="sens" min="0.4" max="2.5" step="0.05" value="1">
+  <label>Volume</label><input type="range" id="vol" min="0" max="1" step="0.05" value="0.9">
+  <div class="botoes"><button class="botao" id="btn-voltar">Continuar</button><button class="botao" id="btn-sair">Sair</button></div>
+</div>
+
+<div id="escolha" class="tela">
+  <h2>A porta está aberta.</h2>
+  <p>Lá fora está amanhecendo. Atrás de você, no fim do corredor, ela espera parada, como sempre esperou.</p>
+  <button class="botao" id="final-a">Abrir a porta e esquecer</button>
+  <button class="botao" id="final-b">Virar-se e lembrar dela</button>
+</div>
+
+<div id="fim" class="tela"><h2 id="fim-t"></h2><p id="fim-p"></p>
+  <div class="creditos">A Casa Que Lembra · criado por IA (Claude) para a Arcádia IA<br>Manequim: modelo Xbot dos exemplos do three.js (Mixamo) · Sons gerados em tempo real com Web Audio</div>
+  <div><button class="botao" onclick="location.reload()">Jogar de novo</button><button class="botao" id="btn-plataforma">Voltar à plataforma</button></div>
+</div>
+
+<div id="morte" class="tela"><h2>Você se perdeu.</h2><p id="morte-p">O escuro entrou devagar, como água por baixo da porta.\nVocê ainda está na casa. Sempre esteve.</p>
+  <div style="margin-top:26px"><button class="botao" onclick="location.reload()">Tentar de novo</button></div>
+</div>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+
+const ID_JOGO = 'a-casa-que-lembra';
+const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: ID_JOGO, evento, ...extra }, '*'); } catch (e) {} };
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const rnd = (a, b) => a + Math.random() * (b - a);
+
+/* =====================================================================
+   MAPA  (# parede  X porta da frente  P jogador  F manequim  L abajur
+          W guarda-roupa  K balcão  S sofá  T mesa  B cama  1-5 memórias)
+   ===================================================================== */
+const MAPA = [
+  '########################',
+  '#W....#.......#KKKK....#',
+  '#.....#...S...#........#',
+  '#B.1..#...S...#...TT.2.#',
+  '#B..L.#.......#..L.....#',
+  '###.####.L....####.#####',
+  '#......................#',
+  '#.P....................X',
+  '####.#####.######.###.##',
+  '#......#.......#....#..#',
+  '#.BB...#.WW...T#....#..#',
+  '#.BB.3.#..4...T#.5..#..#',
+  '#..L...#....L..#..L.#.F#',
+  '########################',
+];
+const S = 2, ALT = 3, ROWS = MAPA.length, COLS = MAPA[0].length;
+const grid = MAPA.map(r => r.split(''));
+let moveisNoTeto = false;
+const ehParede = ch => ch === '#' || ch === 'X';
+const ehMovel = ch => 'WKSTB'.includes(ch);
+const bloqueado = ch => ehParede(ch) || ch === 'L' || (ehMovel(ch) && !moveisNoTeto);
+const celula = (x, z) => { const c = Math.floor(x / S), r = Math.floor(z / S); return (r < 0 || r >= ROWS || c < 0 || c >= COLS) ? '#' : grid[r][c]; };
+const centro = (r, c) => new THREE.Vector3(c * S + S / 2, 0, r * S + S / 2);
+function colide(x, z, raio = 0.3) {
+  for (const dx of [-raio, 0, raio]) for (const dz of [-raio, 0, raio]) if (bloqueado(celula(x + dx, z + dz))) return true;
+  return false;
+}
+function linhaDeVisao(a, b) {
+  const dx = b.x - a.x, dz = b.z - a.z, d = Math.hypot(dx, dz), n = Math.ceil(d / 0.2);
+  for (let i = 1; i < n; i++) { const t = i / n; if (ehParede(celula(a.x + dx * t, a.z + dz * t))) return false; }
+  return true;
+}
+function bfs(origemR, origemC) {
+  const dist = Array.from({ length: ROWS }, () => Array(COLS).fill(-1)), pai = {};
+  const fila = [[origemR, origemC]]; dist[origemR][origemC] = 0;
+  while (fila.length) {
+    const [r, c] = fila.shift();
+    for (const [dr, dc] of [[1,0],[-1,0],[0,1],[0,-1]]) {
+      const nr = r + dr, nc = c + dc;
+      if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS || dist[nr][nc] >= 0 || bloqueado(grid[nr][nc])) continue;
+      dist[nr][nc] = dist[r][c] + 1; pai[nr + ',' + nc] = [r, c]; fila.push([nr, nc]);
+    }
+  }
+  return { dist, pai };
+}
+
+/* =====================================================================
+   RENDERIZAÇÃO
+   ===================================================================== */
+const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
+renderer.setSize(innerWidth, innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.35;
+document.body.prepend(renderer.domElement);
+
+const cena = new THREE.Scene();
+cena.background = new THREE.Color(0x020202);
+cena.fog = new THREE.FogExp2(0x030303, 0.085);
+const camera = new THREE.PerspectiveCamera(72, innerWidth / innerHeight, 0.05, 60);
+camera.rotation.order = 'YXZ';
+cena.add(camera);
+
+const ambiente = new THREE.AmbientLight(0x2a2838, 0.55);
+cena.add(ambiente);
+const hemi = new THREE.HemisphereLight(0x302a35, 0x0a0806, 0.35);
+cena.add(hemi);
+
+// Lanterna
+const lanterna = new THREE.SpotLight(0xfff1d6, 38, 24, 0.46, 0.55, 1.5);
+lanterna.position.set(0.22, -0.18, 0.05);
+lanterna.castShadow = true;
+lanterna.shadow.mapSize.set(1024, 1024);
+lanterna.shadow.camera.near = 0.2; lanterna.shadow.camera.far = 24;
+lanterna.shadow.bias = -0.0006;
+camera.add(lanterna);
+const alvoLanterna = new THREE.Object3D(); alvoLanterna.position.set(0, -0.15, -5);
+camera.add(alvoLanterna); lanterna.target = alvoLanterna;
+
+// ---------- texturas pintadas por código ----------
+function semente(s) { return () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function texCanvas(w, h, desenhar, srgb = true) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  desenhar(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 4;
+  return t;
+}
+function manchas(g, w, h, r, n, cor) {
+  for (let i = 0; i < n; i++) {
+    const x = r() * w, y = r() * h, rad = 10 + r() * 60;
+    const gr = g.createRadialGradient(x, y, 0, x, y, rad);
+    gr.addColorStop(0, cor.replace('A', (0.15 + r() * 0.35).toFixed(2))); gr.addColorStop(1, cor.replace('A', '0'));
+    g.fillStyle = gr; g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+  }
+}
+function ruido(g, w, h, r, intens) {
+  const img = g.getImageData(0, 0, w, h), d = img.data;
+  for (let i = 0; i < d.length; i += 4) { const n = (r() - 0.5) * intens; d[i] += n; d[i + 1] += n; d[i + 2] += n; }
+  g.putImageData(img, 0, 0);
+}
+const texParede = texCanvas(256, 384, (g, w, h) => {
+  const r = semente(7);
+  g.fillStyle = '#5e5044'; g.fillRect(0, 0, w, h);
+  for (let x = 0; x < w; x += 32) { g.fillStyle = 'rgba(38,28,20,.32)'; g.fillRect(x, 0, 11, h); g.fillStyle = 'rgba(150,130,100,.08)'; g.fillRect(x + 14, 0, 3, h); }
+  g.fillStyle = 'rgba(140,118,90,.22)';
+  for (let y = 12; y < h * 0.68; y += 40) for (let x = 0; x < w; x += 32) { const ox = ((y / 40) % 2) * 16; g.beginPath(); g.moveTo(x + ox + 16, y - 7); g.lineTo(x + ox + 22, y); g.lineTo(x + ox + 16, y + 7); g.lineTo(x + ox + 10, y); g.fill(); }
+  for (let i = 0; i < 9; i++) { const x = r() * w; const gr = g.createLinearGradient(0, 0, 0, h * (0.2 + r() * 0.5)); gr.addColorStop(0, 'rgba(40,28,15,.35)'); gr.addColorStop(1, 'rgba(40,28,15,0)'); g.fillStyle = gr; g.fillRect(x, 0, 3 + r() * 10, h); }
+  manchas(g, w, h * 0.7, r, 14, 'rgba(30,20,10,A)');
+  g.fillStyle = '#2b1f17'; g.fillRect(0, h * 0.68, w, h * 0.32);
+  g.fillStyle = '#1a120d'; g.fillRect(0, h * 0.68, w, 7); g.fillRect(0, h - 10, w, 10);
+  g.strokeStyle = 'rgba(0,0,0,.4)'; g.lineWidth = 3;
+  for (let x = 12; x < w; x += 64) g.strokeRect(x, h * 0.68 + 20, 40, h * 0.32 - 40);
+  ruido(g, w, h, r, 26);
+});
+const texPiso = texCanvas(512, 512, (g, w, h) => {
+  const r = semente(3), n = 8, pw = w / n;
+  for (let i = 0; i < n; i++) {
+    let y = -r() * 200;
+    while (y < h) {
+      const len = 120 + r() * 220, v = 50 + r() * 28;
+      g.fillStyle = `rgb(${v + 14},${v - 4},${v - 22})`; g.fillRect(i * pw, y, pw, len);
+      g.strokeStyle = 'rgba(20,10,4,.25)'; g.lineWidth = 1;
+      for (let k = 0; k < 6; k++) { g.beginPath(); const xx = i * pw + 4 + r() * (pw - 8); g.moveTo(xx, y); g.bezierCurveTo(xx + 4, y + len * .3, xx - 4, y + len * .6, xx + 2, y + len); g.stroke(); }
+      g.fillStyle = '#120a05'; g.fillRect(i * pw, y, pw, 2);
+      y += len;
+    }
+    g.fillStyle = '#0e0703'; g.fillRect(i * pw, 0, 2, h);
+  }
+  manchas(g, w, h, r, 18, 'rgba(10,6,2,A)');
+  ruido(g, w, h, r, 22);
+});
+const texTeto = texCanvas(256, 256, (g, w, h) => {
+  const r = semente(11); g.fillStyle = '#76705f'; g.fillRect(0, 0, w, h);
+  manchas(g, w, h, r, 10, 'rgba(70,50,20,A)'); ruido(g, w, h, r, 18);
+});
+function texRetrato(seed, apagado) {
+  return texCanvas(128, 170, (g, w, h) => {
+    const r = semente(seed);
+    const gr = g.createLinearGradient(0, 0, 0, h); gr.addColorStop(0, '#8a7558'); gr.addColorStop(1, '#4a3a28');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h);
+    const n = 1 + Math.floor(r() * 3);
+    for (let i = 0; i < n; i++) {
+      const cx = w * (i + 1) / (n + 1), s = n === 1 ? 1 : 0.62;
+      g.fillStyle = '#1e150e';
+      g.beginPath(); g.ellipse(cx, h * 0.42, 22 * s, 28 * s, 0, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.ellipse(cx, h * 0.95, 46 * s, 42 * s, 0, Math.PI, 0); g.fill();
+    }
+    if (apagado) { g.strokeStyle = '#120a06'; g.lineWidth = 3; for (let k = 0; k < 40; k++) { g.beginPath(); g.moveTo(w * 0.5 + rnd(-30, 30), h * 0.25 + rnd(0, 20)); g.lineTo(w * 0.5 + rnd(-30, 30), h * 0.6 + rnd(0, 30)); g.stroke(); } }
+    ruido(g, w, h, r, 40);
+  });
+}
+function texEscrita(texto) {
+  const t = texCanvas(512, 256, (g, w, h) => {
+    g.clearRect(0, 0, w, h);
+    g.font = 'italic 64px "IM Fell English", Georgia, serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
+    const linhas = texto.split('\n');
+    linhas.forEach((l, i) => {
+      for (let k = 0; k < 3; k++) { g.fillStyle = `rgba(${90 + k * 20},${12 + k * 4},${8},${0.5 + k * 0.15})`; g.fillText(l, w / 2 + rnd(-2, 2), h / 2 + (i - (linhas.length - 1) / 2) * 70 + rnd(-2, 2)); }
+      for (let k = 0; k < 10; k++) { const x = w / 2 + rnd(-200, 200); g.fillStyle = 'rgba(90,12,8,.5)'; g.fillRect(x, h / 2 + 20, 2, rnd(10, 90)); }
+    });
+  });
+  t.wrapS = t.wrapT = THREE.ClampToEdgeWrapping;
+  return t;
+}
+const texBrilho = texCanvas(64, 64, (g, w, h) => {
+  const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  gr.addColorStop(0, 'rgba(255,255,255,1)'); gr.addColorStop(0.25, 'rgba(200,215,255,.45)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, w, h);
+});
+
+// ---------- construção da casa ----------
+const matParede = new THREE.MeshStandardMaterial({ map: texParede, roughness: 0.95 });
+let nParedes = 0; for (const l of grid) for (const ch of l) if (ehParede(ch)) nParedes++;
+const paredes = new THREE.InstancedMesh(new THREE.BoxGeometry(S, ALT, S), matParede, nParedes);
+{ let i = 0; const m = new THREE.Matrix4();
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (ehParede(grid[r][c])) { m.makeTranslation(c * S + S / 2, ALT / 2, r * S + S / 2); paredes.setMatrixAt(i++, m); } }
+paredes.castShadow = paredes.receiveShadow = true;
+cena.add(paredes);
+
+texPiso.repeat.set(COLS, ROWS); texTeto.repeat.set(COLS, ROWS);
+const piso = new THREE.Mesh(new THREE.PlaneGeometry(COLS * S, ROWS * S), new THREE.MeshStandardMaterial({ map: texPiso, roughness: 0.82 }));
+piso.rotation.x = -Math.PI / 2; piso.position.set(COLS * S / 2, 0, ROWS * S / 2); piso.receiveShadow = true; cena.add(piso);
+const teto = new THREE.Mesh(new THREE.PlaneGeometry(COLS * S, ROWS * S), new THREE.MeshStandardMaterial({ map: texTeto, roughness: 1 }));
+teto.rotation.x = Math.PI / 2; teto.position.set(COLS * S / 2, ALT, ROWS * S / 2); teto.receiveShadow = true; cena.add(teto);
+
+const M = {
+  madeira: new THREE.MeshStandardMaterial({ color: 0x3a2517, roughness: 0.75 }),
+  madeiraEsc: new THREE.MeshStandardMaterial({ color: 0x1f140c, roughness: 0.7 }),
+  tecido: new THREE.MeshStandardMaterial({ color: 0x4a3533, roughness: 1 }),
+  lencol: new THREE.MeshStandardMaterial({ color: 0x8e887c, roughness: 1 }),
+  balcao: new THREE.MeshStandardMaterial({ color: 0x55524b, roughness: 0.8 }),
+  tampo: new THREE.MeshStandardMaterial({ color: 0x8d887d, roughness: 0.45 }),
+  metal: new THREE.MeshStandardMaterial({ color: 0x5a5148, roughness: 0.4, metalness: 0.7 }),
+};
+function caixa(w, h, d, mat, x, y, z) { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; return m; }
+const grupoMoveis = new THREE.Group(); cena.add(grupoMoveis);
+const moveis = [];
+function criarMovel(ch) {
+  const g = new THREE.Group();
+  if (ch === 'B') { g.add(caixa(2, 0.32, 2, M.madeira, 0, 0.2, 0)); g.add(caixa(1.96, 0.24, 1.96, M.lencol, 0, 0.48, 0)); }
+  if (ch === 'W') { g.add(caixa(1.6, 2.4, 1.0, M.madeiraEsc, 0, 1.2, 0)); g.add(caixa(0.04, 2.1, 0.02, M.madeira, 0, 1.2, 0.51)); g.add(caixa(0.05, 0.2, 0.05, M.metal, 0.12, 1.3, 0.53)); g.add(caixa(0.05, 0.2, 0.05, M.metal, -0.12, 1.3, 0.53)); }
+  if (ch === 'S') { g.add(caixa(1.2, 0.45, 1.98, M.tecido, -0.1, 0.25, 0)); g.add(caixa(0.3, 0.7, 1.98, M.tecido, 0.45, 0.6, 0)); }
+  if (ch === 'T') { g.add(caixa(1.9, 0.07, 1.9, M.madeira, 0, 0.78, 0)); for (const [x, z] of [[-.85,-.85],[.85,-.85],[-.85,.85],[.85,.85]]) g.add(caixa(0.08, 0.75, 0.08, M.madeira, x, 0.375, z)); }
+  if (ch === 'K') { g.add(caixa(2, 0.9, 1.9, M.balcao, 0, 0.45, 0)); g.add(caixa(2, 0.06, 1.96, M.tampo, 0, 0.93, 0)); }
+  return g;
+}
+
+// Abajures
+const abajures = [];
+function criarAbajur(pos) {
+  const g = new THREE.Group(); g.position.copy(pos);
+  g.add(caixa(0.4, 0.05, 0.4, M.metal, 0, 0.025, 0));
+  const haste = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 1.5, 8), M.metal); haste.position.y = 0.78; g.add(haste);
+  const matCupula = new THREE.MeshStandardMaterial({ color: 0x9a7a55, emissive: 0xffa860, emissiveIntensity: 0.8, side: THREE.DoubleSide, roughness: 1 });
+  const cupula = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.34, 0.38, 18, 1, true), matCupula); cupula.position.y = 1.62; g.add(cupula);
+  const luz = new THREE.PointLight(0xffa05a, 7, 9, 1.6); luz.position.y = 1.5; g.add(luz);
+  cena.add(g);
+  abajures.push({ g, luz, matCupula, base: 7, fase: Math.random() * 100, apagao: 0, cor: new THREE.Color(0xffa05a) });
+}
+
+// Retratos nas paredes
+const retratos = [];
+function lados(r, c) {
+  const out = [];
+  if (ehParede(grid[r][c + 1])) out.push({ x: (c + 1) * S - 0.02, z: r * S + S / 2, ry: -Math.PI / 2 });
+  if (ehParede(grid[r][c - 1])) out.push({ x: c * S + 0.02, z: r * S + S / 2, ry: Math.PI / 2 });
+  if (ehParede(grid[r + 1]?.[c])) out.push({ x: c * S + S / 2, z: (r + 1) * S - 0.02, ry: Math.PI });
+  if (ehParede(grid[r - 1]?.[c])) out.push({ x: c * S + S / 2, z: r * S + 0.02, ry: 0 });
+  return out;
+}
+{
+  const r = semente(42); let n = 0;
+  for (let rr = 1; rr < ROWS - 1; rr++) for (let cc = 1; cc < COLS - 1; cc++) {
+    if (grid[rr][cc] !== '.' || n >= 12) continue;
+    const ls = lados(rr, cc); if (!ls.length || r() > 0.2) continue;
+    const l = ls[Math.floor(r() * ls.length)];
+    const g = new THREE.Group(); g.position.set(l.x, 1.75, l.z); g.rotation.y = l.ry;
+    g.add(caixa(0.56, 0.74, 0.04, M.madeiraEsc, 0, 0, 0.02));
+    const foto = new THREE.Mesh(new THREE.PlaneGeometry(0.44, 0.6), new THREE.MeshStandardMaterial({ map: texRetrato(100 + n, n === 3), roughness: 0.6 }));
+    foto.position.z = 0.045; g.add(foto);
+    g.rotation.z = rnd(-0.06, 0.06);
+    cena.add(g); retratos.push(g); n++;
+  }
+}
+
+// Porta da frente
+let porta, posPorta;
+// Memórias
+const MEMORIAS = [
+  { nome: 'caixinha de música', titulo: 'A caixinha de música',
+    texto: 'Ela dava corda nesta caixinha toda noite, antes de dormir. A melodia ainda está aqui, presa no metal, um pouco desafinada.\n\nClara tinha medo do escuro. Eu prometia que ia protegê-la.\n\nEu prometia muitas coisas.' },
+  { nome: 'desenho', titulo: 'O desenho na geladeira',
+    texto: 'Giz de cera, preso por um ímã em forma de morango. Papai, mamãe e eu, de mãos dadas debaixo de um sol amarelo.\n\nConto de novo. Três pessoas.\n\nOnde ela está? Alguém apagou com tanta força que o papel rasgou… ou nunca houve ninguém ali?' },
+  { nome: 'porta-retratos', titulo: 'O porta-retratos virado',
+    texto: 'Estava virado para baixo, em cima da cômoda. Natal de 2006.\n\nEstou sorrindo e segurando a mão de… ninguém. Meu braço está estendido para o vazio, como se alguém estivesse ali do meu lado.\n\nMamãe chorou quando revelou esta foto. Eu achava que era saudade.' },
+  { nome: 'diário', titulo: 'O diário da mamãe',
+    texto: '"14 de agosto. O médico disse para não contrariar. Ele continua pondo um prato a mais na mesa. Conversa com ela no quarto vazio. Diz que a irmã tem medo do escuro.\n\nComo eu explico ao meu filho de nove anos que a irmã dele nunca chegou a respirar?"\n\nA letra é da mamãe. As páginas seguintes estão em branco.' },
+  { nome: 'boneca', titulo: 'A boneca',
+    texto: 'A boneca dela, dentro da banheira seca. Comprei com o meu próprio dinheiro, aos oito anos, para uma irmã que eu precisava que existisse.\n\nO rosto foi apagado pelo tempo. Igual ao do manequim.\n\nAgora eu entendo. Ela nunca me perseguiu. Ela estava esperando que eu lembrasse.' },
+];
+const itens = [];
+function criarItem(idx, pos) {
+  const g = new THREE.Group(); g.position.copy(pos);
+  const mat = new THREE.MeshStandardMaterial({ color: 0xcdbfa6, roughness: 0.6, emissive: 0x332a20, emissiveIntensity: 0.6 });
+  if (idx === 0) { g.add(caixa(0.3, 0.18, 0.22, M.madeira, 0, 0.09, 0)); const t = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.06, 12), M.metal); t.position.y = 0.21; g.add(t); const b = caixa(0.08, 0.12, 0.02, mat, 0, 0.3, 0); b.rotation.z = 0.4; g.add(b); }
+  if (idx === 1) { const p = new THREE.Mesh(new THREE.PlaneGeometry(0.42, 0.3), new THREE.MeshStandardMaterial({ map: texCanvas(128, 96, (gg, w, h) => {
+      gg.fillStyle = '#e8e0cc'; gg.fillRect(0, 0, w, h); gg.fillStyle = '#e6c330'; gg.beginPath(); gg.arc(108, 16, 10, 0, 7); gg.fill();
+      gg.strokeStyle = '#333'; gg.lineWidth = 2; for (const x of [24, 50, 76]) { gg.beginPath(); gg.arc(x, 40, 6, 0, 7); gg.moveTo(x, 46); gg.lineTo(x, 70); gg.moveTo(x - 10, 56); gg.lineTo(x + 10, 56); gg.moveTo(x, 70); gg.lineTo(x - 7, 86); gg.moveTo(x, 70); gg.lineTo(x + 7, 86); gg.stroke(); }
+      gg.fillStyle = '#2a1a10'; for (let k = 0; k < 60; k++) gg.fillRect(96 + rnd(-8, 8), 36 + rnd(0, 50), 2, 3); }), side: THREE.DoubleSide, roughness: 1, emissive: 0x221d15 }));
+    p.rotation.x = -Math.PI / 2 + 0.15; p.position.y = 0.02; g.add(p); }
+  if (idx === 2) { const f = caixa(0.3, 0.04, 0.38, M.madeiraEsc, 0, 0.02, 0); f.rotation.y = 0.5; g.add(f); }
+  if (idx === 3) { const l = caixa(0.26, 0.06, 0.34, new THREE.MeshStandardMaterial({ color: 0x4a1f1a, roughness: 0.8 }), 0, 0.03, 0); l.rotation.y = -0.3; g.add(l); const pg = caixa(0.24, 0.045, 0.32, mat, 0.01, 0.035, 0); pg.rotation.y = -0.3; g.add(pg); }
+  if (idx === 4) { const corpo = new THREE.Mesh(new THREE.ConeGeometry(0.1, 0.26, 10), new THREE.MeshStandardMaterial({ color: 0x6a2a2a, roughness: 1 })); corpo.position.y = 0.13; g.add(corpo); const cab = new THREE.Mesh(new THREE.SphereGeometry(0.07, 12, 10), mat); cab.position.y = 0.31; g.add(cab); g.rotation.z = 1.2; g.position.y += 0.05; }
+  g.traverse(o => { if (o.isMesh) o.castShadow = true; });
+  const brilho = new THREE.Sprite(new THREE.SpriteMaterial({ map: texBrilho, color: 0xbfd0ff, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.6 }));
+  brilho.scale.set(0.9, 0.9, 1); brilho.position.y = 0.25; g.add(brilho);
+  cena.add(g);
+  itens.push({ idx, g, brilho, pego: false, pos: pos.clone().setY(0.3) });
+}
+
+let inicio = new THREE.Vector3(), spawnManequim = new THREE.Vector3(), inicioRC = [0, 0];
+for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+  const ch = grid[r][c], p = centro(r, c);
+  if (ehMovel(ch)) { const m = criarMovel(ch); m.position.copy(p); grupoMoveis.add(m); moveis.push(m); }
+  if (ch === 'L') criarAbajur(p);
+  if (ch === 'P') { inicio.copy(p); inicioRC = [r, c]; }
+  if (ch === 'F') spawnManequim.copy(p);
+  if (ch >= '1' && ch <= '5') criarItem(+ch - 1, p.clone().add(new THREE.Vector3(rnd(-0.3, 0.3), 0, rnd(-0.3, 0.3))));
+  if (ch === 'X') {
+    porta = new THREE.Group(); porta.position.set(c * S - 0.03, 0, r * S + S / 2);
+    porta.add(caixa(0.08, 2.25, 1.15, M.madeiraEsc, 0, 1.125, 0));
+    for (const y of [0.6, 1.6]) porta.add(caixa(0.04, 0.7, 0.85, M.madeira, -0.05, y, 0));
+    const mac = new THREE.Mesh(new THREE.SphereGeometry(0.05, 10, 8), M.metal); mac.position.set(-0.1, 1.05, 0.42); porta.add(mac);
+    porta.add(caixa(0.1, 0.12, 1.4, M.madeira, 0, 2.3, 0));
+    cena.add(porta); posPorta = new THREE.Vector3(c * S - 0.5, 1.1, r * S + S / 2);
+  }
+}
+
+// Escritas nas paredes
+const escritas = [];
+function escreverNaParede(texto, perto = true) {
+  const candidatos = [];
+  for (let r = 1; r < ROWS - 1; r++) for (let c = 1; c < COLS - 1; c++) {
+    if (bloqueado(grid[r][c])) continue;
+    const p = centro(r, c), d = p.distanceTo(new THREE.Vector3(camera.position.x, 0, camera.position.z));
+    if (perto && (d < 3 || d > 10)) continue;
+    for (const l of lados(r, c)) {
+      if (escritas.some(e => Math.hypot(e.position.x - l.x, e.position.z - l.z) < 1.5)) continue;
+      const v = new THREE.Vector3(l.x, 1.5, l.z);
+      const fora = !estaNaTela(v);
+      candidatos.push({ l, peso: fora ? 2 : 0.3 });
+    }
+  }
+  if (!candidatos.length) return;
+  candidatos.sort((a, b) => b.peso - a.peso + rnd(-0.5, 0.5));
+  const { l } = candidatos[0];
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(1.7, 0.85), new THREE.MeshStandardMaterial({ map: texEscrita(texto), transparent: true, roughness: 1, depthWrite: false }));
+  const n = new THREE.Vector3(Math.sin(l.ry), 0, Math.cos(l.ry));
+  m.position.set(l.x + n.x * 0.01, rnd(1.3, 1.8), l.z + n.z * 0.01); m.rotation.y = l.ry; m.rotation.z = rnd(-0.12, 0.12);
+  cena.add(m); escritas.push(m);
+}
+
+/* =====================================================================
+   MANEQUIM
+   ===================================================================== */
+const manequim = new THREE.Group(); manequim.visible = false; cena.add(manequim);
+const matPorcelana = new THREE.MeshStandardMaterial({ color: 0xd4cbbd, roughness: 0.42, metalness: 0.02 });
+let mixer = null, clipes = [], partesFallback = null;
+function manequimProcedural() {
+  const g = new THREE.Group();
+  const cap = (r, l, x, y, z) => { const m = new THREE.Mesh(new THREE.CapsuleGeometry(r, l, 6, 12), matPorcelana); m.position.set(x, y, z); m.castShadow = true; g.add(m); return m; };
+  cap(0.17, 0.55, 0, 1.28, 0);
+  const cabeca = new THREE.Mesh(new THREE.SphereGeometry(0.13, 18, 14), matPorcelana); cabeca.scale.set(0.9, 1.25, 1); cabeca.position.y = 1.86; cabeca.castShadow = true; g.add(cabeca);
+  cap(0.05, 0.12, 0, 1.7, 0);
+  const bE = cap(0.05, 0.78, -0.27, 1.12, 0), bD = cap(0.05, 0.78, 0.27, 1.12, 0);
+  cap(0.075, 0.82, -0.1, 0.48, 0); cap(0.075, 0.82, 0.1, 0.48, 0);
+  partesFallback = { cabeca, bE, bD };
+  return g;
+}
+function novaPose() {
+  if (mixer && clipes.length) {
+    mixer.stopAllAction();
+    const clip = clipes[Math.floor(Math.random() * clipes.length)];
+    const a = mixer.clipAction(clip); a.reset(); a.play(); a.time = Math.random() * clip.duration; mixer.update(0);
+  } else if (partesFallback) {
+    partesFallback.cabeca.rotation.z = rnd(-0.5, 0.5); partesFallback.cabeca.rotation.x = rnd(-0.3, 0.4);
+    partesFallback.bE.rotation.x = rnd(-1.6, 0.2); partesFallback.bD.rotation.x = rnd(-1.6, 0.2);
+  }
+}
+function carregarManequim() {
+  return new Promise(res => {
+    const t = setTimeout(() => res(null), 12000);
+    new GLTFLoader().load('https://threejs.org/examples/models/gltf/Xbot.glb', g => { clearTimeout(t); res(g); },
+      ev => { if (ev.total) $('#carregando').textContent = `carregando o manequim… ${Math.round(ev.loaded / ev.total * 100)}%`; },
+      () => { clearTimeout(t); res(null); });
+  });
+}
+
+/* =====================================================================
+   ÁUDIO PROCEDURAL
+   ===================================================================== */
+const Som = {
+  ctx: null,
+  init() {
+    const ctx = this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+    this.master = ctx.createGain(); this.master.gain.value = +$('#vol').value;
+    const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -14; comp.ratio.value = 4;
+    this.master.connect(comp).connect(ctx.destination);
+    this.ruidoBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const d = this.ruidoBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    // reverb
+    const len = ctx.sampleRate * 3, ir = ctx.createBuffer(2, len, ctx.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const b = ir.getChannelData(ch); for (let i = 0; i < len; i++) b[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3.2); }
+    this.reverb = ctx.createConvolver(); this.reverb.buffer = ir;
+    this.wet = ctx.createGain(); this.wet.gain.value = 0.45; this.reverb.connect(this.wet).connect(this.master);
+    // drone
+    this.drone = ctx.createGain(); this.drone.gain.value = 0.0; this.drone.connect(this.master);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 170; lp.connect(this.drone);
+    for (const [f, tipo, v] of [[55, 'sawtooth', 0.22], [55.7, 'sawtooth', 0.2], [41.2, 'sine', 0.5], [82.8, 'triangle', 0.08]]) {
+      const o = ctx.createOscillator(); o.type = tipo; o.frequency.value = f; const gg = ctx.createGain(); gg.gain.value = v; o.connect(gg).connect(lp); o.start();
+    }
+    const vento = ctx.createBufferSource(); vento.buffer = this.ruidoBuf; vento.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 380; bp.Q.value = 0.8;
+    const lfo = ctx.createOscillator(); lfo.frequency.value = 0.06; const lg = ctx.createGain(); lg.gain.value = 220; lfo.connect(lg).connect(bp.frequency); lfo.start();
+    const vg = ctx.createGain(); vg.gain.value = 0.18; vento.connect(bp).connect(vg).connect(this.drone); vento.start();
+    // tensão (agudo dissonante)
+    this.tensao = ctx.createGain(); this.tensao.gain.value = 0; this.tensao.connect(this.master); this.tensao.connect(this.reverb);
+    for (const f of [1244, 1318, 1867]) { const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.value = f; const gg = ctx.createGain(); gg.gain.value = 0.012; o.connect(gg).connect(this.tensao); o.start(); }
+    this.proxBatida = 0;
+  },
+  agora() { return this.ctx.currentTime; },
+  saida(pan = 0, rev = 0.3) {
+    const g = this.ctx.createGain(), p = this.ctx.createStereoPanner(); p.pan.value = clamp(pan, -1, 1);
+    g.connect(p); p.connect(this.master);
+    if (rev) { const r = this.ctx.createGain(); r.gain.value = rev; p.connect(r).connect(this.reverb); }
+    return g;
+  },
+  env(g, t, a, pico, dur) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(pico, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); },
+  ruido(dest, t, dur, rate = 1) { const s = this.ctx.createBufferSource(); s.buffer = this.ruidoBuf; s.playbackRate.value = rate; s.connect(dest); s.start(t, Math.random()); s.stop(t + dur); return s; },
+  passo(vol = 0.25, pan = 0, pesado = false) {
+    const t = this.agora(), out = this.saida(pan, pesado ? 0.5 : 0.15);
+    const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = pesado ? 380 : 900; f.connect(out);
+    this.env(out, t, 0.005, vol, pesado ? 0.22 : 0.13); this.ruido(f, t, 0.25, pesado ? 0.5 : 0.8);
+    if (pesado) { const o = this.ctx.createOscillator(); o.frequency.setValueAtTime(70, t); o.frequency.exponentialRampToValueAtTime(35, t + 0.2); const g = this.ctx.createGain(); this.env(g, t, 0.005, vol * 1.4, 0.25); o.connect(g).connect(out); o.start(t); o.stop(t + 0.3); }
+  },
+  batida(vol) {
+    const t = this.agora();
+    for (const [dt, v] of [[0, 1], [0.24, 0.65]]) {
+      const o = this.ctx.createOscillator(); o.frequency.setValueAtTime(62, t + dt); o.frequency.exponentialRampToValueAtTime(32, t + dt + 0.16);
+      const g = this.ctx.createGain(); this.env(g, t + dt, 0.012, vol * v, 0.22); o.connect(g).connect(this.master); o.start(t + dt); o.stop(t + dt + 0.3);
+    }
+  },
+  sussurro(pan = rnd(-1, 1), vol = 0.18) {
+    const t = this.agora(), dur = rnd(1.6, 3.2), out = this.saida(pan, 0.6);
+    const g = this.ctx.createGain(); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + 0.4); g.gain.setValueAtTime(vol, t + dur - 0.5); g.gain.exponentialRampToValueAtTime(0.0001, t + dur); g.connect(out);
+    const trem = this.ctx.createGain(); trem.gain.value = 0.5; trem.connect(g);
+    const lfo = this.ctx.createOscillator(); lfo.type = 'square'; lfo.frequency.value = rnd(4, 8); const lg = this.ctx.createGain(); lg.gain.value = 0.5; lfo.connect(lg).connect(trem.gain); lfo.start(t); lfo.stop(t + dur);
+    for (const [fr, q] of [[rnd(1800, 3200), 7], [rnd(600, 1100), 5], [rnd(4500, 6000), 4]]) { const bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = fr; bp.Q.value = q; bp.frequency.linearRampToValueAtTime(fr * rnd(0.7, 1.3), t + dur); bp.connect(trem); this.ruido(bp, t, dur, rnd(0.9, 1.1)); }
+  },
+  rangido(pan = rnd(-1, 1), vol = 0.08) {
+    const t = this.agora(), dur = rnd(0.8, 1.8), out = this.saida(pan, 0.5);
+    const o = this.ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(rnd(90, 150), t);
+    for (let k = 1; k < 10; k++) o.frequency.linearRampToValueAtTime(rnd(60, 170), t + dur * k / 10);
+    const bp = this.ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = rnd(700, 1300); bp.Q.value = 9;
+    const g = this.ctx.createGain(); this.env(g, t, 0.2, vol, dur); o.connect(bp).connect(g).connect(out); o.start(t); o.stop(t + dur + 0.1);
+  },
+  batidasNaPorta(pan = 0, vol = 0.5, n = 3) {
+    for (let i = 0; i < n; i++) {
+      const t = this.agora() + i * 0.42 + rnd(0, 0.05), out = this.saida(pan, 0.5);
+      const f = this.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 260; f.connect(out); this.env(out, t, 0.003, vol, 0.18); this.ruido(f, t, 0.2, 0.4);
+    }
+  },
+  caixinha(vol = 0.2, pan = 0, notas = null) {
+    const MELODIA = notas || [76, 79, 83, 81, 79, 76, 78, 74, 76, 0, 71, 74, 76, 74, 72, 71];
+    let t = this.agora() + 0.05;
+    for (const n of MELODIA) {
+      if (n) {
+        const fr = 440 * Math.pow(2, (n - 69) / 12) * Math.pow(2, rnd(-18, 18) / 1200);
+        const out = this.saida(pan, 0.6);
+        for (const [mult, v, tp] of [[1, 1, 'triangle'], [2.01, 0.3, 'sine'], [3.98, 0.12, 'sine']]) {
+          const o = this.ctx.createOscillator(); o.type = tp; o.frequency.value = fr * mult; const g = this.ctx.createGain(); this.env(g, t, 0.004, vol * v, 0.9); o.connect(g).connect(out); o.start(t); o.stop(t + 1);
+        }
+      }
+      t += 0.34 + rnd(0, 0.03);
+    }
+    return MELODIA.length * 0.35;
+  },
+  susto(vol = 0.6) {
+    const t = this.agora(), out = this.saida(0, 0.4);
+    const ws = this.ctx.createWaveShaper(); const curva = new Float32Array(512); for (let i = 0; i < 512; i++) { const x = i / 256 - 1; curva[i] = Math.tanh(x * 6); } ws.curve = curva; ws.connect(out);
+    this.env(out, t, 0.01, vol, 1.4);
+    for (let k = 0; k < 4; k++) {
+      const o = this.ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(rnd(300, 900), t); o.frequency.exponentialRampToValueAtTime(rnd(120, 300), t + 1.3);
+      const vib = this.ctx.createOscillator(); vib.frequency.value = rnd(20, 40); const vg = this.ctx.createGain(); vg.gain.value = 60; vib.connect(vg).connect(o.frequency); vib.start(t); vib.stop(t + 1.4);
+      const g = this.ctx.createGain(); g.gain.value = 0.25; o.connect(g).connect(ws); o.start(t); o.stop(t + 1.4);
+    }
+    const hp = this.ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1500; hp.connect(ws); this.ruido(hp, t, 1.2);
+    const b = this.ctx.createOscillator(); b.frequency.setValueAtTime(55, t); b.frequency.exponentialRampToValueAtTime(28, t + 1.2); const bg = this.ctx.createGain(); this.env(bg, t, 0.01, 0.9, 1.4); b.connect(bg).connect(this.master); b.start(t); b.stop(t + 1.5);
+  },
+  acorde(vol = 0.22) {
+    const t = this.agora(), out = this.saida(0, 0.9);
+    out.gain.setValueAtTime(0.0001, t); out.gain.exponentialRampToValueAtTime(vol, t + 1.4); out.gain.exponentialRampToValueAtTime(0.0001, t + 5.5);
+    for (const f of [110, 116.5, 164.8, 233.1, 349.2]) { const o = this.ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = f; o.detune.linearRampToValueAtTime(-60, t + 5); const g = this.ctx.createGain(); g.gain.value = 0.2; o.connect(g).connect(out); o.start(t); o.stop(t + 5.6); }
+    const hp = this.ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 3000; const ng = this.ctx.createGain(); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.08, t + 1.3); ng.gain.exponentialRampToValueAtTime(0.0001, t + 1.5); hp.connect(ng).connect(out); this.ruido(hp, t, 1.6);
+  },
+  atualizar(dt, tensao, bpm, volBatida) {
+    if (!this.ctx) return;
+    const t = this.agora();
+    this.drone.gain.setTargetAtTime(0.06 + tensao * 0.22, t, 0.5);
+    this.tensao.gain.setTargetAtTime(tensao > 0.45 ? (tensao - 0.45) * 1.6 : 0, t, 0.8);
+    this.proxBatida -= dt;
+    if (this.proxBatida <= 0 && volBatida > 0.02) { this.batida(volBatida); this.proxBatida = 60 / bpm; }
+  }
+};
+function posSonora(p) {
+  const d = new THREE.Vector3().subVectors(p, camera.position); const dist = d.length();
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  const dir2 = new THREE.Vector2(dir.x, dir.z).normalize(), d2 = new THREE.Vector2(d.x, d.z).normalize();
+  const pan = clamp(dir2.x * d2.y - dir2.y * d2.x, -1, 1) * -1;
+  return { pan, vol: Math.pow(clamp(1 - dist / 20, 0, 1), 1.6), dist };
+}
+
+/* =====================================================================
+   PÓS-PROCESSAMENTO
+   ===================================================================== */
+const composer = new EffectComposer(renderer);
+composer.addPass(new RenderPass(cena, camera));
+composer.addPass(new OutputPass());
+const efeito = new ShaderPass({
+  uniforms: { tDiffuse: { value: null }, uTempo: { value: 0 }, uLoucura: { value: 0 }, uVermelho: { value: 0 }, uFade: { value: 1 } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
+  fragmentShader: `
+    uniform sampler2D tDiffuse; uniform float uTempo, uLoucura, uVermelho, uFade; varying vec2 vUv;
+    float rand(vec2 c){ return fract(sin(dot(c, vec2(12.9898,78.233))) * 43758.5453); }
+    void main(){
+      vec2 uv = vUv; float w = uLoucura * uLoucura;
+      uv.x += sin(uv.y * 11.0 + uTempo * 1.9) * 0.0045 * w;
+      uv.y += cos(uv.x * 9.0 + uTempo * 1.4) * 0.0035 * w;
+      vec2 c = uv - 0.5; float ca = 0.0025 + 0.012 * w;
+      vec3 col = vec3(texture2D(tDiffuse, uv + c * ca).r, texture2D(tDiffuse, uv).g, texture2D(tDiffuse, uv - c * ca).b);
+      float l = dot(col, vec3(0.299, 0.587, 0.114));
+      col = mix(col, vec3(l), 0.3 + 0.45 * w);
+      col *= mix(vec3(1.0), vec3(1.18, 0.82, 0.78), w);
+      float g = rand(uv * 900.0 + fract(uTempo * 7.13)) - 0.5;
+      col += g * (0.055 + 0.09 * w);
+      col *= smoothstep(0.92, 0.18 - 0.12 * w, length(c) * (1.0 + 0.7 * w));
+      col *= 0.975 + 0.025 * sin(uv.y * 900.0);
+      col = mix(col, vec3(0.55, 0.0, 0.0), uVermelho);
+      col *= (1.0 - uFade);
+      gl_FragColor = vec4(col, 1.0);
+    }`
+});
+composer.addPass(efeito);
+
+/* =====================================================================
+   ESTADO DO JOGO
+   ===================================================================== */
+const J = {
+  estado: 'carregando', yaw: -Math.PI / 2, pitch: 0, sanidade: 100, bateria: 100, folego: 100, lanternaLigada: true,
+  coletados: 0, fase: 0, bob: 0, passoAcc: 0, tempo: 0, proximoEvento: 18, sens: 1, fade: 1, vermelho: 0, tremor: 0,
+  man: { ativo: false, visto: false, caminho: [], recalcular: 0, inativo: 0, semSerVisto: 0, passo: 0, fixo: false, moveuDesdeVisto: false },
+  caixinhaTimer: 0, alvo: null, pensamentos: [], tPensamento: 0, susto: 0, final: null,
+};
+const teclas = {};
+try { J.sens = +localStorage.getItem('casa.sens') || 1; $('#sens').value = J.sens; const v = localStorage.getItem('casa.vol'); if (v != null) $('#vol').value = v; } catch (e) {}
+
+function pensar(txt, dur = 4.5) { J.pensamentos.push({ txt, dur }); }
+function processarPensamentos(dt) {
+  const el = $('#pensamento');
+  if (J.tPensamento > 0) { J.tPensamento -= dt; if (J.tPensamento <= 0.8) el.style.opacity = 0; return; }
+  const p = J.pensamentos.shift(); if (!p) return;
+  el.textContent = p.txt; el.style.opacity = 1; J.tPensamento = p.dur;
+}
+const memoriasEl = $('#memorias'); for (let i = 0; i < 5; i++) memoriasEl.appendChild(document.createElement('i'));
+function atualizarHUD() {
+  $('#b-sanidade div').style.width = J.sanidade + '%';
+  $('#b-bateria div').style.width = J.bateria + '%';
+  $('#b-folego div').style.width = J.folego + '%';
+  [...memoriasEl.children].forEach((e, i) => e.classList.toggle('ok', i < J.coletados));
+}
+const frustum = new THREE.Frustum(), projM = new THREE.Matrix4();
+function estaNaTela(p) { projM.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse); frustum.setFromProjectionMatrix(projM); return frustum.containsPoint(p); }
+
+function luzEm(p) {
+  let l = 0;
+  for (const a of abajures) { const d = Math.hypot(a.g.position.x - p.x, a.g.position.z - p.z); if (d < 4.2 && linhaDeVisao(a.g.position, p)) l = Math.max(l, (a.luz.intensity / a.base) * (1 - d / 4.2)); }
+  return l;
+}
+
+/* =====================================================================
+   ENTRADA
+   ===================================================================== */
+addEventListener('keydown', e => {
+  teclas[e.code] = true;
+  if (e.repeat) return;
+  if (J.estado === 'nota' && (e.code === 'KeyE' || e.code === 'Space' || e.code === 'Enter')) { fecharNota(); return; }
+  if (J.estado !== 'jogando') return;
+  if (e.code === 'KeyF') { if (J.bateria > 3) { J.lanternaLigada = !J.lanternaLigada; clique(); } }
+  if (e.code === 'KeyE') interagir();
+});
+addEventListener('keyup', e => { teclas[e.code] = false; });
+addEventListener('mousemove', e => {
+  if (J.estado !== 'jogando' || document.pointerLockElement !== renderer.domElement) return;
+  J.yaw -= e.movementX * 0.0022 * J.sens; J.pitch = clamp(J.pitch - e.movementY * 0.0022 * J.sens, -1.45, 1.45);
+});
+function travar() { try { const p = renderer.domElement.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+document.addEventListener('pointerlockchange', () => {
+  if (document.pointerLockElement !== renderer.domElement && J.estado === 'jogando') { J.estado = 'pausado'; $('#pausa').classList.add('on'); Som.ctx?.suspend(); }
+});
+renderer.domElement.addEventListener('click', () => { if (J.estado === 'jogando') travar(); });
+$('#nota').addEventListener('click', () => { if (J.estado === 'nota') fecharNota(); });
+$('#btn-voltar').addEventListener('click', () => { $('#pausa').classList.remove('on'); J.estado = 'jogando'; Som.ctx?.resume(); travar(); });
+$('#btn-sair').addEventListener('click', () => avisar('sair'));
+$('#btn-plataforma').addEventListener('click', () => avisar('sair'));
+$('#sens').addEventListener('input', e => { J.sens = +e.target.value; try { localStorage.setItem('casa.sens', J.sens); } catch (er) {} });
+$('#vol').addEventListener('input', e => { if (Som.master) Som.master.gain.value = +e.target.value; try { localStorage.setItem('casa.vol', e.target.value); } catch (er) {} });
+function clique() { if (!Som.ctx) return; const t = Som.agora(), o = Som.saida(0.3, 0); Som.env(o, t, 0.001, 0.12, 0.04); Som.ruido(o, t, 0.05, 2); }
+
+$('#btn-comecar').addEventListener('click', () => {
+  Som.init();
+  $('#menu').classList.remove('on'); $('#hud').classList.add('on');
+  J.estado = 'jogando'; travar();
+  camera.position.set(inicio.x, 1.6, inicio.z);
+  pensar('Vinte anos. A casa ainda cheira a poeira e lavanda.', 5);
+  pensar('Preciso encontrar as coisas dela. As cinco.', 4.5);
+  pensar('Talvez assim eu consiga ir embora.', 4);
+  avisar('iniciado');
+});
+
+/* =====================================================================
+   INTERAÇÃO / EVENTOS DA HISTÓRIA
+   ===================================================================== */
+function interagir() {
+  const a = J.alvo; if (!a) return;
+  if (a.tipo === 'item') pegarItem(a.item);
+  if (a.tipo === 'porta') {
+    if (J.coletados < 5) { pensar(['Trancada. Como se a casa segurasse a maçaneta do outro lado.', 'Ainda não. Ela não deixa.', 'A porta não abre. Falta alguma coisa.'][Math.floor(Math.random() * 3)], 3.5); Som.batidasNaPorta(0, 0.3, 2); }
+    else abrirEscolha();
+  }
+}
+function pegarItem(it) {
+  it.pego = true; cena.remove(it.g); J.coletados++;
+  Som.acorde();
+  const m = MEMORIAS[it.idx];
+  $('#nota-n').textContent = `MEMÓRIA ${J.coletados} DE 5`; $('#nota-t').textContent = m.titulo; $('#nota-p').textContent = m.texto;
+  $('#nota').classList.add('on'); J.estado = 'nota'; J.itemLido = it.idx;
+}
+function fecharNota() {
+  $('#nota').classList.remove('on'); J.estado = 'jogando';
+  if (document.pointerLockElement !== renderer.domElement) travar();
+  eventoMemoria(J.coletados);
+}
+function eventoMemoria(n) {
+  if (n === 1) {
+    J.man.ativo = true; manequim.visible = true; manequim.position.copy(spawnManequim); J.man.inativo = 6;
+    pensar('…tem alguém aqui comigo.', 4); setTimeout(() => Som.passo(0.35, 0.6, true), 2500); setTimeout(() => Som.passo(0.3, 0.6, true), 3100);
+  }
+  if (n === 2) {
+    for (const r of retratos) r.rotation.z += Math.PI;
+    escreverNaParede('ELA NUNCA\nESTEVE AQUI');
+    pensar('Os quadros… quem virou os quadros?', 4);
+    Som.sussurro(-0.8, 0.22);
+  }
+  if (n === 3) {
+    for (const a of abajures) { a.cor.set(0xff2a14); a.apagao = 1.2; }
+    setTimeout(() => abajures.forEach(a => a.cor.set(0xd8784a)), 6000);
+    escreverNaParede('VOCÊ A\nINVENTOU'); escreverNaParede('OLHE PARA ELA', false);
+    pensar('Não. Eu me lembro dela. Eu lembro.', 4);
+    Som.batidasNaPorta(posSonora(posPorta).pan, 0.6, 4);
+  }
+  if (n === 4) {
+    moveisNoTeto = true;
+    for (const m of moveis) { m.position.y = ALT; m.rotation.x = Math.PI; }
+    escreverNaParede('NÃO VÁ\nEMBORA'); escreverNaParede('FIQUE', false); escreverNaParede('FIQUE', false);
+    pensar('Isso não está acontecendo. Isso não está acontecendo.', 4.5);
+    J.man.caminho = [];
+  }
+  if (n === 5) {
+    J.man.fixo = true; J.man.ativo = false;
+    const p = centro(7, 20); manequim.position.set(p.x, 0, p.z); manequim.visible = true;
+    manequim.rotation.y = Math.atan2(camera.position.x - p.x, camera.position.z - p.z);
+    if (mixer && clipes.length) { mixer.stopAllAction(); const c = clipes.find(c => /idle/i.test(c.name)) || clipes[0]; const a = mixer.clipAction(c); a.reset().play(); a.time = 0.5; mixer.update(0); }
+    for (const a of abajures) a.cor.set(0xffe3c0);
+    pensar('Silêncio. Pela primeira vez, a casa ficou em silêncio.', 4.5);
+    pensar('A porta da frente… destrancou.', 4);
+    Som.caixinha(0.16, 0);
+  }
+}
+function abrirEscolha() {
+  J.estado = 'escolha'; document.exitPointerLock(); $('#escolha').classList.add('on');
+}
+function terminar(final) {
+  $('#escolha').classList.remove('on'); J.estado = 'fim'; J.final = final;
+  const FINAIS = {
+    A: ['Esquecer', 'Você abriu a porta e não olhou para trás.\nA casa foi vendida em março. Você tem um emprego novo, amigos novos, uma vida sem cômodos vazios.\n\nMas às vezes, de madrugada, você ouve uma caixinha de música que não existe.\nE conta, sem querer, quantas pessoas há na sala.'],
+    B: ['Lembrar', 'Você se virou. Ela não se moveu. Só esperou que você chegasse perto.\nO rosto de porcelana é frio, e é o único rosto que você conseguiu dar a ela.\n\n"Você nunca existiu", você sussurra. "Mas eu te amei mesmo assim."\nAs luzes se apagam uma a uma. Pela primeira vez em vinte anos, o escuro não dá medo.'],
+  };
+  $('#fim-t').textContent = 'Final: ' + FINAIS[final][0]; $('#fim-p').textContent = FINAIS[final][1];
+  J.fade = 0; J.fadeAlvo = 1;
+  setTimeout(() => { $('#fim').classList.add('on'); $('#hud').classList.remove('on'); }, 2200);
+  if (final === 'B') Som.caixinha(0.22, 0); else Som.batidasNaPorta(0, 0.2, 1);
+  avisar('concluido', { final });
+}
+$('#final-a').addEventListener('click', () => terminar('A'));
+$('#final-b').addEventListener('click', () => terminar('B'));
+
+function morrer() {
+  J.estado = 'morto'; document.exitPointerLock(); $('#hud').classList.remove('on'); $('#morte').classList.add('on');
+  Som.drone?.gain.setTargetAtTime(0.0, Som.agora(), 2);
+  avisar('gameover');
+}
+
+function capturado() {
+  J.estado = 'susto'; J.susto = 1.15; J.vermelho = 0.55; J.tremor = 1;
+  Som.susto(0.7);
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir); dir.y = 0; dir.normalize();
+  manequim.position.set(camera.position.x + dir.x * 0.55, -0.22, camera.position.z + dir.z * 0.55);
+  manequim.rotation.y = Math.atan2(-dir.x, -dir.z);
+  novaPose();
+}
+function aposSusto() {
+  J.sanidade -= 32;
+  if (J.sanidade <= 0) { J.sanidade = 0; morrer(); return; }
+  J.fade = 1;
+  camera.position.set(inicio.x, 1.6, inicio.z); J.yaw = -Math.PI / 2; J.pitch = 0;
+  // manda o manequim para o ponto mais distante
+  const { dist } = bfs(inicioRC[0], inicioRC[1]); let melhor = null, md = -1;
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (dist[r][c] > md) { md = dist[r][c]; melhor = [r, c]; }
+  const p = centro(melhor[0], melhor[1]); manequim.position.set(p.x, 0, p.z);
+  J.man.inativo = 6; J.man.caminho = []; J.estado = 'jogando';
+  pensar(['Ela não quer me machucar… quer?', 'Acordei no corredor. Quanto tempo eu fiquei aqui?', 'De novo. Isso já aconteceu antes.'][Math.floor(Math.random() * 3)], 4);
+}
+
+function eventoAleatorio() {
+  const n = J.coletados, op = ['rangido'];
+  if (n >= 1) op.push('sussurro', 'caixinha', 'apagao');
+  if (n >= 2) op.push('passosAtras', 'porta', 'sussurro');
+  if (n >= 3) op.push('escrita');
+  const e = op[Math.floor(Math.random() * op.length)];
+  if (e === 'rangido') Som.rangido();
+  if (e === 'sussurro') { Som.sussurro(); if (Math.random() < 0.3) pensar(['…você ouviu isso?', 'Ela está chamando meu nome.', 'Clara?'][Math.floor(Math.random() * 3)], 3); }
+  if (e === 'caixinha') Som.caixinha(0.07, rnd(-1, 1), [76, 79, 83, 81, 79, 76]);
+  if (e === 'apagao') { const a = abajures[Math.floor(Math.random() * abajures.length)]; a.apagao = rnd(2, 5); }
+  if (e === 'passosAtras') { const pan = rnd(-0.4, 0.4); for (let i = 0; i < 3; i++) setTimeout(() => Som.passo(0.22, pan, true), i * 520); }
+  if (e === 'porta') Som.batidasNaPorta(posSonora(posPorta).pan, 0.35 * posSonora(posPorta).vol + 0.08, 3);
+  if (e === 'escrita' && escritas.length < 12) escreverNaParede(['CLARA', 'VOCÊ ESTÁ\nSOZINHO', 'ELA TEM\nMEDO DO ESCURO', 'LEMBRE'][Math.floor(Math.random() * 4)]);
+}
+
+/* =====================================================================
+   LOOP
+   ===================================================================== */
+const relogio = new THREE.Clock();
+const tmp = new THREE.Vector3(), frente = new THREE.Vector3(), direita = new THREE.Vector3();
+
+function atualizarJogador(dt) {
+  const correr = (teclas.ShiftLeft || teclas.ShiftRight) && J.folego > 2;
+  let ix = 0, iz = 0;
+  if (teclas.KeyW || teclas.ArrowUp) iz += 1; if (teclas.KeyS || teclas.ArrowDown) iz -= 1;
+  if (teclas.KeyA || teclas.ArrowLeft) ix -= 1; if (teclas.KeyD || teclas.ArrowRight) ix += 1;
+  const movendo = ix || iz;
+  const vel = (correr && movendo ? 4.1 : 2.3) * (moveisNoTeto ? 0.92 : 1);
+  frente.set(-Math.sin(J.yaw), 0, -Math.cos(J.yaw)); direita.set(-frente.z, 0, frente.x);
+  if (movendo) {
+    const l = Math.hypot(ix, iz); const mx = (frente.x * iz + direita.x * ix) / l * vel * dt, mz = (frente.z * iz + direita.z * ix) / l * vel * dt;
+    const p = camera.position;
+    if (!colide(p.x + mx, p.z)) p.x += mx;
+    if (!colide(p.x, p.z + mz)) p.z += mz;
+    J.bob += dt * (correr ? 11 : 7.5);
+    if (Math.sin(J.bob) * Math.sin(J.bob - dt * 8) <= 0 && J.passoAcc <= 0) { Som.passo(correr ? 0.2 : 0.11, rnd(-0.15, 0.15)); J.passoAcc = 0.2; }
+  }
+  J.passoAcc -= dt;
+  J.folego = clamp(J.folego + (correr && movendo ? -24 : 14) * dt, 0, 100);
+  const tremor = J.tremor > 0 ? (Math.random() - 0.5) * 0.06 * J.tremor : 0;
+  const loucura = 1 - J.sanidade / 100;
+  camera.rotation.set(J.pitch + tremor + Math.sin(J.tempo * 0.7) * 0.01 * loucura, J.yaw + tremor, Math.sin(J.tempo * 0.5) * 0.04 * loucura * loucura);
+  camera.position.y = 1.6 + (movendo ? Math.sin(J.bob) * (correr ? 0.06 : 0.035) : 0);
+}
+
+function atualizarLanterna(dt) {
+  if (J.lanternaLigada) { J.bateria -= dt * 0.9; if (J.bateria <= 0) { J.bateria = 0; J.lanternaLigada = false; pensar('A lanterna morreu. Respira.', 3); } }
+  else J.bateria = Math.min(100, J.bateria + dt * 2.6);
+  let int = J.lanternaLigada ? 38 : 0;
+  const pertoMan = J.man.ativo && manequim.position.distanceTo(camera.position) < 5;
+  if (J.lanternaLigada && (J.bateria < 18 || pertoMan) && Math.random() < (pertoMan ? 0.25 : 0.12)) int *= Math.random() * 0.3;
+  lanterna.intensity = lerp(lanterna.intensity, int, 0.5);
+}
+
+function atualizarAbajures(dt) {
+  const loucura = 1 - J.sanidade / 100, nivel = J.coletados;
+  for (const a of abajures) {
+    a.fase += dt;
+    let f = 1;
+    const ruidoF = Math.sin(a.fase * 13.1) * Math.sin(a.fase * 7.3 + 1.2);
+    if (ruidoF > 0.93 - nivel * 0.04 - loucura * 0.1) f = rnd(0.05, 0.5);
+    if (a.apagao > 0) { a.apagao -= dt; f = Math.random() < 0.1 ? 0.6 : 0.02; }
+    if (manequim.visible && !J.man.fixo && manequim.position.distanceTo(a.g.position) < 3.2) f *= Math.random() < 0.3 ? 0.6 : 0.05;
+    const alvo = a.base * f * (J.coletados >= 5 ? 1.1 : 1);
+    a.luz.intensity = lerp(a.luz.intensity, alvo, 0.35);
+    a.luz.color.lerp(a.cor, 0.05);
+    a.matCupula.emissiveIntensity = 0.15 + 0.8 * (a.luz.intensity / a.base);
+    a.matCupula.emissive.copy(a.luz.color);
+  }
+}
+
+function atualizarManequim(dt) {
+  const man = J.man;
+  if (!manequim.visible) return;
+  const pc = camera.position, mp = manequim.position;
+  const dist = Math.hypot(pc.x - mp.x, pc.z - mp.z);
+  // visto?
+  const cabeca = tmp.set(mp.x, 1.6, mp.z), peito = new THREE.Vector3(mp.x, 1.0, mp.z);
+  let naTela = estaNaTela(cabeca) || estaNaTela(peito);
+  let visivel = false;
+  if (naTela && linhaDeVisao(pc, peito)) {
+    let iluminado = dist < 2.3;
+    if (!iluminado && J.lanternaLigada && lanterna.intensity > 10 && dist < 15) {
+      const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+      const para = new THREE.Vector3().subVectors(peito, pc).normalize();
+      if (dir.dot(para) > Math.cos(0.5)) iluminado = true;
+    }
+    if (!iluminado && luzEm(mp) > 0.25) iluminado = true;
+    visivel = iluminado;
+  }
+  if (visivel && !man.visto) { if (man.moveuDesdeVisto) { novaPose(); man.moveuDesdeVisto = false; if (dist < 6) { Som.rangido(0, 0.05); J.tremor = 0.4; } } }
+  man.visto = visivel;
+  if (man.fixo) return;
+
+  if (visivel) { J.sanidade -= dt * (dist < 5 ? 6 : 2.8); man.semSerVisto = 0; }
+  if (!man.ativo) return;
+  if (man.inativo > 0) { man.inativo -= dt; return; }
+
+  if (!visivel) {
+    man.semSerVisto += dt;
+    manequim.rotation.y = Math.atan2(pc.x - mp.x, pc.z - mp.z);
+    const vel = 1.35 + J.coletados * 0.32 + (1 - J.sanidade / 100) * 0.8;
+    man.recalcular -= dt;
+    if (man.recalcular <= 0 || !man.caminho.length) {
+      man.recalcular = 0.4;
+      const pr = Math.floor(pc.z / S), pcC = Math.floor(pc.x / S), mr = Math.floor(mp.z / S), mc = Math.floor(mp.x / S);
+      const { pai } = bfs(pr, pcC); const cam = []; let atual = [mr, mc], guard = 0;
+      while (atual && !(atual[0] === pr && atual[1] === pcC) && guard++ < 300) { atual = pai[atual[0] + ',' + atual[1]]; if (atual) cam.push(atual); }
+      man.caminho = cam;
+    }
+    let alvo;
+    if (man.caminho.length > 1) { const [r, c] = man.caminho[0]; alvo = centro(r, c); if (Math.hypot(alvo.x - mp.x, alvo.z - mp.z) < 0.25) man.caminho.shift(); }
+    else alvo = new THREE.Vector3(pc.x, 0, pc.z);
+    const dx = alvo.x - mp.x, dz = alvo.z - mp.z, dl = Math.hypot(dx, dz);
+    if (dl > 0.01) { const s = Math.min(dl, vel * dt); mp.x += dx / dl * s; mp.z += dz / dl * s; man.moveuDesdeVisto = true; }
+    man.passo -= dt;
+    if (man.passo <= 0) { man.passo = 0.62 - J.coletados * 0.04; const ps = posSonora(new THREE.Vector3(mp.x, 1, mp.z)); if (ps.vol > 0.03) Som.passo(0.35 * ps.vol, ps.pan, true); }
+    // reaparece perto se estiver muito longe
+    if (dist > 14 && man.semSerVisto > 9) {
+      const opcoes = [];
+      for (let r = 1; r < ROWS - 1; r++) for (let c = 1; c < COLS - 1; c++) {
+        if (bloqueado(grid[r][c])) continue; const p = centro(r, c), d = Math.hypot(p.x - pc.x, p.z - pc.z);
+        if (d > 6 && d < 10 && !estaNaTela(p.clone().setY(1.2))) opcoes.push(p);
+      }
+      if (opcoes.length) { const p = opcoes[Math.floor(Math.random() * opcoes.length)]; mp.set(p.x, 0, p.z); man.caminho = []; man.semSerVisto = 0; }
+    }
+    if (dist < 0.95) capturado();
+  }
+}
+
+function atualizarAlvo() {
+  const dir = new THREE.Vector3(); camera.getWorldDirection(dir);
+  let alvo = null;
+  for (const it of itens) {
+    if (it.pego) continue;
+    const v = new THREE.Vector3().subVectors(it.pos, camera.position); const d = v.length();
+    if (d < 2.3 && dir.dot(v.normalize()) > 0.86) alvo = { tipo: 'item', item: it, txt: 'Pegar ' + MEMORIAS[it.idx].nome };
+  }
+  if (!alvo && posPorta) { const v = new THREE.Vector3().subVectors(posPorta, camera.position); if (v.length() < 2.4 && dir.dot(v.normalize()) > 0.75) alvo = { tipo: 'porta', txt: J.coletados >= 5 ? 'Abrir a porta' : 'Porta da frente' }; }
+  J.alvo = alvo;
+  $('#mira').classList.toggle('alvo', !!alvo);
+  const pr = $('#prompt'); if (alvo) { pr.innerHTML = '<b>E</b>' + alvo.txt; pr.style.opacity = 1; } else pr.style.opacity = 0;
+}
+
+function atualizarSanidade(dt) {
+  const luz = luzEm(camera.position);
+  if (luz > 0.2) J.sanidade += dt * 3.2 * luz;
+  else if (!J.lanternaLigada) J.sanidade -= dt * 2.1;
+  else J.sanidade -= dt * 0.22;
+  if (J.coletados >= 5) J.sanidade += dt * 4;
+  J.sanidade = clamp(J.sanidade, 0, 100);
+  if (J.sanidade <= 0) morrer();
+  if (J.sanidade < 25 && !J.avisoSan) { J.avisoSan = true; pensar('Minha cabeça… preciso de luz.', 3.5); }
+  if (J.sanidade > 45) J.avisoSan = false;
+}
+
+function loop() {
+  requestAnimationFrame(loop);
+  const dt = Math.min(relogio.getDelta(), 0.05);
+  efeito.uniforms.uTempo.value += dt;
+  if (J.estado === 'jogando') {
+    J.tempo += dt;
+    atualizarJogador(dt); atualizarLanterna(dt); atualizarAbajures(dt); atualizarManequim(dt);
+    if (J.estado === 'jogando') { atualizarSanidade(dt); atualizarAlvo(); processarPensamentos(dt); }
+    for (const it of itens) if (!it.pego) { it.brilho.material.opacity = 0.35 + Math.sin(J.tempo * 2.2 + it.idx) * 0.2; it.g.children[0].rotation.y += dt * 0.2; }
+    // caixinha de música perto da memória 1
+    const it0 = itens.find(i => i.idx === 0);
+    if (it0 && !it0.pego) { J.caixinhaTimer -= dt; if (J.caixinhaTimer <= 0) { const ps = posSonora(it0.pos); J.caixinhaTimer = ps.dist < 14 ? Som.caixinha(0.16 * ps.vol + 0.01, ps.pan) + 3 : 2; } }
+    J.proximoEvento -= dt;
+    if (J.proximoEvento <= 0 && J.coletados < 5) { eventoAleatorio(); J.proximoEvento = rnd(14, 26) - J.coletados * 2; }
+    atualizarHUD();
+  } else if (J.estado === 'susto') {
+    J.susto -= dt; J.tremor = 1;
+    const tremor = (Math.random() - 0.5) * 0.08; camera.rotation.z = tremor;
+    if (J.susto <= 0) aposSusto();
+  } else if (J.estado === 'fim') {
+    atualizarAbajures(dt);
+  }
+  // áudio de tensão
+  if (Som.ctx && (J.estado === 'jogando' || J.estado === 'susto')) {
+    const loucura = 1 - J.sanidade / 100;
+    let prox = 0; if (manequim.visible && !J.man.fixo) prox = clamp(1 - manequim.position.distanceTo(camera.position) / 9, 0, 1);
+    const tensao = clamp(Math.max(loucura * 0.8, prox), 0, 1);
+    Som.atualizar(dt, tensao, 62 + tensao * 85, 0.05 + tensao * 0.5);
+  }
+  // efeitos de tela
+  J.tremor = Math.max(0, J.tremor - dt * 1.5);
+  J.vermelho = Math.max(0, J.vermelho - dt * 0.6);
+  const alvoFade = J.estado === 'fim' ? 1 : 0;
+  J.fade = lerp(J.fade, alvoFade, J.estado === 'fim' ? 0.012 : 0.04);
+  efeito.uniforms.uFade.value = J.fade;
+  efeito.uniforms.uVermelho.value = J.vermelho;
+  efeito.uniforms.uLoucura.value = lerp(efeito.uniforms.uLoucura.value, clamp((1 - J.sanidade / 100) * 1.1 + (J.man.visto && !J.man.fixo ? 0.25 : 0), 0, 1), 0.08);
+  composer.render();
+}
+
+addEventListener('resize', () => { camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight); composer.setSize(innerWidth, innerHeight); });
+
+/* =====================================================================
+   INÍCIO
+   ===================================================================== */
+camera.position.set(inicio.x, 1.6, inicio.z);
+camera.rotation.set(0, J.yaw, 0);
+loop();
+carregarManequim().then(g => {
+  if (g) {
+    const modelo = g.scene;
+    modelo.traverse(o => { if (o.isMesh) { o.material = matPorcelana; o.castShadow = true; o.frustumCulled = false; } });
+    modelo.updateMatrixWorld(true); modelo.traverse(o => { if (o.isSkinnedMesh) o.skeleton.update(); });
+    const box = new THREE.Box3().setFromObject(modelo); let h = box.max.y - box.min.y;
+    if (!(h > 0.5 && h < 5)) { h = 1.8; box.min.y = 0; }
+    modelo.scale.setScalar(1.98 / h); modelo.position.y = -box.min.y * (1.98 / h);
+    manequim.add(modelo);
+    mixer = new THREE.AnimationMixer(modelo);
+    clipes = g.animations.filter(c => !/^tpose/i.test(c.name));
+  } else {
+    manequim.add(manequimProcedural());
+  }
+  novaPose();
+  // pré-compila shaders
+  manequim.visible = true; manequim.position.set(-50, 0, -50); renderer.compile(cena, camera); manequim.visible = false;
+  J.estado = 'menu'; $('#carregando').textContent = g ? '' : 'modelo offline: usando manequim alternativo';
+  const b = $('#btn-comecar'); b.disabled = false; b.textContent = 'Entrar na casa';
+});
+</script>
+</body>
+</html>
