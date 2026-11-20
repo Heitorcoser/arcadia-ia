@@ -1,0 +1,1200 @@
+{
+ "formato": "arcadia-studio",
+ "versao": 1,
+ "id": "proj-ubip3c",
+ "nome": "Chuva de Moedas",
+ "tipo": "cena",
+ "criado": 1795141259869,
+ "atualizado": 1795141270252,
+ "descricao": "Rodadas de 45 segundos numa arena cercada: moedas aparecem pelo chão e você corre para pegar o máximo que puder. A moeda dourada vale 1 e a gema roxa, mais rara, vale 5. O jogo guarda seu recorde enquanto você joga. WASD anda, Espaço pula.",
+ "cena": {
+  "id": "raiz",
+  "ClassName": "DataModel",
+  "Name": "Jogo",
+  "props": {},
+  "children": [
+   {
+    "id": "ub9wr3",
+    "ClassName": "Workspace",
+    "Name": "Workspace",
+    "props": {
+     "Gravity": 196.2,
+     "FallenPartsDestroyHeight": -100
+    },
+    "children": [
+     {
+      "id": "ubgjyn",
+      "ClassName": "Part",
+      "Name": "Baseplate",
+      "props": {
+       "Position": [
+        0,
+        -0.5,
+        0
+       ],
+       "Size": [
+        80,
+        1,
+        80
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#5fb15f",
+       "Material": "Grass",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "ubhyhy",
+      "ClassName": "SpawnLocation",
+      "Name": "SpawnLocation",
+      "props": {
+       "Position": [
+        0,
+        0.5,
+        30
+       ],
+       "Size": [
+        8,
+        1,
+        8
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#3f8f47",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "ubjlrt",
+      "ClassName": "Folder",
+      "Name": "MoedasDaRodada",
+      "props": {},
+      "children": [
+       {
+        "id": "uccx9t",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          14,
+          2.5,
+          6
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ucdmsa",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          -9,
+          2.5,
+          1
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "uceij1",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          23,
+          2.5,
+          1
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ucfq41",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          4,
+          2.5,
+          17
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ucgth2",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          2,
+          2.5,
+          14
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "uch3iu",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          18,
+          2.5,
+          -18
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ucioey",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          12,
+          2.5,
+          -9
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ucjko3",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          24,
+          2.5,
+          10
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "uckni5",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          -12,
+          2.5,
+          6
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "uclxbl",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          -15,
+          2.5,
+          8
+         ],
+         "Size": [
+          0.4,
+          2.6,
+          2.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "ubk0qo",
+      "ClassName": "Model",
+      "Name": "Cercas",
+      "props": {},
+      "children": [
+       {
+        "id": "ubl9kq",
+        "ClassName": "Part",
+        "Name": "Cerca1",
+        "props": {
+         "Position": [
+          0,
+          3,
+          -40
+         ],
+         "Size": [
+          82,
+          6,
+          2
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#7c5c46",
+         "Material": "Wood",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubmjd4",
+        "ClassName": "Part",
+        "Name": "Cerca2",
+        "props": {
+         "Position": [
+          0,
+          3,
+          40
+         ],
+         "Size": [
+          82,
+          6,
+          2
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#7c5c46",
+         "Material": "Wood",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubna3m",
+        "ClassName": "Part",
+        "Name": "Cerca3",
+        "props": {
+         "Position": [
+          -40,
+          3,
+          0
+         ],
+         "Size": [
+          2,
+          6,
+          82
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#7c5c46",
+         "Material": "Wood",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubo4c0",
+        "ClassName": "Part",
+        "Name": "Cerca4",
+        "props": {
+         "Position": [
+          40,
+          3,
+          0
+         ],
+         "Size": [
+          2,
+          6,
+          82
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#7c5c46",
+         "Material": "Wood",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "ubpk0l",
+      "ClassName": "Folder",
+      "Name": "Cenario",
+      "props": {},
+      "children": [
+       {
+        "id": "ubq37a",
+        "ClassName": "Part",
+        "Name": "Pedra1",
+        "props": {
+         "Position": [
+          -18,
+          1.6,
+          -12
+         ],
+         "Size": [
+          5,
+          3.5,
+          4.5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#78716c",
+         "Material": "Slate",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Ball",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubrx6t",
+        "ClassName": "Part",
+        "Name": "Pedra2",
+        "props": {
+         "Position": [
+          14,
+          1.6,
+          20
+         ],
+         "Size": [
+          5,
+          3.5,
+          4.5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#78716c",
+         "Material": "Slate",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Ball",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubszqz",
+        "ClassName": "Part",
+        "Name": "Pedra3",
+        "props": {
+         "Position": [
+          22,
+          1.6,
+          -16
+         ],
+         "Size": [
+          5,
+          3.5,
+          4.5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#78716c",
+         "Material": "Slate",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Ball",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubtvfa",
+        "ClassName": "Part",
+        "Name": "Pedra4",
+        "props": {
+         "Position": [
+          -24,
+          1.6,
+          18
+         ],
+         "Size": [
+          5,
+          3.5,
+          4.5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#78716c",
+         "Material": "Slate",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Ball",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubu9ni",
+        "ClassName": "Part",
+        "Name": "Pedra5",
+        "props": {
+         "Position": [
+          0,
+          1.6,
+          0
+         ],
+         "Size": [
+          5,
+          3.5,
+          4.5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#78716c",
+         "Material": "Slate",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Ball",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ubv0px",
+        "ClassName": "Model",
+        "Name": "Arvore1",
+        "props": {},
+        "children": [
+         {
+          "id": "ubwo1u",
+          "ClassName": "Part",
+          "Name": "Tronco",
+          "props": {
+           "Position": [
+            -32,
+            4,
+            -32
+           ],
+           "Size": [
+            1.6,
+            8,
+            1.6
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#6b4226",
+           "Material": "Wood",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Block",
+           "CastShadow": true
+          },
+          "children": []
+         },
+         {
+          "id": "ubx0hk",
+          "ClassName": "Part",
+          "Name": "Folhas",
+          "props": {
+           "Position": [
+            -32,
+            10,
+            -32
+           ],
+           "Size": [
+            8,
+            8,
+            8
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#2f8f3a",
+           "Material": "Grass",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Ball",
+           "CastShadow": true
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "ubynn9",
+        "ClassName": "Model",
+        "Name": "Arvore2",
+        "props": {},
+        "children": [
+         {
+          "id": "ubzhnq",
+          "ClassName": "Part",
+          "Name": "Tronco",
+          "props": {
+           "Position": [
+            32,
+            4,
+            -32
+           ],
+           "Size": [
+            1.6,
+            8,
+            1.6
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#6b4226",
+           "Material": "Wood",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Block",
+           "CastShadow": true
+          },
+          "children": []
+         },
+         {
+          "id": "uc0c02",
+          "ClassName": "Part",
+          "Name": "Folhas",
+          "props": {
+           "Position": [
+            32,
+            10,
+            -32
+           ],
+           "Size": [
+            8,
+            8,
+            8
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#2f8f3a",
+           "Material": "Grass",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Ball",
+           "CastShadow": true
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uc1n2g",
+        "ClassName": "Model",
+        "Name": "Arvore3",
+        "props": {},
+        "children": [
+         {
+          "id": "uc2a8g",
+          "ClassName": "Part",
+          "Name": "Tronco",
+          "props": {
+           "Position": [
+            -32,
+            4,
+            32
+           ],
+           "Size": [
+            1.6,
+            8,
+            1.6
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#6b4226",
+           "Material": "Wood",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Block",
+           "CastShadow": true
+          },
+          "children": []
+         },
+         {
+          "id": "uc395t",
+          "ClassName": "Part",
+          "Name": "Folhas",
+          "props": {
+           "Position": [
+            -32,
+            10,
+            32
+           ],
+           "Size": [
+            8,
+            8,
+            8
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#2f8f3a",
+           "Material": "Grass",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Ball",
+           "CastShadow": true
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uc4j8u",
+        "ClassName": "Model",
+        "Name": "Arvore4",
+        "props": {},
+        "children": [
+         {
+          "id": "uc5nt9",
+          "ClassName": "Part",
+          "Name": "Tronco",
+          "props": {
+           "Position": [
+            32,
+            4,
+            32
+           ],
+           "Size": [
+            1.6,
+            8,
+            1.6
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#6b4226",
+           "Material": "Wood",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Block",
+           "CastShadow": true
+          },
+          "children": []
+         },
+         {
+          "id": "uc691n",
+          "ClassName": "Part",
+          "Name": "Folhas",
+          "props": {
+           "Position": [
+            32,
+            10,
+            32
+           ],
+           "Size": [
+            8,
+            8,
+            8
+           ],
+           "Orientation": [
+            0,
+            0,
+            0
+           ],
+           "Color": "#2f8f3a",
+           "Material": "Grass",
+           "Transparency": 0,
+           "Reflectance": 0,
+           "Anchored": true,
+           "CanCollide": true,
+           "CanTouch": true,
+           "Shape": "Ball",
+           "CastShadow": true
+          },
+          "children": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "uba34k",
+    "ClassName": "Players",
+    "Name": "Players",
+    "props": {
+     "RespawnTime": 3,
+     "CharacterWalkSpeed": 16,
+     "CharacterJumpPower": 50
+    },
+    "children": []
+   },
+   {
+    "id": "ubb5v4",
+    "ClassName": "Lighting",
+    "Name": "Lighting",
+    "props": {
+     "ClockTime": 14,
+     "Brightness": 2,
+     "Ambient": "#7a8090",
+     "SkyColor": "#8ec5ff",
+     "FogColor": "#c9dcf0",
+     "FogEnd": 900,
+     "GlobalShadows": true
+    },
+    "children": []
+   },
+   {
+    "id": "ubcilq",
+    "ClassName": "ReplicatedStorage",
+    "Name": "ReplicatedStorage",
+    "props": {},
+    "children": []
+   },
+   {
+    "id": "ubdt54",
+    "ClassName": "ServerScriptService",
+    "Name": "ServerScriptService",
+    "props": {},
+    "children": []
+   },
+   {
+    "id": "ubem8y",
+    "ClassName": "StarterGui",
+    "Name": "StarterGui",
+    "props": {},
+    "children": [
+     {
+      "id": "uc7gpx",
+      "ClassName": "ScreenGui",
+      "Name": "Tela",
+      "props": {
+       "Enabled": true,
+       "ResetOnSpawn": true
+      },
+      "children": [
+       {
+        "id": "uc8899",
+        "ClassName": "TextLabel",
+        "Name": "Placar",
+        "props": {
+         "Position": [
+          0,
+          16,
+          0,
+          16
+         ],
+         "Size": [
+          0,
+          150,
+          0,
+          46
+         ],
+         "AnchorPoint": [
+          0,
+          0
+         ],
+         "BackgroundColor3": "#1e1e2e",
+         "BackgroundTransparency": 0.35,
+         "Visible": true,
+         "ZIndex": 1,
+         "CornerRadius": 8,
+         "Text": "🪙 0",
+         "TextColor3": "#ffffff",
+         "TextSize": 26,
+         "TextTransparency": 0,
+         "Font": "Padrão",
+         "TextXAlignment": "Center"
+        },
+        "children": []
+       },
+       {
+        "id": "uc9d4q",
+        "ClassName": "TextLabel",
+        "Name": "Relogio",
+        "props": {
+         "Position": [
+          0.5,
+          0,
+          0,
+          16
+         ],
+         "Size": [
+          0,
+          140,
+          0,
+          46
+         ],
+         "AnchorPoint": [
+          0.5,
+          0
+         ],
+         "BackgroundColor3": "#7c2d12",
+         "BackgroundTransparency": 0.35,
+         "Visible": true,
+         "ZIndex": 1,
+         "CornerRadius": 8,
+         "Text": "⏱ 45",
+         "TextColor3": "#ffffff",
+         "TextSize": 26,
+         "TextTransparency": 0,
+         "Font": "Padrão",
+         "TextXAlignment": "Center"
+        },
+        "children": []
+       },
+       {
+        "id": "ucavx5",
+        "ClassName": "TextLabel",
+        "Name": "Aviso",
+        "props": {
+         "Position": [
+          0.5,
+          0,
+          0.3,
+          0
+         ],
+         "Size": [
+          0,
+          560,
+          0,
+          80
+         ],
+         "AnchorPoint": [
+          0.5,
+          0.5
+         ],
+         "BackgroundColor3": "#1e1e2e",
+         "BackgroundTransparency": 0.2,
+         "Visible": true,
+         "ZIndex": 1,
+         "CornerRadius": 8,
+         "Text": "Prepare-se…",
+         "TextColor3": "#ffffff",
+         "TextSize": 34,
+         "TextTransparency": 0,
+         "Font": "Padrão",
+         "TextXAlignment": "Center"
+        },
+        "children": []
+       },
+       {
+        "id": "ucb5pd",
+        "ClassName": "Script",
+        "Name": "Rodadas",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- Chuva de Moedas: pegue o máximo que puder antes do tempo acabar.\n-- Moeda dourada vale 1, gema roxa vale 5.\nlocal jogador = game.Players.LocalPlayer\nlocal tela = script.Parent\nlocal relogio = tela:WaitForChild(\"Relogio\")\nlocal placar = tela:WaitForChild(\"Placar\")\nlocal aviso = tela:WaitForChild(\"Aviso\")\nlocal pasta = workspace:WaitForChild(\"MoedasDaRodada\")\n\nlocal DURACAO = 45\nlocal MAXIMO = 14\nlocal pontos, recorde = 0, 0\nlocal rodando = false\n\nlocal function tocar(nome)\n  local som = Instance.new(\"Sound\")\n  som.SoundId = nome\n  som.Parent = workspace\n  som:Play()\nend\n\nlocal function criarMoeda()\n  local gema = math.random() < 0.12\n  local m = Instance.new(\"Part\")\n  m.Name = gema and \"Gema\" or \"Moeda\"\n  m.Anchored = true\n  m.CanCollide = false\n  m.Material = \"Neon\"\n  if gema then\n    m.Shape = \"Ball\"\n    m.Size = Vector3.new(2, 2, 2)\n    m.Color = Color3.fromRGB(190, 90, 255)\n  else\n    m.Shape = \"Cylinder\"\n    m.Size = Vector3.new(0.4, 2.6, 2.6)\n    m.Color = Color3.fromRGB(245, 197, 24)\n  end\n  m.Position = Vector3.new(math.random(-34, 34), 2.5, math.random(-34, 34))\n  m.Parent = pasta\n  local pega = false\n  m.Touched:Connect(function(hit)\n    if pega or not rodando then return end\n    if game.Players:GetPlayerFromCharacter(hit.Parent) ~= jogador then return end\n    pega = true\n    pontos = pontos + (gema and 5 or 1)\n    placar.Text = \"🪙 \" .. pontos\n    tocar(gema and \"powerup\" or \"coin\")\n    m:Destroy()\n  end)\nend\n\nlocal function limpar()\n  for _, c in ipairs(pasta:GetChildren()) do c:Destroy() end\nend\n\nwhile true do\n  limpar()\n  pontos = 0\n  placar.Text = \"🪙 0\"\n  relogio.Text = \"⏱ \" .. DURACAO\n  aviso.Visible = true\n  for i = 3, 1, -1 do\n    aviso.Text = \"Prepare-se… \" .. i\n    tocar(\"click\")\n    wait(1)\n  end\n  aviso.Text = \"VAI!\"\n  rodando = true\n  local t, proxima = DURACAO, 0\n  while t > 0 do\n    local dt = wait(0.05)\n    t = t - dt\n    proxima = proxima - dt\n    if t < DURACAO - 1 then aviso.Visible = false end\n    relogio.Text = \"⏱ \" .. math.max(0, math.ceil(t))\n    if proxima <= 0 and #pasta:GetChildren() < MAXIMO then\n      criarMoeda()\n      proxima = 0.45\n    end\n    for _, c in ipairs(pasta:GetChildren()) do\n      c.Orientation = c.Orientation + Vector3.new(0, 6, 0)\n    end\n  end\n  rodando = false\n  tocar(\"win\")\n  local novo = pontos > recorde\n  if novo then recorde = pontos end\n  aviso.Visible = true\n  aviso.Text = (novo and \"🏆 Novo recorde! \" or \"Fim! \") .. pontos .. \" moedas · recorde \" .. recorde\n  wait(5)\nend\n"
+        },
+        "children": []
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "ubfj6i",
+    "ClassName": "SoundService",
+    "Name": "SoundService",
+    "props": {
+     "Volume": 0.6
+    },
+    "children": []
+   }
+  ]
+ },
+ "genero": "Arcade",
+ "subgenero": "Coleta contra o tempo",
+ "autor": "Claude (exemplo)"
+}

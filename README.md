@@ -31,6 +31,17 @@ Todo mundo nasce numa arena. A cada rodada, alguém vira o Gênio e escreve um p
 
 **Controles:** `WASD` andar · `Mouse` mirar · `Clique`/`Espaço` atacar · `Enter` escrever o pedido
 
+## Arcádia Studio
+Um estúdio de jogos no navegador (`studio/index.html`), com layout parecido com o de estúdios de jogos populares: faixa de ferramentas, Explorer, Propriedades, viewport 3D com gizmo, editor de código com abas, Saída e barra de comando. Os painéis são redimensionáveis: arraste as bordas (duplo clique volta ao tamanho padrão).
+
+- **Jogos 3D**: partes, modelos prontos e scripts em **Lua** ou **JavaScript** com uma API parecida com a de estúdios populares (`Touched:Connect`, `Instance.new`, `leaderstats`, `TweenService`…).
+- **Projetos de arquivos**: HTML/CSS/JS, TypeScript, JSX, Lua e Python, com pastas.
+- **Publicar**: o jogo aparece em **Jogos de Players** na plataforma e ganha um link para qualquer pessoa jogar.
+- **IA pelo MCP**: o servidor em [`mcp/`](mcp/README.md) deixa uma IA (Claude Code, Claude Desktop…) criar, testar e publicar jogos dentro do Studio.
+
+### Jogos de Players
+A aba mostra os jogos publicados neste navegador e os da **comunidade** (`comunidade/index.json`). Para colocar um jogo na comunidade, adicione o `.arcadia.json` (botão “Baixar arquivo” ao publicar) à pasta `comunidade/` e uma entrada em `comunidade/index.json`, ou peça à IA para usar a ferramenta `publicar_na_comunidade` do MCP.
+
 ## Como jogar
 Abra o `index.html` no navegador (Chrome, Edge ou Firefox). É preciso estar conectado à internet, porque o three.js e o modelo 3D são carregados online.
 

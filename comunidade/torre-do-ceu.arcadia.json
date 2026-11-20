@@ -1,0 +1,1541 @@
+{
+ "formato": "arcadia-studio",
+ "versao": 1,
+ "id": "proj-u9lc0k",
+ "nome": "Torre do Céu",
+ "tipo": "cena",
+ "criado": 1795141249209,
+ "atualizado": 1795141257123,
+ "descricao": "Uma escadaria em espiral em volta de um pilar de mármore, por cima de um mar de lava. Pule de degrau em degrau, cuidado com as plataformas de vidro que somem e com os elevadores que sobem e descem. Dois checkpoints, seis moedas e o céu lá no topo. WASD anda, Espaço pula.",
+ "cena": {
+  "id": "raiz",
+  "ClassName": "DataModel",
+  "Name": "Jogo",
+  "props": {},
+  "children": [
+   {
+    "id": "u9cxvw",
+    "ClassName": "Workspace",
+    "Name": "Workspace",
+    "props": {
+     "Gravity": 196.2,
+     "FallenPartsDestroyHeight": -100
+    },
+    "children": [
+     {
+      "id": "u9kj09",
+      "ClassName": "SpawnLocation",
+      "Name": "SpawnLocation",
+      "props": {
+       "Position": [
+        24,
+        0.5,
+        0
+       ],
+       "Size": [
+        10,
+        1,
+        10
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#3f8f47",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "u9m1ja",
+      "ClassName": "Part",
+      "Name": "MarDeLava",
+      "props": {
+       "Position": [
+        0,
+        -3,
+        0
+       ],
+       "Size": [
+        160,
+        1,
+        160
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#ff4a1c",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "u9nxtn",
+        "ClassName": "Script",
+        "Name": "Lava",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- o mar de lava: quem cair, volta para o último checkpoint\nscript.Parent.Touched:Connect(function(hit)\n  local h = hit.Parent:FindFirstChild(\"Humanoid\")\n  if h and h.Health > 0 then h.Health = 0 end\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "u9o9pb",
+      "ClassName": "Part",
+      "Name": "Pilar",
+      "props": {
+       "Position": [
+        0,
+        26.95,
+        0
+       ],
+       "Size": [
+        8,
+        65.9,
+        8
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#cbd5e1",
+       "Material": "Marble",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "u9py1u",
+      "ClassName": "Model",
+      "Name": "Escadaria",
+      "props": {},
+      "children": [
+       {
+        "id": "u9qje6",
+        "ClassName": "Part",
+        "Name": "Degrau0",
+        "props": {
+         "Position": [
+          16,
+          1.5,
+          0
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e75555",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9rz3j",
+        "ClassName": "Part",
+        "Name": "Degrau1",
+        "props": {
+         "Position": [
+          13.21,
+          4.1,
+          9.03
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e77a55",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9srst",
+        "ClassName": "Part",
+        "Name": "Degrau2",
+        "props": {
+         "Position": [
+          5.8,
+          6.7,
+          14.91
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e79e55",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9tlvw",
+        "ClassName": "Part",
+        "Name": "Degrau3",
+        "props": {
+         "Position": [
+          -3.64,
+          9.3,
+          15.58
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e7c255",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9uhsu",
+        "ClassName": "Part",
+        "Name": "Degrau4",
+        "props": {
+         "Position": [
+          -11.8,
+          11.9,
+          10.81
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e7e755",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9v3tu",
+        "ClassName": "Part",
+        "Name": "Fantasma5",
+        "props": {
+         "Position": [
+          -15.84,
+          14.5,
+          2.26
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#c4b5fd",
+         "Material": "Glass",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "u9wws9",
+          "ClassName": "Script",
+          "Name": "Pisca",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- some por um instante e volta\nlocal p = script.Parent\nwhile true do\n  wait(2)\n  for i = 1, 5 do\n    p.Transparency = i / 5\n    wait(0.1)\n  end\n  p.CanCollide = false\n  wait(1.2)\n  p.CanCollide = true\n  p.Transparency = 0\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "u9x2rv",
+        "ClassName": "Part",
+        "Name": "Degrau6",
+        "props": {
+         "Position": [
+          -14.35,
+          17.1,
+          -7.08
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#9ee755",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9ye75",
+        "ClassName": "Part",
+        "Name": "Degrau8",
+        "props": {
+         "Position": [
+          1.4,
+          22.3,
+          -15.94
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#55e755",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "u9zlac",
+        "ClassName": "Part",
+        "Name": "Degrau9",
+        "props": {
+         "Position": [
+          10.16,
+          24.9,
+          -12.36
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#55e77a",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ua09ro",
+        "ClassName": "Part",
+        "Name": "Elevador10",
+        "props": {
+         "Position": [
+          15.36,
+          24.5,
+          -4.47
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#3b82f6",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "ua1qhm",
+          "ClassName": "Script",
+          "Name": "SobeDesce",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- sobe e desce devagar\nlocal TweenService = game:GetService(\"TweenService\")\nlocal p = script.Parent\nlocal info = TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)\nTweenService:Create(p, info, { Position = p.Position + Vector3.new(0, 5, 0) }):Play()\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "ua2b41",
+        "ClassName": "Part",
+        "Name": "Degrau11",
+        "props": {
+         "Position": [
+          15.2,
+          30.1,
+          4.98
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#55e7c2",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ua3jan",
+        "ClassName": "Part",
+        "Name": "Degrau12",
+        "props": {
+         "Position": [
+          9.73,
+          32.7,
+          12.7
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#55e7e7",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ua4h24",
+        "ClassName": "Part",
+        "Name": "Fantasma13",
+        "props": {
+         "Position": [
+          0.86,
+          35.3,
+          15.98
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#c4b5fd",
+         "Material": "Glass",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "ua51lb",
+          "ClassName": "Script",
+          "Name": "Pisca",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- some por um instante e volta\nlocal p = script.Parent\nwhile true do\n  wait(2)\n  for i = 1, 5 do\n    p.Transparency = i / 5\n    wait(0.1)\n  end\n  p.CanCollide = false\n  wait(1.2)\n  p.CanCollide = true\n  p.Transparency = 0\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "ua6ksl",
+        "ClassName": "Part",
+        "Name": "Degrau14",
+        "props": {
+         "Position": [
+          -8.31,
+          37.9,
+          13.67
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#559ee7",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ua72q6",
+        "ClassName": "Part",
+        "Name": "Degrau16",
+        "props": {
+         "Position": [
+          -15.76,
+          43.1,
+          -2.79
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#5555e7",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ua850j",
+        "ClassName": "Part",
+        "Name": "Degrau17",
+        "props": {
+         "Position": [
+          -11.43,
+          45.7,
+          -11.2
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#7a55e7",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "ua9das",
+        "ClassName": "Part",
+        "Name": "Elevador18",
+        "props": {
+         "Position": [
+          -3.11,
+          45.3,
+          -15.69
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#3b82f6",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uaaled",
+          "ClassName": "Script",
+          "Name": "SobeDesce",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- sobe e desce devagar\nlocal TweenService = game:GetService(\"TweenService\")\nlocal p = script.Parent\nlocal info = TweenInfo.new(2.5, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)\nTweenService:Create(p, info, { Position = p.Position + Vector3.new(0, 5, 0) }):Play()\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uab0ma",
+        "ClassName": "Part",
+        "Name": "Degrau19",
+        "props": {
+         "Position": [
+          6.3,
+          50.9,
+          -14.71
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#c255e7",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "uacdv3",
+        "ClassName": "Part",
+        "Name": "Fantasma20",
+        "props": {
+         "Position": [
+          13.5,
+          53.5,
+          -8.59
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#c4b5fd",
+         "Material": "Glass",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uadrpw",
+          "ClassName": "Script",
+          "Name": "Pisca",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- some por um instante e volta\nlocal p = script.Parent\nwhile true do\n  wait(2)\n  for i = 1, 5 do\n    p.Transparency = i / 5\n    wait(0.1)\n  end\n  p.CanCollide = false\n  wait(1.2)\n  p.CanCollide = true\n  p.Transparency = 0\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uaenge",
+        "ClassName": "Part",
+        "Name": "Degrau21",
+        "props": {
+         "Position": [
+          15.99,
+          56.1,
+          0.54
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e755c2",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "uafjg9",
+        "ClassName": "Part",
+        "Name": "Degrau22",
+        "props": {
+         "Position": [
+          12.89,
+          58.7,
+          9.47
+         ],
+         "Size": [
+          5,
+          1,
+          5
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#e7559e",
+         "Material": "SmoothPlastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "uagffh",
+      "ClassName": "Folder",
+      "Name": "Extras",
+      "props": {},
+      "children": [
+       {
+        "id": "uahvzh",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          -3.64,
+          11.8,
+          15.58
+         ],
+         "Size": [
+          0.4,
+          2.4,
+          2.4
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uaimst",
+          "ClassName": "Script",
+          "Name": "Moeda",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- moeda: soma 1 e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"coin\"\n  som.Parent = workspace\n  som:Play()\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uaj6xm",
+        "ClassName": "SpawnLocation",
+        "Name": "Checkpoint1",
+        "props": {
+         "Position": [
+          -7.84,
+          19.7,
+          -13.95
+         ],
+         "Size": [
+          6,
+          1,
+          6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#9ca3af",
+         "Material": "Plastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uak062",
+          "ClassName": "Script",
+          "Name": "Checkpoint",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- salva o ponto de renascimento\nlocal cp = script.Parent\ncp.Touched:Connect(function(hit)\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if jogador and jogador.RespawnLocation ~= cp then\n    jogador.RespawnLocation = cp\n    cp.Color = Color3.fromRGB(80, 220, 120)\n    local som = Instance.new(\"Sound\")\n    som.SoundId = \"powerup\"\n    som.Parent = cp\n    som:Play()\n    print(jogador.Name .. \" chegou no \" .. cp.Name)\n  end\nend)\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "ualxlz",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          1.4,
+          24.8,
+          -15.94
+         ],
+         "Size": [
+          0.4,
+          2.4,
+          2.4
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uam9j5",
+          "ClassName": "Script",
+          "Name": "Moeda",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- moeda: soma 1 e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"coin\"\n  som.Parent = workspace\n  som:Play()\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uan17c",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          9.73,
+          35.2,
+          12.7
+         ],
+         "Size": [
+          0.4,
+          2.4,
+          2.4
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uaohgq",
+          "ClassName": "Script",
+          "Name": "Moeda",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- moeda: soma 1 e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"coin\"\n  som.Parent = workspace\n  som:Play()\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uappnj",
+        "ClassName": "SpawnLocation",
+        "Name": "Checkpoint2",
+        "props": {
+         "Position": [
+          -14.58,
+          40.5,
+          6.59
+         ],
+         "Size": [
+          6,
+          1,
+          6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#9ca3af",
+         "Material": "Plastic",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uaq2nv",
+          "ClassName": "Script",
+          "Name": "Checkpoint",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- salva o ponto de renascimento\nlocal cp = script.Parent\ncp.Touched:Connect(function(hit)\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if jogador and jogador.RespawnLocation ~= cp then\n    jogador.RespawnLocation = cp\n    cp.Color = Color3.fromRGB(80, 220, 120)\n    local som = Instance.new(\"Sound\")\n    som.SoundId = \"powerup\"\n    som.Parent = cp\n    som:Play()\n    print(jogador.Name .. \" chegou no \" .. cp.Name)\n  end\nend)\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uarbs3",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          -15.76,
+          45.6,
+          -2.79
+         ],
+         "Size": [
+          0.4,
+          2.4,
+          2.4
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uasdnc",
+          "ClassName": "Script",
+          "Name": "Moeda",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- moeda: soma 1 e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"coin\"\n  som.Parent = workspace\n  som:Play()\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uat644",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          6.3,
+          53.4,
+          -14.71
+         ],
+         "Size": [
+          0.4,
+          2.4,
+          2.4
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uauf22",
+          "ClassName": "Script",
+          "Name": "Moeda",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- moeda: soma 1 e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"coin\"\n  som.Parent = workspace\n  som:Play()\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "uavm12",
+        "ClassName": "Part",
+        "Name": "Moeda",
+        "props": {
+         "Position": [
+          15.99,
+          58.6,
+          0.54
+         ],
+         "Size": [
+          0.4,
+          2.4,
+          2.4
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#f5c518",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": false,
+         "CanTouch": true,
+         "Shape": "Cylinder",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "uaw4z0",
+          "ClassName": "Script",
+          "Name": "Moeda",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- moeda: soma 1 e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"coin\"\n  som.Parent = workspace\n  som:Play()\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+          },
+          "children": []
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "uaxk6p",
+      "ClassName": "Part",
+      "Name": "Ceu",
+      "props": {
+       "Position": [
+        0,
+        59.9,
+        0
+       ],
+       "Size": [
+        18,
+        1,
+        18
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#facc15",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "uay16n",
+        "ClassName": "Script",
+        "Name": "Vitoria",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- topo da torre: vitória!\nlocal feito = {}\nscript.Parent.Touched:Connect(function(hit)\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador or feito[jogador.Name] then return end\n  feito[jogador.Name] = true\n  local moedas = 0\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then moedas = stats.Moedas.Value end\n  local tela = Instance.new(\"ScreenGui\")\n  tela.Parent = jogador:FindFirstChild(\"PlayerGui\")\n  local txt = Instance.new(\"TextLabel\")\n  txt.Size = UDim2.new(0, 520, 0, 110)\n  txt.Position = UDim2.new(0.5, 0, 0.35, 0)\n  txt.AnchorPoint = Vector2.new(0.5, 0.5)\n  txt.Text = \"🏆 Você chegou ao céu!\\n🪙 \" .. moedas .. \" de 6 moedas\"\n  txt.TextSize = 36\n  txt.BackgroundColor3 = Color3.fromRGB(30, 30, 50)\n  txt.Parent = tela\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"win\"\n  som.Parent = script.Parent\n  som:Play()\nend)\n"
+        },
+        "children": []
+       },
+       {
+        "id": "uazu12",
+        "ClassName": "BillboardText",
+        "Name": "Placa",
+        "props": {
+         "Text": "☁️ O CÉU",
+         "TextColor3": "#ffffff",
+         "TextSize": 28,
+         "BackgroundTransparency": 1,
+         "BackgroundColor3": "#000000",
+         "StudsOffset": [
+          0,
+          5,
+          0
+         ],
+         "Enabled": true
+        },
+        "children": []
+       },
+       {
+        "id": "ub0gle",
+        "ClassName": "PointLight",
+        "Name": "Brilho",
+        "props": {
+         "Color": "#fff1d6",
+         "Brightness": 2,
+         "Range": 40,
+         "Enabled": true
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "ub1281",
+      "ClassName": "Part",
+      "Name": "PlacaInicio",
+      "props": {
+       "Position": [
+        30,
+        3,
+        0
+       ],
+       "Size": [
+        0.4,
+        5,
+        8
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#7c5c46",
+       "Material": "Wood",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "ub2ga8",
+        "ClassName": "BillboardText",
+        "Name": "Texto",
+        "props": {
+         "Text": "Suba até o céu! 🧗",
+         "TextColor3": "#ffffff",
+         "TextSize": 28,
+         "BackgroundTransparency": 1,
+         "BackgroundColor3": "#000000",
+         "StudsOffset": [
+          0,
+          4,
+          0
+         ],
+         "Enabled": true
+        },
+        "children": []
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "u9dyrb",
+    "ClassName": "Players",
+    "Name": "Players",
+    "props": {
+     "RespawnTime": 3,
+     "CharacterWalkSpeed": 16,
+     "CharacterJumpPower": 50
+    },
+    "children": []
+   },
+   {
+    "id": "u9ehzq",
+    "ClassName": "Lighting",
+    "Name": "Lighting",
+    "props": {
+     "ClockTime": 14,
+     "Brightness": 2,
+     "Ambient": "#7a8090",
+     "SkyColor": "#8ec5ff",
+     "FogColor": "#c9dcf0",
+     "FogEnd": 900,
+     "GlobalShadows": true
+    },
+    "children": []
+   },
+   {
+    "id": "u9f954",
+    "ClassName": "ReplicatedStorage",
+    "Name": "ReplicatedStorage",
+    "props": {},
+    "children": []
+   },
+   {
+    "id": "u9g0y6",
+    "ClassName": "ServerScriptService",
+    "Name": "ServerScriptService",
+    "props": {},
+    "children": [
+     {
+      "id": "ub3mab",
+      "ClassName": "Script",
+      "Name": "Placar",
+      "props": {
+       "Language": "Lua",
+       "Enabled": true,
+       "Source": "-- placar de cada jogador\ngame.Players.PlayerAdded:Connect(function(jogador)\n  local stats = Instance.new(\"Folder\")\n  stats.Name = \"leaderstats\"\n  stats.Parent = jogador\n  local moedas = Instance.new(\"IntValue\")\n  moedas.Name = \"Moedas\"\n  moedas.Parent = stats\nend)\n"
+      },
+      "children": []
+     }
+    ]
+   },
+   {
+    "id": "u9h5rv",
+    "ClassName": "StarterGui",
+    "Name": "StarterGui",
+    "props": {},
+    "children": [
+     {
+      "id": "ub4zoi",
+      "ClassName": "ScreenGui",
+      "Name": "Tela",
+      "props": {
+       "Enabled": true,
+       "ResetOnSpawn": true
+      },
+      "children": [
+       {
+        "id": "ub58ek",
+        "ClassName": "TextLabel",
+        "Name": "Moedas",
+        "props": {
+         "Position": [
+          0,
+          16,
+          0,
+          16
+         ],
+         "Size": [
+          0,
+          170,
+          0,
+          46
+         ],
+         "AnchorPoint": [
+          0,
+          0
+         ],
+         "BackgroundColor3": "#1e1e2e",
+         "BackgroundTransparency": 0.35,
+         "Visible": true,
+         "ZIndex": 1,
+         "CornerRadius": 8,
+         "Text": "🪙 0 / 6",
+         "TextColor3": "#ffffff",
+         "TextSize": 26,
+         "TextTransparency": 0,
+         "Font": "Padrão",
+         "TextXAlignment": "Center"
+        },
+        "children": [
+         {
+          "id": "ub67x4",
+          "ClassName": "Script",
+          "Name": "Atualiza",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- mostra as moedas na tela\nlocal jogador = game.Players.LocalPlayer\nlocal moedas = jogador:WaitForChild(\"leaderstats\"):WaitForChild(\"Moedas\")\nlocal texto = script.Parent\ntexto.Text = \"🪙 \" .. moedas.Value .. \" / 6\"\nmoedas.Changed:Connect(function(v)\n  texto.Text = \"🪙 \" .. v .. \" / 6\"\nend)\n"
+          },
+          "children": []
+         }
+        ]
+       },
+       {
+        "id": "ub767b",
+        "ClassName": "TextLabel",
+        "Name": "Altura",
+        "props": {
+         "Position": [
+          0,
+          16,
+          0,
+          70
+         ],
+         "Size": [
+          0,
+          170,
+          0,
+          40
+         ],
+         "AnchorPoint": [
+          0,
+          0
+         ],
+         "BackgroundColor3": "#1e1e2e",
+         "BackgroundTransparency": 0.25,
+         "Visible": true,
+         "ZIndex": 1,
+         "CornerRadius": 8,
+         "Text": "⬆ 0 / 62 m",
+         "TextColor3": "#ffffff",
+         "TextSize": 22,
+         "TextTransparency": 0,
+         "Font": "Padrão",
+         "TextXAlignment": "Center"
+        },
+        "children": [
+         {
+          "id": "ub8ini",
+          "ClassName": "Script",
+          "Name": "Altura",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- mostra a altura do jogador\nlocal jogador = game.Players.LocalPlayer\nlocal texto = script.Parent\nwhile true do\n  local c = jogador.Character\n  local raiz = c and c:FindFirstChild(\"HumanoidRootPart\")\n  if raiz then\n    texto.Text = \"⬆ \" .. math.max(0, math.floor(raiz.Position.Y)) .. \" / 62 m\"\n  end\n  wait(0.2)\nend\n"
+          },
+          "children": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "u9i9k6",
+    "ClassName": "SoundService",
+    "Name": "SoundService",
+    "props": {
+     "Volume": 0.6
+    },
+    "children": []
+   }
+  ]
+ },
+ "genero": "Obby / Parkour",
+ "subgenero": "Obby vertical",
+ "autor": "Claude (exemplo)"
+}

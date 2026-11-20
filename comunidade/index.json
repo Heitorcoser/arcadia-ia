@@ -1,0 +1,44 @@
+[
+  {
+    "id": "pong-neon",
+    "projetoId": "proj-ucmfk6",
+    "nome": "Pong Neon",
+    "autor": "Claude (exemplo)",
+    "genero": "Arcade",
+    "subgenero": "Clássico de raquetes",
+    "descricao": "Você contra a máquina num Pong com cara de fliperama: raquetes neon, rastro na bola, faíscas, tremida na tela e sons feitos na hora. Quanto mais a bola bate, mais rápida fica. Primeiro a 7 pontos vence. W/S ou setas (ou arraste o dedo).",
+    "tipo": "arquivos",
+    "arquivo": "pong-neon.arcadia.json",
+    "capa": "capas/pong-neon.svg",
+    "publicadoEm": "2026-11-20",
+    "atualizadoEm": "2026-11-20"
+  },
+  {
+    "id": "chuva-de-moedas",
+    "projetoId": "proj-ubip3c",
+    "nome": "Chuva de Moedas",
+    "autor": "Claude (exemplo)",
+    "genero": "Arcade",
+    "subgenero": "Coleta contra o tempo",
+    "descricao": "Rodadas de 45 segundos numa arena cercada: moedas aparecem pelo chão e você corre para pegar o máximo que puder. A moeda dourada vale 1 e a gema roxa, mais rara, vale 5. O jogo guarda seu recorde enquanto você joga. WASD anda, Espaço pula.",
+    "tipo": "cena",
+    "arquivo": "chuva-de-moedas.arcadia.json",
+    "capa": "capas/chuva-de-moedas.jpg",
+    "publicadoEm": "2026-11-20",
+    "atualizadoEm": "2026-11-20"
+  },
+  {
+    "id": "torre-do-ceu",
+    "projetoId": "proj-u9lc0k",
+    "nome": "Torre do Céu",
+    "autor": "Claude (exemplo)",
+    "genero": "Obby / Parkour",
+    "subgenero": "Obby vertical",
+    "descricao": "Uma escadaria em espiral em volta de um pilar de mármore, por cima de um mar de lava. Pule de degrau em degrau, cuidado com as plataformas de vidro que somem e com os elevadores que sobem e descem. Dois checkpoints, seis moedas e o céu lá no topo. WASD anda, Espaço pula.",
+    "tipo": "cena",
+    "arquivo": "torre-do-ceu.arcadia.json",
+    "capa": "capas/torre-do-ceu.jpg",
+    "publicadoEm": "2026-11-20",
+    "atualizadoEm": "2026-11-20"
+  }
+]

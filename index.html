@@ -166,6 +166,19 @@
   .player-bar .sp{margin-left:auto;display:flex;gap:8px}
   .player iframe{flex:1;border:0;width:100%;background:#000}
 
+  /* ---------- jogos de players ---------- */
+  .criar{height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line2);background:var(--surface);color:var(--text);text-decoration:none;display:inline-flex;align-items:center;gap:8px;font-weight:600;font-size:13.5px;white-space:nowrap;transition:border-color .2s}
+  .criar:hover{border-color:var(--accent)}
+  .players-intro{color:var(--muted);font-size:14px;line-height:1.6;margin:-6px 0 18px;max-width:760px}
+  .players-intro a{color:#c4b5fd}
+  .card.de-player .card-cover{background:linear-gradient(135deg,#1b2440,#2a1b40)}
+  .card-cover .ph{position:absolute;inset:0;display:grid;place-items:center;font-size:46px}
+  .badge.autor{left:auto;right:12px;background:rgba(10,10,15,.8);color:#d6d6e2;text-transform:none;letter-spacing:0;font-weight:600}
+  .badge.local{left:12px;top:auto;bottom:12px;background:rgba(139,92,246,.9);color:#fff}
+  .card-foot .acoes-p{display:flex;gap:6px}
+  .btn.icone{width:36px;padding:0;justify-content:center}
+  @media (max-width:520px){ .criar span{display:none} }
+
   /* ---------- toast ---------- */
   .toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:120;background:var(--surface2);border:1px solid var(--line2);padding:12px 18px;border-radius:12px;font-size:14px;transition:.3s;pointer-events:none;box-shadow:0 12px 30px rgba(0,0,0,.5)}
   .toast.show{opacity:1;transform:translateX(-50%)}
@@ -201,6 +214,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
       <input id="busca" type="search" placeholder="Buscar jogo, gênero, tag…">
     </label>
+    <a class="criar" href="studio/index.html" title="Abrir o Arcádia Studio">🛠️<span>Criar jogo</span></a>
   </div>
 </header>
 
@@ -239,6 +253,20 @@
       </select>
     </div>
     <div class="grid" id="grade"></div>
+  </section>
+
+  <section id="players">
+    <div class="section-head">
+      <h2>Jogos de Players</h2>
+      <div class="filters" id="filtros-p">
+        <button class="filter active" data-fonte="todos">Todos</button>
+        <button class="filter" data-fonte="comunidade">Comunidade</button>
+        <button class="filter" data-fonte="local">Publicados neste navegador</button>
+      </div>
+      <a class="criar" href="studio/index.html">🛠️ Criar no Studio</a>
+    </div>
+    <p class="players-intro">Jogos feitos por pessoas (e pelas IAs delas) no <a href="studio/index.html">Arcádia Studio</a>. Os da <b>Comunidade</b> estão no repositório e aparecem para todo mundo; os que você publica no Studio aparecem aqui na hora, só neste navegador, e podem ser compartilhados por link.</p>
+    <div class="grid" id="grade-p"></div>
   </section>
 </main>
 
@@ -469,7 +497,7 @@
     });
   }
 
-  function renderTudo() { renderHero(); renderStats(); renderFiltros(); renderGrade(); if (jogoAberto && $("#detalhes").classList.contains("open")) { const y = $("#detalhes").scrollTop; renderModal(); $("#detalhes").scrollTop = y; } }
+  function renderTudo() { renderHero(); renderStats(); renderFiltros(); renderGrade(); renderGradeP(); if (jogoAberto && $("#detalhes").classList.contains("open")) { const y = $("#detalhes").scrollTop; renderModal(); $("#detalhes").scrollTop = y; } }
 
   // ---------- ações ----------
   function abrirDetalhes(id) { jogoAberto = JOGOS.find(j => j.id === id); renderModal(); $("#detalhes").classList.add("open"); $("#detalhes").scrollTop = 0; document.body.style.overflow = "hidden"; }
@@ -549,6 +577,99 @@
     } catch { toast("Arquivo inválido"); }
     e.target.value = "";
   });
+
+  // ---------- jogos de players (Studio) ----------
+  // "comunidade": comunidade/index.json no repositório · "local": IndexedDB que o Studio usa ao publicar
+  let fonteP = "todos", comunidade = [], locais = [];
+  const lerLocais = () => new Promise(ok => {
+    try {
+      const r = indexedDB.open("arcadia-studio", 1);
+      r.onupgradeneeded = () => { const d = r.result; if (!d.objectStoreNames.contains("projetos")) d.createObjectStore("projetos", { keyPath: "id" }); if (!d.objectStoreNames.contains("publicados")) d.createObjectStore("publicados", { keyPath: "id" }); };
+      r.onsuccess = () => { try { const q = r.result.transaction("publicados").objectStore("publicados").getAll(); q.onsuccess = () => ok(q.result || []); q.onerror = () => ok([]); } catch { ok([]); } };
+      r.onerror = () => ok([]);
+    } catch { ok([]); }
+  });
+  const apagarLocal = id => new Promise(ok => { const r = indexedDB.open("arcadia-studio", 1); r.onsuccess = () => { const t = r.result.transaction("publicados", "readwrite"); t.objectStore("publicados").delete(id); t.oncomplete = ok; t.onerror = ok; }; r.onerror = ok; });
+  async function compactar(obj) {
+    const cs = new Blob([new TextEncoder().encode(JSON.stringify(obj))]).stream().pipeThrough(new CompressionStream("deflate-raw"));
+    const buf = new Uint8Array(await new Response(cs).arrayBuffer());
+    let s = ""; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000));
+    return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+  }
+  function jogosP() {
+    const c = comunidade.map(j => ({ ...j, fonte: "comunidade", chave: "c:" + j.id, capaUrl: j.capa ? "comunidade/" + j.capa : "", data: j.atualizadoEm || j.publicadoEm || "" }));
+    const l = locais.map(j => ({ ...j, fonte: "local", chave: "l:" + j.id, capaUrl: j.capa || "", data: j.publicadoEm ? new Date(j.publicadoEm).toISOString().slice(0, 10) : "" }));
+    return [...l, ...c];
+  }
+  const iconeGen = g => ({ "Obby / Parkour": "🧗", "Aventura": "🗺️", "Ação": "⚔️", "Plataforma": "🍄", "Puzzle": "🧩", "Corrida": "🏎️", "Terror": "👻", "Simulador": "🛠️", "Tycoon": "💰", "RPG": "🐉", "Party Game": "🎉", "Esporte": "⚽", "Arcade": "🕹️" }[g] || "🎮");
+  function renderGradeP() {
+    const q = busca.trim().toLowerCase();
+    const naComunidade = new Set(comunidade.map(c => "pub-" + c.projetoId));
+    const lista = jogosP().filter(j => (fonteP === "todos" ? !(j.fonte === "local" && naComunidade.has(j.id)) : j.fonte === fonteP) && (!q || [j.nome, j.autor, j.genero, j.subgenero, j.descricao].join(" ").toLowerCase().includes(q)));
+    let h = lista.map(j => `
+      <article class="card de-player" data-jogar-p="${esc(j.chave)}">
+        <div class="card-cover">${j.capaUrl ? `<img src="${esc(j.capaUrl)}" alt="Capa de ${esc(j.nome)}" loading="lazy">` : `<span class="ph">${iconeGen(j.genero)}</span>`}
+          <span class="badge g" style="background:#8b5cf6">${esc(j.genero || "Outro")}</span>
+          <span class="badge autor">por ${esc(j.autor || "Anônimo")}</span>
+          ${j.fonte === "local" ? '<span class="badge local">Neste navegador</span>' : ""}
+        </div>
+        <div class="card-body">
+          <h3>${esc(j.nome)}</h3>
+          <div class="genre-line"><b style="color:#c4b5fd">${esc(j.genero || "Outro")}</b>${j.subgenero ? ` · <em>${esc(j.subgenero)}</em>` : ""} · ${j.tipo === "arquivos" ? "Projeto web" : "Jogo 3D"}</div>
+          <div class="rating-row">${estrelasHTML(nota(j.chave), j.chave, 17)}<span class="rating-label">${rotulo(nota(j.chave))}</span></div>
+          <p>${esc(j.descricao || "Sem descrição.")}</p>
+          <div class="card-foot">
+            <span class="meta"><span>${j.data ? esc(new Date(j.data + "T12:00:00").toLocaleDateString("pt-BR")) : ""}</span></span>
+            <span class="acoes-p">
+              <button class="btn small icone" data-link-p="${esc(j.chave)}" title="Copiar link para compartilhar">🔗</button>
+              ${j.fonte === "local" ? `<button class="btn small icone" data-apagar-p="${esc(j.chave)}" title="Tirar da lista deste navegador">🗑</button>` : ""}
+              <button class="btn small primary" data-jogar-p="${esc(j.chave)}">Jogar</button>
+            </span>
+          </div>
+        </div>
+      </article>`).join("");
+    if (!lista.length) h = fonteP === "local" && !q
+      ? `<div class="empty">Você ainda não publicou nenhum jogo neste navegador.<br><br><a class="btn primary" style="text-decoration:none" href="studio/index.html">🛠️ Abrir o Arcádia Studio</a></div>`
+      : `<div class="empty">${q ? `Nenhum jogo de player encontrado para “${esc(busca)}”.` : "Nenhum jogo de player ainda. Seja o primeiro!"}</div>`;
+    $("#grade-p").innerHTML = h;
+  }
+  async function carregarP() {
+    try { const r = await fetch("comunidade/index.json", { cache: "no-cache" }); const d = r.ok ? await r.json() : []; comunidade = Array.isArray(d) ? d : (d.jogos || []); } catch { comunidade = []; }
+    locais = (await lerLocais()).sort((a, b) => (b.publicadoEm || 0) - (a.publicadoEm || 0));
+    renderGradeP();
+  }
+  const achaP = chave => jogosP().find(j => j.chave === chave);
+  const urlP = j => j.fonte === "comunidade" ? "studio/jogar.html?arquivo=" + encodeURIComponent("../comunidade/" + j.arquivo) : "studio/jogar.html?local=" + encodeURIComponent(j.id);
+  function jogarP(chave) {
+    const j = achaP(chave); if (!j) return;
+    jogoAberto = null;
+    $("#player-nome").textContent = j.nome + " · por " + (j.autor || "Anônimo");
+    $("#frame").src = urlP(j);
+    $("#player").classList.add("open");
+    document.body.style.overflow = "hidden";
+    setTimeout(() => $("#frame").focus(), 300);
+  }
+  async function linkP(chave) {
+    const j = achaP(chave); if (!j) return;
+    let link = new URL(urlP(j), location.href).href;
+    if (j.fonte === "local") link = new URL("studio/jogar.html", location.href).href + "#p=" + await compactar(j.projeto);
+    try { await navigator.clipboard.writeText(link); toast("🔗 Link copiado: qualquer pessoa pode jogar"); } catch { prompt("Copie o link do jogo:", link); }
+  }
+  document.addEventListener("click", async e => {
+    if (e.target.closest(".stars")) return;
+    const lk = e.target.closest("[data-link-p]"); if (lk) { e.stopPropagation(); linkP(lk.dataset.linkP); return; }
+    const ap = e.target.closest("[data-apagar-p]"); if (ap) {
+      e.stopPropagation(); const j = achaP(ap.dataset.apagarP);
+      if (j && confirm(`Tirar “${j.nome}” da lista deste navegador? (O projeto continua salvo no Studio.)`)) { await apagarLocal(j.id); carregarP(); }
+      return;
+    }
+    const jp = e.target.closest("[data-jogar-p]"); if (jp) { jogarP(jp.dataset.jogarP); return; }
+    const fp = e.target.closest("[data-fonte]"); if (fp) { fonteP = fp.dataset.fonte; document.querySelectorAll("#filtros-p .filter").forEach(b => b.classList.toggle("active", b === fp)); renderGradeP(); }
+  });
+  $("#busca").addEventListener("input", renderGradeP);
+  // volta do Studio depois de publicar: atualiza a lista
+  addEventListener("focus", () => lerLocais().then(l => { if (l.length !== locais.length || l.some((x, i) => x.publicadoEm !== (locais[i] || {}).publicadoEm)) { locais = l.sort((a, b) => (b.publicadoEm || 0) - (a.publicadoEm || 0)); renderGradeP(); } }));
+  carregarP().then(() => { if (location.hash === "#players") $("#players").scrollIntoView(); });
 
   let tt; function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 3200); }
 
