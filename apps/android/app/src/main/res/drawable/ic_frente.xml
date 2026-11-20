@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <!-- controle de videogame -->
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M38,40 L70,40 A14,14 0 0 1 84,54 L84,58 A10,10 0 0 1 66,64 L62,60 L46,60 L42,64 A10,10 0 0 1 24,58 L24,54 A14,14 0 0 1 38,40 Z" />
+    <path android:fillColor="#FF5C3CC8"
+        android:pathData="M36,48 L40,48 L40,44 L44,44 L44,48 L48,48 L48,52 L44,52 L44,56 L40,56 L40,52 L36,52 Z" />
+    <path android:fillColor="#FF5C3CC8"
+        android:pathData="M66,46 m-3,0 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0 M72,53 m-3,0 a3,3 0 1 0 6,0 a3,3 0 1 0 -6,0" />
+</vector>

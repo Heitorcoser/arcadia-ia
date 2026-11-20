@@ -1,0 +1,42 @@
+{
+  "name": "arcadia-ia",
+  "productName": "Arcadia IA",
+  "version": "1.0.0",
+  "description": "Arcádia IA: plataforma de jogos criados por IA",
+  "author": "Heitorcoser",
+  "license": "UNLICENSED",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "6.3.9"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "io.github.heitorcoser.arcadia",
+    "productName": "Arcadia IA",
+    "files": ["main.js", "offline.html", "icone.png"],
+    "win": {
+      "target": "nsis",
+      "icon": "icone.png",
+      "artifactName": "ArcadiaIA-Setup.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Arcádia IA",
+      "artifactName": "ArcadiaIA-Setup.${ext}"
+    },
+    "publish": [
+      { "provider": "github", "owner": "Heitorcoser", "repo": "arcadia-ia", "releaseType": "release" }
+    ]
+  }
+}

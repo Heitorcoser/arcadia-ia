@@ -1,0 +1,81 @@
+# Compila os apps (Windows .exe e Android .apk) e publica numa Release.
+# Para lançar uma versão nova:  git tag v1.0.1 && git push origin v1.0.1
+name: Apps (Windows + Android)
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Compilar instalador .exe
+        shell: bash
+        working-directory: apps/windows
+        run: |
+          VERSAO="${GITHUB_REF_NAME#v}"
+          npm version "$VERSAO" --no-git-tag-version --allow-same-version
+          npm install --no-audit --no-fund
+          npx electron-builder --win nsis --publish never
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            apps/windows/dist/ArcadiaIA-Setup.exe
+            apps/windows/dist/ArcadiaIA-Setup.exe.blockmap
+            apps/windows/dist/latest.yml
+
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Chave de assinatura
+        env:
+          ANDROID_KEYSTORE: ${{ secrets.ANDROID_KEYSTORE }}
+        run: |
+          if [ -z "$ANDROID_KEYSTORE" ]; then echo "::error::Falta o segredo ANDROID_KEYSTORE no repositório"; exit 1; fi
+          echo "$ANDROID_KEYSTORE" | base64 -d > "$RUNNER_TEMP/arcadia.jks"
+      - name: Compilar .apk
+        working-directory: apps/android
+        env:
+          KEYSTORE_PATH: ${{ runner.temp }}/arcadia.jks
+          KEYSTORE_SENHA: arcadia-ia-2026
+        run: gradle assembleRelease -Pversao="${GITHUB_REF_NAME#v}" --no-daemon
+      - run: cp apps/android/app/build/outputs/apk/release/app-release.apk ArcadiaIA.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: ArcadiaIA.apk
+
+  release:
+    needs: [windows, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: arquivos
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          name: Arcádia IA ${{ github.ref_name }}
+          files: arquivos/*
+          body: |
+            **Windows:** baixe `ArcadiaIA-Setup.exe` e instale.
+            **Android:** baixe `ArcadiaIA.apk` e instale (permita "apps desconhecidos").
+
+            Os apps se atualizam sozinhos: os jogos novos aparecem na hora, e versões novas do app são instaladas automaticamente (Windows) ou com um toque (Android).

@@ -43,6 +43,18 @@
   .barra div{height:100%;background:#cbbda4;transition:width .2s}
   #b-sanidade div{background:linear-gradient(90deg,#7a1f17,#cbbda4)}
   #flash{position:fixed;inset:0;background:#000;pointer-events:none;z-index:6;opacity:0}
+  #toque{position:fixed;inset:0;z-index:7;display:none;touch-action:none;-webkit-user-select:none}
+  #toque.on{display:block}
+  #joy{position:absolute;width:124px;height:124px;border-radius:50%;border:1px solid rgba(230,220,200,.3);background:rgba(0,0,0,.25);display:none;transform:translate(-50%,-50%);pointer-events:none}
+  #joy i{position:absolute;left:50%;top:50%;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:rgba(230,220,200,.35)}
+  .bt{position:absolute;width:66px;height:66px;border-radius:50%;border:1px solid rgba(230,220,200,.4);background:rgba(10,8,6,.45);color:#e8dcc6;font-family:"Special Elite",monospace;font-size:11px;letter-spacing:1px;display:grid;place-items:center;transition:background .15s,box-shadow .2s}
+  .bt.ativo{background:rgba(230,220,200,.35)}
+  .bt.pronto{border-color:#efe4cf;box-shadow:0 0 16px rgba(232,220,198,.55)}
+  #bt-e{right:26px;bottom:112px;width:80px;height:80px;font-size:12px}
+  #bt-f{right:120px;bottom:36px}
+  #bt-run{right:26px;bottom:26px;width:72px;height:72px}
+  #bt-pausa{right:18px;top:16px;width:46px;height:46px;font-size:14px}
+  #dica-toque{position:absolute;left:50%;top:18%;transform:translateX(-50%);font-family:"Special Elite";font-size:13px;color:#a89c89;text-align:center;line-height:1.7;pointer-events:none;transition:opacity 1.5s;text-shadow:0 0 4px #000}
 
   #nota{background:rgba(0,0,0,.78);z-index:12}
   .papel{width:min(560px,92vw);background:#d9ccb2;color:#2a2018;padding:38px 42px;box-shadow:0 20px 70px #000;transform:rotate(-1deg);text-align:left;position:relative;
@@ -99,6 +111,11 @@
   </div>
 </div>
 <div id="flash"></div>
+<div id="toque">
+  <div id="joy"><i></i></div>
+  <div id="dica-toque">arraste à esquerda para andar · arraste à direita para olhar</div>
+  <div class="bt" id="bt-e">PEGAR</div><div class="bt" id="bt-f">LUZ</div><div class="bt" id="bt-run">CORRER</div><div class="bt" id="bt-pausa">II</div>
+</div>
 
 <div id="nota" class="tela"><div class="papel"><div class="n" id="nota-n"></div><h2 id="nota-t"></h2><p id="nota-p"></p><div class="fechar">[E] continuar</div></div></div>
 
@@ -134,6 +151,7 @@ import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 
 const ID_JOGO = 'a-casa-que-lembra';
+const TOQUE = matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
 const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: ID_JOGO, evento, ...extra }, '*'); } catch (e) {} };
 const $ = s => document.querySelector(s);
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -195,7 +213,7 @@ function bfs(origemR, origemC) {
    RENDERIZAÇÃO
    ===================================================================== */
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: 'high-performance' });
-renderer.setPixelRatio(Math.min(devicePixelRatio, 1.25));
+renderer.setPixelRatio(TOQUE ? 1 : Math.min(devicePixelRatio, 1.25));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -219,7 +237,7 @@ cena.add(hemi);
 const lanterna = new THREE.SpotLight(0xfff1d6, 38, 24, 0.46, 0.55, 1.5);
 lanterna.position.set(0.22, -0.18, 0.05);
 lanterna.castShadow = true;
-lanterna.shadow.mapSize.set(1024, 1024);
+lanterna.shadow.mapSize.set(TOQUE ? 512 : 1024, TOQUE ? 512 : 1024);
 lanterna.shadow.camera.near = 0.2; lanterna.shadow.camera.far = 24;
 lanterna.shadow.bias = -0.0006;
 camera.add(lanterna);
@@ -714,7 +732,7 @@ addEventListener('mousemove', e => {
   if (J.estado !== 'jogando' || document.pointerLockElement !== renderer.domElement) return;
   J.yaw -= e.movementX * 0.0022 * J.sens; J.pitch = clamp(J.pitch - e.movementY * 0.0022 * J.sens, -1.45, 1.45);
 });
-function travar() { try { const p = renderer.domElement.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+function travar() { if (TOQUE) return; try { const p = renderer.domElement.requestPointerLock(); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 document.addEventListener('pointerlockchange', () => {
   if (document.pointerLockElement !== renderer.domElement && J.estado === 'jogando') { J.estado = 'pausado'; $('#pausa').classList.add('on'); Som.ctx?.suspend(); }
 });
@@ -725,12 +743,65 @@ $('#btn-sair').addEventListener('click', () => avisar('sair'));
 $('#btn-plataforma').addEventListener('click', () => avisar('sair'));
 $('#sens').addEventListener('input', e => { J.sens = +e.target.value; try { localStorage.setItem('casa.sens', J.sens); } catch (er) {} });
 $('#vol').addEventListener('input', e => { if (Som.master) Som.master.gain.value = +e.target.value; try { localStorage.setItem('casa.vol', e.target.value); } catch (er) {} });
+/* ---------- controles de toque (celular / app Android) ---------- */
+const joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 }, olhar = { id: null, lx: 0, ly: 0 };
+let correrToque = false;
+function botaoToque(id, apertou) {
+  const el = $('#' + id); if (!el) return;
+  if (id !== 'bt-f') el.classList.toggle('ativo', apertou);
+  if (id === 'bt-run') correrToque = apertou;
+  if (!apertou || J.estado !== 'jogando') return;
+  if (id === 'bt-e') interagir();
+  if (id === 'bt-f' && J.bateria > 3) { J.lanternaLigada = !J.lanternaLigada; clique(); }
+  if (id === 'bt-pausa') { J.estado = 'pausado'; $('#pausa').classList.add('on'); Som.ctx?.suspend(); }
+}
+if (TOQUE) {
+  const z = $('#toque');
+  $('.controles').innerHTML = '<span><b>esquerda</b>andar</span><span><b>direita</b>olhar</span><span><b>PEGAR</b>interagir</span><span><b>LUZ</b>lanterna</span><span><b>CORRER</b>segure</span>';
+  z.addEventListener('touchstart', e => {
+    for (const t of e.changedTouches) {
+      const bt = t.target.closest && t.target.closest('.bt');
+      if (bt) { botaoToque(bt.id, true); continue; }
+      if (t.clientX < innerWidth * 0.45 && joy.id === null) {
+        Object.assign(joy, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 });
+        const j = $('#joy'); j.style.display = 'block'; j.style.left = t.clientX + 'px'; j.style.top = t.clientY + 'px'; j.firstElementChild.style.transform = '';
+      } else if (olhar.id === null) Object.assign(olhar, { id: t.identifier, lx: t.clientX, ly: t.clientY });
+    }
+    e.preventDefault();
+  }, { passive: false });
+  z.addEventListener('touchmove', e => {
+    for (const t of e.changedTouches) {
+      if (t.identifier === joy.id) {
+        let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy), m = 52;
+        if (d > m) { dx *= m / d; dy *= m / d; }
+        joy.x = dx / m; joy.y = -dy / m; $('#joy i').style.transform = `translate(${dx}px,${dy}px)`;
+      } else if (t.identifier === olhar.id) {
+        if (J.estado === 'jogando') { J.yaw -= (t.clientX - olhar.lx) * 0.0058 * J.sens; J.pitch = clamp(J.pitch - (t.clientY - olhar.ly) * 0.0058 * J.sens, -1.45, 1.45); }
+        olhar.lx = t.clientX; olhar.ly = t.clientY;
+      }
+    }
+    e.preventDefault();
+  }, { passive: false });
+  const soltar = e => {
+    for (const t of e.changedTouches) {
+      if (t.identifier === joy.id) { joy.id = null; joy.x = joy.y = 0; $('#joy').style.display = 'none'; }
+      if (t.identifier === olhar.id) olhar.id = null;
+      const bt = t.target.closest && t.target.closest('.bt'); if (bt) botaoToque(bt.id, false);
+    }
+  };
+  z.addEventListener('touchend', soltar); z.addEventListener('touchcancel', soltar);
+}
 function clique() { if (!Som.ctx) return; const t = Som.agora(), o = Som.saida(0.3, 0); Som.env(o, t, 0.001, 0.12, 0.04); Som.ruido(o, t, 0.05, 2); }
 
 $('#btn-comecar').addEventListener('click', () => {
   Som.init();
   $('#menu').classList.remove('on'); $('#hud').classList.add('on');
   J.estado = 'jogando'; travar();
+  if (TOQUE) {
+    $('#toque').classList.add('on');
+    try { const fs = document.documentElement.requestFullscreen?.(); fs?.then?.(() => screen.orientation?.lock?.('landscape').catch(() => {})).catch(() => {}); } catch (e) {}
+    setTimeout(() => { $('#dica-toque').style.opacity = 0; }, 9000);
+  }
   camera.position.set(inicio.x, 1.6, inicio.z);
   pensar('Vinte anos. A casa ainda cheira a poeira e lavanda.', 5);
   pensar('Preciso encontrar as coisas dela. As cinco.', 4.5);
@@ -801,6 +872,7 @@ function abrirEscolha() {
   J.estado = 'escolha'; document.exitPointerLock(); $('#escolha').classList.add('on');
 }
 function terminar(final) {
+  $('#toque').classList.remove('on');
   $('#escolha').classList.remove('on'); J.estado = 'fim'; J.final = final;
   const FINAIS = {
     A: ['Esquecer', 'Você abriu a porta e não olhou para trás.\nA casa foi vendida em março. Você tem um emprego novo, amigos novos, uma vida sem cômodos vazios.\n\nMas às vezes, de madrugada, você ouve uma caixinha de música que não existe.\nE conta, sem querer, quantas pessoas há na sala.'],
@@ -816,6 +888,7 @@ $('#final-a').addEventListener('click', () => terminar('A'));
 $('#final-b').addEventListener('click', () => terminar('B'));
 
 function morrer() {
+  $('#toque').classList.remove('on');
   J.estado = 'morto'; document.exitPointerLock(); $('#hud').classList.remove('on'); $('#morte').classList.add('on');
   Som.drone?.gain.setTargetAtTime(0.0, Som.agora(), 2);
   avisar('gameover');
@@ -864,15 +937,16 @@ const relogio = new THREE.Clock();
 const tmp = new THREE.Vector3(), frente = new THREE.Vector3(), direita = new THREE.Vector3();
 
 function atualizarJogador(dt) {
-  const correr = (teclas.ShiftLeft || teclas.ShiftRight) && J.folego > 2;
+  const correr = (teclas.ShiftLeft || teclas.ShiftRight || correrToque) && J.folego > 2;
   let ix = 0, iz = 0;
   if (teclas.KeyW || teclas.ArrowUp) iz += 1; if (teclas.KeyS || teclas.ArrowDown) iz -= 1;
   if (teclas.KeyA || teclas.ArrowLeft) ix -= 1; if (teclas.KeyD || teclas.ArrowRight) ix += 1;
-  const movendo = ix || iz;
+  ix += joy.x; iz += joy.y;
+  const movendo = Math.hypot(ix, iz) > 0.08;
   const vel = (correr && movendo ? 4.1 : 2.3) * (moveisNoTeto ? 0.92 : 1);
   frente.set(-Math.sin(J.yaw), 0, -Math.cos(J.yaw)); direita.set(-frente.z, 0, frente.x);
   if (movendo) {
-    const l = Math.hypot(ix, iz); const mx = (frente.x * iz + direita.x * ix) / l * vel * dt, mz = (frente.z * iz + direita.z * ix) / l * vel * dt;
+    const l = Math.max(1, Math.hypot(ix, iz)); const mx = (frente.x * iz + direita.x * ix) / l * vel * dt, mz = (frente.z * iz + direita.z * ix) / l * vel * dt;
     const p = camera.position;
     if (!colide(p.x + mx, p.z)) p.x += mx;
     if (!colide(p.x, p.z + mz)) p.z += mz;
@@ -983,7 +1057,8 @@ function atualizarAlvo() {
   if (!alvo && posPorta) { const v = new THREE.Vector3().subVectors(posPorta, camera.position); if (v.length() < 2.4 && dir.dot(v.normalize()) > 0.75) alvo = { tipo: 'porta', txt: J.coletados >= 5 ? 'Abrir a porta' : 'Porta da frente' }; }
   J.alvo = alvo;
   $('#mira').classList.toggle('alvo', !!alvo);
-  const pr = $('#prompt'); if (alvo) { pr.innerHTML = '<b>E</b>' + alvo.txt; pr.style.opacity = 1; } else pr.style.opacity = 0;
+  const pr = $('#prompt'); $('#bt-e').classList.toggle('pronto', !!alvo);
+  if (alvo) { pr.innerHTML = (TOQUE ? '' : '<b>E</b>') + alvo.txt; pr.style.opacity = 1; } else pr.style.opacity = 0;
 }
 
 function atualizarSanidade(dt) {
