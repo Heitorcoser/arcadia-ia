@@ -466,7 +466,11 @@ function interpretar(texto, nomes = []) {
   const clausulas = [];
   const nova = () => ({ verbo: null, coisa: null, alvos: [], n: null, nArt: null, dur: null, atraso: 0, mods: {}, agora: false, desconhecidas: [] });
   let cl = nova();
-  const fechar = () => { if (cl.verbo || cl.coisa || Object.keys(cl.mods).length || cl.alvos.length) clausulas.push(cl); cl = nova(); };
+  const fechar = (final = false) => {
+    if (!final && !cl.verbo && !cl.coisa && !Object.keys(cl.mods).length && cl.alvos.length) { const al = cl.alvos; cl = nova(); cl.alvos = al; return; }   // "Zé e Bia virem…"
+    if (cl.verbo || cl.coisa || Object.keys(cl.mods).length || (final && cl.alvos.length)) clausulas.push(cl);
+    cl = nova();
+  };
   const setCoisa = k => {
     if (cl.coisa && cl.verbo) { const v = cl.verbo, al = [...cl.alvos], md = { ...cl.mods }; fechar(); cl.verbo = v; cl.alvos = al; cl.mods = md; }
     cl.coisa = k;
@@ -512,7 +516,7 @@ function interpretar(texto, nomes = []) {
     if (c) { setCoisa(c); tk.cls = 'coisa'; tk.e = COISAS[c].e; continue; }
     if (!STOP.has(w) && w.length >= 3 && /\p{L}/u.test(w)) cl.desconhecidas.push(tk.t);
   }
-  fechar();
+  fechar(true);
   return { tokens: toks.filter(t => t.cls !== 'esp' || true).map(t => [t.t, t.cls, t.e]), clausulas };
 }
 
@@ -883,19 +887,28 @@ function executarPedido(autor, texto) {
       if (o.forte) autor.ovosUsados.add(o.id);
       try { ef.push(...(o.fn(autor, ctx) || [])); } catch (e) { console.error(e); }
     }
+    // o resto da frase (sem as palavras do easter egg) também vale
+    let resto = ' ' + normFrase(texto) + ' ';
+    for (const a of achados) resto = resto.replace(' ' + a.frase + ' ', ' ');
+    rodarClausulas(interpretar(resto.trim(), nomes).clausulas.slice(0, 3), autor, ef, true);
     if (!ef.length) ef.push('🥚 …');
     evento({ k: 'pedido', nome: autor.nome, id: autor.id, tokens: marcarOvos(r.tokens, achados), ef, ovos: achados.map(x => x.o.id) });
     return;
   }
-  for (const cl of r.clausulas.slice(0, 4)) {
+  rodarClausulas(r.clausulas.slice(0, 4), autor, ef, false);
+  if (!ef.length) ef.push('O gênio não entendeu nada… 🤷 (veja o 📖 dicionário)');
+  evento({ k: 'pedido', nome: autor.nome, id: autor.id, tokens: r.tokens, ef });
+}
+function rodarClausulas(clausulas, autor, ef, soCompletas) {
+  for (const cl of clausulas) {
+    if (soCompletas && ['virar', 'atacar', 'chover', 'invocar'].includes(cl.verbo) && !cl.coisa) continue;
+    if (soCompletas && !cl.verbo && !cl.coisa && !Object.keys(cl.mods).length) continue;
     if (!prepararClausula(cl, ef)) continue;
     if (cl.atraso > 0 && !cl.agora) {
       ef.push(`⏳ daqui ${cl.atraso}s: ${MARCAS.find(m => m.id === cl.verbo)?.nome || cl.verbo}${cl.coisa ? ' ' + COISAS[cl.coisa].e : ''}…`);
       agenda.push({ t: T + cl.atraso, fn: () => { const e2 = []; executar(cl, autor, e2); if (e2.length) evento({ k: 'msg', txt: '⏰ ' + e2.join(' · ') }); } });
     } else executar(cl, autor, ef);
   }
-  if (!ef.length) ef.push('O gênio não entendeu nada… 🤷 (veja o 📖 dicionário)');
-  evento({ k: 'pedido', nome: autor.nome, id: autor.id, tokens: r.tokens, ef });
 }
 function fazer(autor, verbo, coisa = null, op = {}) {
   let k = coisa ? norm(coisa) : null; if (k && !COISAS[k]) k = LEX.get(k) || null;
@@ -908,12 +921,13 @@ function executar(cl, autor, ef) {
   const durTxt = d => d === Infinity ? 'para sempre' : `por ${Math.round(d)}s`;
   const fin = d => d === Infinity ? 60 : d;
   const al = padrao => resolverAlvos(cl.alvos, autor, padrao);
-  const status = (padrao, s, d, frase) => { const a = al(padrao); for (const p of a) darSt(p, s, d); if (a.length) ef.push(`${nomesDe(a)} ${frase} ${durTxt(d)}`); return a; };
+  const varios = a => a.length > 1 && nomesDe(a) !== 'todo mundo';
+  const status = (padrao, s, d, frase, fraseP) => { const a = al(padrao); for (const p of a) darSt(p, s, d); if (a.length) ef.push(`${nomesDe(a)} ${varios(a) ? fraseP : frase} ${durTxt(d)}`); return a; };
   switch (cl.verbo) {
     case 'virar': {
       const a = al('eu'), d = dur(15);
       for (const p of a) { transformar(p, c.k, d); if (md.tam) darSt(p, md.tam > 1 ? 'grande' : 'pequeno', fin(d)); if (md.vel) darSt(p, md.vel > 1 ? 'rapido' : 'lento', fin(d)); }
-      if (a.length) ef.push(`${nomesDe(a)} ${a.length > 1 ? 'viraram' : 'virou'} ${c.e} ${plural(c.nome, a.length)}${md.tam > 1 ? ' gigante' : md.tam < 1 ? ' mini' : ''} ${durTxt(d)}`);
+      if (a.length) ef.push(`${nomesDe(a)} ${varios(a) ? 'viraram' : 'virou'} ${c.e} ${plural(c.nome, varios(a) ? 2 : 1)}${md.tam > 1 ? ' gigante' : md.tam < 1 ? ' mini' : ''} ${durTxt(d)}`);
       break;
     }
     case 'atacar': case 'invocar': {
@@ -951,22 +965,22 @@ function executar(cl, autor, ef) {
         for (const p of alvosJ) boom(p.x, p.y, 120, 35, autor.id);
         if (alvosM.length + alvosJ.length) { ef.push(`💥 ${alvosM.length + alvosJ.length} ${c.e} ${plural(c.nome)} explodiram`); break; }
       }
-      if (cl.alvos.length) { const a = al('outros'); for (const p of a) boom(p.x, p.y, 130, 40, autor.id); if (a.length) ef.push(`💥 ${nomesDe(a)} explodiu`); }
+      if (cl.alvos.length) { const a = al('outros'); for (const p of a) boom(p.x, p.y, 130, 40, autor.id); if (a.length) ef.push(`💥 ${nomesDe(a)} ${varios(a) ? 'explodiram' : 'explodiu'}`); }
       else { const outros = jogadores.filter(p => !p.morto && p !== autor); for (let i = 0; i < 6; i++) agenda.push({ t: T + i * 0.25, fn: () => { const o = outros.length && Math.random() < 0.7 ? pick(outros) : null; const x = o ? o.x + rnd(-120, 120) : rnd(100, W - 100), y = o ? o.y + rnd(-120, 120) : rnd(100, H - 100); boom(x, y, 140, 35, autor.id); } }); ef.push('💥 explosões por toda a arena'); }
       break;
     }
-    case 'crescer': status('eu', 'grande', dur(12, 60), 'ficou gigante'); break;
-    case 'encolher': status('eu', 'pequeno', dur(12, 60), 'ficou mini'); break;
-    case 'congelar': status('outros', 'congelado', dur(4, 10), 'congelou ❄️'); break;
-    case 'acelerar': status('eu', 'rapido', dur(10, 40), 'ficou super rápido ⚡'); break;
-    case 'lento': status('outros', 'lento', dur(8, 30), 'ficou lento 🐌'); break;
-    case 'inverter': status('outros', 'invertido', dur(8, 25), 'ficou com os controles invertidos 😵'); break;
-    case 'invisivel': status('eu', 'invisivel', dur(10, 30), 'ficou invisível 👀'); break;
-    case 'escudo': status('eu', 'escudo', dur(8, 20), 'ganhou escudo 🛡️'); break;
-    case 'dancar': status('todos', 'dancando', dur(5, 10), 'está dançando 💃'); break;
-    case 'voar': status('eu', 'voando', dur(12, 40), 'está voando 🪽'); break;
-    case 'curar': { const a = al('eu'); for (const p of a) { p.hp = Math.min(hpMaxDe(p), p.hp + 60); evento({ k: 'cura', x: p.x, y: p.y }); } if (a.length) ef.push(`💚 ${nomesDe(a)} recuperou vida`); break; }
-    case 'teleportar': { const a = al('eu'); for (const p of a) { evento({ k: 'poof', x: p.x, y: p.y }); Object.assign(p, posLivre()); evento({ k: 'poof', x: p.x, y: p.y }); } if (a.length) ef.push(`🌀 ${nomesDe(a)} foi teleportado`); break; }
+    case 'crescer': status('eu', 'grande', dur(12, 60), 'ficou gigante', 'ficaram gigantes'); break;
+    case 'encolher': status('eu', 'pequeno', dur(12, 60), 'ficou mini', 'ficaram mini'); break;
+    case 'congelar': status('outros', 'congelado', dur(4, 10), 'congelou ❄️', 'congelaram ❄️'); break;
+    case 'acelerar': status('eu', 'rapido', dur(10, 40), 'ficou super rápido ⚡', 'ficaram super rápidos ⚡'); break;
+    case 'lento': status('outros', 'lento', dur(8, 30), 'ficou lento 🐌', 'ficaram lentos 🐌'); break;
+    case 'inverter': status('outros', 'invertido', dur(8, 25), 'ficou com os controles invertidos 😵', 'ficaram com os controles invertidos 😵'); break;
+    case 'invisivel': status('eu', 'invisivel', dur(10, 30), 'ficou invisível 👀', 'ficaram invisíveis 👀'); break;
+    case 'escudo': status('eu', 'escudo', dur(8, 20), 'ganhou escudo 🛡️', 'ganharam escudo 🛡️'); break;
+    case 'dancar': status('todos', 'dancando', dur(5, 10), 'está dançando 💃', 'estão dançando 💃'); break;
+    case 'voar': status('eu', 'voando', dur(12, 40), 'está voando 🪽', 'estão voando 🪽'); break;
+    case 'curar': { const a = al('eu'); for (const p of a) { p.hp = Math.min(hpMaxDe(p), p.hp + 60); evento({ k: 'cura', x: p.x, y: p.y }); } if (a.length) ef.push(`💚 ${nomesDe(a)} ${varios(a) ? 'recuperaram' : 'recuperou'} vida`); break; }
+    case 'teleportar': { const a = al('eu'); for (const p of a) { evento({ k: 'poof', x: p.x, y: p.y }); Object.assign(p, posLivre()); evento({ k: 'poof', x: p.x, y: p.y }); } if (a.length) ef.push(`🌀 ${nomesDe(a)} ${varios(a) ? 'foram teleportados' : 'foi teleportado'}`); break; }
     case 'trocar': { const a = al('aleatorio').filter(p => p !== autor); const o = a[0]; if (o && !autor.morto) { const x = autor.x, y = autor.y; autor.x = o.x; autor.y = o.y; o.x = x; o.y = y; evento({ k: 'poof', x: o.x, y: o.y }); evento({ k: 'poof', x: autor.x, y: autor.y }); ef.push(`🔄 ${autor.nome} trocou de lugar com ${o.nome}`); } break; }
     case 'dano': { const a = al('aleatorio'); for (const p of a) { evento({ k: 'raio', x: p.x, y: p.y }); ferir(p, 45, autor.id); } if (a.length) ef.push(`⚡ um raio caiu em ${nomesDe(a)}`); break; }
     case 'escuridao': { const d = fin(dur(12, 40)); G.escuro = T + d; ef.push(`🌑 as luzes se apagaram ${durTxt(d)}`); break; }
