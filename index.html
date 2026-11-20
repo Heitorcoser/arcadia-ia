@@ -286,6 +286,8 @@
   const tempoFmt = s => { s = Math.round(s); if (s < 60) return s + " s"; const m = Math.floor(s / 60); if (m < 60) return m + " min"; return Math.floor(m / 60) + " h " + String(m % 60).padStart(2, "0") + " min"; };
   const PALAVRAS = { 0.5:"Péssimo",1:"Muito ruim",1.5:"Ruim",2:"Fraco",2.5:"Mediano",3:"Ok",3.5:"Bom",4:"Muito bom",4.5:"Ótimo",5:"Obra-prima" };
   const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2l2.95 6.2 6.8.82-5 4.7 1.28 6.73L12 17.4l-6.03 3.25 1.28-6.73-5-4.7 6.8-.82z"/></svg>';
+  const corG = j => j.corGenero || "#ef4444";
+  const chipG = j => `background:${corG(j)}24;border-color:${corG(j)}66;color:${corG(j)}`;
   const ehNovo = j => (Date.now() - new Date(j.criadoEm + "T12:00:00")) < 1000 * 60 * 60 * 24 * 14;
 
   function estrelasHTML(valor, id, tamanho) {
@@ -341,7 +343,7 @@
       <div class="hero-body">
         <span class="eyebrow"><i></i>Lançamento mais recente</span>
         <h1>${esc(j.nome)}</h1>
-        <div class="chips"><span class="chip genre">${esc(j.genero)}</span><span class="chip sub">${esc(j.subgenero)}</span><span class="chip">${esc(j.duracao)}</span><span class="chip">${esc(j.classificacao)}</span></div>
+        <div class="chips"><span class="chip genre" style="${chipG(j)}">${esc(j.genero)}</span><span class="chip sub">${esc(j.subgenero)}</span><span class="chip">${esc(j.duracao)}</span><span class="chip">${esc(j.classificacao)}</span></div>
         <p>${esc(j.sinopse)}</p>
         <div class="rating-row" style="margin-bottom:20px">${estrelasHTML(nota(j.id), j.id, 22)}<span class="rating-label">${rotulo(nota(j.id))}</span></div>
         <div class="actions">
@@ -380,12 +382,12 @@
       return `
       <article class="card" data-detalhes="${j.id}">
         <div class="card-cover"><img src="${capaSrc(j)}" alt="Capa de ${esc(j.nome)}" loading="lazy">
-          <span class="badge g">${esc(j.genero)}</span>
+          <span class="badge g" style="background:${corG(j)}">${esc(j.genero)}</span>
           ${s?.concluido ? '<span class="badge done">Concluído</span>' : ehNovo(j) ? '<span class="badge new">Novo</span>' : ""}
         </div>
         <div class="card-body">
           <h3>${esc(j.nome)}</h3>
-          <div class="genre-line"><b>${esc(j.genero)}</b> · <em>${esc(j.subgenero)}</em></div>
+          <div class="genre-line"><b style="color:${corG(j)}">${esc(j.genero)}</b> · <em>${esc(j.subgenero)}</em></div>
           <div class="rating-row">${estrelasHTML(nota(j.id), j.id, 17)}<span class="rating-label">${rotulo(nota(j.id))}</span></div>
           <p>${esc(j.sinopse)}</p>
           <div class="card-foot">
@@ -412,7 +414,7 @@
       <button class="close" data-fechar aria-label="Fechar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
       <div class="modal-cover"><img src="${capaSrc(j)}" alt=""></div>
       <div class="modal-body">
-        <div class="chips"><span class="chip genre">${esc(j.genero)}</span><span class="chip sub">${esc(j.subgenero)}</span>${(j.tags || []).map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div>
+        <div class="chips"><span class="chip genre" style="${chipG(j)}">${esc(j.genero)}</span><span class="chip sub">${esc(j.subgenero)}</span>${(j.tags || []).map(t => `<span class="chip">${esc(t)}</span>`).join("")}</div>
         <h2>${esc(j.nome)}</h2>
         <div class="actions"><button class="btn primary" data-jogar="${j.id}"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg>${s.jogadas ? "Jogar de novo" : "Jogar"}</button></div>
         <div class="cols">

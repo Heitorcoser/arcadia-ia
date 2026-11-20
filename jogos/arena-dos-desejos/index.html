@@ -1,0 +1,1854 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Arena dos Desejos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#1b1033;--card:#271650;--card2:#33206a;--line:#4b3290;--txt:#fff7ea;--muted:#cbbcf0;
+    --marca:#ffd166;--coisa:#4cc9f0;--alvo:#ff5d9e;--num:#80ed99;--mod:#c3a6ff;--nada:rgba(255,255,255,.45)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:"Baloo 2",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  #cv{position:fixed;inset:0;display:block;touch-action:none}
+  button{font:inherit;color:inherit;cursor:pointer}
+  input{font:inherit}
+  .tela{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto;
+    background:radial-gradient(ellipse at 50% 0%,#4a2a9a 0%,#1b1033 60%)}
+  .tela.on{display:flex}
+  .caixa{width:min(560px,100%);background:var(--card);border:2px solid var(--line);border-radius:26px;padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.45)}
+  .logo{text-align:center;margin-bottom:6px}
+  .logo .gen{font-size:60px;display:inline-block;animation:flutua 3s ease-in-out infinite}
+  @keyframes flutua{50%{transform:translateY(-8px) rotate(-4deg)}}
+  .logo h1{margin:0;font-size:clamp(34px,6vw,48px);line-height:1;font-weight:800;letter-spacing:.5px;
+    background:linear-gradient(90deg,#ffd166,#ff5d9e,#4cc9f0);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .logo p{margin:6px 0 0;color:var(--muted);font-size:15px}
+  label.r{display:block;font-size:13px;color:var(--muted);font-weight:600;margin:16px 0 6px}
+  .campo{width:100%;height:46px;border-radius:14px;border:2px solid var(--line);background:#1f1242;color:var(--txt);padding:0 14px;font-size:17px;outline:none}
+  .campo:focus{border-color:var(--marca)}
+  .rostos{display:flex;flex-wrap:wrap;gap:6px}
+  .rostos button{width:44px;height:44px;border-radius:12px;border:2px solid var(--line);background:#1f1242;font-size:24px;padding:0}
+  .rostos button.sel{border-color:var(--marca);background:#3a2478}
+  .btn{height:50px;border-radius:15px;border:0;font-weight:700;font-size:17px;padding:0 18px;background:var(--card2);border:2px solid var(--line);transition:transform .12s}
+  .btn:hover{transform:translateY(-2px)}
+  .btn.pri{background:linear-gradient(135deg,#ff5d9e,#ff8c42);border-color:transparent;box-shadow:0 8px 24px rgba(255,93,158,.35)}
+  .btn.sec{background:linear-gradient(135deg,#4cc9f0,#7b61ff);border-color:transparent}
+  .grade2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+  .linha{display:flex;gap:10px;margin-top:10px}
+  .linha .campo{flex:1;text-transform:uppercase;letter-spacing:4px;text-align:center;font-weight:700}
+  .mini{font-size:13px;color:var(--muted);line-height:1.55;margin-top:16px}
+  .mini b{color:var(--txt)}
+  .erro{color:#ff8a8a;font-weight:600;min-height:22px;margin-top:10px;text-align:center}
+  select.campo{height:42px;font-size:15px}
+  .link{background:none;border:0;color:var(--coisa);text-decoration:underline;padding:0;font-weight:600}
+
+  /* HUD */
+  #hud{position:fixed;inset:0;z-index:7;pointer-events:none;display:none}
+  #hud.on{display:block}
+  .chip{background:rgba(20,10,45,.72);border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:4px 12px;backdrop-filter:blur(6px);font-weight:700}
+  #topo-esq{position:absolute;left:12px;top:10px;display:flex;gap:8px;align-items:center;pointer-events:auto}
+  #btn-sair{width:38px;height:38px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(20,10,45,.72);font-size:16px;padding:0}
+  #btn-dic{height:38px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(20,10,45,.72);font-size:14px;font-weight:700;padding:0 12px}
+  #sala{display:none;font-size:14px}
+  #relogio{position:absolute;left:50%;top:10px;transform:translateX(-50%);font-size:22px;min-width:84px;text-align:center}
+  #placar{position:absolute;right:12px;top:10px;width:200px;padding:8px 10px;font-size:14px}
+  #placar div{display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden}
+  #placar div span:nth-child(2){flex:1;overflow:hidden;text-overflow:ellipsis}
+  #placar div.eu{color:var(--marca)}
+  #placar div.morto{opacity:.45}
+  #feed{position:absolute;right:12px;top:auto;bottom:14px;display:flex;flex-direction:column;gap:4px;align-items:flex-end;font-size:14px;max-width:46vw}
+  #feed div{background:rgba(20,10,45,.7);border-radius:10px;padding:2px 10px;animation:entra .25s}
+  @keyframes entra{from{transform:translateX(20px);opacity:0}}
+  #banner{position:absolute;left:50%;top:52px;transform:translateX(-50%);width:min(680px,94vw);text-align:center;transition:opacity .4s;opacity:0}
+  #banner.on{opacity:1}
+  #banner .quem{display:inline-block;font-size:15px;font-weight:800;background:linear-gradient(135deg,#7b61ff,#ff5d9e);padding:2px 14px;border-radius:999px;margin-bottom:6px}
+  #banner .frase{font-size:clamp(20px,3.2vw,30px);font-weight:800;line-height:1.25;text-shadow:0 2px 0 rgba(0,0,0,.35);background:rgba(20,10,45,.72);border-radius:18px;padding:6px 16px;display:inline-block}
+  #banner .efeitos{margin-top:6px;display:flex;flex-direction:column;gap:3px;align-items:center}
+  #banner .efeitos span{font-size:15px;font-weight:700;background:rgba(20,10,45,.75);border-radius:10px;padding:1px 12px}
+  .tk-marca{color:var(--marca)} .tk-coisa{color:var(--coisa)} .tk-alvo{color:var(--alvo)} .tk-num{color:var(--num)} .tk-mod{color:var(--mod)} .tk-nada,.tk-liga{color:var(--nada)}
+  .tk-marca,.tk-coisa,.tk-alvo,.tk-num,.tk-mod{text-decoration:underline;text-decoration-thickness:3px;text-underline-offset:5px}
+  .cursor{display:inline-block;width:3px;height:1em;background:var(--txt);vertical-align:-3px;margin-left:2px;animation:pisca 1s steps(2) infinite}
+  @keyframes pisca{50%{opacity:0}}
+  #batata{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);font-size:clamp(20px,3.4vw,34px);font-weight:800;padding:8px 22px;border-radius:18px;display:none;text-align:center;text-shadow:0 2px 0 rgba(0,0,0,.4)}
+  #batata.verde{background:rgba(34,160,80,.8)} #batata.verm{background:rgba(220,30,40,.88);animation:pulsa .5s infinite alternate}
+  @keyframes pulsa{to{transform:translate(-50%,-50%) scale(1.06)}}
+  .tk-ovo{background:linear-gradient(90deg,#ff5d9e,#ffd166,#4cc9f0,#80ed99);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:800;filter:drop-shadow(0 0 6px rgba(255,209,102,.6))}
+  .ovos div.nao{opacity:.55}
+  .ovos div b{font-size:15px}
+  #morte{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:28px;font-weight:800;text-align:center;display:none;text-shadow:0 3px 0 rgba(0,0,0,.4)}
+
+  /* pedido */
+  #pedido{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(720px,96vw);z-index:8;display:none;
+    background:rgba(39,22,80,.95);border:3px solid var(--marca);border-radius:22px;padding:12px 14px;box-shadow:0 0 40px rgba(255,209,102,.35)}
+  #pedido.on{display:block;animation:sobe .25s}
+  @keyframes sobe{from{transform:translate(-50%,30px);opacity:0}}
+  #pedido .cab{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;margin-bottom:8px}
+  #pedido .cab .t{margin-left:auto;color:var(--marca);font-size:20px}
+  #pedido .barra{height:5px;border-radius:5px;background:rgba(255,255,255,.12);margin-bottom:10px;overflow:hidden}
+  #pedido .barra div{height:100%;background:var(--marca)}
+  #pedido form{display:flex;gap:8px}
+  #pedido input{flex:1;height:48px;border-radius:14px;border:2px solid var(--line);background:#1f1242;color:var(--txt);padding:0 14px;font-size:18px;outline:none}
+  #pedido input:focus{border-color:var(--marca)}
+  #pedido button[type=submit]{height:48px;border-radius:14px;border:0;background:linear-gradient(135deg,#ffd166,#ff8c42);color:#2a1300;font-weight:800;padding:0 18px;font-size:17px}
+  #previa{min-height:26px;margin-top:8px;font-size:17px;font-weight:700}
+  #sugestoes{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  #sugestoes button{border:1px solid var(--line);background:#1f1242;border-radius:999px;padding:2px 10px;font-size:13.5px;font-weight:600}
+
+  /* toque */
+  #toque{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
+  #toque.on{display:block}
+  #joy{position:absolute;width:130px;height:130px;border-radius:50%;border:3px solid rgba(255,255,255,.25);background:rgba(0,0,0,.18);display:none;transform:translate(-50%,-50%);pointer-events:none}
+  #joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.4)}
+  #bt-atk{position:absolute;right:26px;bottom:30px;width:92px;height:92px;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:rgba(255,93,158,.45);font-size:38px;display:grid;place-items:center;user-select:none;-webkit-user-select:none}
+  #bt-atk.ativo{background:rgba(255,93,158,.8)}
+
+  /* dicionário */
+  #dic{z-index:30;align-items:flex-start}
+  #dic .caixa{width:min(900px,100%);max-height:none}
+  #dic h2{margin:0;font-size:28px}
+  #dic h3{margin:20px 0 8px;font-size:18px}
+  #dic .topo{display:flex;align-items:center;gap:10px}
+  #dic .topo button{margin-left:auto}
+  .marcas{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px}
+  .marcas div{background:#1f1242;border:1px solid var(--line);border-radius:14px;padding:8px 12px;font-size:14px;line-height:1.45}
+  .marcas b{color:var(--marca);font-size:15.5px}
+  .marcas i{color:var(--muted);font-style:normal;display:block}
+  .marcas code{color:var(--coisa);font-family:inherit;font-weight:700}
+  .coisas{display:flex;flex-wrap:wrap;gap:6px}
+  .coisas span{background:#1f1242;border:1px solid var(--line);border-radius:999px;padding:2px 10px 2px 6px;font-size:14px;cursor:pointer}
+  .coisas span:hover{border-color:var(--coisa)}
+  .legenda{display:flex;flex-wrap:wrap;gap:8px 14px;font-weight:700;font-size:14px}
+
+  /* fim */
+  #fim{background:rgba(20,10,45,.82);z-index:15}
+  .podio{display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:18px 0}
+  .podio div{width:120px;text-align:center;border-radius:16px 16px 0 0;background:var(--card2);padding:10px 6px;font-weight:700}
+  .podio div .e{font-size:44px;display:block}
+  .podio .p1{height:190px;background:linear-gradient(#ffd166,#e3a400);color:#2a1300}
+  .podio .p2{height:150px;background:linear-gradient(#d9dbe8,#9aa0b8);color:#1a1a2a}
+  .podio .p3{height:120px;background:linear-gradient(#f0a56b,#b9662c);color:#2a1300}
+
+  #toast{position:fixed;left:50%;bottom:120px;transform:translateX(-50%);z-index:40;background:#33206a;border:2px solid var(--line);border-radius:14px;padding:8px 16px;font-weight:700;opacity:0;transition:.3s;pointer-events:none;text-align:center;max-width:92vw}
+  #toast.on{opacity:1}
+  @media (max-width:640px){
+    #placar{width:150px;font-size:12.5px}
+    #banner{top:50px}
+    #banner .frase{font-size:18px}
+    #feed{font-size:12px}
+  }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- MENU -->
+<div class="tela on" id="menu">
+  <div class="caixa">
+    <div class="logo"><span class="gen">🧞</span><h1>Arena dos Desejos</h1><p>Cada rodada, alguém vira o Gênio. O que ele escrever… acontece.</p></div>
+    <label class="r" for="nome">Seu nome</label>
+    <input class="campo" id="nome" maxlength="14" placeholder="Digite seu nome" autocomplete="off">
+    <label class="r">Seu rosto</label>
+    <div class="rostos" id="rostos"></div>
+    <label class="r" for="nbots">Bots na arena</label>
+    <select class="campo" id="nbots"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option selected>5</option><option>6</option><option>7</option></select>
+    <div class="grade2">
+      <button class="btn pri" id="b-solo">🤖 Jogar com bots</button>
+      <button class="btn sec" id="b-criar">🌐 Criar sala online</button>
+    </div>
+    <div class="linha">
+      <input class="campo" id="codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
+      <button class="btn" id="b-entrar">Entrar na sala</button>
+    </div>
+    <div class="erro" id="erro"></div>
+    <div class="mini">
+      <b>Como funciona:</b> todo mundo nasce na arena. A cada rodada uma pessoa (ou bot) é sorteada para fazer um <b>pedido</b>.
+      O jogo procura as <span class="tk-marca">palavras-marca</span> (vire, ataque, chova…), as <span class="tk-coisa">coisas</span> (borboleta, dragão, pizza…),
+      os <span class="tk-alvo">alvos</span> (todos, eu, o nome de alguém) e os <span class="tk-num">números</span> (5 dragões, 10 segundos), e faz o desejo acontecer.
+      <br>🥚 Existem <b id="n-ovos"></b> easter eggs escondidos (Undertale, animes, games, memes…). Será que você acha todos?
+      <br><button class="link" id="b-dic-menu">Ver o dicionário de palavras</button>
+    </div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="topo-esq"><button id="btn-sair" title="Sair">✕</button><button id="btn-dic">📖 Palavras</button><span class="chip" id="sala"></span></div>
+  <div class="chip" id="relogio">4:00</div>
+  <div class="chip" id="placar"></div>
+  <div id="banner"></div>
+  <div id="feed"></div>
+  <div id="morte"></div>
+  <div id="batata"></div>
+</div>
+
+<div id="pedido">
+  <div class="cab">🧞 Sua vez de fazer um pedido! <span class="t" id="ped-t">15</span></div>
+  <div class="barra"><div id="ped-barra"></div></div>
+  <form id="ped-form" autocomplete="off"><input id="ped-in" maxlength="120" placeholder="ex: vire dragão / ataque 5 tubarões / chova pizza"><button type="submit">Pedir!</button></form>
+  <div id="previa"></div>
+  <div id="sugestoes"></div>
+</div>
+
+<div id="toque"><div id="joy"><i></i></div><div id="bt-atk">👊</div></div>
+
+<div class="tela" id="dic"><div class="caixa">
+  <div class="topo"><h2>📖 Dicionário do Gênio</h2><button class="btn" id="dic-fechar">Fechar</button></div>
+  <div class="legenda" style="margin-top:10px"><span class="tk-marca">marca</span><span class="tk-coisa">coisa</span><span class="tk-alvo">alvo</span><span class="tk-num">número / tempo</span><span class="tk-mod">modificador</span><span class="tk-nada">ignorado</span></div>
+  <h3>Palavras-marca (o que acontece)</h3><div class="marcas" id="dic-marcas"></div>
+  <h3>Alvos</h3><div class="marcas" id="dic-alvos"></div>
+  <h3>Números, tempo e modificadores</h3><div class="marcas" id="dic-mods"></div>
+  <h3>Coisas <span style="color:var(--muted);font-size:14px">(clique para usar no pedido)</span></h3><div class="coisas" id="dic-coisas"></div>
+  <h3>🥚 Easter eggs <span id="dic-ovos-n" style="color:var(--marca)"></span></h3>
+  <div class="mini" style="margin-top:0">Frases secretas de Undertale, animes, games, memes, filmes e da TV brasileira. Cada uma faz algo único. As que você ainda não descobriu aparecem só com uma pista.</div>
+  <div id="dic-ovos"></div>
+</div></div>
+
+<div class="tela" id="fim"><div class="caixa" style="text-align:center">
+  <h2 style="margin:0;font-size:34px">🏆 Fim da partida!</h2>
+  <div class="podio" id="podio"></div>
+  <div class="mini" id="fim-info" style="text-align:center"></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+"use strict";
+/* =====================================================================
+   UTILIDADES
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const norm = s => String(s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const TOQUE = matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: 'arena-dos-desejos', evento, ...extra }, '*'); } catch (e) {} };
+const W = 2200, H = 1400, DURACAO = 240;
+
+/* =====================================================================
+   DICIONÁRIO: COISAS
+   [nome, emoji, categoria, propriedades, sinônimos]
+   tam=tamanho vel=velocidade hp=vida dano=força voa tiro=projétil
+   cura=vida ao pegar pontos=pontos ao pegar peso=dano ao cair esp=especial
+   ===================================================================== */
+const LISTA = [
+  ['borboleta','🦋','animal',{tam:.7,vel:1.35,hp:.55,dano:.6,voa:1},['mariposa']],
+  ['abelha','🐝','animal',{tam:.6,vel:1.3,hp:.5,dano:.9,voa:1},['vespa','marimbondo']],
+  ['galinha','🐔','animal',{tam:.8,vel:1.05,hp:.7,tiro:'🥚'},['galo','frango de granja']],
+  ['pato','🦆','animal',{tam:.8,hp:.7,voa:1}],
+  ['vaca','🐄','animal',{tam:1.35,vel:.8,hp:1.6,dano:1.3,peso:30,tiro:'🥛'},['boi','touro']],
+  ['porco','🐷','animal',{tam:1.1,vel:.9,hp:1.3},['porquinho','leitao']],
+  ['cachorro','🐶','animal',{vel:1.25,dano:1.2},['cao','dog','cachorra']],
+  ['gato','🐱','animal',{vel:1.3,tam:.85},['gata','bichano']],
+  ['rato','🐭','animal',{tam:.55,vel:1.4,hp:.45},['camundongo']],
+  ['sapo','🐸','animal',{tam:.8,vel:1.15,tiro:'💧'},['ra','perereca']],
+  ['cobra','🐍','animal',{vel:1.1,dano:1.4},['serpente','jiboia']],
+  ['tubarão','🦈','animal',{tam:1.4,vel:1.2,dano:1.8,hp:1.4}],
+  ['polvo','🐙','animal',{tiro:'💧',hp:1.1},['lula']],
+  ['macaco','🐒','animal',{vel:1.3,tiro:'🍌'},['mico']],
+  ['leão','🦁','animal',{tam:1.25,vel:1.15,dano:1.7,hp:1.3}],
+  ['tigre','🐯','animal',{tam:1.2,vel:1.2,dano:1.6,hp:1.2},['onca']],
+  ['urso','🐻','animal',{tam:1.35,vel:.9,dano:1.7,hp:1.7}],
+  ['panda','🐼','animal',{tam:1.3,vel:.8,hp:1.6}],
+  ['elefante','🐘','animal',{tam:1.75,vel:.7,dano:2,hp:2.4,peso:40}],
+  ['dinossauro','🦖','monstro',{tam:1.7,vel:1,dano:2.2,hp:2},['tiranossauro','trex','t-rex','dino']],
+  ['dragão','🐉','monstro',{tam:1.7,vel:1.05,dano:1.8,hp:2,voa:1,tiro:'🔥'}],
+  ['unicórnio','🦄','animal',{tam:1.2,vel:1.4,tiro:'🌈'}],
+  ['cavalo','🐴','animal',{tam:1.3,vel:1.6,hp:1.3},['egua','pônei','ponei']],
+  ['coelho','🐰','animal',{tam:.75,vel:1.5,hp:.6}],
+  ['tartaruga','🐢','animal',{vel:.45,hp:2.2,dano:.8},['jabuti','cagado']],
+  ['caracol','🐌','animal',{tam:.7,vel:.3,hp:1.2,dano:.5},['lesma']],
+  ['aranha','🕷️','animal',{tam:.8,vel:1.25,dano:1.2}],
+  ['formiga','🐜','animal',{tam:.45,vel:1.1,hp:.35,dano:.6}],
+  ['morcego','🦇','animal',{tam:.75,vel:1.45,hp:.55,voa:1,esp:'vampiro'}],
+  ['coruja','🦉','animal',{tam:.85,voa:1}],
+  ['pinguim','🐧','animal',{vel:.85,tiro:'❄️',esp:'gelo'}],
+  ['baleia','🐋','animal',{tam:2.1,vel:.6,hp:2.8,dano:1.8,peso:60,tiro:'💧'}],
+  ['peixe','🐟','animal',{tam:.7,vel:1.2,hp:.5},['peixinho','sardinha']],
+  ['caranguejo','🦀','animal',{tam:.8,dano:1.3,hp:1.2},['siri']],
+  ['lagosta','🦞','animal',{tam:.9,dano:1.3},['camarao']],
+  ['girafa','🦒','animal',{tam:1.6,vel:1.1,hp:1.5}],
+  ['gorila','🦍','animal',{tam:1.45,dano:1.9,hp:1.7},['king kong','kong']],
+  ['lobo','🐺','animal',{vel:1.35,dano:1.4},['lobisomem']],
+  ['raposa','🦊','animal',{vel:1.4}],
+  ['mosquito','🦟','animal',{tam:.45,vel:1.5,hp:.3,dano:.5,voa:1,esp:'vampiro'},['pernilongo','muricoca','muriçoca']],
+  ['crocodilo','🐊','animal',{tam:1.4,dano:1.9,hp:1.6},['jacare']],
+  ['coala','🐨','animal',{}],
+  ['passarinho','🐦','animal',{tam:.6,vel:1.4,hp:.5,voa:1},['passaro','ave','pomba']],
+  ['águia','🦅','animal',{vel:1.5,voa:1,dano:1.3},['falcao','gaviao']],
+  ['papagaio','🦜','animal',{voa:1,vel:1.3},['arara']],
+  ['ovelha','🐑','animal',{hp:1.2},['carneiro']],
+  ['camelo','🐫','animal',{tam:1.4,hp:1.6}],
+  ['zumbi','🧟','monstro',{vel:.75,hp:1.4,dano:1.2,esp:'zumbi'},['zombie','morto-vivo']],
+  ['fantasma','👻','monstro',{vel:1.1,hp:.8,voa:1,esp:'fantasma'},['assombracao','espirito']],
+  ['alienígena','👽','monstro',{tiro:'💫'},['alien','et','extraterrestre','marciano','ovni']],
+  ['robô','🤖','monstro',{hp:1.7,tiro:'⚡'},['androide','ciborgue']],
+  ['vampiro','🧛','monstro',{esp:'vampiro',vel:1.15,dano:1.3},['dracula']],
+  ['monstro','👾','monstro',{dano:1.4,hp:1.3},['bicho-papao','criatura']],
+  ['demônio','👹','monstro',{tam:1.2,dano:1.8,hp:1.4,tiro:'🔥'},['diabo','capeta','ogro']],
+  ['palhaço','🤡','monstro',{tiro:'🎈',vel:1.1}],
+  ['esqueleto','💀','monstro',{hp:.8,dano:1.2},['caveira']],
+  ['mago','🧙','pessoa',{tiro:'✨'},['bruxo','feiticeiro','bruxa','mágico','magico']],
+  ['cowboy','🤠','pessoa',{tiro:'💥'},['caubói','vaqueiro','xerife']],
+  ['bebê','👶','pessoa',{tam:.65,vel:.7,hp:.6,dano:.4},['nenem','neném']],
+  ['vovó','👵','pessoa',{vel:.6,hp:1.2,tiro:'🍪'},['avó','velhinha','idosa','vovozinha']],
+  ['policial','👮','pessoa',{tiro:'💥'},['policia','polícia','guarda']],
+  ['princesa','👸','pessoa',{tiro:'✨'},['rainha']],
+  ['papai noel','🎅','pessoa',{tiro:'🎁',hp:1.3},['noel','bom velhinho']],
+  ['fada','🧚','pessoa',{tam:.65,voa:1,tiro:'✨',vel:1.3}],
+  ['super-herói','🦸','pessoa',{voa:1,vel:1.4,dano:1.6,hp:1.4},['heroi','superheroi','super-heroi','super heroi']],
+  ['sereia','🧜','pessoa',{tiro:'💧'}],
+  ['pizza','🍕','comida',{cura:25}],
+  ['hambúrguer','🍔','comida',{cura:30},['hamburguer','x-burguer','xis','lanche']],
+  ['banana','🍌','comida',{cura:15}],
+  ['maçã','🍎','comida',{cura:15}],
+  ['melancia','🍉','comida',{cura:30,tam:1.2,peso:20}],
+  ['sorvete','🍦','comida',{cura:15},['picole','sorvetinho']],
+  ['bolo','🎂','comida',{cura:35},['torta']],
+  ['chocolate','🍫','comida',{cura:20},['brigadeiro','bombom']],
+  ['pão','🍞','comida',{cura:15},['paozinho','pao de queijo']],
+  ['queijo','🧀','comida',{cura:15}],
+  ['ovo','🥚','comida',{cura:10}],
+  ['cenoura','🥕','comida',{cura:12}],
+  ['abacaxi','🍍','comida',{cura:18}],
+  ['morango','🍓','comida',{cura:12}],
+  ['coxinha','🍗','comida',{cura:25},['frango','asinha']],
+  ['pipoca','🍿','comida',{cura:10}],
+  ['café','☕','comida',{cura:10,esp:'rapido'},['cafezinho']],
+  ['taco','🌮','comida',{cura:20}],
+  ['sushi','🍣','comida',{cura:20}],
+  ['rosquinha','🍩','comida',{cura:20},['donut','sonho']],
+  ['biscoito','🍪','comida',{cura:12},['bolacha','cookie']],
+  ['uva','🍇','comida',{cura:12}],
+  ['batata','🥔','comida',{cura:12},['batata frita']],
+  ['pimenta','🌶️','comida',{dano:1.5,esp:'fogo',peso:15}],
+  ['coco','🥥','comida',{cura:15,peso:15}],
+  ['refrigerante','🥤','comida',{cura:15},['refri','suco','milkshake']],
+  ['pastel','🥟','comida',{cura:20}],
+  ['bomba','💣','objeto',{peso:45,esp:'bomba'},['dinamite','granada']],
+  ['pedra','🗿','objeto',{peso:30,hp:2.5,vel:.6},['rocha','pedregulho']],
+  ['meteoro','☄️','objeto',{peso:50,esp:'fogo'},['meteorito','cometa','asteroide']],
+  ['raio','⚡','objeto',{peso:35},['relampago','trovao','eletricidade']],
+  ['fogo','🔥','objeto',{peso:20,esp:'fogo'},['chama','fogueira','labareda']],
+  ['bola','⚽','objeto',{peso:12,vel:1.5},['futebol','bola de futebol']],
+  ['piano','🎹','objeto',{peso:55,tam:1.4}],
+  ['carro','🚗','objeto',{tam:1.4,vel:1.8,hp:1.8,dano:1.6,peso:45},['carrinho','fusca']],
+  ['foguete','🚀','objeto',{vel:2.1,hp:.9,voa:1,dano:1.5,peso:45},['missil','nave']],
+  ['avião','✈️','objeto',{vel:1.9,voa:1,peso:45},['jatinho']],
+  ['ônibus','🚌','objeto',{tam:1.7,vel:1.2,hp:2.2,dano:2,peso:60},['busao']],
+  ['espada','🗡️','objeto',{dano:1.8,peso:20},['faca','adaga']],
+  ['martelo','🔨','objeto',{dano:1.6,peso:25},['marreta']],
+  ['chinelo','🥿','objeto',{peso:15,dano:1.3},['sandalia','havaiana','sapato']],
+  ['dinheiro','💰','objeto',{pontos:1},['grana','ouro','tesouro','moeda']],
+  ['estrela','⭐','objeto',{pontos:1,voa:1},['estrelinha']],
+  ['diamante','💎','objeto',{pontos:2},['joia','cristal']],
+  ['coração','❤️','objeto',{cura:40},['coracao']],
+  ['presente','🎁','objeto',{esp:'presente'},['caixa surpresa','surpresa']],
+  ['balão','🎈','objeto',{voa:1,hp:.3,vel:.8},['bexiga']],
+  ['privada','🚽','objeto',{peso:35},['vaso sanitario']],
+  ['tijolo','🧱','objeto',{peso:25}],
+  ['tornado','🌪️','natureza',{tam:1.4,vel:1.1,esp:'empurra',voa:1,hp:3},['furacao','redemoinho','ciclone']],
+  ['nuvem','☁️','natureza',{voa:1,tam:1.3,tiro:'💧'}],
+  ['árvore','🌳','natureza',{tam:1.6,vel:.35,hp:2.5,peso:40},['arvore']],
+  ['flor','🌸','natureza',{tam:.7,cura:10},['rosa','florzinha']],
+  ['cogumelo','🍄','natureza',{esp:'cresce',cura:10}],
+  ['cacto','🌵','natureza',{dano:1.4,hp:1.6,vel:.5}],
+  ['sol','☀️','natureza',{tam:1.6,voa:1,tiro:'🔥'}],
+  ['lua','🌙','natureza',{voa:1}],
+  ['floco de neve','❄️','natureza',{esp:'gelo',voa:1,peso:10},['neve','floco','gelo','granizo']],
+  ['arco-íris','🌈','natureza',{voa:1,cura:20},['arco-iris','arcoiris','arco iris']],
+  ['vulcão','🌋','natureza',{tam:1.8,vel:.25,hp:3,tiro:'🔥'}],
+];
+function plurais(w) {
+  const out = [w];
+  if (/ao$/.test(w)) out.push(w.replace(/ao$/, 'oes'), w.replace(/ao$/, 'aes'), w.replace(/ao$/, 'aos'));
+  else if (/(r|z|s)$/.test(w)) out.push(w + 'es');
+  else if (/m$/.test(w)) out.push(w.replace(/m$/, 'ns'));
+  else if (/l$/.test(w)) out.push(w.replace(/l$/, 'is'));
+  else out.push(w + 's');
+  const pal = w.split(' '); if (pal.length > 1) { pal[0] = plurais(pal[0])[1] || pal[0]; out.push(pal.join(' ')); }
+  return out;
+}
+function plural(nome, n = 2) {
+  if (n === 1) return nome;
+  const w = nome.split(' '); let f = w[0];
+  if (/ão$/.test(f)) f = f.replace(/ão$/, 'ões'); else if (/(r|z|s)$/.test(f)) f += 'es';
+  else if (/m$/.test(f)) f = f.replace(/m$/, 'ns'); else if (/l$/.test(f)) f = f.replace(/l$/, 'is'); else f += 's';
+  w[0] = f; return w.join(' ');
+}
+const COISAS = {}, LEX = new Map();
+for (const [nome, e, cat, p = {}, sin = []] of LISTA) {
+  const k = norm(nome);
+  COISAS[k] = { k, nome, e, cat, tam: 1, vel: 1, hp: 1, dano: 1, ...p };
+  for (const f of [nome, ...sin]) for (const v of plurais(norm(f))) {
+    if (!LEX.has(v)) LEX.set(v, k);
+    const s = v.replace(/-/g, ' '); if (!LEX.has(s)) LEX.set(s, k);
+  }
+}
+const TODAS = Object.values(COISAS).filter(c => c.cat !== 'segredo');
+function acharCoisa(w) {
+  if (LEX.has(w)) return LEX.get(w);
+  const t = [];
+  if (/zinh[oa]s?$/.test(w)) t.push(w.replace(/zinh[oa]s?$/, ''));
+  if (/inhos$/.test(w)) t.push(w.replace(/inhos$/, 'o')); if (/inhas$/.test(w)) t.push(w.replace(/inhas$/, 'a'));
+  if (/inho$/.test(w)) t.push(w.replace(/inho$/, 'o')); if (/inha$/.test(w)) t.push(w.replace(/inha$/, 'a'));
+  if (/oes$/.test(w)) t.push(w.replace(/oes$/, 'ao'));
+  if (/es$/.test(w)) t.push(w.slice(0, -2));
+  if (/s$/.test(w)) t.push(w.slice(0, -1));
+  for (const x of t) if (LEX.has(x)) return LEX.get(x);
+  if (w.includes('-')) for (const parte of w.split('-')) { const k = parte.length > 2 && acharCoisa(parte); if (k) return k; }
+  return null;
+}
+
+/* =====================================================================
+   DICIONÁRIO: PALAVRAS-MARCA, ALVOS, NÚMEROS E MODIFICADORES
+   ===================================================================== */
+const MARCAS = [
+  { id: 'virar', rx: /^(vir(e|a|o|em|am|ar|ou)|transform\w*|sej(a|am)|torn(e|em|ar)|vira-se|vire-se)$/, nome: 'vire', pal: 'vire, vira, transforme, seja, torne', desc: 'Transforma alguém numa coisa. Sem alvo, transforma você.', ex: 'vire borboleta · Zé vire galinha 10 segundos' },
+  { id: 'atacar', rx: /^(ataqu\w*|atac\w*|persig\w*|perseg\w*|cac(e|em)|invad\w*)$/, nome: 'ataque', pal: 'ataque, ataquem, persiga, invada', desc: 'Faz coisas aparecerem e atacarem os outros (ou o alvo escolhido).', ex: 'ataque 5 dragões · tubarões ataquem Bia' },
+  { id: 'chover', rx: /^(chov\w*|chuv\w*|cai(a|am)|despenc\w*)$/, nome: 'chova', pal: 'chova, chuva de, caiam, despenque', desc: 'Faz coisas caírem do céu. Comida cura, coisas pesadas machucam.', ex: 'chova pizza · chuva de bombas · caiam vacas' },
+  { id: 'invocar', rx: /^(invoc\w*|invoqu\w*|aparec\w*|cri(e|em|ar)|surj\w*|surg\w*|spawn\w*|nas[cç]\w*|nasca\w*|tra(ga|gam|zer)|cham(e|em|ar))$/, nome: 'invoque', pal: 'invoque, apareça, crie, traga, chame', desc: 'Cria ajudantes que protegem quem pediu.', ex: 'invoque 3 lobos · apareçam robôs' },
+  { id: 'explodir', rx: /^(explod\w*|explos\w*|expluda\w*|boom|kaboom|cabum)$/, nome: 'exploda', pal: 'exploda, explosão, kaboom', desc: 'Explode o alvo, ou todas as coisas de um tipo.', ex: 'exploda Zé · exploda as galinhas' },
+  { id: 'crescer', rx: /^(cres[cç]\w*|cresca\w*|aument\w*|engord\w*|agigant\w*)$/, nome: 'cresça', pal: 'cresça, aumente, gigante', desc: 'Deixa o alvo gigante (mais forte, mais fácil de acertar).', ex: 'cresça · todos gigantes' },
+  { id: 'encolher', rx: /^(encolh\w*|diminu\w*|reduz\w*)$/, nome: 'encolha', pal: 'encolha, diminua, mini', desc: 'Deixa o alvo pequenininho.', ex: 'encolha os outros' },
+  { id: 'congelar', rx: /^(congel\w*|paralis\w*|petrific\w*|estatua|trav(e|em|ar)|par(e|em))$/, nome: 'congele', pal: 'congele, paralise, pare, estátua', desc: 'Congela o alvo por alguns segundos (padrão: os outros).', ex: 'congele todos 5 segundos' },
+  { id: 'acelerar', rx: /^(aceler\w*|turbo|corr(a|am|er))$/, nome: 'acelere', pal: 'acelere, corra, rápido, turbo', desc: 'Deixa o alvo muito rápido.', ex: 'acelere · corra' },
+  { id: 'lento', rx: /^(desaceler\w*|devagar|lerd\w*)$/, nome: 'devagar', pal: 'devagar, desacelere, lento', desc: 'Deixa o alvo lento (padrão: os outros).', ex: 'os outros devagar' },
+  { id: 'curar', rx: /^(cur(e|a|ar|em)|sar(e|a|ar|em)|regener\w*|vida|saude|salv(e|a|ar))$/, nome: 'cure', pal: 'cure, sare, vida, regenere', desc: 'Recupera vida.', ex: 'cure todos' },
+  { id: 'teleportar', rx: /^(tele\w*port\w*|teleport\w*|portal)$/, nome: 'teleporte', pal: 'teleporte, teletransporte', desc: 'Joga o alvo num lugar aleatório.', ex: 'teleporte todos' },
+  { id: 'trocar', rx: /^(troqu\w*|troc\w*)$/, nome: 'troque', pal: 'troque, trocar', desc: 'Troca de lugar com alguém.', ex: 'troque com Bia' },
+  { id: 'inverter', rx: /^(invert\w*|inversao|bebad\w*|tont\w*|confus\w*|zonz\w*)$/, nome: 'inverta', pal: 'inverta, tonto, confuso', desc: 'Inverte os controles do alvo (padrão: os outros).', ex: 'inverta todos' },
+  { id: 'escuridao', rx: /^(escur\w*|noite|apag\w*|breu|blackout)$/, nome: 'escuridão', pal: 'escuridão, noite, apague a luz', desc: 'A arena fica escura: cada um só enxerga em volta de si.', ex: 'apague a luz 15 segundos' },
+  { id: 'lava', rx: /^(lava|magma)$/, nome: 'lava', pal: 'lava, o chão é lava', desc: 'O chão vira lava! Só as pedras são seguras (quem voa escapa).', ex: 'o chão é lava' },
+  { id: 'invisivel', rx: /^(invisive\w*|invisi\w*|sum(a|am|ir)|desaparec\w*|desapareca\w*)$/, nome: 'invisível', pal: 'invisível, suma, desapareça', desc: 'Some da vista dos outros e dos monstros.', ex: 'fique invisível' },
+  { id: 'escudo', rx: /^(escudo|imortal\w*|invencive\w*|invulnerave\w*|proteg\w*|protej\w*|blind\w*)$/, nome: 'escudo', pal: 'escudo, imortal, invencível, proteja', desc: 'Ninguém consegue machucar o alvo.', ex: 'escudo 8 segundos' },
+  { id: 'dano', rx: /^(morr\w*|mat(e|a|ar|em)|elimin\w*|destru\w*|machuqu\w*|machuc\w*|bat(a|am|er)|soc(a|ar)|soqu\w*|fulmin\w*)$/, nome: 'machuque', pal: 'machuque, destrua, elimine, morra', desc: 'Um raio cai no alvo (padrão: alguém aleatório).', ex: 'destrua o líder' },
+  { id: 'dancar', rx: /^(dan[cç]\w*|danc\w*|rebol\w*|bail\w*|requebr\w*)$/, nome: 'dance', pal: 'dance, dancem, rebole, baile', desc: 'Todo mundo (ou o alvo) para tudo para dançar.', ex: 'todos dancem' },
+  { id: 'voar', rx: /^(vo(e|a|ar|em|ando)|asas?|plan(e|ar))$/, nome: 'voe', pal: 'voe, voar, asas', desc: 'Voa por cima da lava, terremotos e coisas caindo.', ex: 'voe 15 segundos' },
+  { id: 'terremoto', rx: /^(terremoto|tremor|trem(a|er|am)|sism\w*|abalo)$/, nome: 'terremoto', pal: 'terremoto, trema, tremor', desc: 'A arena treme e machuca quem está no chão.', ex: 'terremoto' },
+  { id: 'cancelar', rx: /^(cancel\w*|desfa\w*|normal|reset\w*|volt(e|a|em|ar))$/, nome: 'cancele', pal: 'cancele, desfaça, pare tudo, volte ao normal', desc: 'Desfaz tudo: transformações, monstros e efeitos.', ex: 'pare tudo' },
+  { id: 'puxar', rx: /^(pux\w*|ima|atrai\w*|atraia\w*|sug(ue|uem|ar))$/, nome: 'puxe', pal: 'puxe, ímã, atraia', desc: 'Puxa os outros para perto de você.', ex: 'puxe todos' },
+  { id: 'empurrar', rx: /^(empurr\w*|ventania|vento|sopr\w*|afast\w*)$/, nome: 'empurre', pal: 'empurre, vento, sopre, afaste', desc: 'Empurra os outros para longe de você.', ex: 'empurre todos' },
+  { id: 'clonar', rx: /^(clon\w*|multiplic\w*|copi\w*|duplic\w*)$/, nome: 'clone', pal: 'clone, multiplique, copie', desc: 'Cria cópias de você que lutam ao seu lado.', ex: 'me clone 4' },
+  { id: 'ganhar', rx: /^(ganh\w*|vitoria|venc\w*)$/, nome: 'ganhe', pal: 'ganhe, vença, vitória', desc: 'Dá +2 pontos para quem pediu. Só dá para usar de vez em quando…', ex: 'ganhe pontos' },
+];
+const ALVOS = {
+  eu: 'eu', me: 'eu', mim: 'eu', comigo: 'eu', te: 'eu', voce: 'eu', tu: 'eu',
+  todos: 'todos', todas: 'todos', geral: 'todos', galera: 'todos', pessoal: 'todos', jogadores: 'todos', arena: 'todos',
+  outros: 'outros', outras: 'outros', inimigos: 'outros', inimigo: 'outros', eles: 'outros', elas: 'outros', adversarios: 'outros', rivais: 'outros', resto: 'outros',
+  alguem: 'aleatorio', aleatorio: 'aleatorio', qualquer: 'aleatorio', sorteado: 'aleatorio',
+  lider: 'lider', primeiro: 'lider', campeao: 'lider', ganhando: 'lider',
+  ultimo: 'ultimo', perdedor: 'ultimo', perdendo: 'ultimo',
+  bots: 'bots', bot: 'bots', humanos: 'humanos', pessoas: 'humanos',
+};
+const NUMEROS = { um: 1, uma: 1, dois: 2, duas: 2, tres: 3, quatro: 4, cinco: 5, seis: 6, sete: 7, oito: 8, nove: 9, dez: 10, onze: 11, doze: 12, treze: 13, quatorze: 14, catorze: 14, quinze: 15, dezesseis: 16, dezessete: 17, dezoito: 18, dezenove: 19, vinte: 20, trinta: 30, quarenta: 40, cinquenta: 50, sessenta: 60, cem: 100, cento: 100, mil: 1000, milhao: 1000, duzia: 12 };
+const MUITOS = { muitos: 15, muitas: 15, varios: 8, varias: 8, monte: 15, montao: 25, bando: 12, enxame: 20, horda: 20, exercito: 25, milhares: 40, infinitos: 40, infinitas: 40, montes: 20, zilhoes: 40 };
+const UNIDADES = { s: 1, seg: 1, segs: 1, segundo: 1, segundos: 1, sec: 1, min: 60, minuto: 60, minutos: 60, hora: 3600, horas: 3600 };
+const ADJ = {};
+for (const w of ['gigante', 'gigantes', 'enorme', 'enormes', 'grande', 'grandes', 'gigantesco', 'gigantesca', 'gigantescos', 'gigantescas', 'colossal', 'mega', 'gordo', 'gorda', 'gordos', 'gordas']) ADJ[w] = { tam: 2 };
+for (const w of ['mini', 'pequeno', 'pequena', 'pequenos', 'pequenas', 'minusculo', 'minuscula', 'minusculos', 'minusculas', 'micro', 'nano', 'pequenininho', 'pequenininha', 'baixinho', 'baixinha']) ADJ[w] = { tam: 0.5 };
+for (const w of ['rapido', 'rapida', 'rapidos', 'rapidas', 'veloz', 'velozes', 'ligeiro', 'ligeira', 'ligeiros', 'ligeiras']) ADJ[w] = { vel: 1.8 };
+for (const w of ['lento', 'lenta', 'lentos', 'lentas', 'lerdo', 'lerda']) ADJ[w] = { vel: 0.5 };
+for (const w of ['furioso', 'furiosa', 'furiosos', 'furiosas', 'bravo', 'brava', 'bravos', 'bravas', 'raivoso', 'raivosa', 'raivosos', 'raivosas', 'malvado', 'malvada', 'malvados', 'malvadas', 'feroz', 'ferozes', 'assassino', 'assassinos', 'assassina', 'assassinas', 'monstruoso', 'monstruosos']) ADJ[w] = { dano: 2 };
+const STOP = new Set('o a os as um uma uns umas de do da dos das em no na nos nas num numa por pra para pro com que ser sou e é ao aos fique fica ficar faca faz fazer quero queria desejo peco pedido favor pfv pls muito mais bem tudo todo toda isso esse essa este esta meu minha seu sua vez vezes so sim nao vai vamos deixa deixe ele ela dele dela aqui ali la chao tipo coisa mundo gente bem tambem entao agora ja'.split(' '));
+
+/* =====================================================================
+   INTERPRETADOR DE PEDIDOS
+   ===================================================================== */
+function interpretar(texto, nomes = []) {
+  const brutos = String(texto).slice(0, 140).match(/[\p{L}\p{N}][\p{L}\p{N}'-]*|[,.;!?]+|\s+|[^\s\p{L}\p{N}]/gu) || [];
+  const toks = brutos.map(t => ({ t, w: norm(t), cls: /^\s+$/.test(t) ? 'esp' : 'nada', e: '' }));
+  const pal = toks.filter(x => x.cls !== 'esp');
+  const clausulas = [];
+  const nova = () => ({ verbo: null, coisa: null, alvos: [], n: null, nArt: null, dur: null, atraso: 0, mods: {}, agora: false, desconhecidas: [] });
+  let cl = nova();
+  const fechar = () => { if (cl.verbo || cl.coisa || Object.keys(cl.mods).length || cl.alvos.length) clausulas.push(cl); cl = nova(); };
+  const setCoisa = k => {
+    if (cl.coisa && cl.verbo) { const v = cl.verbo, al = [...cl.alvos], md = { ...cl.mods }; fechar(); cl.verbo = v; cl.alvos = al; cl.mods = md; }
+    cl.coisa = k;
+  };
+  for (let i = 0; i < pal.length; i++) {
+    const tk = pal[i], w = tk.w, w2 = pal[i + 1]?.w, w3 = pal[i + 2]?.w;
+    const marcar = (cls, n = 1) => { for (let k = 0; k < n; k++) if (pal[i + k]) pal[i + k].cls = cls; i += n - 1; };
+    if (/^[,.;!?]+$/.test(w)) { fechar(); tk.cls = 'liga'; continue; }
+    if ((w === 'e' && tk.t !== 'é' && tk.t !== 'É') || (w === 'depois' && w2 !== 'de') || w === 'entao' || w === 'tambem' || w === 'ai' || w === 'dai') { fechar(); tk.cls = 'liga'; continue; }
+    if (w === 'todo' && w2 === 'mundo') { cl.alvos.push('todos'); marcar('alvo', 2); continue; }
+    if ((w === 'para' || w === 'pra' || w === 'pro') && w2 === 'sempre') { cl.dur = Infinity; marcar('num', 2); continue; }
+    if ((w === 'pare' || w === 'para') && w2 === 'tudo') { if (cl.verbo) fechar(); cl.verbo = 'cancelar'; marcar('marca', 2); continue; }
+    if (w === 'meia' && w2 === 'duzia') { cl.n = 6; marcar('num', 2); continue; }
+    if (w === 'chao' && ['e', 'virou', 'vira', 'de'].includes(w2) && w3 === 'lava') { if (cl.verbo) fechar(); cl.verbo = 'lava'; marcar('marca', 3); continue; }
+    if (w2) {
+      const f3 = w3 ? `${w} ${w2} ${w3}` : null, f2 = `${w} ${w2}`;
+      const k3 = f3 && LEX.get(f3), k2 = LEX.get(f2);
+      if (k3) { setCoisa(k3); tk.e = COISAS[k3].e; marcar('coisa', 3); continue; }
+      if (k2) { setCoisa(k2); tk.e = COISAS[k2].e; marcar('coisa', 2); continue; }
+    }
+    const num = /^\d+$/.test(w) ? +w : NUMEROS[w];
+    if (num !== undefined) {
+      const un = UNIDADES[w2];
+      if (un) {
+        const p1 = pal[i - 1]?.w, p2 = pal[i - 2]?.w;
+        const atraso = ['em', 'daqui', 'apos', 'dentro'].includes(p1) || (p1 === 'de' && (p2 === 'depois' || p2 === 'dentro')) || (p1 === 'a' && p2 === 'daqui');
+        if (atraso) { cl.atraso = Math.min(30, num * un); if (pal[i - 1]) pal[i - 1].cls = 'num'; if ((p1 === 'de' || p1 === 'a') && pal[i - 2]) pal[i - 2].cls = 'num'; }
+        else cl.dur = num * un;
+        marcar('num', 2); continue;
+      }
+      if (w === 'um' || w === 'uma') { cl.nArt = 1; continue; }
+      cl.n = num; tk.cls = 'num'; continue;
+    }
+    if (MUITOS[w]) { cl.n = MUITOS[w]; tk.cls = 'num'; continue; }
+    if (['agora', 'ja', 'imediatamente', 'jaja', 'rapidinho'].includes(w)) { cl.agora = true; tk.cls = 'mod'; continue; }
+    const m = MARCAS.find(m => m.rx.test(w));
+    if (m) { if (cl.verbo && cl.verbo !== m.id) fechar(); cl.verbo = m.id; tk.cls = 'marca'; continue; }
+    if (ALVOS[w]) { cl.alvos.push(ALVOS[w]); tk.cls = 'alvo'; continue; }
+    const jog = nomes.find(n => n.n === w || n.full === w);
+    if (jog) { cl.alvos.push('id:' + jog.id); tk.cls = 'alvo'; continue; }
+    if (ADJ[w]) { Object.assign(cl.mods, ADJ[w]); tk.cls = 'mod'; continue; }
+    const c = acharCoisa(w);
+    if (c) { setCoisa(c); tk.cls = 'coisa'; tk.e = COISAS[c].e; continue; }
+    if (!STOP.has(w) && w.length >= 3 && /\p{L}/u.test(w)) cl.desconhecidas.push(tk.t);
+  }
+  fechar();
+  return { tokens: toks.filter(t => t.cls !== 'esp' || true).map(t => [t.t, t.cls, t.e]), clausulas };
+}
+
+/* =====================================================================
+   EASTER EGGS
+   Frases secretas que disparam efeitos únicos. Formas secretas também
+   funcionam com a gramática normal (ex: "vire sans").
+   ===================================================================== */
+const normFrase = s => norm(s).replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const SECRETAS = [
+  ['sans', '💀', { tiro: '🦴', esp: 'esquiva', vel: 1.15, hp: 0.6 }],
+  ['papyrus', '💀', { tam: 1.35, tiro: '🦴', hp: 1.3 }],
+  ['toriel', '🐐', { tiro: '🔥', hp: 1.5 }],
+  ['spamton', '🕴️', { tiro: '💵', voa: 1 }],
+  ['saiyajin', '😤', { vel: 1.5, dano: 2.2, hp: 1.6, tiro: '💛' }],
+  ['titã', '😬', { tam: 2.6, vel: 0.7, dano: 2.6, hp: 3 }],
+  ['pikachu', '🐭', { tiro: '⚡', vel: 1.45 }],
+  ['luffy', '👒', { vel: 1.3, dano: 1.5, esp: 'elastico' }],
+  ['nika', '😆', { tam: 2, hp: 2.2, dano: 1.8, esp: 'elastico' }],
+  ['sonic', '🦔', { vel: 2.3, dano: 1.2 }],
+  ['mario', '👨‍🔧', { tiro: '🔥' }],
+  ['bowser', '🐢', { tam: 1.8, hp: 2.5, dano: 2, tiro: '🔥' }],
+  ['pacman', '😮', { vel: 1.3, esp: 'vampiro' }],
+  ['link', '🧝', { tiro: '🏹' }],
+  ['pochita', '🐶', { dano: 2.6, vel: 1.4 }],
+  ['hulk', '💪', { tam: 2.1, dano: 2.6, hp: 2.2 }],
+  ['barril', '🛢️', { hp: 2, vel: 0.7 }],
+  ['pou', '🥔', { hp: 1.4 }],
+  ['shrek', '👹', { tam: 1.5, hp: 2, dano: 1.8 }],
+  ['genkidama', '🔵', { tam: 3.2, peso: 70 }],
+  ['espaguete', '🍝', { cura: 25 }],
+  ['torta de caramelo', '🥧', { cura: 35 }],
+  ['amendoim', '🥜', { cura: 15 }],
+  ['anel', '💍', { pontos: 1 }],
+  ['milho', '🌽', { cura: 15 }],
+  ['abóbora', '🎃', { dano: 1.3, hp: 1.2 }],
+  ['ovo de páscoa', '🥚', { pontos: 1 }],
+];
+for (const [nome, e, p] of SECRETAS) {
+  const k = norm(nome);
+  COISAS[k] = { k, nome, e, cat: 'segredo', tam: 1, vel: 1, hp: 1, dano: 1, ...p };
+  for (const v of plurais(k)) if (!LEX.has(v)) LEX.set(v, k);
+}
+const bicho = (e, p = {}) => ({ k: 'x' + e, e, cat: 'monstro', tam: 1, vel: 1, hp: 1, dano: 1, ...p });
+const outrosDe = a => jogadores.filter(p => !p.morto && p !== a);
+const maisProximoJogador = a => outrosDe(a).sort((x, y) => Math.hypot(x.x - a.x, x.y - a.y) - Math.hypot(y.x - a.x, y.y - a.y))[0];
+const confete = p => evento({ k: 'confete', x: p.x, y: p.y });
+function mobsDe(a, e, n, p = {}, hostil = true) {
+  const al = outrosDe(a);
+  for (let i = 0; i < n; i++) {
+    const base = hostil && al.length ? al[i % al.length] : a, ang = Math.random() * 6.283, r = hostil ? rnd(300, 450) : rnd(60, 140);
+    criarMob(bicho(e, p), { x: base.x + Math.cos(ang) * r, y: base.y + Math.sin(ang) * r, dono: a.id, alvoId: hostil && al.length ? al[i % al.length].id : null, ate: T + (p.vida || 18) });
+  }
+}
+function rajada(a, e, n, dano, tam = 1.2, esp = null) {
+  const alvo = maisProximoInimigo(a, 2500);
+  let ax = alvo ? alvo.x - a.x : a.dirx, ay = alvo ? alvo.y - a.y : a.diry; const l = Math.hypot(ax, ay) || 1; ax /= l; ay /= l;
+  for (let i = 0; i < n; i++) agenda.push({ t: T + i * 0.06, fn: () => { if (!a.morto) criarTiro(a.x + ax * 40, a.y + ay * 40, ax, ay, e, a.id, dano, esp, { vel: 900, vida: 1.6, tam, r: 26 * tam, atravessa: true }); } });
+}
+function anel(alvo, e, n, dono, dano) {
+  for (let i = 0; i < n; i++) { const g = i / n * Math.PI * 2, c = Math.cos(g), s = Math.sin(g); criarTiro(alvo.x + c * 270, alvo.y + s * 270, -c, -s, e, dono, dano, null, { vel: 250, vida: 1.5, tam: 0.6 }); }
+}
+const OVOS = [
+  // ---------------- Undertale & Deltarune ----------------
+  { id: 'sans', cat: 'Undertale & Deltarune', nome: 'Sans', e: '💀', ps: ['sans'], dica: 'um esqueleto baixinho que adora piadas', fn: a => { transformar(a, 'sans', 25); return ['💀 vai ser um tempo ruim pra eles… (você desvia de 60% dos ataques e joga ossos 🦴)']; } },
+  { id: 'papyrus', nome: 'Papyrus', e: '💀', ps: ['papyrus', 'nyeh heh heh'], dica: 'o irmão alto que cozinha espaguete', fn: a => { transformar(a, 'papyrus', 25); return ['💀 NYEH HEH HEH! o grande Papyrus chegou', ...fazer(a, 'chover', 'espaguete', { n: 12 })]; } },
+  { id: 'megalovania', nome: 'Megalovania', e: '🦴', ps: ['megalovania'], dica: 'a música da luta mais difícil', fn: a => { for (const p of outrosDe(a)) anel(p, '🦴', 12, a.id, 7); G.escuro = T + 6; return ['🦴 ossos por todos os lados!']; } },
+  { id: 'determinacao', nome: 'Determinação', e: '❤️', ps: ['determinacao', 'determination', 'save point', 'ponto de save'], dica: 'o que te mantém de pé (e salva o jogo)', fn: a => { a.hp = hpMaxDe(a); darSt(a, 'escudo', 4); confete(a); return ['❤️ a determinação encheu você: vida cheia + escudo']; } },
+  { id: 'toriel', nome: 'Toriel', e: '🐐', ps: ['toriel'], dica: 'a mãe-cabra das ruínas', fn: a => { transformar(a, 'toriel', 20); return ['🐐 Toriel te protege', ...fazer(a, 'chover', 'torta de caramelo', { n: 8 })]; } },
+  { id: 'flowey', nome: 'Flowey', e: '🌻', ps: ['flowey'], dica: 'uma flor sorridente nada amigável', fn: a => { for (const p of outrosDe(a)) anel(p, '✨', 14, a.id, 6); return ['🌻 Flowey cercou todo mundo de "pétalas da amizade"']; } },
+  { id: 'temmie', nome: 'Temmie', e: '🐱', ps: ['temmie', 'hoi', 'tem flakes'], dica: 'hOI!! eu sou…', fn: a => { mobsDe(a, '🐱', 12, { tam: 0.5, vel: 1.5, hp: 0.5, dano: 0.5 }, false); return ['🐱 hOI!! 12 temmies vieram te ajudar']; } },
+  { id: 'poupar', nome: 'Poupar (Mercy)', e: '🏳️', ps: ['frisk', 'poupar', 'misericordia', 'mercy', 'spare'], dica: 'a opção pacifista do menu (em inglês ou português)', fn: a => { let n = 0; for (const m of mobs) if (m.tipo === 'mob' && !m.morto) { m.morto = true; n++; evento({ k: 'poof', x: m.x, y: m.y }); } for (const p of jogadores) if (!p.morto) darSt(p, 'dancando', 2.5); return [`🏳️ ${n} criaturas foram poupadas. Todo mundo comemora`]; } },
+  { id: 'chara', nome: 'Chara', e: '🔪', ps: ['chara'], dica: 'o primeiro humano caído…', fn: a => { darSt(a, 'furia', 12); G.escuro = T + 8; return ['🔪 seus golpes dão o dobro de dano por 12s… e as luzes se apagaram']; } },
+  { id: 'spamton', nome: 'Spamton', e: '🕴️', ps: ['spamton', 'big shot', 'bigshot', 'kromer'], dica: 'um vendedor que quer ser [[BIG SHOT]]', fn: a => { transformar(a, 'spamton', 20); return ['🕴️ [[BIG SHOT]]! ofertas imperdíveis', ...fazer(a, 'chover', 'dinheiro', { n: 15 })]; } },
+  { id: 'mettaton', nome: 'Mettaton', e: '🎤', ps: ['mettaton'], dica: 'o robô apresentador de TV', fn: a => { transformar(a, 'robo', 20); for (const p of outrosDe(a)) darSt(p, 'dancando', 4); return ['🎤 luzes, câmera… todo mundo dançando no show do Mettaton']; } },
+  { id: 'cachorro-irritante', nome: 'Cachorro Irritante', e: '🐶', ps: ['annoying dog', 'cachorro irritante', 'toby fox'], dica: 'um cachorrinho branco que absorve o código', fn: a => { mobsDe(a, '🐶', 14, { tam: 0.55, vel: 1.4, dano: 0.2, hp: 0.4 }, true); return ['🐶 o cachorro irritante se multiplicou (e não faz nada de útil)']; } },
+
+  // ---------------- Animes ----------------
+  { id: 'saiyajin', cat: 'Animes', nome: 'Super Saiyajin', e: '😤', ps: ['goku', 'super saiyajin', 'super sayajin', 'saiyajin', 'sayajin', 'ssj', 'kakaroto'], dica: 'cabelo amarelo, poder acima de 8000', fn: a => { transformar(a, 'saiyajin', 20); darSt(a, 'rapido', 20); confete(a); return ['😤 SUPER SAIYAJIN! força e velocidade lá em cima']; } },
+  { id: 'kamehameha', nome: 'Kamehameha', e: '🔵', ps: ['kamehameha', 'kame hame ha'], dica: 'o golpe de energia mais famoso dos animes', fn: a => { rajada(a, '🔵', 14, 12, 1.3); return ['🔵 KAMEHAMEHAAAAA!']; } },
+  { id: 'genkidama', nome: 'Genki Dama', e: '🔵', ps: ['genki dama', 'genkidama', 'bomba espiritual'], dica: 'uma esfera gigante feita com a energia de todos', fn: a => { const alvo = outrosDe(a).sort((x, y) => y.pontos - x.pontos)[0]; if (!alvo) return ['🔵 a Genki Dama não achou ninguém']; criarQueda(COISAS.genkidama, alvo.x, alvo.y, a.id); return [`🔵 uma Genki Dama gigante está caindo em ${alvo.nome}!`]; } },
+  { id: 'kaioken', nome: 'Kaioken', e: '🔥', ps: ['kaioken', 'kaio ken'], dica: 'aura vermelha, poder multiplicado (com um preço)', fn: a => { darSt(a, 'rapido', 12); darSt(a, 'furia', 12); a.hp = Math.max(1, a.hp - 15); return ['🔥 KAIOKEN! dano em dobro e velocidade (custou um pouco de vida)']; } },
+  { id: 'shenlong', nome: 'Shenlong', e: '🐉', forte: true, ps: ['shenlong', 'shenron', 'esferas do dragao', 'esfera do dragao', 'dragon ball'], dica: 'junte as sete esferas…', fn: a => { V.bonus = a.id; return ['🐉 Shenlong apareceu e vai realizar mais um desejo seu!', ...fazer(a, 'chover', 'estrela', { n: 7 })]; } },
+  { id: 'kage-bunshin', nome: 'Kage Bunshin', e: '🍥', ps: ['naruto', 'kage bunshin', 'jutsu dos clones', 'jutsu clone', 'dattebayo', 'multiclones'], dica: 'o jutsu favorito do ninja loiro', fn: a => { for (let i = 0; i < 8; i++) criarMob(bicho(emojiDe(a), { hp: 1.2, vel: 1.2 }), { x: a.x + rnd(-120, 120), y: a.y + rnd(-120, 120), dono: a.id, ate: T + 20, clone: true }); return ['🍥 KAGE BUNSHIN NO JUTSU! 8 clones']; } },
+  { id: 'rasengan', nome: 'Rasengan', e: '🌀', ps: ['rasengan'], dica: 'uma esfera de vento girando na palma da mão', fn: a => { const al = maisProximoInimigo(a, 2000), g = al ? Math.atan2(al.y - a.y, al.x - a.x) : Math.atan2(a.diry, a.dirx); boom(a.x + Math.cos(g) * 90, a.y + Math.sin(g) * 90, 130, 45, a.id, true); return ['🌀 RASENGAN!']; } },
+  { id: 'sharingan', nome: 'Sharingan', e: '👁️', ps: ['sharingan', 'genjutsu', 'tsukuyomi', 'itachi', 'sasuke', 'mangekyou'], dica: 'olhos vermelhos que prendem numa ilusão', fn: a => { const al = outrosDe(a); for (const p of al) darSt(p, 'congelado', 4); G.cinza = T + 4; return [`👁️ genjutsu! ${al.length ? nomesDe(al) : 'ninguém'} ficou preso numa ilusão`]; } },
+  { id: 'amaterasu', nome: 'Amaterasu', e: '🔥', ps: ['amaterasu'], dica: 'chamas negras que nunca se apagam', fn: a => { for (const p of outrosDe(a)) p.queima = T + 6; return ['🔥 chamas negras queimam todo mundo']; } },
+  { id: 'chidori', nome: 'Chidori', e: '⚡', ps: ['chidori', 'raikiri'], dica: 'mil pássaros cantando na mão', fn: a => { const al = outrosDe(a).sort((x, y) => Math.hypot(x.x - a.x, x.y - a.y) - Math.hypot(y.x - a.x, y.y - a.y)).slice(0, 2); for (const p of al) { evento({ k: 'raio', x: p.x, y: p.y }); ferir(p, 35, a.id); } return al.length ? [`⚡ CHIDORI em ${nomesDe(al)}`] : []; } },
+  { id: 'luffy', nome: 'Gomu Gomu', e: '👒', ps: ['luffy', 'gomu gomu', 'one piece', 'rei dos piratas'], dica: 'o pirata de borracha', fn: a => { transformar(a, 'luffy', 20); return ['👒 GOMU GOMU NO… seus socos esticam (alcance dobrado)', ...fazer(a, 'puxar')]; } },
+  { id: 'gear5', nome: 'Gear 5', e: '😆', ps: ['gear 5', 'gear five', 'gear cinco', 'nika', 'joy boy', 'joyboy'], dica: 'o deus do sol que só quer rir', fn: a => { transformar(a, 'nika', 15); for (const p of outrosDe(a)) darSt(p, 'dancando', 4); return ['😆 GEAR 5! o deus do sol fez todo mundo dançar']; } },
+  { id: 'zoro', nome: 'Santoryu', e: '🗡️', ps: ['zoro', 'santoryu', 'tres espadas'], dica: 'um espadachim que vive se perdendo', fn: a => { mobsDe(a, '🗡️', 3, { vel: 1.6, dano: 2, hp: 1.5, voa: 1 }, false); return ['🗡️ SANTORYU! três espadas lutam por você']; } },
+  { id: 'tita', nome: 'Titã', e: '😬', ps: ['attack on titan', 'shingeki no kyojin', 'shingeki', 'ataque dos titas', 'tita colossal', 'eren', 'titan'], dica: 'gigantes com um sorriso assustador', fn: a => { transformar(a, 'tita', 15); return ['😬 você virou um titã gigante!']; } },
+  { id: 'saitama', nome: 'One Punch', e: '👊', ps: ['saitama', 'one punch man', 'one punch', 'um soco'], dica: 'um herói careca que vence com um soco só', fn: a => { darSt(a, 'umsoco', 20); return ['👊 seu próximo soco derruba qualquer um (20s)']; } },
+  { id: 'death-note', nome: 'Death Note', e: '📓', forte: true, alvo: true, ps: ['death note', 'caderno da morte', 'kira', 'light yagami', 'ryuk'], dica: 'um caderno onde não se deve escrever nomes', fn: (a, c) => { const p = c.alvo('aleatorio').filter(x => x !== a)[0]; if (!p) return ['📓 nenhum nome foi escrito']; agenda.push({ t: T + 6, fn: () => { if (p.morto || !jogadores.includes(p)) return; if (temSt(p, 'escudo')) evento({ k: 'msg', txt: `📓 ${p.nome} escapou do caderno!` }); else { evento({ k: 'raio', x: p.x, y: p.y }); matar(p, a.id); evento({ k: 'msg', txt: `📓 ${p.nome} teve um ataque cardíaco` }); } } }); return [`📓 ${a.nome} escreveu "${p.nome}" no caderno… 6 segundos`]; } },
+  { id: 'omae-wa', nome: 'Omae wa mou…', e: '💥', ps: ['omae wa mou shindeiru', 'omae wa mou', 'voce ja esta morto', 'nani'], dica: '"você já está morto"… NANI?!', fn: a => { const p = maisProximoJogador(a); if (!p) return []; agenda.push({ t: T + 2.5, fn: () => { if (!p.morto) { evento({ k: 'pega', x: p.x, y: p.y - 40, e: 'NANI?!' }); boom(p.x, p.y, 120, 45, a.id, true); } } }); return [`💥 ${p.nome}… você já está morto.`]; } },
+  { id: 'za-warudo', nome: 'Za Warudo', e: '⏱️', ps: ['za warudo', 'the world', 'zawarudo', 'toki yo tomare', 'pare o tempo', 'parar o tempo', 'tempo parado'], dica: 'um vilão vampiro que para o tempo', fn: a => { for (const p of outrosDe(a)) darSt(p, 'congelado', 5); for (const m of mobs) if (m.tipo === 'mob' && m.dono !== a.id) m.parado = T + 5; G.cinza = T + 5; return ['⏱️ ZA WARUDO! o tempo parou (menos para você)']; } },
+  { id: 'ora-ora', nome: 'ORA ORA', e: '👊', ps: ['ora ora', 'muda muda', 'dora dora'], dica: 'uma rajada de socos gritada em japonês', fn: a => { for (let i = 0; i < 14; i++) agenda.push({ t: T + i * 0.08, fn: () => { if (a.morto) return; const g = rnd(0, 6.283); evento({ k: 'golpe', x: a.x + Math.cos(g) * 50, y: a.y + Math.sin(g) * 50, a: g, s: 80 }); for (const p of outrosDe(a)) if (Math.hypot(p.x - a.x, p.y - a.y) < 130) ferir(p, 5, a.id, { kx: (p.x - a.x) * 2, ky: (p.y - a.y) * 2 }); } }); return ['👊 ORA ORA ORA ORA ORA!']; } },
+  { id: 'jojo', nome: 'Pose JoJo', e: 'ゴ', ps: ['jojo', 'jojos', 'menacing', 'gogogo', 'pose jojo'], dica: 'ゴゴゴゴ (poses bizarras)', fn: a => { evento({ k: 'ggg', x: a.x, y: a.y }); darSt(a, 'escudo', 5); darSt(a, 'grande', 8); return ['ゴゴゴゴ pose bizarra: escudo e tamanho extra']; } },
+  { id: 'yare-yare', nome: 'Yare Yare', e: '😑', ps: ['yare yare', 'yare yare daze'], dica: 'o suspiro mais calmo dos animes', fn: a => { a.hp = hpMaxDe(a); evento({ k: 'cura', x: a.x, y: a.y }); return ['😑 yare yare daze… vida cheia']; } },
+  { id: 'respiracao', nome: 'Respiração da Água', e: '🌊', ps: ['demon slayer', 'kimetsu no yaiba', 'kimetsu', 'tanjiro', 'respiracao da agua', 'nezuko'], dica: 'respiração da água, primeira forma', fn: a => { for (const p of outrosDe(a)) if (Math.hypot(p.x - a.x, p.y - a.y) < 450) ferir(p, 18, a.id); evento({ k: 'boom', x: a.x, y: a.y, r: 200 }); return ['🌊 Respiração da Água! uma onda empurrou todo mundo', ...fazer(a, 'empurrar')]; } },
+  { id: 'dominio', nome: 'Expansão de Domínio', e: '🟣', ps: ['expansao de dominio', 'vazio infinito', 'domain expansion', 'ryoiki tenkai', 'gojo', 'satoru gojo', 'jujutsu kaisen'], dica: '"expansão de ___"', fn: a => { G.escuro = T + 6; G.cinza = T + 4; for (const p of outrosDe(a)) darSt(p, 'congelado', 4); return ['🟣 EXPANSÃO DE DOMÍNIO: Vazio Infinito. ninguém consegue se mexer']; } },
+  { id: 'sukuna', nome: 'Santuário Malevolente', e: '👹', ps: ['sukuna', 'santuario malevolo', 'santuario malevolente', 'malevolent shrine'], dica: 'o rei das maldições e seu santuário', fn: a => { for (const p of outrosDe(a)) { evento({ k: 'golpe', x: p.x, y: p.y, a: rnd(0, 6), s: 90 }); ferir(p, 22, a.id); } return ['👹 Santuário Malevolente: cortes em todo mundo']; } },
+  { id: 'pikachu', nome: 'Pikachu', e: '⚡', ps: ['pikachu', 'pika pika', 'pokemon', 'eu escolho voce'], dica: 'o ratinho elétrico mais famoso do mundo', fn: a => { transformar(a, 'pikachu', 20); return ['⚡ PIKA PIKA! você virou um ratinho elétrico']; } },
+  { id: 'pokebola', nome: 'Pokébola', e: '🔴', ps: ['pokebola', 'pokeball', 'poke bola'], dica: '"___, vai!" (captura alguém)', fn: a => { const p = maisProximoJogador(a); if (!p) return []; darSt(p, 'congelado', 6); evento({ k: 'poof', x: p.x, y: p.y }); evento({ k: 'pega', x: p.x, y: p.y, e: 'CAPTURADO!' }); return [`🔴 ${p.nome} foi capturado por 6 segundos`]; } },
+  { id: 'sailor', nome: 'Prisma Lunar', e: '🌙', ps: ['sailor moon', 'pelo poder do prisma lunar', 'prisma lunar'], dica: '"pelo poder do prisma lunar…"', fn: a => { a.hp = hpMaxDe(a); darSt(a, 'escudo', 6); confete(a); return ['🌙 transformação cintilante! vida cheia + escudo']; } },
+  { id: 'pegasus', nome: 'Meteoro de Pégaso', e: '☄️', ps: ['meteoro de pegasus', 'meteoro de pegaso', 'cavaleiros do zodiaco', 'seiya', 'pegasus'], dica: 'o golpe do cavaleiro de bronze mais famoso', fn: a => ['☄️ METEORO DE PÉGASO!', ...fazer(a, 'chover', 'meteoro', { n: 18 })] },
+  { id: 'eva', nome: 'Evangelion', e: '🤖', ps: ['evangelion', 'shinji', 'entra no robo', 'eva 01'], dica: '"entra no robô, ___!"', fn: a => { transformar(a, 'robo', 15); darSt(a, 'grande', 15); return ['🤖 você entrou no robô gigante!']; } },
+  { id: 'pochita', nome: 'Pochita', e: '🐶', ps: ['chainsaw man', 'pochita', 'denji', 'homem motosserra'], dica: 'um cachorro-motosserra fofinho', fn: a => { transformar(a, 'pochita', 15); return ['🐶 VRUUUM! cachorro-motosserra (dano altíssimo)']; } },
+  { id: 'anya', nome: 'Waku Waku', e: '🥜', ps: ['spy x family', 'spy family', 'anya', 'waku waku'], dica: 'uma menina telepata que ama amendoim', fn: a => ['🥜 waku waku!', ...fazer(a, 'chover', 'amendoim', { n: 20 })] },
+  { id: 'plus-ultra', nome: 'Plus Ultra', e: '💥', ps: ['plus ultra', 'all might', 'my hero academia', 'boku no hero', 'deku'], dica: 'o grito do maior herói (PLUS ___)', fn: a => { darSt(a, 'furia', 12); darSt(a, 'rapido', 12); darSt(a, 'grande', 12); return ['💥 PLUS ULTRA! mais forte, mais rápido, maior']; } },
+  { id: 'isekai', nome: 'Caminhão-kun', e: '🚚', ps: ['isekai', 'caminhao kun', 'truck kun', 'reencarnei'], dica: 'o caminhão que manda gente para outro mundo', fn: a => { for (let i = 0; i < 3; i++) agenda.push({ t: T + i * 0.7, fn: () => criarTiro(W + 150, rnd(150, H - 150), -1, 0, '🚚', a.id, 30, null, { vel: 950, vida: 3.4, tam: 2.4, r: 70, atravessa: true, isekai: true }) }); return ['🚚 Caminhão-kun passou! quem for atropelado vai parar em outro mundo']; } },
+  { id: 'baka', nome: 'BAKA!', e: '🥿', ps: ['baka'], dica: '"bobo" em japonês', fn: a => { const p = pick(outrosDe(a)); if (!p) return []; ferir(p, 22, a.id, { kx: rnd(-600, 600), ky: rnd(-600, 600) }); evento({ k: 'pega', x: p.x, y: p.y, e: 'BAKA!' }); return [`🥿 ${p.nome} levou uma chinelada: BAKA!`]; } },
+  { id: 'uwu', nome: 'UwU', e: '🐱', ps: ['uwu', 'owo', 'kawaii', 'nyan'], dica: 'a carinha mais fofa da internet', fn: a => [...fazer(a, 'virar', 'gato', { alvos: ['todos'], dur: 10 }), ...fazer(a, 'chover', 'coracao', { n: 10 })] },
+  { id: 'nya', nome: 'Nya~', e: '😺', ps: ['nya', 'nyaa', 'neko'], dica: 'o miado em japonês', fn: a => { transformar(a, 'gato', 20); darSt(a, 'rapido', 20); return ['😺 nya~ você virou um gatinho veloz']; } },
+  { id: 'senpai', nome: 'Senpai', e: '💕', ps: ['senpai', 'notice me senpai', 'me nota senpai'], dica: '"me nota, ___!"', fn: a => { const p = pick(outrosDe(a)); if (!p) return []; p.x = a.x + rnd(-60, 60); p.y = a.y + rnd(-60, 60); evento({ k: 'poof', x: p.x, y: p.y }); evento({ k: 'pega', x: p.x, y: p.y, e: '💕' }); return [`💕 ${p.nome} notou ${a.nome} e veio correndo`]; } },
+  { id: 'bankai', nome: 'Bankai', e: '🌙', ps: ['bankai', 'bleach', 'ichigo', 'getsuga tensho'], dica: 'a liberação final de uma espada espiritual', fn: a => { rajada(a, '🌙', 8, 15, 1.5); darSt(a, 'furia', 8); return ['🌙 BANKAI! Getsuga Tensho!']; } },
+  { id: 'alquimia', nome: 'Troca Equivalente', e: '⚗️', ps: ['troca equivalente', 'fullmetal', 'fullmetal alchemist', 'edward elric', 'alquimia'], dica: 'para obter algo, é preciso dar algo em troca', fn: a => { const l = outrosDe(a).sort((x, y) => y.hp - x.hp)[0]; if (!l) return []; const h1 = a.hp, h2 = l.hp; a.hp = Math.min(hpMaxDe(a), h2); l.hp = Math.max(1, Math.min(hpMaxDe(l), h1)); evento({ k: 'poof', x: a.x, y: a.y }); evento({ k: 'poof', x: l.x, y: l.y }); return [`⚗️ troca equivalente: ${a.nome} trocou de vida com ${l.nome}`]; } },
+  { id: 'doraemon', nome: 'Bolso Mágico', e: '🎁', ps: ['doraemon', 'bolso magico'], dica: 'um gato-robô azul com um bolso mágico', fn: a => ['🎁 o bolso mágico se abriu!', ...fazer(a, 'chover', 'presente', { n: 10 })] },
+  { id: 'godzilla', nome: 'Kaiju', e: '🦖', ps: ['godzilla', 'kaiju'], dica: 'o rei dos monstros', fn: a => { transformar(a, 'dinossauro', 15); darSt(a, 'grande', 15); return ['🦖 KAIJU! você virou um monstro gigante']; } },
+
+  // ---------------- Games ----------------
+  { id: 'creeper', cat: 'Games', nome: 'Creeper', e: '💣', ps: ['creeper', 'aw man'], dica: 'um bicho verde que faz "ssss" e explode', fn: a => { mobsDe(a, '💣', 6, { vel: 1.1, esp: 'bomba', hp: 0.8 }, true); return ['💣 sssssss… creepers atrás de todo mundo']; } },
+  { id: 'minecraft', nome: 'Minecraft', e: '🧱', ps: ['minecraft', 'steve', 'craftar'], dica: 'o jogo dos blocos', fn: a => ['🧱 chuva de blocos!', ...fazer(a, 'chover', 'tijolo', { n: 25 })] },
+  { id: 'herobrine', nome: 'Herobrine', e: '👻', ps: ['herobrine'], dica: 'uma lenda de olhos brancos que nunca existiu', fn: a => { G.escuro = T + 10; mobsDe(a, '👻', 6, { voa: 1, dano: 1.4 }, true); return ['👻 Herobrine está aqui… (as luzes se apagaram)']; } },
+  { id: 'impostor', nome: 'Impostor', e: 'ඞ', ps: ['among us', 'amogus', 'impostor', 'sus', 'sussy', 'tem um impostor'], dica: 'tem alguém suspeito entre nós…', fn: a => { G.disfarce = T + 12; const p = pick(jogadores.filter(x => !x.morto)); if (p) darSt(p, 'furia', 12); return ['ඞ há um impostor entre nós… todo mundo ficou igual por 12s']; } },
+  { id: 'mario', nome: 'Mario', e: '🍄', ps: ['mario', 'super mario', 'its a me', 'mamma mia'], dica: 'um encanador que pula em tartarugas', fn: a => { transformar(a, 'mario', 20); return ['🍄 é eu, Mario! (bolas de fogo + moedas)', ...fazer(a, 'chover', 'dinheiro', { n: 12 })]; } },
+  { id: 'luigi', nome: 'Luigi', e: '👻', ps: ['luigi', 'luigis mansion'], dica: 'o irmão de verde que tem medo de fantasma', fn: a => { mobsDe(a, '👻', 6, { voa: 1 }, true); return ['👻 Luigi ligou o aspirador: fantasmas por toda parte', ...fazer(a, 'puxar')]; } },
+  { id: 'bowser', nome: 'Bowser', e: '🐢', ps: ['bowser'], dica: 'o rei das tartarugas', fn: a => { transformar(a, 'bowser', 15); return ['🐢 BOWSER! uma tartaruga gigante que cospe fogo']; } },
+  { id: 'sonic', nome: 'Sonic', e: '🦔', ps: ['sonic', 'gotta go fast'], dica: 'um ouriço azul muito, muito rápido', fn: a => { transformar(a, 'sonic', 15); return ['🦔 GOTTA GO FAST!', ...fazer(a, 'chover', 'anel', { n: 12 })]; } },
+  { id: 'pacman', nome: 'Pac-Man', e: '😮', ps: ['pac man', 'pacman', 'waka waka'], dica: 'waka waka waka', fn: a => { transformar(a, 'pacman', 15); mobsDe(a, '👻', 4, { voa: 1, vel: 1.1 }, true); return ['😮 waka waka! você rouba vida ao morder; fantasmas atrás dos outros']; } },
+  { id: 'tetris', nome: 'Tetris', e: '🧱', ps: ['tetris'], dica: 'blocos caindo em linha', fn: a => ['🧱 TETRIS!', ...fazer(a, 'chover', 'tijolo', { n: 35 })] },
+  { id: 'zelda', nome: 'Hyrule', e: '🏹', ps: ['zelda', 'link', 'triforce', 'hyrule', 'hey listen'], dica: 'é perigoso ir sozinho!', fn: a => { transformar(a, 'link', 20); return ['🏹 você virou um herói élfico com arco', ...fazer(a, 'chover', 'coracao', { n: 6 })]; } },
+  { id: 'fnaf', nome: 'Five Nights', e: '🐻', ps: ['fnaf', 'five nights', 'freddy fazbear', 'freddy'], dica: 'cinco noites numa pizzaria assombrada', fn: a => { G.escuro = T + 12; mobsDe(a, '🐻', 4, { vel: 1.3, dano: 1.8, hp: 1.5 }, true); return ['🐻 meia-noite na pizzaria… os animatrônicos acordaram']; } },
+  { id: 'fortnite', nome: 'Dancinha', e: '🕺', ps: ['fortnite', 'default dance', 'dancinha do fortnite', 'battle bus'], dica: 'o battle royale das dancinhas', fn: a => fazer(a, 'dancar', null, { alvos: ['todos'], dur: 4 }) },
+  { id: 'oof', nome: 'OOF', e: '🧱', ps: ['oof', 'roblox'], dica: 'o som de quando o boneco de blocos cai', fn: a => { const p = pick(outrosDe(a)); if (!p) return []; ferir(p, 25, a.id); evento({ k: 'pega', x: p.x, y: p.y, e: 'OOF' }); return [`🧱 OOF! ${p.nome} se machucou`]; } },
+  { id: 'noob', nome: 'Noob', e: '🐣', ps: ['noob', 'nub', 'noobado'], dica: 'o contrário de pro', fn: a => { const p = pick(outrosDe(a)); if (!p) return []; darSt(p, 'pequeno', 12); darSt(p, 'lento', 8); return [`🐣 ${p.nome} virou noob: mini e lento`]; } },
+  { id: 'wasted', nome: 'Wasted', e: '💀', ps: ['wasted', 'gta'], dica: 'a tela cinza de quando tudo dá errado', fn: a => { const p = pick(outrosDe(a)); if (!p) return []; ferir(p, 40, a.id); evento({ k: 'pega', x: p.x, y: p.y, e: 'WASTED' }); G.cinza = T + 2; return [`💀 ${p.nome}: WASTED`]; } },
+  { id: 'konami', nome: 'Código Konami', e: '🎮', ps: ['cima cima baixo baixo', 'up up down down', 'konami', 'codigo konami'], dica: '↑↑↓↓←→←→BA', fn: a => { a.hp = hpMaxDe(a); darSt(a, 'escudo', 10); darSt(a, 'rapido', 10); confete(a); return ['🎮 +30 vidas! (escudo, velocidade e vida cheia)']; } },
+  { id: 'pou', nome: 'Pou', e: '🥔', ps: ['pou'], dica: 'o bichinho virtual que vive com fome', fn: a => { transformar(a, 'pou', 20); return ['🥔 você virou um Pou faminto', ...fazer(a, 'chover', 'pizza', { n: 10 })]; } },
+  { id: 'angry-birds', nome: 'Angry Birds', e: '🐦', ps: ['angry birds', 'passaros raivosos'], dica: 'pássaros lançados num estilingue', fn: a => { rajada(a, '🐦', 8, 12, 1.1); return ['🐦 pássaros raivosos lançados!']; } },
+  { id: 'flappy', nome: 'Flappy', e: '🐤', ps: ['flappy bird', 'flappy'], dica: 'um passarinho que voa tocando na tela', fn: a => fazer(a, 'voar', null, { alvos: ['todos'], dur: 8 }) },
+  { id: 'subway', nome: 'Subway', e: '🛹', ps: ['subway surfers', 'subway surf'], dica: 'correndo nos trilhos do metrô', fn: a => fazer(a, 'acelerar', null, { alvos: ['todos'], dur: 10 }) },
+  { id: 'candy-crush', nome: 'Candy Crush', e: '🍬', ps: ['candy crush'], dica: 'doces combinando em linha', fn: a => ['🍬 SWEET!', ...fazer(a, 'chover', 'rosquinha', { n: 25 })] },
+  { id: 'pvz', nome: 'Plantas x Zumbis', e: '🌻', ps: ['plants vs zombies', 'plantas contra zumbis', 'plantas vs zumbis', 'pvz'], dica: 'plantas defendendo a casa de mortos-vivos', fn: a => { mobsDe(a, '🌻', 3, { vel: 0.3, tiro: '☀️', hp: 2 }, false); return ['🌻 plantas defendem você…', ...fazer(a, 'atacar', 'zumbi', { n: 5 })]; } },
+
+  // ---------------- Memes & Internet ----------------
+  { id: 'rickroll', cat: 'Memes & Internet', nome: 'Rickroll', e: '🕺', ps: ['rickroll', 'rick roll', 'rick astley', 'never gonna'], dica: 'você nunca vai desistir de mim…', fn: a => { for (const p of jogadores) if (!p.morto) darSt(p, 'dancando', 5); return ['🕺 você foi rickrollado! todo mundo dançando']; } },
+  { id: 'doge', nome: 'Doge', e: '🐕', ps: ['doge', 'much wow', 'such wow', 'muito uau'], dica: 'much wow, such cachorro', fn: a => { mobsDe(a, '🐕', 3, { vel: 1.2 }, false); return ['🐕 much wow. such dinheiro', ...fazer(a, 'chover', 'dinheiro', { n: 12 })]; } },
+  { id: 'stonks', nome: 'Stonks', e: '📈', ps: ['stonks'], dica: 'o gráfico do homem de terno', fn: a => { if (T - (a.stonks ?? -99) < 60) return ['📉 not stonks (espere um pouco)']; a.stonks = T; a.pontos += 2; evento({ k: 'pega', x: a.x, y: a.y, e: '📈 +2' }); return ['📈 STONKS! +2 pontos']; } },
+  { id: 'sigma', nome: 'Sigma', e: '🗿', ps: ['sigma', 'sigma male', 'modo sigma'], dica: '🗿 cara séria', fn: a => { transformar(a, 'pedra', 12); darSt(a, 'escudo', 5); return ['🗿 modo sigma ativado']; } },
+  { id: 'rizz', nome: 'Rizz', e: '😏', ps: ['rizz', 'rizzler', 'w rizz'], dica: 'charme nível máximo', fn: a => { evento({ k: 'pega', x: a.x, y: a.y, e: '💕' }); return ['😏 rizz absurdo: todo mundo veio até você', ...fazer(a, 'puxar')]; } },
+  { id: 'aura', nome: '+1000 Aura', e: '✨', ps: ['aura', 'mais aura', 'aura farming', '1000 aura'], dica: '+1000 de ___', fn: a => { darSt(a, 'escudo', 5); darSt(a, 'rapido', 8); evento({ k: 'pega', x: a.x, y: a.y, e: '+1000 AURA' }); confete(a); return ['✨ +1000 de aura']; } },
+  { id: 'ohio', nome: 'Only in Ohio', e: '🌽', ps: ['ohio', 'only in ohio', 'so em ohio'], dica: 'só lá acontecem essas coisas', fn: (a, c) => { const opc = OVOS.filter(o => !o.forte && !o.alvo && o.id !== 'ohio'); const ef = ['🌽 só em Ohio…']; for (let i = 0; i < 3; i++) { const o = pick(opc); try { ef.push(...(o.fn(a, c) || [])); } catch (e) {} } return ef; } },
+  { id: 'skibidi', nome: 'Skibidi', e: '🚽', ps: ['skibidi', 'skibidi toilet', 'skibidi dop'], dica: 'privadas cantoras invadindo', fn: a => ['🚽 skibidi dop dop!', ...fazer(a, 'atacar', 'privada', { n: 8 })] },
+  { id: 'tralalero', nome: 'Tralalero Tralala', e: '🦈', ps: ['tralalero tralala', 'tralalero'], dica: 'um tubarão de tênis (brainrot italiano)', fn: a => { mobsDe(a, '🦈', 6, { vel: 1.9, dano: 1.4 }, true); return ['🦈👟 TRALALERO TRALALA! tubarões de tênis']; } },
+  { id: 'tung-tung', nome: 'Tung Tung Sahur', e: '🏏', ps: ['tung tung tung sahur', 'tung tung tung', 'tung tung', 'sahur'], dica: 'tung tung tung tung…', fn: a => { mobsDe(a, '🏏', 6, { vel: 1.3, dano: 1.6 }, true); return ['🏏 TUNG TUNG TUNG SAHUR!']; } },
+  { id: 'bombardiro', nome: 'Bombardiro Crocodilo', e: '🐊', ps: ['bombardiro crocodilo', 'bombardiro'], dica: 'um crocodilo-avião que solta bombas', fn: a => ['🐊✈️ BOMBARDIRO CROCODILO!', ...fazer(a, 'chover', 'bomba', { n: 10 }), ...fazer(a, 'atacar', 'crocodilo', { n: 3 })] },
+  { id: 'cappuccino', nome: 'Cappuccino Assassino', e: '☕', ps: ['cappuccino assassino', 'capuccino assassino', 'cappuccino assassina'], dica: 'um café ninja muito perigoso', fn: a => { mobsDe(a, '☕', 6, { vel: 1.7, dano: 1.8, hp: 0.7 }, true); return ['☕🗡️ CAPPUCCINO ASSASSINO!']; } },
+  { id: 'lirili', nome: 'Lirilì Larilà', e: '🐘', ps: ['lirili larila', 'lirili'], dica: 'um elefante-cacto de sandálias', fn: a => { mobsDe(a, '🐘', 3, { tam: 1.4, vel: 0.9, dano: 1.8, hp: 2 }, true); return ['🐘🌵 LIRILÌ LARILÀ!', ...fazer(a, 'chover', 'cacto', { n: 8 })]; } },
+  { id: 'patapim', nome: 'Brr Brr Patapim', e: '🐒', ps: ['brr brr patapim', 'patapim'], dica: 'um macaco-árvore de pés gigantes', fn: a => { mobsDe(a, '🐒', 4, { vel: 1.3 }, false); return ['🐒🌳 BRR BRR PATAPIM!', ...fazer(a, 'chover', 'arvore', { n: 5 })]; } },
+  { id: 'chimpanzini', nome: 'Chimpanzini Bananini', e: '🍌', ps: ['chimpanzini bananini', 'chimpanzini'], dica: 'um macaco dentro de uma banana', fn: a => { transformar(a, 'macaco', 15); return ['🐒🍌 CHIMPANZINI BANANINI!', ...fazer(a, 'chover', 'banana', { n: 15 })]; } },
+  { id: 'xablau', nome: 'Xablau', e: '🎲', ps: ['xablau'], dica: 'a palavra brasileira que significa tudo e nada', fn: a => { for (const p of jogadores) if (!p.morto) transformar(p, pick(TODAS).k, 10); return ['🎲 XABLAU! todo mundo virou alguma coisa']; } },
+  { id: 'receba', nome: 'Receba!', e: '💰', ps: ['receba'], dica: 'o grito de quem acabou de ganhar', fn: a => { for (let i = 0; i < 8; i++) criarQueda(COISAS.dinheiro, clamp(a.x + rnd(-150, 150), 60, W - 60), clamp(a.y + rnd(-150, 150), 60, H - 60), a.id); return ['💰 RECEBA!']; } },
+  { id: 'sextou', nome: 'Sextou', e: '🎉', ps: ['sextou', 'sextouu'], dica: 'o melhor dia da semana', fn: a => ['🎉 SEXTOU!', ...fazer(a, 'dancar', null, { alvos: ['todos'], dur: 3 }), ...fazer(a, 'chover', 'pizza', { n: 15 })] },
+  { id: 'taca-le-pau', nome: 'Taca-le Pau', e: '🏎️', ps: ['taca le pau', 'tacale pau'], dica: 'acelera tudo, sem freio!', fn: a => { darSt(a, 'rapido', 10); darSt(a, 'furia', 8); return ['🏎️ TACA-LE PAU! velocidade e fúria']; } },
+  { id: 'press-f', nome: 'Press F', e: '🙏', ps: ['press f', 'aperte f', 'f no chat', 'f pra ele'], dica: 'pague seus respeitos', fn: a => { for (const p of jogadores) if (!p.morto) p.hp = Math.min(hpMaxDe(p), p.hp + 40); return ['🙏 respeitos prestados: todo mundo recuperou vida']; } },
+  { id: 'gg', nome: 'GG', e: '🤝', ps: ['gg', 'gg ez', 'gg wp', 'good game'], dica: 'o que se diz no fim de uma boa partida', fn: a => { for (const p of jogadores) if (!p.morto) { p.hp = hpMaxDe(p); confete(p); } return ['🤝 GG! todo mundo com vida cheia']; } },
+  { id: 'lag', nome: 'Lag', e: '📶', ps: ['lag', 'lagou', 'ping alto', 'ta lagado'], dica: 'quando a internet trava', fn: a => { const al = outrosDe(a); for (const p of al) darSt(p, 'congelado', 1.5); for (let i = 1; i <= 3; i++) agenda.push({ t: T + i * 0.5, fn: () => { for (const p of al) if (!p.morto) { p.x = clamp(p.x + rnd(-90, 90), 40, W - 40); p.y = clamp(p.y + rnd(-90, 90), 40, H - 40); } } }); return ['📶 LAG! todo mundo travou e teleportou']; } },
+  { id: 'hello', nome: 'Hello World', e: '💻', ps: ['hello world', 'ola mundo'], dica: 'o primeiro programa de todo programador', fn: a => { darSt(a, 'escudo', 3); return ['💻 console.log("Olá, mundo!")']; } },
+  { id: '42', nome: '42', e: '🌌', ps: ['42', 'sentido da vida', 'resposta para tudo'], exato: ['42'], dica: 'a resposta para a vida, o universo e tudo mais', fn: a => { a.hp = hpMaxDe(a); return ['🌌 42. (vida cheia, obviamente)']; } },
+  { id: 'batatinha', nome: 'Batatinha Frita 1, 2, 3', e: '🚦', ps: ['batatinha frita', 'round 6', 'squid game', 'luz vermelha luz verde'], dica: '"___ 1, 2, 3!" (não se mexa no vermelho)', fn: a => { G.batata = T + 16; G.batataIni = T; G.autorBatata = a.id; return ['🚦 BATATINHA FRITA 1, 2, 3! quem se mexer no vermelho se machuca']; } },
+
+  // ---------------- Brasil & TV ----------------
+  { id: 'chaves', cat: 'Brasil & TV', nome: 'Chaves', e: '🛢️', ps: ['chaves', 'chavinho', 'foi sem querer querendo', 'isso isso isso'], dica: 'o menino que mora num barril', fn: a => { transformar(a, 'barril', 15); darSt(a, 'escudo', 3); return ['🛢️ foi sem querer querendo!']; } },
+  { id: 'chapolin', nome: 'Chapolin', e: '🔨', ps: ['chapolin', 'chapolin colorado', 'marreta bionica', 'nao contavam com minha astucia'], dica: 'um herói vermelho com marreta biônica', fn: a => { darSt(a, 'furia', 12); return ['🔨 ninguém contava com a minha astúcia! (dano em dobro)']; } },
+  { id: 'madruga', nome: 'Seu Madruga', e: '🥊', ps: ['seu madruga', 'madruga'], dica: 'o vizinho que nunca paga o aluguel', fn: a => { const al = outrosDe(a).sort(() => Math.random() - 0.5).slice(0, 3); for (const p of al) ferir(p, 15, a.id, { kx: rnd(-400, 400), ky: rnd(-400, 400) }); return al.length ? [`🥊 cascudos em ${nomesDe(al)}`] : []; } },
+  { id: 'coelhada', nome: 'Coelhada', e: '🐰', ps: ['coelhada', 'sansao', 'turma da monica'], dica: 'um coelho de pelúcia azul que voa longe', fn: a => { const p = maisProximoJogador(a); if (!p) return []; const dx = p.x - a.x, dy = p.y - a.y, d = Math.hypot(dx, dy) || 1; ferir(p, 30, a.id, { kx: dx / d * 1600, ky: dy / d * 1600 }); evento({ k: 'pega', x: p.x, y: p.y, e: '🐰💥' }); return [`🐰 COELHADA em ${p.nome}!`]; } },
+  { id: 'pintadinha', nome: 'Galinha Pintadinha', e: '🐔', ps: ['galinha pintadinha'], dica: 'a galinha mais famosa das crianças', fn: a => ['🐔 pó pó pó!', ...fazer(a, 'chover', 'galinha', { n: 15 })] },
+  { id: 'baby-shark', nome: 'Baby Shark', e: '🦈', ps: ['baby shark'], dica: 'doo doo doo doo doo doo', fn: a => fazer(a, 'atacar', 'tubarao', { n: 10, mods: { tam: 0.5 } }) },
+  { id: 'bob-esponja', nome: 'Fenda do Biquíni', e: '🍔', ps: ['bob esponja', 'spongebob', 'siriguejo', 'hamburguer de siri', 'fenda do biquini'], dica: 'um morador do fundo do mar que faz hambúrgueres', fn: a => [...fazer(a, 'chover', 'hamburguer', { n: 15 }), ...fazer(a, 'invocar', 'caranguejo', { n: 3 })] },
+  { id: 'shrek', nome: 'Shrek', e: '👹', ps: ['shrek', 'sai do meu pantano'], dica: 'um ogro verde que ama o pântano', fn: a => { transformar(a, 'shrek', 15); return ['👹 SAI DO MEU PÂNTANO!', ...fazer(a, 'empurrar')]; } },
+  { id: 'minions', nome: 'Minions', e: '😃', ps: ['minion', 'minions'], dica: 'ajudantes amarelos que amam banana', fn: a => { mobsDe(a, '😃', 8, { tam: 0.55, vel: 1.3, hp: 0.6 }, false); return ['😃 BANANAAA! 8 ajudantes amarelos']; } },
+  { id: 'brasil', nome: 'É Hexa', e: '⚽', ps: ['brasil', 'hexa', 'vai brasil', 'e hexa'], dica: 'o país do futebol (e do hexa?)', fn: a => ['⚽ É HEXA!', ...fazer(a, 'chover', 'bola', { n: 20 })] },
+  { id: 'carnaval', nome: 'Carnaval', e: '🎊', ps: ['carnaval', 'samba'], dica: 'a maior festa do Brasil', fn: a => { for (const p of jogadores) if (!p.morto) { darSt(p, 'dancando', 4); confete(p); } return ['🎊 CARNAVAL! todo mundo sambando']; } },
+  { id: 'junina', nome: 'Festa Junina', e: '🌽', ps: ['festa junina', 'arraia', 'arraial', 'quadrilha'], dica: 'fogueira, pipoca e quadrilha', fn: a => ['🌽 arraiá!', ...fazer(a, 'chover', 'milho', { n: 10 }), ...fazer(a, 'chover', 'pipoca', { n: 10 })] },
+  { id: 'natal', nome: 'Natal', e: '🎄', ps: ['natal', 'ho ho ho', 'feliz natal'], dica: 'ho ho ho', fn: a => ['🎄 Feliz Natal!', ...fazer(a, 'chover', 'presente', { n: 12 })] },
+  { id: 'halloween', nome: 'Halloween', e: '🎃', ps: ['halloween', 'gostosuras ou travessuras', 'dia das bruxas'], dica: 'doces ou travessuras', fn: a => { G.escuro = T + 10; return ['🎃 gostosuras ou travessuras?', ...fazer(a, 'atacar', 'abobora', { n: 6 })]; } },
+  { id: 'pascoa', nome: 'O Ovo dos Ovos', e: '🥚', ps: ['easter egg', 'easter eggs', 'ovo de pascoa', 'pascoa'], dica: 'você está procurando ele agora mesmo', fn: a => ['🥚 você achou o easter egg dos easter eggs!', ...fazer(a, 'chover', 'ovo de pascoa', { n: 15 })] },
+
+  // ---------------- Filmes & Quadrinhos ----------------
+  { id: 'thanos', cat: 'Filmes & Quadrinhos', nome: 'O Estalo', e: '🧤', forte: true, ps: ['thanos', 'estalo', 'eu sou inevitavel', 'joias do infinito', 'manopla do infinito'], dica: 'um estalar de dedos e metade some', fn: a => { const al = outrosDe(a).filter(() => Math.random() < 0.5); for (const p of al) { for (let i = 0; i < 3; i++) evento({ k: 'poof', x: p.x + rnd(-20, 20), y: p.y + rnd(-20, 20) }); matar(p, null); } return [`🧤 *estalo* ${al.length ? nomesDe(al) + ' virou pó' : 'ninguém virou pó (que sorte)'}. perfeitamente equilibrado.`]; } },
+  { id: 'hulk', nome: 'Hulk', e: '💪', ps: ['hulk', 'hulk esmaga'], dica: 'um gigante verde que esmaga', fn: a => { transformar(a, 'hulk', 15); return ['💪 HULK ESMAGA!']; } },
+  { id: 'aranha', nome: 'Amigão da Vizinhança', e: '🕸️', ps: ['homem aranha', 'spider man', 'spiderman', 'teia'], dica: 'o amigão da vizinhança', fn: a => { transformar(a, 'aranha', 15); for (const p of outrosDe(a)) darSt(p, 'lento', 6); return ['🕸️ teias em todo mundo (lentos por 6s)']; } },
+  { id: 'batman', nome: 'Batman', e: '🦇', ps: ['batman', 'eu sou o batman', 'i am batman'], dica: 'eu sou a noite', fn: a => { G.escuro = T + 8; transformar(a, 'morcego', 15); darSt(a, 'escudo', 4); return ['🦇 eu sou o Batman.']; } },
+  { id: 'superman', nome: 'Superman', e: '🦸', ps: ['superman', 'super man', 'homem de aco'], dica: 'é um pássaro? é um avião?', fn: a => { transformar(a, 'super-heroi', 20); return ['🦸 é um pássaro? é um avião? não!']; } },
+  { id: 'star-wars', nome: 'A Força', e: '⚔️', ps: ['star wars', 'jedi', 'sabre de luz', 'que a forca esteja com voce'], dica: 'que a força esteja com você', fn: a => { darSt(a, 'furia', 10); return ['⚔️ empurrão da Força!', ...fazer(a, 'empurrar')]; } },
+  { id: 'vader', nome: 'Lado Sombrio', e: '🖤', ps: ['darth vader', 'eu sou seu pai', 'lado negro', 'lado sombrio'], dica: '"Luke, eu sou seu…"', fn: a => { G.escuro = T + 8; return ['🖤 venha para o lado sombrio…', ...fazer(a, 'puxar')]; } },
+  { id: 'matrix', nome: 'Matrix', e: '💊', ps: ['matrix', 'pilula vermelha', 'bullet time'], dica: 'pílula vermelha ou azul?', fn: a => { for (const p of outrosDe(a)) darSt(p, 'lento', 6); G.cinza = T + 6; darSt(a, 'rapido', 6); return ['💊 bullet time: todo mundo em câmera lenta, menos você']; } },
+  { id: 'avada', nome: 'Avada Kedavra', e: '💚', alvo: true, ps: ['avada kedavra'], dica: 'o feitiço proibido (luz verde)', fn: (a, c) => { const p = c.alvo('aleatorio').filter(x => x !== a)[0]; if (!p) return []; evento({ k: 'raio', x: p.x, y: p.y }); ferir(p, 60, a.id); return [`💚 um raio verde atingiu ${p.nome}`]; } },
+  { id: 'expelliarmus', nome: 'Expelliarmus', e: '✨', ps: ['expelliarmus'], dica: 'o feitiço que tira a varinha da mão', fn: a => { const p = maisProximoJogador(a); if (!p) return []; darSt(p, 'desarmado', 6); evento({ k: 'pega', x: p.x, y: p.y, e: 'DESARMADO' }); return [`✨ ${p.nome} foi desarmado por 6s`]; } },
+  { id: 'leviosa', nome: 'Wingardium Leviosa', e: '🎈', ps: ['wingardium leviosa', 'leviosa'], dica: 'é levi-Ó-sa, não levio-SÁ', fn: a => { for (const p of outrosDe(a)) { darSt(p, 'voando', 4); darSt(p, 'congelado', 4); } return ['🎈 todo mundo está flutuando sem poder se mexer']; } },
+  { id: 'patrono', nome: 'Expecto Patronum', e: '🦌', ps: ['expecto patronum', 'patrono', 'patronum'], dica: 'um animal prateado contra as trevas', fn: a => { mobsDe(a, '🦌', 3, { vel: 1.5, dano: 1.3, hp: 1.5 }, false); G.escuro = 0; return ['🦌 EXPECTO PATRONUM!']; } },
+  { id: 'lumos', nome: 'Lumos', e: '💡', ps: ['lumos', 'lumos maxima'], dica: 'acende a ponta da varinha', fn: a => { G.escuro = 0; return ['💡 as luzes voltaram']; } },
+  { id: 'nox', nome: 'Nox', e: '🌑', ps: ['nox'], dica: 'o contrário de lumos', fn: a => { G.escuro = T + 10; return ['🌑 nox: escuridão total']; } },
+  { id: 'accio', nome: 'Accio', e: '🧲', ps: ['accio'], dica: 'o feitiço que puxa objetos', fn: a => { let n = 0; for (const m of mobs) if (m.tipo === 'item') { m.x = a.x + rnd(-40, 40); m.y = a.y + rnd(-40, 40); n++; } return [`🧲 ACCIO! ${n} itens voaram até ${a.nome}`]; } },
+  { id: 'obliviate', nome: 'Obliviate', e: '🌫️', ps: ['obliviate'], dica: 'o feitiço que apaga a memória', fn: a => { for (const p of jogadores) if (!p.morto) { p.forma = null; p.st = {}; Object.assign(p, posLivre()); evento({ k: 'poof', x: p.x, y: p.y }); } return ['🌫️ todo mundo esqueceu o que era e onde estava']; } },
+  { id: 'hogwarts', nome: 'Hogwarts', e: '🧙', ps: ['harry potter', 'hogwarts', 'sou um bruxo'], dica: '"você é um bruxo, ___"', fn: a => { transformar(a, 'mago', 20); return ['🧙 você é um bruxo!', ...fazer(a, 'invocar', 'coruja', { n: 3 })]; } },
+  { id: 'abracadabra', nome: 'Abracadabra', e: '🎩', ps: ['abracadabra', 'hocus pocus', 'shazam', 'plim plim', 'sim salabim'], dica: 'a palavra mágica mais clássica', fn: a => { for (const p of jogadores) if (!p.morto) transformar(p, pick(TODAS).k, 12); return ['🎩 ABRACADABRA! cada um virou uma coisa diferente']; } },
+  { id: 'pirlimpimpim', nome: 'Pirlimpimpim', e: '✨', ps: ['pirlimpimpim', 'po de pirlimpimpim'], dica: 'o pó mágico do Sítio', fn: a => { for (const p of jogadores) if (!p.morto) { evento({ k: 'poof', x: p.x, y: p.y }); Object.assign(p, posLivre()); darSt(p, 'voando', 6); } return ['✨ pó de pirlimpimpim: todo mundo voou para outro lugar']; } },
+
+  // ---------------- Segredos da Arcádia ----------------
+  { id: 'claude', cat: 'Segredos da Arcádia', nome: 'O Criador', e: '🤖', ps: ['claude', 'anthropic'], dica: 'quem criou este jogo?', fn: a => { a.hp = hpMaxDe(a); darSt(a, 'escudo', 6); darSt(a, 'rapido', 8); confete(a); return ['🤖 oi! fui eu que fiz este jogo. toma um presente: vida, escudo e velocidade']; } },
+  { id: 'genio', nome: 'Gênio da Lâmpada', e: '🧞', forte: true, ps: ['genio da lampada', 'lampada magica', 'aladdin', 'aladim'], dica: 'esfregue a lâmpada…', fn: a => { V.bonus = a.id; return ['🧞 o Gênio da lâmpada te deu mais um desejo!']; } },
+  { id: 'arcadia', nome: 'Arcádia', e: '🎮', ps: ['arcadia', 'arcadia ia'], dica: 'o nome desta plataforma', fn: a => ['🎮 bem-vindo à Arcádia!', ...fazer(a, 'chover', 'estrela', { n: 15 })] },
+  { id: 'casa', nome: 'A Casa Que Lembra', e: '🕯️', ps: ['a casa que lembra', 'clara', 'manequim'], dica: 'o outro jogo da plataforma (terror…)', fn: a => { G.escuro = T + 12; mobsDe(a, '👤', 3, { vel: 0.6, dano: 2, hp: 3 }, true); return ['🕯️ Clara está aqui… não olhe para trás']; } },
+];
+{ let cat = ''; for (const o of OVOS) { cat = o.cat || cat; o.cat = cat; o.psN = o.ps.map(normFrase); o.exN = (o.exato || []).map(normFrase); } }
+function acharOvos(texto, excluir = []) {
+  const t = normFrase(texto), tt = ' ' + t + ' ', ex = new Set(excluir.map(normFrase)), out = [];
+  for (const o of OVOS) {
+    const f = o.psN.find(p => !ex.has(p) && (o.exN.includes(p) ? t === p : tt.includes(' ' + p + ' ')));
+    if (f) out.push({ o, frase: f });
+  }
+  return out;
+}
+function marcarOvos(tokens, achados) {
+  if (!achados.length) return tokens;
+  const w = new Set(achados.flatMap(a => a.frase.split(' ')).filter(x => !STOP.has(x) || achados.some(a => a.frase === x)));
+  return tokens.map(([t, c, e]) => c !== 'esp' && normFrase(t).split(' ').some(x => x && w.has(x)) ? [t, 'ovo', ''] : [t, c, e]);
+}
+let ovosAchados = new Set();
+try { ovosAchados = new Set(JSON.parse(localStorage.getItem('desejos.ovos') || '[]')); } catch (e) {}
+function descobrir(ids) {
+  const novos = ids.filter(id => !ovosAchados.has(id) && OVOS.some(o => o.id === id));
+  if (!novos.length) return;
+  novos.forEach(id => ovosAchados.add(id));
+  try { localStorage.setItem('desejos.ovos', JSON.stringify([...ovosAchados])); } catch (e) {}
+  const o = OVOS.find(x => x.id === novos[0]);
+  toast(`🥚 Easter egg descoberto: ${o.e} ${o.nome} (${ovosAchados.size}/${OVOS.length})`, 5000);
+  montarDicionario();
+}
+
+/* =====================================================================
+   ESTADO DA PARTIDA (só o anfitrião simula)
+   ===================================================================== */
+let modo = null;            // 'host' | 'cliente'
+let meuId = null, T = 0, seq = 0;
+let jogadores = [], mobs = [], agenda = [];
+let G = {}, V = {}, estado = 'jogo';
+let evLocal = [], evRede = [];
+let primeiraPartidaFim = false;
+const CORES = ['#ff5d9e', '#4cc9f0', '#ffd166', '#80ed99', '#c3a6ff', '#ff8c42', '#5eead4', '#f472b6', '#a3e635', '#fca5a5'];
+const ROSTOS = ['😀', '😎', '🤓', '🥳', '😺', '🤠', '😜', '🤩', '😇', '😈'];
+const NOMES_BOT = ['Zé', 'Bia', 'Tião', 'Juju', 'Kiko', 'Nina', 'Duda', 'Tonho', 'Gigi', 'Lelo', 'Neide', 'Cacá', 'Bebeto', 'Lulu'];
+const SM = { MORTO: 1, VOA: 2, GELO: 4, DANCA: 8, INVIS: 16, ESCUDO: 32, INVERT: 64, BOT: 128, LENTO: 256, RAPIDO: 512, FANT: 1024 };
+
+function evento(e) { evLocal.push(e); evRede.push(e); }
+const temSt = (p, s) => (p.st[s] || 0) > T;
+const darSt = (p, s, d) => { p.st[s] = Math.max(p.st[s] || 0, T + d); if (s === 'grande') p.st.pequeno = 0; if (s === 'pequeno') p.st.grande = 0; if (s === 'rapido') p.st.lento = 0; if (s === 'lento') p.st.rapido = 0; };
+const formaDe = p => (p.forma && p.forma.ate > T) ? COISAS[p.forma.k] : null;
+const tamDe = p => (formaDe(p)?.tam || 1) * (temSt(p, 'grande') ? 1.8 : 1) * (temSt(p, 'pequeno') ? 0.55 : 1);
+const raioJ = p => 24 * tamDe(p);
+const raioM = m => 22 * m.tam;
+const hpMaxDe = p => Math.round(100 * (formaDe(p)?.hp || 1) * (temSt(p, 'grande') ? 1.3 : 1));
+const voando = p => !!(formaDe(p)?.voa) || temSt(p, 'voando');
+const emojiDe = p => formaDe(p)?.e || p.rosto;
+const velDe = p => 270 * (formaDe(p)?.vel || 1) * (temSt(p, 'rapido') ? 1.65 : 1) * (temSt(p, 'lento') ? 0.5 : 1) * (temSt(p, 'grande') ? 0.9 : 1);
+const posLivre = () => ({ x: rnd(150, W - 150), y: rnd(150, H - 150) });
+
+function adicionarJogador({ nome, rosto, bot, id }) {
+  const p = {
+    id: id || (bot ? 'b' : 'p') + (++seq), nome, rosto: rosto || pick(ROSTOS), bot: !!bot,
+    cor: CORES[jogadores.length % CORES.length], ...posLivre(), vx: 0, vy: 0, dirx: 1, diry: 0,
+    hp: 100, forma: null, st: {}, morto: 0, pontos: 0, kos: 0, mortes: 0, atkCd: 0,
+    input: { mx: 0, my: 0, ax: 1, ay: 0, atk: false, auto: false }, ultimoPedido: 0, queima: 0, lavaAcc: 0, ganhou: 0, ia: { t: 0 }
+  };
+  const usadas = new Set(jogadores.map(j => j.cor)); p.cor = CORES.find(c => !usadas.has(c)) || p.cor;
+  p.st.escudo = T + 2;
+  jogadores.push(p);
+  return p;
+}
+function removerJogador(id) { jogadores = jogadores.filter(p => p.id !== id); for (const m of mobs) if (m.dono === id) m.dono = null; if (V.quem === id) { V.fase = 'pausa'; V.ate = T + 2; } }
+let botsDesejados = 5;
+function ajustarBots() {
+  const humanos = jogadores.filter(p => !p.bot).length;
+  const queremos = Math.max(0, botsDesejados + 1 - humanos);
+  let bots = jogadores.filter(p => p.bot);
+  while (bots.length > queremos) { const b = bots.pop(); removerJogador(b.id); }
+  while (bots.length < queremos) {
+    const usados = new Set(jogadores.map(p => p.nome));
+    const nome = NOMES_BOT.find(n => !usados.has(n)) || 'Bot ' + (++seq);
+    bots.push(adicionarJogador({ nome, bot: true }));
+  }
+}
+function reiniciarPartida() {
+  mobs = []; agenda = [];
+  G = { lava: 0, ilhas: [], escuro: 0, terremoto: 0, autorLava: null, autorTerremoto: null, cinza: 0, disfarce: 0, batata: 0, batataIni: 0, autorBatata: null, fim: T + DURACAO };
+  V = { fase: 'pausa', ate: T + 4, quem: null, nome: '', texto: '', botTexto: '', botAcc: 0 };
+  for (const p of jogadores) Object.assign(p, posLivre(), { vx: 0, vy: 0, hp: 100, forma: null, st: { escudo: T + 2 }, morto: 0, pontos: 0, kos: 0, mortes: 0, ultimoPedido: 0, queima: 0, ganhou: 0, ovosUsados: new Set(), stonks: undefined });
+  estado = 'jogo';
+  evento({ k: 'msg', txt: '🧞 Nova partida! Em instantes alguém vai fazer o primeiro pedido…' });
+}
+function terminarPartida() {
+  estado = 'fim'; G.reinicio = T + 13;
+  const ord = [...jogadores].sort((a, b) => b.pontos - a.pontos || a.mortes - b.mortes);
+  G.podio = ord.slice(0, 3).map(p => [p.nome, p.rosto, p.pontos, p.id]);
+  V.fase = 'fim';
+}
+
+/* =====================================================================
+   EXECUÇÃO DOS PEDIDOS
+   ===================================================================== */
+function nomesParaParser() { return jogadores.map(p => ({ id: p.id, n: norm(p.nome).split(/\s+/)[0], full: norm(p.nome) })); }
+function nomesDe(arr) {
+  const vivos = jogadores.filter(p => !p.morto);
+  if (arr.length > 2 && arr.length === vivos.length) return 'todo mundo';
+  if (arr.length === 1) return arr[0].nome;
+  if (arr.length <= 3) return arr.slice(0, -1).map(p => p.nome).join(', ') + ' e ' + arr[arr.length - 1].nome;
+  return arr.length + ' pessoas';
+}
+function resolverAlvos(lista, autor, padrao) {
+  const vivos = jogadores.filter(p => !p.morto);
+  const L = lista.length ? lista : [padrao];
+  const set = new Set();
+  for (const a of L) {
+    if (a === 'eu') { if (!autor.morto) set.add(autor); }
+    else if (a === 'todos') vivos.forEach(p => set.add(p));
+    else if (a === 'outros') vivos.filter(p => p !== autor).forEach(p => set.add(p));
+    else if (a === 'aleatorio') { const o = vivos.filter(p => p !== autor); if (o.length) set.add(pick(o)); }
+    else if (a === 'lider') { const o = [...vivos].sort((x, y) => y.pontos - x.pontos); if (o[0]) set.add(o[0]); }
+    else if (a === 'ultimo') { const o = [...vivos].sort((x, y) => x.pontos - y.pontos); if (o[0]) set.add(o[0]); }
+    else if (a === 'bots') vivos.filter(p => p.bot).forEach(p => set.add(p));
+    else if (a === 'humanos') vivos.filter(p => !p.bot).forEach(p => set.add(p));
+    else if (a.startsWith('id:')) { const p = jogadores.find(p => p.id === a.slice(3)); if (p && !p.morto) set.add(p); }
+  }
+  return [...set];
+}
+function prepararClausula(cl, ef) {
+  let v = cl.verbo; const md = cl.mods;
+  if (!v) {
+    if (md.tam > 1) v = 'crescer'; else if (md.tam < 1) v = 'encolher';
+    else if (md.vel > 1) v = 'acelerar'; else if (md.vel < 1) v = 'lento';
+    else if (cl.coisa) { const c = COISAS[cl.coisa]; v = (c.cura || c.pontos) ? 'chover' : (cl.alvos.length ? 'virar' : 'atacar'); }
+    else return false;
+  }
+  if (v === 'virar' && !cl.coisa) {
+    if (md.tam > 1) v = 'crescer'; else if (md.tam < 1) v = 'encolher'; else if (md.vel > 1) v = 'acelerar'; else if (md.vel < 1) v = 'lento';
+  }
+  if (['virar', 'atacar', 'chover', 'invocar'].includes(v) && !cl.coisa) {
+    const pool = v === 'chover' ? TODAS.filter(c => c.cat === 'comida' || c.peso) : v === 'virar' ? TODAS : TODAS.filter(c => c.cat === 'animal' || c.cat === 'monstro');
+    cl.coisa = pick(pool).k;
+    const c = COISAS[cl.coisa];
+    ef.push(cl.desconhecidas.length ? `🤔 não conheço “${cl.desconhecidas[0]}”, então escolhi ${c.e} ${c.nome}` : `🎲 coisa surpresa: ${c.e} ${c.nome}`);
+  }
+  cl.verbo = v; return true;
+}
+function executarPedido(autor, texto) {
+  const nomes = nomesParaParser();
+  const r = interpretar(texto, nomes);
+  const ef = [];
+  const achados = acharOvos(texto, nomes.flatMap(n => [n.n, n.full]));
+  if (achados.length) {
+    const alvosRaw = r.clausulas.flatMap(c => c.alvos);
+    const ctx = { alvo: padrao => resolverAlvos(alvosRaw, autor, padrao), n: r.clausulas[0]?.n };
+    autor.ovosUsados = autor.ovosUsados || new Set();
+    for (const { o } of achados.slice(0, 3)) {
+      if (o.forte && autor.ovosUsados.has(o.id)) { ef.push(`🙅 ${o.nome} só pode ser usado uma vez por partida`); continue; }
+      if (o.forte) autor.ovosUsados.add(o.id);
+      try { ef.push(...(o.fn(autor, ctx) || [])); } catch (e) { console.error(e); }
+    }
+    if (!ef.length) ef.push('🥚 …');
+    evento({ k: 'pedido', nome: autor.nome, id: autor.id, tokens: marcarOvos(r.tokens, achados), ef, ovos: achados.map(x => x.o.id) });
+    return;
+  }
+  for (const cl of r.clausulas.slice(0, 4)) {
+    if (!prepararClausula(cl, ef)) continue;
+    if (cl.atraso > 0 && !cl.agora) {
+      ef.push(`⏳ daqui ${cl.atraso}s: ${MARCAS.find(m => m.id === cl.verbo)?.nome || cl.verbo}${cl.coisa ? ' ' + COISAS[cl.coisa].e : ''}…`);
+      agenda.push({ t: T + cl.atraso, fn: () => { const e2 = []; executar(cl, autor, e2); if (e2.length) evento({ k: 'msg', txt: '⏰ ' + e2.join(' · ') }); } });
+    } else executar(cl, autor, ef);
+  }
+  if (!ef.length) ef.push('O gênio não entendeu nada… 🤷 (veja o 📖 dicionário)');
+  evento({ k: 'pedido', nome: autor.nome, id: autor.id, tokens: r.tokens, ef });
+}
+function fazer(autor, verbo, coisa = null, op = {}) {
+  let k = coisa ? norm(coisa) : null; if (k && !COISAS[k]) k = LEX.get(k) || null;
+  const cl = { verbo, coisa: k, alvos: op.alvos || [], n: op.n ?? null, nArt: null, dur: op.dur ?? null, atraso: 0, mods: op.mods || {}, agora: true, desconhecidas: [] };
+  const ef = []; if (prepararClausula(cl, ef)) executar(cl, autor, ef); return ef;
+}
+function executar(cl, autor, ef) {
+  const c = cl.coisa ? COISAS[cl.coisa] : null, md = cl.mods;
+  const dur = (padrao, max = 90) => cl.dur === Infinity ? Infinity : clamp(cl.dur ?? padrao, 1, max);
+  const durTxt = d => d === Infinity ? 'para sempre' : `por ${Math.round(d)}s`;
+  const fin = d => d === Infinity ? 60 : d;
+  const al = padrao => resolverAlvos(cl.alvos, autor, padrao);
+  const status = (padrao, s, d, frase) => { const a = al(padrao); for (const p of a) darSt(p, s, d); if (a.length) ef.push(`${nomesDe(a)} ${frase} ${durTxt(d)}`); return a; };
+  switch (cl.verbo) {
+    case 'virar': {
+      const a = al('eu'), d = dur(15);
+      for (const p of a) { transformar(p, c.k, d); if (md.tam) darSt(p, md.tam > 1 ? 'grande' : 'pequeno', fin(d)); if (md.vel) darSt(p, md.vel > 1 ? 'rapido' : 'lento', fin(d)); }
+      if (a.length) ef.push(`${nomesDe(a)} ${a.length > 1 ? 'viraram' : 'virou'} ${c.e} ${plural(c.nome, a.length)}${md.tam > 1 ? ' gigante' : md.tam < 1 ? ' mini' : ''} ${durTxt(d)}`);
+      break;
+    }
+    case 'atacar': case 'invocar': {
+      const ataque = cl.verbo === 'atacar';
+      const a = ataque ? al('outros') : [];
+      const n = clamp(Math.round(cl.n ?? cl.nArt ?? (ataque ? 6 : 3)), 1, 30);
+      const d = fin(dur(20, 60));
+      for (let i = 0; i < n; i++) {
+        const base = ataque ? (a.length ? a[i % a.length] : null) : autor;
+        let x, y;
+        if (base) { const ang = Math.random() * Math.PI * 2, r = ataque ? rnd(320, 480) : rnd(60, 150); x = base.x + Math.cos(ang) * r; y = base.y + Math.sin(ang) * r; }
+        else ({ x, y } = posLivre());
+        criarMob(c, { x, y, dono: autor.id, alvoId: ataque && a.length ? a[i % a.length].id : null, ate: T + d, mods: md });
+      }
+      ef.push(ataque ? `${n} ${c.e} ${plural(c.nome, n)}${md.tam > 1 ? ' gigantes' : ''}${md.dano > 1 ? ' furiosos' : ''} atacando ${a.length ? nomesDe(a) : 'todo mundo'}`
+                     : `${n} ${c.e} ${plural(c.nome, n)} protegendo ${autor.nome}`);
+      break;
+    }
+    case 'chover': {
+      const n = clamp(Math.round(cl.n ?? cl.nArt ?? 24), 1, 60);
+      const vivos = jogadores.filter(p => !p.morto);
+      for (let i = 0; i < n; i++) agenda.push({ t: T + i * rnd(0.04, 0.14), fn: () => {
+        let x, y; const alvo = Math.random() < 0.6 && vivos.length ? pick(vivos) : null;
+        if (alvo) { x = alvo.x + rnd(-280, 280); y = alvo.y + rnd(-280, 280); } else ({ x, y } = posLivre());
+        criarQueda(c, clamp(x, 60, W - 60), clamp(y, 60, H - 60), autor.id, md);
+      } });
+      ef.push(`🌧️ chuva de ${c.e} ${plural(c.nome)} (${n})`);
+      break;
+    }
+    case 'explodir': {
+      if (c) {
+        const alvosM = mobs.filter(m => m.k === c.k && (m.tipo === 'mob' || m.tipo === 'item'));
+        const alvosJ = jogadores.filter(p => !p.morto && formaDe(p)?.k === c.k);
+        for (const m of alvosM) { boom(m.x, m.y, 110, 25, autor.id); m.morto = true; }
+        for (const p of alvosJ) boom(p.x, p.y, 120, 35, autor.id);
+        if (alvosM.length + alvosJ.length) { ef.push(`💥 ${alvosM.length + alvosJ.length} ${c.e} ${plural(c.nome)} explodiram`); break; }
+      }
+      if (cl.alvos.length) { const a = al('outros'); for (const p of a) boom(p.x, p.y, 130, 40, autor.id); if (a.length) ef.push(`💥 ${nomesDe(a)} explodiu`); }
+      else { const outros = jogadores.filter(p => !p.morto && p !== autor); for (let i = 0; i < 6; i++) agenda.push({ t: T + i * 0.25, fn: () => { const o = outros.length && Math.random() < 0.7 ? pick(outros) : null; const x = o ? o.x + rnd(-120, 120) : rnd(100, W - 100), y = o ? o.y + rnd(-120, 120) : rnd(100, H - 100); boom(x, y, 140, 35, autor.id); } }); ef.push('💥 explosões por toda a arena'); }
+      break;
+    }
+    case 'crescer': status('eu', 'grande', dur(12, 60), 'ficou gigante'); break;
+    case 'encolher': status('eu', 'pequeno', dur(12, 60), 'ficou mini'); break;
+    case 'congelar': status('outros', 'congelado', dur(4, 10), 'congelou ❄️'); break;
+    case 'acelerar': status('eu', 'rapido', dur(10, 40), 'ficou super rápido ⚡'); break;
+    case 'lento': status('outros', 'lento', dur(8, 30), 'ficou lento 🐌'); break;
+    case 'inverter': status('outros', 'invertido', dur(8, 25), 'ficou com os controles invertidos 😵'); break;
+    case 'invisivel': status('eu', 'invisivel', dur(10, 30), 'ficou invisível 👀'); break;
+    case 'escudo': status('eu', 'escudo', dur(8, 20), 'ganhou escudo 🛡️'); break;
+    case 'dancar': status('todos', 'dancando', dur(5, 10), 'está dançando 💃'); break;
+    case 'voar': status('eu', 'voando', dur(12, 40), 'está voando 🪽'); break;
+    case 'curar': { const a = al('eu'); for (const p of a) { p.hp = Math.min(hpMaxDe(p), p.hp + 60); evento({ k: 'cura', x: p.x, y: p.y }); } if (a.length) ef.push(`💚 ${nomesDe(a)} recuperou vida`); break; }
+    case 'teleportar': { const a = al('eu'); for (const p of a) { evento({ k: 'poof', x: p.x, y: p.y }); Object.assign(p, posLivre()); evento({ k: 'poof', x: p.x, y: p.y }); } if (a.length) ef.push(`🌀 ${nomesDe(a)} foi teleportado`); break; }
+    case 'trocar': { const a = al('aleatorio').filter(p => p !== autor); const o = a[0]; if (o && !autor.morto) { const x = autor.x, y = autor.y; autor.x = o.x; autor.y = o.y; o.x = x; o.y = y; evento({ k: 'poof', x: o.x, y: o.y }); evento({ k: 'poof', x: autor.x, y: autor.y }); ef.push(`🔄 ${autor.nome} trocou de lugar com ${o.nome}`); } break; }
+    case 'dano': { const a = al('aleatorio'); for (const p of a) { evento({ k: 'raio', x: p.x, y: p.y }); ferir(p, 45, autor.id); } if (a.length) ef.push(`⚡ um raio caiu em ${nomesDe(a)}`); break; }
+    case 'escuridao': { const d = fin(dur(12, 40)); G.escuro = T + d; ef.push(`🌑 as luzes se apagaram ${durTxt(d)}`); break; }
+    case 'lava': { const d = fin(dur(12, 40)); G.lava = T + d; G.autorLava = autor.id; gerarIlhas(); ef.push(`🌋 o chão virou lava ${durTxt(d)}! corra para as pedras`); break; }
+    case 'terremoto': { const d = fin(dur(6, 20)); G.terremoto = T + d; G.autorTerremoto = autor.id; ef.push(`🫨 terremoto ${durTxt(d)}`); break; }
+    case 'cancelar': {
+      G.lava = G.escuro = G.terremoto = G.cinza = G.disfarce = G.batata = 0;
+      for (const m of mobs) if (m.tipo !== 'item') { m.morto = true; evento({ k: 'poof', x: m.x, y: m.y }); }
+      agenda = agenda.filter(a => a.manter);
+      for (const p of jogadores) { if (p.forma) evento({ k: 'poof', x: p.x, y: p.y }); p.forma = null; p.st = {}; p.hp = Math.min(p.hp, hpMaxDe(p)); }
+      ef.push('✨ tudo voltou ao normal');
+      break;
+    }
+    case 'puxar': case 'empurrar': {
+      const a = al('outros').filter(p => p !== autor), s = cl.verbo === 'puxar' ? 1 : -1;
+      for (const p of a) { const dx = autor.x - p.x, dy = autor.y - p.y, d = Math.hypot(dx, dy) || 1; p.vx += dx / d * 1300 * s; p.vy += dy / d * 1300 * s; }
+      if (a.length) ef.push(`${s > 0 ? '🧲' : '🌬️'} ${autor.nome} ${s > 0 ? 'puxou' : 'empurrou'} ${nomesDe(a)}`);
+      break;
+    }
+    case 'clonar': {
+      const n = clamp(Math.round(cl.n ?? cl.nArt ?? 3), 1, 8), f = formaDe(autor);
+      const base = f || { k: 'clone', e: autor.rosto, tam: 1, vel: 1.1, hp: 1.4, dano: 1, cat: 'pessoa' };
+      for (let i = 0; i < n; i++) criarMob(base, { x: autor.x + rnd(-90, 90), y: autor.y + rnd(-90, 90), dono: autor.id, ate: T + fin(dur(20, 60)), e: emojiDe(autor), clone: true });
+      ef.push(`👯 ${autor.nome} criou ${n} ${n > 1 ? 'clones' : 'clone'}`);
+      break;
+    }
+    case 'ganhar': {
+      if (T - autor.ganhou < 60) { ef.push(`🙅 ${autor.nome} já ganhou pontos de graça há pouco`); break; }
+      autor.ganhou = T; autor.pontos += 2; evento({ k: 'pega', x: autor.x, y: autor.y, e: '⭐' }); ef.push(`⭐ ${autor.nome} ganhou +2 pontos`);
+      break;
+    }
+  }
+}
+
+/* =====================================================================
+   SIMULAÇÃO
+   ===================================================================== */
+function transformar(p, k, d) {
+  const ratio = p.hp / hpMaxDe(p);
+  p.forma = { k, ate: d === Infinity ? 1e12 : T + d };
+  p.hp = Math.max(1, Math.round(ratio * hpMaxDe(p)));
+  evento({ k: 'poof', x: p.x, y: p.y });
+}
+function destransformar(p) {
+  const ratio = p.hp / hpMaxDe(p);
+  p.forma = null; p.hp = Math.max(1, Math.round(ratio * hpMaxDe(p)));
+  evento({ k: 'poof', x: p.x, y: p.y });
+}
+function criarMob(c, { x, y, dono = null, alvoId = null, ate, mods = {}, e = null, clone = false }) {
+  if (mobs.length > 230) return null;
+  const tam = (c.tam || 1) * (mods.tam || 1) * 0.85;
+  const hp = Math.round(22 * (c.hp || 1) * (mods.tam > 1 ? 1.8 : 1) * (clone ? 1.5 : 1));
+  const m = { id: ++seq, tipo: 'mob', k: c.k, e: e || c.e, x: clamp(x, 40, W - 40), y: clamp(y, 40, H - 40), vx: 0, vy: 0, tam, hp, hpMax: hp,
+    vel: 150 * (c.vel || 1) * (mods.vel || 1), dano: 7 * (c.dano || 1) * (mods.dano || 1) * (mods.tam > 1 ? 1.4 : 1),
+    dono, alvoId, ate: ate || T + 20, cd: 0.8, cdTiro: rnd(0.8, 2), tiro: c.tiro, esp: c.esp, voa: c.voa, clone };
+  mobs.push(m); evento({ k: 'poof', x: m.x, y: m.y, p: 1 });
+  return m;
+}
+function criarTiro(x, y, dx, dy, e, dono, dano, esp, o = {}) {
+  if (mobs.length > 290) return;
+  const vel = o.vel || 620;
+  mobs.push({ id: ++seq, tipo: 'tiro', e, x, y, vx: dx * vel, vy: dy * vel, dono, dano, esp, ate: T + (o.vida || 1.1), tam: o.tam || 0.55, r: o.r || 12, acertou: o.atravessa ? new Set() : null, isekai: !!o.isekai });
+}
+function criarQueda(c, x, y, dono, md = {}) {
+  if (mobs.length > 260) return;
+  mobs.push({ id: ++seq, tipo: 'cai', k: c.k, e: c.e, x, y, h: rnd(600, 850), vh: 250, tam: (c.tam || 1) * (md.tam || 1) * 0.9, dono, ate: T + 10 });
+}
+function gerarIlhas() {
+  G.ilhas = [];
+  const n = Math.max(4, Math.ceil(jogadores.length * 0.7));
+  for (let i = 0; i < n; i++) {
+    let p, tent = 0;
+    do { p = { x: rnd(220, W - 220), y: rnd(220, H - 220), r: rnd(95, 135) }; tent++; } while (tent < 30 && G.ilhas.some(o => Math.hypot(o.x - p.x, o.y - p.y) < o.r + p.r + 120));
+    G.ilhas.push(p);
+  }
+}
+function ferir(q, dano, fonte, o = {}) {
+  if (q.morto || temSt(q, 'escudo')) return false;
+  if (formaDe(q)?.esp === 'esquiva' && Math.random() < 0.6) { if (!o.silencioso && Math.random() < 0.5) evento({ k: 'pega', x: q.x, y: q.y, e: 'MISS' }); return false; }
+  q.hp -= dano; q.ultimo = fonte;
+  if (o.kx) { q.vx += o.kx; q.vy += o.ky; }
+  if (o.esp === 'gelo') darSt(q, 'lento', 2.5);
+  if (o.esp === 'fogo') q.queima = T + 3;
+  if (o.esp === 'zumbi' && formaDe(q)?.k !== 'zumbi' && q.hp > 0) transformar(q, 'zumbi', 10);
+  if (o.esp === 'vampiro') { const f = jogadores.find(x => x.id === fonte); if (f && !f.morto) f.hp = Math.min(hpMaxDe(f), f.hp + dano * 0.5); }
+  if (!o.silencioso) evento({ k: 'hit', x: q.x, y: q.y });
+  if (q.hp <= 0) matar(q, fonte);
+  return true;
+}
+function ferirMob(m, dano, fonte, kx = 0, ky = 0) {
+  m.hp -= dano; m.vx += kx; m.vy += ky;
+  evento({ k: 'hit', x: m.x, y: m.y });
+  if (m.hp <= 0 && !m.morto) { m.morto = true; evento({ k: 'poof', x: m.x, y: m.y }); }
+}
+function matar(q, por) {
+  const k = jogadores.find(x => x.id === por);
+  const emo = k && k !== q ? emojiDe(k) : '💀';
+  q.morto = T + 3; q.mortes++; q.hp = 0; q.forma = null; q.st = {}; q.queima = 0;
+  if (k && k !== q) { k.kos++; k.pontos += 3; }
+  evento({ k: 'ko', a: k && k !== q ? k.nome : null, b: q.nome, e: emo, x: q.x, y: q.y, id: q.id });
+}
+function boom(x, y, r, dano, dono, poupar = false) {
+  evento({ k: 'boom', x, y, r });
+  for (const p of jogadores) {
+    if (p.morto || (poupar && p.id === dono)) continue; const d = Math.hypot(p.x - x, p.y - y);
+    if (d < r + raioJ(p)) { const f = 1 - Math.min(1, d / (r + raioJ(p))) * 0.5, dx = (p.x - x) / (d || 1), dy = (p.y - y) / (d || 1); ferir(p, dano * f, dono, { kx: dx * 700, ky: dy * 700 }); }
+  }
+  for (const m of mobs) if (m.tipo === 'mob' && !m.morto && Math.hypot(m.x - x, m.y - y) < r + raioM(m)) ferirMob(m, dano * 1.5, dono, (m.x - x) * 4, (m.y - y) * 4);
+}
+function maisProximoInimigo(p, alcance) {
+  let alvo = null, md = alcance;
+  for (const q of jogadores) if (q !== p && !q.morto && !temSt(q, 'invisivel')) { const d = Math.hypot(q.x - p.x, q.y - p.y); if (d < md) { md = d; alvo = q; } }
+  for (const m of mobs) if (m.tipo === 'mob' && m.dono !== p.id && !m.morto) { const d = Math.hypot(m.x - p.x, m.y - p.y); if (d < md * 0.85) { md = d; alvo = m; } }
+  return alvo;
+}
+function atacar(p) {
+  let ax = p.input.ax, ay = p.input.ay;
+  if (p.input.auto || (!ax && !ay)) { const a = maisProximoInimigo(p, 520); if (a) { ax = a.x - p.x; ay = a.y - p.y; } else { ax = p.dirx; ay = p.diry; } }
+  const l = Math.hypot(ax, ay) || 1; ax /= l; ay /= l;
+  const f = formaDe(p), tam = tamDe(p);
+  let mult = (f?.dano || 1) * (temSt(p, 'grande') ? 1.4 : 1) * (temSt(p, 'pequeno') ? 0.7 : 1) * (temSt(p, 'furia') ? 2 : 1);
+  const umSoco = temSt(p, 'umsoco');
+  if (f?.esp === 'bomba') { boom(p.x, p.y, 190, 60, p.id); matar(p, null); return; }
+  if (f?.tiro) { criarTiro(p.x + ax * 30 * tam, p.y + ay * 30 * tam, ax, ay, f.tiro, p.id, 9 * mult, f.esp); p.atkCd = 0.5; evento({ k: 'tiro', x: p.x, y: p.y }); return; }
+  const alc = (30 * tam + 44) * (f?.esp === 'elastico' ? 2.2 : 1), cx = p.x + ax * alc * 0.6, cy = p.y + ay * alc * 0.6;
+  if (umSoco) mult *= 100;
+  let acertou = false;
+  for (const q of jogadores) if (q !== p && !q.morto && Math.hypot(q.x - cx, q.y - cy) < alc * 0.75 + raioJ(q)) { if (ferir(q, 11 * mult, p.id, { kx: ax * (umSoco ? 2500 : 420), ky: ay * (umSoco ? 2500 : 420), esp: f?.esp })) acertou = true; }
+  for (const m of mobs) if (m.tipo === 'mob' && !m.morto && m.dono !== p.id && Math.hypot(m.x - cx, m.y - cy) < alc * 0.75 + raioM(m)) { ferirMob(m, 15 * mult, p.id, ax * 320, ay * 320); acertou = true; }
+  if (umSoco && acertou) { p.st.umsoco = 0; evento({ k: 'boom', x: cx, y: cy, r: 110 }); evento({ k: 'pega', x: cx, y: cy - 30, e: 'ONE PUNCH!' }); }
+  evento({ k: 'golpe', x: cx, y: cy, a: Math.atan2(ay, ax), s: alc });
+  p.atkCd = 0.42;
+}
+function renascer(p) {
+  Object.assign(p, posLivre(), { vx: 0, vy: 0, morto: 0, forma: null, st: { escudo: T + 2.5 }, queima: 0 });
+  p.hp = hpMaxDe(p); evento({ k: 'poof', x: p.x, y: p.y });
+}
+function atualizarJogador(p, dt) {
+  if (p.morto) { if (T >= p.morto && estado === 'jogo') renascer(p); return; }
+  if (p.forma && p.forma.ate <= T) destransformar(p);
+  if (p.hp > hpMaxDe(p)) p.hp = hpMaxDe(p);
+  let { mx, my } = p.input;
+  mx = clamp(+mx || 0, -1, 1); my = clamp(+my || 0, -1, 1);
+  if (temSt(p, 'invertido')) { mx = -mx; my = -my; }
+  if (temSt(p, 'congelado') || temSt(p, 'dancando')) { mx = 0; my = 0; }
+  const vel = velDe(p), k = Math.min(1, dt * 9);
+  p.vx += (mx * vel - p.vx) * k; p.vy += (my * vel - p.vy) * k;
+  const r = raioJ(p);
+  p.x = clamp(p.x + p.vx * dt, r, W - r); p.y = clamp(p.y + p.vy * dt, r, H - r);
+  if (mx || my) { const l = Math.hypot(mx, my); p.dirx = mx / l; p.diry = my / l; }
+  p.atkCd -= dt;
+  if (p.input.atk && p.atkCd <= 0 && !temSt(p, 'congelado') && !temSt(p, 'dancando') && !temSt(p, 'desarmado')) atacar(p);
+}
+function colisoes() {
+  const vivos = jogadores.filter(p => !p.morto);
+  for (let i = 0; i < vivos.length; i++) for (let j = i + 1; j < vivos.length; j++) {
+    const a = vivos[i], b = vivos[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, r = raioJ(a) + raioJ(b);
+    if (d < r) { const e = (r - d) / 2; a.x -= dx / d * e; a.y -= dy / d * e; b.x += dx / d * e; b.y += dy / d * e; }
+  }
+  const ms = mobs.filter(m => m.tipo === 'mob');
+  if (ms.length < 140) for (let i = 0; i < ms.length; i++) for (let j = i + 1; j < ms.length; j++) {
+    const a = ms[i], b = ms[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1, r = (raioM(a) + raioM(b)) * 0.8;
+    if (d < r) { const e = (r - d) / 2; a.x -= dx / d * e; a.y -= dy / d * e; b.x += dx / d * e; b.y += dy / d * e; }
+  }
+}
+function aterrissar(m) {
+  const c = COISAS[m.k];
+  if (c.cura || c.pontos || ['presente', 'rapido', 'cresce'].includes(c.esp)) { m.tipo = 'item'; m.h = 0; m.ate = T + 14; evento({ k: 'impacto', x: m.x, y: m.y, r: 20 }); return; }
+  if (c.esp === 'bomba') { boom(m.x, m.y, 160, 45, m.dono); m.morto = true; return; }
+  const r = 34 * m.tam + 26, dano = c.peso || 18;
+  for (const p of jogadores) if (!p.morto && !voando(p) && Math.hypot(p.x - m.x, p.y - m.y) < r + raioJ(p)) ferir(p, dano, m.dono, { kx: (p.x - m.x) * 5, ky: (p.y - m.y) * 5, esp: c.esp });
+  evento({ k: 'impacto', x: m.x, y: m.y, r });
+  m.morto = true;
+  if (['animal', 'monstro', 'pessoa'].includes(c.cat)) criarMob(c, { x: m.x, y: m.y, dono: m.dono, ate: T + 12 });
+}
+function pegarItem(p, m) {
+  const c = COISAS[m.k];
+  if (c.cura) { p.hp = Math.min(hpMaxDe(p), p.hp + c.cura); evento({ k: 'cura', x: p.x, y: p.y }); }
+  if (c.pontos) { p.pontos += c.pontos; evento({ k: 'pega', x: p.x, y: p.y, e: '+' + c.pontos }); }
+  if (c.esp === 'rapido') darSt(p, 'rapido', 6);
+  if (c.esp === 'cresce') darSt(p, 'grande', 8);
+  if (c.esp === 'presente') {
+    const s = Math.random();
+    if (s < 0.3) { p.hp = hpMaxDe(p); evento({ k: 'cura', x: p.x, y: p.y }); }
+    else if (s < 0.55) { p.pontos += 2; evento({ k: 'pega', x: p.x, y: p.y, e: '+2' }); }
+    else if (s < 0.8) transformar(p, pick(TODAS).k, 10);
+    else boom(p.x, p.y, 120, 30, null);
+  }
+}
+function atualizarMobs(dt) {
+  for (let i = mobs.length - 1; i >= 0; i--) {
+    const m = mobs[i];
+    if (m.morto || m.ate <= T) { if (!m.morto && m.tipo === 'mob') evento({ k: 'poof', x: m.x, y: m.y }); mobs.splice(i, 1); continue; }
+    if (m.tipo === 'tiro') {
+      m.x += m.vx * dt; m.y += m.vy * dt;
+      if (m.x < -300 || m.y < -300 || m.x > W + 300 || m.y > H + 300) { m.morto = true; continue; }
+      for (const p of jogadores) {
+        if (p.id === m.dono || p.morto || (m.acertou && m.acertou.has(p.id))) continue;
+        if (Math.hypot(p.x - m.x, p.y - m.y) < raioJ(p) + m.r) {
+          ferir(p, m.dano, m.dono, { kx: m.vx * 0.35, ky: m.vy * 0.35, esp: m.esp });
+          if (m.isekai && !p.morto) { evento({ k: 'poof', x: p.x, y: p.y }); Object.assign(p, posLivre()); evento({ k: 'pega', x: p.x, y: p.y, e: 'ISEKAI!' }); }
+          if (m.acertou) m.acertou.add(p.id); else { m.morto = true; break; }
+        }
+      }
+      if (!m.morto) for (const o of mobs) {
+        if (o.tipo !== 'mob' || o.morto || o.dono === m.dono || (m.acertou && m.acertou.has('m' + o.id))) continue;
+        if (Math.hypot(o.x - m.x, o.y - m.y) < raioM(o) + m.r) { ferirMob(o, m.dano * 1.3, m.dono, m.vx * 0.3, m.vy * 0.3); if (m.acertou) m.acertou.add('m' + o.id); else { m.morto = true; break; } }
+      }
+      continue;
+    }
+    if (m.tipo === 'cai') { m.vh += dt * 1100; m.h -= m.vh * dt; if (m.h <= 0) aterrissar(m); continue; }
+    if (m.tipo === 'item') { for (const p of jogadores) if (!p.morto && Math.hypot(p.x - m.x, p.y - m.y) < raioJ(p) + 22) { pegarItem(p, m); m.morto = true; break; } continue; }
+    // criatura
+    m.cd -= dt; m.cdTiro -= dt;
+    if (m.parado > T) continue;
+    let alvo = null;
+    if (m.alvoId) { const a = jogadores.find(p => p.id === m.alvoId); if (a && !a.morto && !temSt(a, 'invisivel')) alvo = a; }
+    if (!alvo) { let md = 1e9; for (const p of jogadores) if (p.id !== m.dono && !p.morto && !temSt(p, 'invisivel')) { const d = Math.hypot(p.x - m.x, p.y - m.y); if (d < md) { md = d; alvo = p; } } }
+    let tx, ty, dx = 0, dy = 0, d = 1e9;
+    if (alvo) { dx = alvo.x - m.x; dy = alvo.y - m.y; d = Math.hypot(dx, dy) || 1; }
+    if (alvo && !(m.tiro && d < 250)) { tx = dx / d; ty = dy / d; } else if (alvo) { tx = -dy / d * 0.5; ty = dx / d * 0.5; } else { tx = Math.cos(m.id + T * 0.5); ty = Math.sin(m.id * 1.7 + T * 0.4); }
+    if (m.voa) { tx += Math.cos(T * 2.1 + m.id) * 0.45; ty += Math.sin(T * 2.6 + m.id) * 0.45; }
+    const k = Math.min(1, dt * 4);
+    m.vx += (tx * m.vel - m.vx) * k; m.vy += (ty * m.vel - m.vy) * k;
+    m.x = clamp(m.x + m.vx * dt, 20, W - 20); m.y = clamp(m.y + m.vy * dt, 20, H - 20);
+    if (alvo && d < raioM(m) + raioJ(alvo) + 4 && m.cd <= 0) {
+      if (m.esp === 'bomba') { boom(m.x, m.y, 150, 40, m.dono); m.morto = true; continue; }
+      ferir(alvo, m.dano, m.dono, { kx: dx / d * 260, ky: dy / d * 260, esp: m.esp }); m.cd = 0.8;
+    }
+    if (m.tiro && alvo && d < 560 && m.cdTiro <= 0) { criarTiro(m.x, m.y, dx / d, dy / d, m.tiro, m.dono, 6 * Math.sqrt(m.dano / 7), m.esp); m.cdTiro = rnd(1.5, 2.4); }
+    if (m.esp === 'empurra') for (const p of jogadores) { if (p.morto) continue; const ex = p.x - m.x, ey = p.y - m.y, ed = Math.hypot(ex, ey) || 1; if (ed < 180) { p.vx += ex / ed * 1500 * dt; p.vy += ey / ed * 1500 * dt; } }
+  }
+}
+function efeitosGlobais(dt) {
+  const lava = G.lava > T, terr = G.terremoto > T;
+  for (const p of jogadores) {
+    if (p.morto) continue;
+    let dps = 0, fonte = null;
+    if (lava && !voando(p) && !G.ilhas.some(il => Math.hypot(p.x - il.x, p.y - il.y) < il.r)) { dps += 22; fonte = G.autorLava; }
+    if (terr && !voando(p)) { dps += 5; fonte = fonte || G.autorTerremoto; p.vx += rnd(-1, 1) * 1600 * dt; p.vy += rnd(-1, 1) * 1600 * dt; }
+    if (p.queima > T) { dps += 5; }
+    if (G.batata > T && !voando(p)) { const t0 = T - G.batataIni; if (Math.floor(t0 / 2.6) % 2 === 1 && t0 % 2.6 > 0.45 && Math.hypot(p.vx, p.vy) > 55) { dps += 26; fonte = fonte || G.autorBatata; } }
+    if (dps) { p.lavaAcc += dps * dt; if (p.lavaAcc >= 5) { const v = p.lavaAcc; p.lavaAcc = 0; ferir(p, v, fonte === p.id ? null : fonte); } }
+  }
+}
+function turno(dt) {
+  if (V.fase === 'pausa') { if (T >= V.ate) proximaVez(); return; }
+  if (V.fase !== 'digitando') return;
+  const p = jogadores.find(x => x.id === V.quem);
+  if (!p) { V.fase = 'pausa'; V.ate = T + 2; return; }
+  if (p.bot) {
+    V.botAcc += dt * 13; V.texto = V.botTexto.slice(0, Math.max(0, Math.floor(V.botAcc)));
+    if (V.botAcc >= V.botTexto.length + 8) { receberPedido(p.id, V.botTexto); return; }
+  }
+  if (T >= V.ate) {
+    if (p.bot) receberPedido(p.id, V.botTexto);
+    else { evento({ k: 'msg', txt: `⌛ ${p.nome} demorou demais e perdeu a vez` }); V.fase = 'pausa'; V.ate = T + 3; }
+  }
+}
+function proximaVez() {
+  const vivos = jogadores.filter(p => !p.morto);
+  if (!vivos.length) { V.ate = T + 1; return; }
+  vivos.sort((a, b) => (a.ultimoPedido - b.ultimoPedido) || (Math.random() - 0.5));
+  const p = vivos[0]; p.ultimoPedido = T;
+  Object.assign(V, { fase: 'digitando', quem: p.id, nome: p.nome, texto: '', ate: T + (p.bot ? 12 : 16), botTexto: p.bot ? pedidoBot(p) : '', botAcc: p.bot ? -rnd(8, 22) : 0 });
+  evento({ k: 'vez', id: p.id, nome: p.nome });
+}
+function receberPedido(id, texto) {
+  texto = String(texto || '').trim().slice(0, 120);
+  if (V.fase !== 'digitando' || V.quem !== id || !texto) return;
+  const p = jogadores.find(x => x.id === id); if (!p) return;
+  V.fase = 'pausa'; V.ate = T + 9; V.texto = texto;
+  executarPedido(p, texto);
+  if (V.bonus) {
+    const b = jogadores.find(x => x.id === V.bonus); V.bonus = null;
+    if (b && !b.morto) {
+      Object.assign(V, { fase: 'digitando', quem: b.id, nome: b.nome, texto: '', ate: T + (b.bot ? 12 : 16), botTexto: b.bot ? pedidoBot(b) : '', botAcc: b.bot ? -rnd(30, 50) : 0 });
+      evento({ k: 'vez', id: b.id, nome: b.nome, bonus: 1 });
+    }
+  }
+}
+function pedidoBot(bot) {
+  const outros = jogadores.filter(p => p !== bot && !p.morto);
+  const nomeAlvo = outros.length ? pick(outros).nome : 'todos';
+  const bicho = () => pick(TODAS.filter(c => c.cat === 'animal' || c.cat === 'monstro'));
+  const qq = () => pick(TODAS), com = () => pick(TODAS.filter(c => c.cat === 'comida' || c.peso));
+  const n = pick([3, 4, 5, 6, 8, 10]), s = pick([5, 8, 10, 15, 20]);
+  if (Math.random() < 0.18) { const o = pick(OVOS); return o.alvo ? `${o.ps[0]} ${nomeAlvo}` : o.ps[0]; }
+  return pick([
+    () => `vire ${qq().nome}`,
+    () => `vire ${bicho().nome} ${pick(['gigante', 'agora', 'rápido', ''])}`.trim(),
+    () => `todos virem ${qq().nome} ${s} segundos`,
+    () => `${nomeAlvo} vire ${qq().nome}`,
+    () => `ataque ${n} ${plural(bicho().nome)}`,
+    () => `${n} ${plural(bicho().nome)} ${pick(['furiosos', 'gigantes', 'rápidos', ''])} ataquem ${nomeAlvo}`.replace('  ', ' '),
+    () => `chova ${plural(com().nome)}`,
+    () => `chuva de ${plural(com().nome)}`,
+    () => 'o chão é lava',
+    () => `exploda ${nomeAlvo}`,
+    () => `invoque ${pick([2, 3, 4])} ${plural(bicho().nome)}`,
+    () => 'congele todos',
+    () => 'fique invisível e acelere',
+    () => 'apague a luz',
+    () => 'terremoto agora',
+    () => `cresça e vire ${bicho().nome}`,
+    () => `todos dancem ${pick([4, 5, 6])} segundos`,
+    () => 'inverta os outros',
+    () => `me clone ${pick([2, 3, 4])}`,
+    () => `vire ${bicho().nome} e chova ${plural(com().nome)}`,
+    () => `troque com ${nomeAlvo}`,
+    () => 'voe e chova bombas',
+    () => `em 5 segundos chova ${plural(com().nome)}`,
+    () => `destrua o líder`,
+  ])();
+}
+function iaBot(b, dt) {
+  if (b.morto) return;
+  b.ia.t -= dt; if (b.ia.t > 0) return; b.ia.t = rnd(0.12, 0.25);
+  if (V.fase === 'digitando' && V.quem === b.id) { b.input = { mx: 0, my: 0, ax: 0, ay: 0, atk: false, auto: true }; return; }
+  let alvo = null, md = 1e9;
+  for (const p of jogadores) if (p !== b && !p.morto && !temSt(p, 'invisivel')) { const d = Math.hypot(p.x - b.x, p.y - b.y); if (d < md) { md = d; alvo = p; } }
+  let ameaca = null, ma = 300;
+  for (const m of mobs) if (m.tipo === 'mob' && m.dono !== b.id) { const d = Math.hypot(m.x - b.x, m.y - b.y); if (d < ma) { ma = d; ameaca = m; } }
+  const tgt = ameaca && ma < md * 0.8 ? ameaca : alvo, dt2 = tgt ? Math.hypot(tgt.x - b.x, tgt.y - b.y) : 1e9;
+  let mx = 0, my = 0;
+  const vaiPara = (x, y, s = 1) => { const dx = x - b.x, dy = y - b.y, d = Math.hypot(dx, dy) || 1; mx += dx / d * s; my += dy / d * s; };
+  const hpPct = b.hp / hpMaxDe(b), tiro = !!formaDe(b)?.tiro;
+  if (G.lava > T && !voando(b)) {
+    const il = G.ilhas.reduce((a, c) => !a || Math.hypot(c.x - b.x, c.y - b.y) < Math.hypot(a.x - b.x, a.y - b.y) ? c : a, null);
+    if (il && Math.hypot(il.x - b.x, il.y - b.y) > il.r * 0.5) vaiPara(il.x, il.y, 1.2);
+  } else if (hpPct < 0.35 && tgt && dt2 < 320) {
+    vaiPara(tgt.x, tgt.y, -1);
+    const comida = mobs.find(m => m.tipo === 'item' && COISAS[m.k]?.cura && Math.hypot(m.x - b.x, m.y - b.y) < 500); if (comida) vaiPara(comida.x, comida.y, 0.8);
+  } else {
+    const item = mobs.find(m => m.tipo === 'item' && Math.hypot(m.x - b.x, m.y - b.y) < (hpPct < 0.7 ? 450 : 200));
+    if (item) vaiPara(item.x, item.y, 1);
+    else if (tgt) { if (tiro && dt2 < 280) vaiPara(tgt.x, tgt.y, -0.7); else vaiPara(tgt.x, tgt.y, 1); }
+    mx += Math.cos(T * 1.3 + b.id.length + b.nome.length) * 0.35; my += Math.sin(T * 1.1 + b.nome.length) * 0.35;
+  }
+  for (const m of mobs) if (m.tipo === 'cai' && m.h < 400 && Math.hypot(m.x - b.x, m.y - b.y) < 90 && !COISAS[m.k]?.cura) vaiPara(m.x, m.y, -1.5);
+  const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
+  const alcance = tiro ? 480 : 34 * tamDe(b) + 60;
+  b.input = { mx, my, ax: tgt ? tgt.x - b.x : 0, ay: tgt ? tgt.y - b.y : 0, atk: !!tgt && dt2 < alcance && Math.random() < 0.8, auto: false };
+}
+function simular(dt) {
+  T += dt;
+  if (estado === 'fim') { if (T >= G.reinicio) reiniciarPartida(); return; }
+  for (let i = agenda.length - 1; i >= 0; i--) if (agenda[i] && agenda[i].t <= T) { const a = agenda.splice(i, 1)[0]; try { a.fn(); } catch (e) { console.error(e); } }
+  turno(dt);
+  for (const p of jogadores) { if (p.bot) iaBot(p, dt); atualizarJogador(p, dt); }
+  colisoes(); atualizarMobs(dt); efeitosGlobais(dt);
+  if (T >= G.fim) terminarPartida();
+}
+function montarSnap(comEventos) {
+  const disf = G.disfarce > T;
+  const j = jogadores.map(p => {
+    let f = 0;
+    if (p.morto) f |= SM.MORTO; if (voando(p)) f |= SM.VOA; if (temSt(p, 'congelado')) f |= SM.GELO; if (temSt(p, 'dancando')) f |= SM.DANCA;
+    if (temSt(p, 'invisivel')) f |= SM.INVIS; if (temSt(p, 'escudo')) f |= SM.ESCUDO; if (temSt(p, 'invertido')) f |= SM.INVERT; if (p.bot) f |= SM.BOT;
+    if (temSt(p, 'lento')) f |= SM.LENTO; if (temSt(p, 'rapido')) f |= SM.RAPIDO; if (formaDe(p)?.esp === 'fantasma') f |= SM.FANT;
+    return [p.id, disf ? '???' : p.nome, p.cor, disf ? '😶' : emojiDe(p), Math.round(p.x), Math.round(p.y), Math.max(0, Math.round(p.hp)), hpMaxDe(p), Math.round(tamDe(p) * 100), f, p.pontos, p.kos, p.mortes, formaDe(p)?.nome || '', p.rosto, temSt(p, 'umsoco') ? '#ffd166' : temSt(p, 'furia') ? '#ff3d3d' : ''];
+  });
+  const m = mobs.map(o => [o.id, o.e, Math.round(o.x), Math.round(o.y), Math.round(o.tam * 100), Math.round(o.h || 0), o.dono || '', o.tipo === 'mob' ? (o.clone ? 4 : 0) : o.tipo === 'cai' ? 1 : o.tipo === 'item' ? 2 : 3, o.hpMax ? Math.round(o.hp / o.hpMax * 10) : 10]);
+  const s = {
+    t: 's', j, m, e: estado,
+    g: { lava: G.lava > T ? +(G.lava - T).toFixed(1) : 0, il: G.lava > T ? G.ilhas.map(i => [Math.round(i.x), Math.round(i.y), Math.round(i.r)]) : [], esc: G.escuro > T ? 1 : 0, ter: G.terremoto > T ? 1 : 0, cz: G.cinza > T ? 1 : 0, bat: G.batata > T ? (Math.floor((T - G.batataIni) / 2.6) % 2 ? 2 : 1) : 0 },
+    v: { f: V.fase, q: V.quem, n: V.nome, tx: V.fase === 'digitando' ? V.texto : '', r: V.fase === 'digitando' ? Math.max(0, V.ate - T) : 0, tot: V.quem && jogadores.find(p => p.id === V.quem)?.bot ? 12 : 16 },
+    fim: Math.max(0, (G.fim || 0) - T), re: estado === 'fim' ? Math.max(0, G.reinicio - T) : 0, pod: estado === 'fim' ? G.podio : null,
+  };
+  if (comEventos) { s.ev = evRede; evRede = []; }
+  return s;
+}
+
+/* =====================================================================
+   REDE (PeerJS: salas online sem servidor próprio)
+   ===================================================================== */
+const PREFIXO = 'arcadia-desejos-v1-';
+let peer = null, conns = new Map(), conn = null, codigoSala = null;
+function criarSalaOnline() {
+  if (!window.Peer) { toast('Não deu para carregar o sistema de salas. Jogando offline com bots.'); return; }
+  const tentar = (n = 0) => {
+    codigoSala = Array.from({ length: 4 }, () => pick('ABCDEFGHJKMNPQRSTUVWXYZ')).join('');
+    peer = new Peer(PREFIXO + codigoSala, { debug: 0 });
+    peer.on('open', () => { $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 Sala ' + codigoSala; toast(`Sala ${codigoSala} criada! Seus amigos entram com esse código.`, 6000); });
+    peer.on('connection', c => {
+      c.on('data', d => dadosDoCliente(c, d));
+      c.on('close', () => saiuCliente(c));
+      c.on('error', () => saiuCliente(c));
+    });
+    peer.on('error', e => {
+      if (e.type === 'unavailable-id' && n < 5) { peer.destroy(); tentar(n + 1); }
+      else if (['network', 'server-error', 'socket-error', 'socket-closed', 'browser-incompatible'].includes(e.type)) toast('Servidor de salas indisponível. A partida continua offline com bots.');
+    });
+  };
+  tentar();
+}
+function dadosDoCliente(c, d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'oi') {
+    if (conns.has(c.peer)) return;
+    if (jogadores.filter(p => !p.bot).length >= 8) { c.send({ t: 'cheio' }); return; }
+    let nome = String(d.nome || 'Jogador').replace(/[<>]/g, '').trim().slice(0, 14) || 'Jogador';
+    while (jogadores.some(p => p.nome === nome)) nome += '2';
+    const p = adicionarJogador({ nome, rosto: ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false });
+    conns.set(c.peer, { c, pid: p.id });
+    c.send({ t: 'ola', id: p.id, sala: codigoSala });
+    ajustarBots();
+    evento({ k: 'msg', txt: `👋 ${p.nome} entrou na arena` });
+    return;
+  }
+  const info = conns.get(c.peer); if (!info) return;
+  const p = jogadores.find(x => x.id === info.pid); if (!p) return;
+  if (d.t === 'i') p.input = { mx: clamp(+d.mx || 0, -1, 1), my: clamp(+d.my || 0, -1, 1), ax: +d.ax || 0, ay: +d.ay || 0, atk: !!d.atk, auto: !!d.auto };
+  if (d.t === 'd' && V.quem === p.id && V.fase === 'digitando') V.texto = String(d.texto || '').slice(0, 120);
+  if (d.t === 'p') receberPedido(p.id, d.texto);
+}
+function saiuCliente(c) {
+  const info = conns.get(c.peer); if (!info) return;
+  conns.delete(c.peer);
+  const p = jogadores.find(x => x.id === info.pid);
+  if (p) evento({ k: 'msg', txt: `🚪 ${p.nome} saiu` });
+  removerJogador(info.pid); ajustarBots();
+}
+function entrarSala(cod) {
+  cod = cod.toUpperCase().replace(/[^A-Z]/g, '');
+  if (cod.length !== 4) { erroMenu('O código tem 4 letras.'); return; }
+  if (!window.Peer) { erroMenu('Não deu para carregar o sistema de salas (sem internet?).'); return; }
+  erroMenu('Conectando…', true);
+  const limite = setTimeout(() => { erroMenu('Não consegui encontrar a sala. Confira o código.'); try { peer.destroy(); } catch (e) {} }, 15000);
+  peer = new Peer({ debug: 0 });
+  peer.on('open', () => {
+    conn = peer.connect(PREFIXO + cod, { reliable: true });
+    conn.on('open', () => conn.send({ t: 'oi', nome: meuNome(), rosto: meuRosto }));
+    conn.on('data', d => {
+      if (d.t === 'ola') { clearTimeout(limite); meuId = d.id; codigoSala = d.sala; modo = 'cliente'; entrarNoJogo(); $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 Sala ' + codigoSala; }
+      else if (d.t === 's') { S = d; for (const e of d.ev || []) tratarEvento(e); }
+      else if (d.t === 'cheio') { clearTimeout(limite); erroMenu('Essa sala está cheia.'); }
+    });
+    conn.on('close', () => { if (modo === 'cliente') { toast('O anfitrião fechou a sala.', 5000); setTimeout(() => location.reload(), 2500); } });
+  });
+  peer.on('error', e => { clearTimeout(limite); erroMenu(e.type === 'peer-unavailable' ? 'Sala não encontrada. Confira o código.' : 'Não foi possível conectar (' + e.type + ').'); });
+}
+function enviarAoHost(msg) { if (conn && conn.open) conn.send(msg); }
+
+/* =====================================================================
+   ÁUDIO
+   ===================================================================== */
+let AC = null, mestre = null;
+function iniciarAudio() {
+  if (AC) return;
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); mestre = AC.createGain(); mestre.gain.value = 0.5; mestre.connect(AC.destination); } catch (e) {}
+}
+function tom(f, dur, tipo = 'sine', v = 0.2, f2 = null, atraso = 0) {
+  if (!AC) return; const t = AC.currentTime + atraso, o = AC.createOscillator(), g = AC.createGain();
+  o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(mestre); o.start(t); o.stop(t + dur + 0.05);
+}
+function ruido(dur, v = 0.3, freq = 800, tipo = 'lowpass') {
+  if (!AC) return; const t = AC.currentTime, n = AC.sampleRate * dur, b = AC.createBuffer(1, n, AC.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n);
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = b; f.type = tipo; f.frequency.value = freq; g.gain.value = v;
+  s.connect(f).connect(g).connect(mestre); s.start(t);
+}
+const SONS = {
+  vez: () => { tom(660, 0.15, 'triangle', 0.18); tom(990, 0.25, 'triangle', 0.18, null, 0.12); },
+  pedido: () => { [523, 659, 784, 1046, 1318].forEach((f, i) => tom(f, 0.3, 'sine', 0.13, null, i * 0.06)); },
+  boom: () => { ruido(0.6, 0.6, 500); tom(90, 0.4, 'sine', 0.4, 40); },
+  hit: () => tom(180, 0.08, 'square', 0.06, 90),
+  poof: () => ruido(0.25, 0.12, 2500, 'highpass'),
+  ko: () => { tom(440, 0.35, 'sawtooth', 0.1, 110); },
+  pega: () => { tom(880, 0.08, 'square', 0.07); tom(1320, 0.12, 'square', 0.07, null, 0.07); },
+  tiro: () => tom(900, 0.1, 'triangle', 0.06, 300),
+  impacto: () => { ruido(0.25, 0.25, 350); },
+  raio: () => { ruido(0.4, 0.5, 4000, 'highpass'); tom(70, 0.5, 'sawtooth', 0.25, 30); },
+  golpe: () => ruido(0.1, 0.08, 1500, 'bandpass'),
+  minhaVez: () => { [784, 988, 1175, 1568].forEach((f, i) => tom(f, 0.22, 'triangle', 0.2, null, i * 0.08)); },
+};
+function som(nome, x, y) {
+  if (!AC || !SONS[nome]) return;
+  if (x !== undefined && cam) { const d = Math.hypot(x - cam.x, y - cam.y); if (d > 900) return; mestre.gain.value = 0.5 * clamp(1.2 - d / 900, 0.25, 1); }
+  else mestre.gain.value = 0.5;
+  SONS[nome]();
+}
+
+/* =====================================================================
+   RENDERIZAÇÃO
+   ===================================================================== */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let DPR = 1, S = null, cam = { x: W / 2, y: H / 2, z: 1 }, tremor = 0;
+const vis = new Map(), particulas = [];
+function redimensionar() { DPR = Math.min(window.devicePixelRatio || 1, 2); cv.width = innerWidth * DPR; cv.height = innerHeight * DPR; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; }
+addEventListener('resize', redimensionar); redimensionar();
+const SPR = new Map();
+const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
+function spr(e) {
+  let c = SPR.get(e); if (c) return c;
+  c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'); g.font = `96px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 64, 70);
+  SPR.set(e, c); return c;
+}
+const piso = document.createElement('canvas');
+(function desenharPiso() {
+  piso.width = W / 2; piso.height = H / 2; const g = piso.getContext('2d'), t = 50;
+  for (let y = 0; y < piso.height; y += t) for (let x = 0; x < piso.width; x += t) { g.fillStyle = ((x + y) / t) % 2 ? '#f6e3c0' : '#f0d8ae'; g.fillRect(x, y, t, t); }
+  g.strokeStyle = 'rgba(160,110,60,.18)'; g.lineWidth = 6; g.beginPath(); g.arc(piso.width / 2, piso.height / 2, 170, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.arc(piso.width / 2, piso.height / 2, 30, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.moveTo(piso.width / 2, 0); g.lineTo(piso.width / 2, piso.height); g.stroke();
+  g.font = '40px ' + FONTE_EMOJI; g.globalAlpha = 0.15; g.textAlign = 'center';
+  for (const [x, y, e] of [[90, 80, '✨'], [1000, 90, '⭐'], [120, 610, '🌟'], [1010, 620, '✨']]) g.fillText(e, x, y);
+})();
+function emTela(x, y) { return [(x - cam.x) * cam.z + cv.width / 2, (y - cam.y) * cam.z + cv.height / 2]; }
+function suavizar(chave, x, y, dt) {
+  let v = vis.get(chave);
+  if (!v) { v = { x, y, vivo: 0 }; vis.set(chave, v); }
+  const k = Math.min(1, dt * (modo === 'host' ? 30 : 14));
+  if (Math.hypot(v.x - x, v.y - y) > 300) { v.x = x; v.y = y; }
+  v.x += (x - v.x) * k; v.y += (y - v.y) * k; v.vivo = 1;
+  return v;
+}
+function particula(p) { if (particulas.length < 400) particulas.push(p); }
+function tratarEvento(e) {
+  const meu = () => S?.j.find(j => j[0] === meuId);
+  switch (e.k) {
+    case 'hit': for (let i = 0; i < 3; i++) particula({ x: e.x, y: e.y, vx: rnd(-160, 160), vy: rnd(-200, -40), v: 0.4, m: 0.4, e: '✦', s: 16, cor: '#fff' }); som('hit', e.x, e.y); break;
+    case 'golpe': particula({ x: e.x, y: e.y, vx: 0, vy: 0, v: 0.18, m: 0.18, arco: e.a, s: e.s }); som('golpe', e.x, e.y); break;
+    case 'boom': particula({ x: e.x, y: e.y, vx: 0, vy: 0, v: 0.5, m: 0.5, e: '💥', s: e.r * 1.6, cresce: 1 }); for (let i = 0; i < 8; i++) particula({ x: e.x, y: e.y, vx: rnd(-400, 400), vy: rnd(-400, 400), v: 0.6, m: 0.6, e: '🔥', s: 28 }); tremor = Math.max(tremor, 14); som('boom', e.x, e.y); break;
+    case 'raio': particula({ x: e.x, y: e.y - 40, vx: 0, vy: 0, v: 0.45, m: 0.45, e: '⚡', s: 130 }); tremor = Math.max(tremor, 10); som('raio', e.x, e.y); break;
+    case 'poof': for (let i = 0; i < (e.p ? 2 : 6); i++) particula({ x: e.x + rnd(-15, 15), y: e.y + rnd(-15, 15), vx: rnd(-90, 90), vy: rnd(-90, 40), v: 0.55, m: 0.55, e: '☁️', s: e.p ? 22 : 34 }); if (!e.p) som('poof', e.x, e.y); break;
+    case 'cura': for (let i = 0; i < 4; i++) particula({ x: e.x + rnd(-20, 20), y: e.y, vx: 0, vy: rnd(-120, -60), v: 0.8, m: 0.8, e: '💚', s: 22 }); som('pega', e.x, e.y); break;
+    case 'pega': particula({ x: e.x, y: e.y - 30, vx: 0, vy: -70, v: 1, m: 1, txt: e.e, s: 30, cor: '#ffd166' }); som('pega', e.x, e.y); break;
+    case 'impacto': for (let i = 0; i < 5; i++) particula({ x: e.x, y: e.y, vx: rnd(-200, 200), vy: rnd(-120, 0), v: 0.4, m: 0.4, e: '💨', s: 22 }); if (e.r > 40) tremor = Math.max(tremor, 5); som('impacto', e.x, e.y); break;
+    case 'tiro': som('tiro', e.x, e.y); break;
+    case 'ko': feed(e.a ? `${e.e} <b>${esc(e.a)}</b> derrubou <b>${esc(e.b)}</b>` : `💀 <b>${esc(e.b)}</b> caiu`); particula({ x: e.x, y: e.y, vx: 0, vy: -60, v: 1.2, m: 1.2, e: '💀', s: 50 }); som('ko', e.x, e.y); break;
+    case 'msg': feed(esc(e.txt)); break;
+    case 'vez': if (e.id === meuId) { som('minhaVez'); abrirPedido(); } else som('vez'); if (!e.bonus) bannerAte = 0; break;
+    case 'pedido': mostrarPedido(e); som('pedido'); fecharPedido(); if (e.ovos?.length) { descobrir(e.ovos); confeteTela(); } break;
+    case 'confete': for (let i = 0; i < 14; i++) particula({ x: e.x, y: e.y, vx: rnd(-260, 260), vy: rnd(-420, -160), v: 1.1, m: 1.1, e: pick(['🎉', '🎊', '✨', '⭐']), s: 22 }); break;
+    case 'ggg': for (let i = 0; i < 10; i++) particula({ x: e.x + rnd(-140, 140), y: e.y + rnd(-110, 40), vx: 0, vy: -25, v: 1.8, m: 1.8, txt: 'ゴ', s: 36, cor: '#c084fc' }); break;
+  }
+}
+function desenhar(dt) {
+  if (!S) return;
+  const eu = S.j.find(j => j[0] === meuId);
+  // câmera
+  const zBase = Math.min(cv.width / 1250, cv.height / 780);
+  cam.z += (zBase - cam.z) * Math.min(1, dt * 4);
+  if (eu) { const v = vis.get('j' + meuId); if (v) { cam.x += (v.x - cam.x) * Math.min(1, dt * 6); cam.y += (v.y - cam.y) * Math.min(1, dt * 6); } }
+  const meiaW = cv.width / 2 / cam.z, meiaH = cv.height / 2 / cam.z;
+  cam.x = W < meiaW * 2 ? W / 2 : clamp(cam.x, meiaW - 60, W - meiaW + 60);
+  cam.y = H < meiaH * 2 ? H / 2 : clamp(cam.y, meiaH - 60, H - meiaH + 60);
+  if (S.g.ter) tremor = Math.max(tremor, 7);
+  const tx = (Math.random() - 0.5) * tremor * DPR, ty = (Math.random() - 0.5) * tremor * DPR; tremor *= Math.pow(0.02, dt);
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  const fundo = ctx.createLinearGradient(0, 0, 0, cv.height); fundo.addColorStop(0, '#2a1760'); fundo.addColorStop(1, '#150b2e');
+  ctx.fillStyle = fundo; ctx.fillRect(0, 0, cv.width, cv.height);
+  ctx.translate(tx, ty);
+  const [ax, ay] = emTela(0, 0), aw = W * cam.z, ah = H * cam.z, z = cam.z;
+  // borda da arena
+  ctx.fillStyle = '#5b3f8c'; roundRect(ax - 18 * z, ay - 18 * z, aw + 36 * z, ah + 36 * z, 40 * z); ctx.fill();
+  ctx.fillStyle = '#3d2768'; roundRect(ax - 8 * z, ay - 8 * z, aw + 16 * z, ah + 16 * z, 30 * z); ctx.fill();
+  ctx.save(); roundRect(ax, ay, aw, ah, 24 * z); ctx.clip();
+  ctx.drawImage(piso, ax, ay, aw, ah);
+  if (S.g.lava) {
+    const tt = performance.now() / 1000, gr = ctx.createLinearGradient(ax, ay, ax + aw, ay + ah);
+    gr.addColorStop(0, '#ff3d00'); gr.addColorStop(0.5 + Math.sin(tt) * 0.2, '#ff9100'); gr.addColorStop(1, '#ff1744');
+    ctx.globalAlpha = Math.min(1, S.g.lava * 2) * 0.9; ctx.fillStyle = gr; ctx.fillRect(ax, ay, aw, ah); ctx.globalAlpha = 1;
+    for (let i = 0; i < 30; i++) { const bx = ((i * 397 + tt * 40) % W), by = ((i * 211 + Math.sin(tt + i) * 30) % H); const [sx, sy] = emTela(bx, by); ctx.fillStyle = 'rgba(255,230,120,.5)'; ctx.beginPath(); ctx.arc(sx, sy, (6 + (i % 4) * 3) * z * (0.6 + 0.4 * Math.sin(tt * 3 + i)), 0, 7); ctx.fill(); }
+    for (const [x, y, r] of S.g.il) { const [sx, sy] = emTela(x, y); ctx.fillStyle = '#6b6b7b'; ctx.beginPath(); ctx.arc(sx, sy, r * z, 0, 7); ctx.fill(); ctx.fillStyle = '#8d8d9e'; ctx.beginPath(); ctx.arc(sx - 6 * z, sy - 8 * z, r * z * 0.86, 0, 7); ctx.fill(); }
+  }
+  ctx.restore();
+  // entidades ordenadas por y
+  const lista = [];
+  for (const m of S.m) { const v = suavizar('m' + m[0], m[2], m[3], dt); lista.push({ tipo: 'm', d: m, v, y: v.y }); }
+  for (const p of S.j) { if (p[9] & SM.MORTO) continue; const v = suavizar('j' + p[0], p[4], p[5], dt); lista.push({ tipo: 'j', d: p, v, y: v.y }); }
+  lista.sort((a, b) => a.y - b.y);
+  const tt = performance.now() / 1000;
+  for (const o of lista) {
+    if (o.tipo === 'm') desenharMob(o.d, o.v, z, tt);
+    else desenharJogador(o.d, o.v, z, tt, o.d[0] === meuId);
+  }
+  // partículas
+  for (let i = particulas.length - 1; i >= 0; i--) {
+    const p = particulas[i]; p.v -= dt; if (p.v <= 0) { particulas.splice(i, 1); continue; }
+    p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 200 * dt * (p.e === '☁️' || p.e === '💚' || p.txt ? -0.2 : 1);
+    const [sx, sy] = emTela(p.x, p.y), a = clamp(p.v / p.m, 0, 1);
+    ctx.globalAlpha = a;
+    if (p.arco !== undefined) { ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 6 * z; ctx.beginPath(); ctx.arc(sx, sy, p.s * 0.55 * z, p.arco - 1, p.arco + 1); ctx.stroke(); }
+    else if (p.txt) { ctx.font = `800 ${p.s * z}px "Baloo 2"`; ctx.textAlign = 'center'; ctx.fillStyle = p.cor; ctx.strokeStyle = '#2a1300'; ctx.lineWidth = 4 * z; ctx.strokeText(p.txt, sx, sy); ctx.fillText(p.txt, sx, sy); }
+    else if (p.cor) { ctx.fillStyle = p.cor; ctx.font = `${p.s * z}px sans-serif`; ctx.textAlign = 'center'; ctx.fillText(p.e, sx, sy); }
+    else { const s = p.s * z * (p.cresce ? 0.5 + (1 - a) * 0.8 : 1); ctx.drawImage(spr(p.e), sx - s / 2, sy - s / 2, s, s); }
+    ctx.globalAlpha = 1;
+  }
+  if (S.g.cz) {
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'saturation'; ctx.fillStyle = 'hsl(0,0%,50%)'; ctx.fillRect(0, 0, cv.width, cv.height);
+    ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = 'rgba(70,80,140,.16)'; ctx.fillRect(0, 0, cv.width, cv.height); ctx.restore();
+  }
+  // escuridão
+  if (S.g.esc) {
+    const v = eu && !(eu[9] & SM.MORTO) ? vis.get('j' + meuId) : null;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (v) { const [sx, sy] = emTela(v.x, v.y); const gr = ctx.createRadialGradient(sx, sy, 60 * z, sx, sy, 260 * z); gr.addColorStop(0, 'rgba(5,2,15,0)'); gr.addColorStop(1, 'rgba(5,2,15,.96)'); ctx.fillStyle = gr; }
+    else ctx.fillStyle = 'rgba(5,2,15,.93)';
+    ctx.fillRect(0, 0, cv.width, cv.height);
+  }
+  for (const [k, v] of vis) { if (!v.vivo) vis.delete(k); else v.vivo = 0; }
+}
+function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function desenharMob(m, v, z, tt) {
+  const [, e, , , tam100, h, dono, tipo, hp10] = m, tam = tam100 / 100;
+  const [sx, sy] = emTela(v.x, v.y);
+  let s = 54 * tam * z;
+  if (tipo === 3) { s = 55 * tam * z; ctx.drawImage(spr(e), sx - s / 2, sy - s / 2, s, s); return; }
+  const alt = tipo === 1 ? h * z : 0;
+  ctx.fillStyle = 'rgba(40,20,10,.22)';
+  const so = tipo === 1 ? clamp(1 - h / 900, 0.3, 1) : 1;
+  ctx.beginPath(); ctx.ellipse(sx, sy + s * 0.32, s * 0.38 * so, s * 0.14 * so, 0, 0, 7); ctx.fill();
+  if (dono === meuId && tipo !== 1) { ctx.strokeStyle = 'rgba(128,237,153,.8)'; ctx.lineWidth = 3 * z; ctx.beginPath(); ctx.ellipse(sx, sy + s * 0.32, s * 0.42, s * 0.16, 0, 0, 7); ctx.stroke(); }
+  const bob = tipo === 2 ? Math.sin(tt * 4 + m[0]) * 4 * z : tipo === 0 || tipo === 4 ? Math.abs(Math.sin(tt * 9 + m[0])) * -5 * z : 0;
+  ctx.save(); ctx.translate(sx, sy - alt + bob);
+  if (tipo === 1) ctx.rotate(Math.sin(tt * 6 + m[0]) * 0.3);
+  ctx.drawImage(spr(e), -s / 2, -s / 2, s, s);
+  ctx.restore();
+  if ((tipo === 0 || tipo === 4) && hp10 < 10) { const w = s * 0.7; ctx.fillStyle = 'rgba(0,0,0,.4)'; ctx.fillRect(sx - w / 2, sy - s * 0.62, w, 4 * z); ctx.fillStyle = dono === meuId ? '#80ed99' : '#ff5d6c'; ctx.fillRect(sx - w / 2, sy - s * 0.62, w * hp10 / 10, 4 * z); }
+}
+function desenharJogador(p, v, z, tt, ehEu) {
+  const [id, nome, cor, e, , , hp, hpMax, tam100, f] = p, tam = tam100 / 100;
+  const [sx, sy] = emTela(v.x, v.y), s = 66 * tam * z, voa = f & SM.VOA;
+  let alpha = 1;
+  if (f & SM.INVIS) alpha = ehEu ? 0.4 : 0.08; else if (f & SM.FANT) alpha = 0.55;
+  ctx.globalAlpha = alpha;
+  ctx.fillStyle = 'rgba(40,20,10,.25)'; ctx.beginPath(); ctx.ellipse(sx, sy + s * 0.34, s * (voa ? 0.28 : 0.4), s * (voa ? 0.1 : 0.15), 0, 0, 7); ctx.fill();
+  ctx.strokeStyle = cor; ctx.lineWidth = (ehEu ? 5 : 3.5) * z; ctx.beginPath(); ctx.ellipse(sx, sy + s * 0.34, s * 0.44, s * 0.17, 0, 0, 7); ctx.stroke();
+  const alt = voa ? (22 + Math.sin(tt * 3 + id.length) * 6) * z : 0;
+  ctx.save(); ctx.translate(sx, sy - alt);
+  if (f & SM.DANCA) ctx.rotate(Math.sin(tt * 10) * 0.5);
+  else ctx.rotate(Math.sin(tt * 8 + id.length) * 0.04);
+  ctx.drawImage(spr(e), -s / 2, -s / 2, s, s);
+  ctx.restore();
+  if (f & SM.GELO) { ctx.fillStyle = 'rgba(150,220,255,.45)'; roundRect(sx - s * 0.5, sy - s * 0.55 - alt, s, s, 10 * z); ctx.fill(); const q = 26 * z; ctx.drawImage(spr('❄️'), sx + s * 0.25, sy - s * 0.7 - alt, q, q); }
+  if (f & SM.ESCUDO) { ctx.strokeStyle = 'rgba(120,200,255,.85)'; ctx.lineWidth = 3 * z; ctx.fillStyle = 'rgba(120,200,255,.15)'; ctx.beginPath(); ctx.arc(sx, sy - alt, s * 0.62, 0, 7); ctx.fill(); ctx.stroke(); }
+  if (f & SM.DANCA) { const q = 22 * z; ctx.drawImage(spr('🎵'), sx - s * 0.6, sy - s * 0.7 - alt + Math.sin(tt * 6) * 5 * z, q, q); }
+  if (p[16]) { ctx.strokeStyle = p[16]; ctx.lineWidth = 4 * z; ctx.globalAlpha = 0.5 + Math.sin(tt * 8) * 0.25; ctx.beginPath(); ctx.arc(sx, sy - alt, s * 0.58, 0, 7); ctx.stroke(); ctx.globalAlpha = alpha; }
+  if (f & SM.INVERT) { const q = 22 * z; ctx.drawImage(spr('💫'), sx + s * 0.35, sy - s * 0.65 - alt, q, q); }
+  ctx.globalAlpha = (f & SM.INVIS) && !ehEu ? 0 : 1;
+  // nome e vida
+  const ny = sy - s * 0.62 - alt - 8 * z, fs = Math.max(11 * DPR, 15 * z);
+  ctx.font = `800 ${fs}px "Baloo 2"`; ctx.textAlign = 'center'; ctx.lineWidth = 4 * DPR; ctx.strokeStyle = 'rgba(30,15,60,.85)';
+  ctx.strokeText((ehEu ? '▼ ' : '') + nome, sx, ny - 8 * z); ctx.fillStyle = ehEu ? '#ffd166' : '#fff'; ctx.fillText((ehEu ? '▼ ' : '') + nome, sx, ny - 8 * z);
+  const w = Math.max(44 * DPR, 60 * z), hpP = clamp(hp / hpMax, 0, 1);
+  ctx.fillStyle = 'rgba(30,15,60,.75)'; ctx.fillRect(sx - w / 2 - 2, ny - 2, w + 4, 8 * z + 4);
+  ctx.fillStyle = hpP > 0.5 ? '#80ed99' : hpP > 0.25 ? '#ffd166' : '#ff5d6c'; ctx.fillRect(sx - w / 2, ny, w * hpP, 8 * z);
+  ctx.globalAlpha = 1;
+}
+
+/* =====================================================================
+   HUD
+   ===================================================================== */
+let bannerAte = 0, ultimoPlacar = 0, pedidoAberto = false;
+function feed(html) {
+  const el = document.createElement('div'); el.innerHTML = html; $('#feed').prepend(el);
+  while ($('#feed').children.length > 5) $('#feed').lastChild.remove();
+  setTimeout(() => el.remove(), 7000);
+}
+function htmlTokens(tokens) {
+  return tokens.map(([t, cls, e]) => cls === 'esp' ? ' ' : `<span class="tk-${cls}">${esc(t)}${e && cls === 'coisa' ? ' ' + e : ''}</span>`).join('');
+}
+function confeteTela() { const v = vis.get('j' + meuId); if (v) for (let i = 0; i < 10; i++) particula({ x: v.x + rnd(-300, 300), y: v.y - 250, vx: rnd(-60, 60), vy: rnd(50, 160), v: 1.6, m: 1.6, e: pick(['🥚', '✨', '🎉']), s: 26 }); }
+function mostrarPedido(e) {
+  const b = $('#banner');
+  b.innerHTML = `<div class="quem">${e.ovos?.length ? '🥚 EASTER EGG! ' : '🧞 '}${esc(e.nome)} pediu</div><br><div class="frase">${htmlTokens(e.tokens)}</div><div class="efeitos">${e.ef.map(x => `<span>${esc(x)}</span>`).join('')}</div>`;
+  b.classList.add('on'); bannerAte = performance.now() + 7000;
+}
+function atualizarHUD() {
+  if (!S) return;
+  const agora = performance.now();
+  const f = Math.ceil(S.fim); $('#relogio').textContent = `${Math.floor(f / 60)}:${String(f % 60).padStart(2, '0')}`;
+  $('#relogio').style.color = f <= 20 ? '#ff5d6c' : '';
+  if (agora - ultimoPlacar > 250) {
+    ultimoPlacar = agora;
+    const ord = [...S.j].sort((a, b) => b[10] - a[10]);
+    $('#placar').innerHTML = ord.map(p => `<div class="${p[0] === meuId ? 'eu' : ''} ${p[9] & SM.MORTO ? 'morto' : ''}"><span>${p[3]}</span><span>${esc(p[1])}${p[9] & SM.BOT ? ' 🤖' : ''}</span><b>${p[10]}</b></div>`).join('');
+  }
+  const b = $('#banner');
+  if (agora > bannerAte) {
+    if (S.v.f === 'digitando' && S.v.q !== meuId) { b.innerHTML = `<div class="quem">🧞 Vez de ${esc(S.v.n)}</div><br><div class="frase">${S.v.tx ? htmlTokens(tokensPedido(S.v.tx)) : '<span class="tk-nada">pensando…</span>'}<span class="cursor"></span></div>`; b.classList.add('on'); }
+    else b.classList.remove('on');
+  }
+  if (S.v.f === 'digitando' && S.v.q === meuId) {
+    if (!pedidoAberto) abrirPedido();
+    $('#ped-t').textContent = Math.ceil(S.v.r); $('#ped-barra').style.width = clamp(S.v.r / S.v.tot, 0, 1) * 100 + '%';
+  } else if (pedidoAberto) fecharPedido();
+  const bt = $('#batata');
+  if (S.g.bat) { bt.style.display = 'block'; bt.className = S.g.bat === 2 ? 'verm' : 'verde'; bt.textContent = S.g.bat === 2 ? '🔴 BATATINHA FRITA 1, 2, 3! NÃO SE MEXA!' : '🟢 PODE ANDAR…'; } else bt.style.display = 'none';
+  const eu = S.j.find(j => j[0] === meuId), m = $('#morte');
+  if (eu && eu[9] & SM.MORTO) { m.style.display = 'block'; m.textContent = '💫 Você foi derrubado! Voltando…'; } else m.style.display = 'none';
+  const fim = $('#fim');
+  if (S.e === 'fim' && S.pod) {
+    if (!fim.classList.contains('on')) {
+      fim.classList.add('on');
+      const ordem = [1, 0, 2].filter(i => S.pod[i]);
+      $('#podio').innerHTML = ordem.map(i => `<div class="p${i + 1}"><span class="e">${S.pod[i][1]}</span>${esc(S.pod[i][0])}<br>${S.pod[i][2]} pts</div>`).join('');
+      if (!primeiraPartidaFim) { primeiraPartidaFim = true; avisar('concluido', { final: S.pod[0] && S.pod[0][3] === meuId ? 'vitoria' : 'partida' }); }
+      fecharPedido();
+    }
+    $('#fim-info').textContent = `Nova partida em ${Math.ceil(S.re)}s…`;
+  } else fim.classList.remove('on');
+}
+function tokensPedido(tx) { const ns = nomesSnap(); return marcarOvos(interpretar(tx, ns).tokens, acharOvos(tx, ns.flatMap(n => [n.n, n.full]))); }
+function nomesSnap() { return S ? S.j.map(p => ({ id: p[0], n: norm(p[1]).split(/\s+/)[0], full: norm(p[1]) })) : []; }
+const SUGESTOES = ['vire dragão', 'ataque 5 tubarões', 'chova pizza', 'o chão é lava', 'todos virem galinha 10 segundos', 'exploda o líder', 'invoque 3 lobos', 'fique invisível', 'apague a luz', 'congele todos', 'chuva de bombas', 'cresça e voe', 'me clone 3', 'todos dancem'];
+function abrirPedido() {
+  pedidoAberto = true; const p = $('#pedido'); p.classList.add('on');
+  const inp = $('#ped-in'); inp.value = ''; $('#previa').innerHTML = '<span class="tk-nada">as palavras reconhecidas ficam coloridas aqui</span>';
+  const sug = [...SUGESTOES].sort(() => Math.random() - 0.5).slice(0, 5);
+  $('#sugestoes').innerHTML = sug.map(s => `<button type="button">${esc(s)}</button>`).join('');
+  if (!TOQUE) setTimeout(() => inp.focus(), 50);
+}
+function fecharPedido() { pedidoAberto = false; $('#pedido').classList.remove('on'); $('#ped-in').blur(); }
+let ultimoDigitando = 0;
+$('#ped-in').addEventListener('input', e => {
+  const tx = e.target.value;
+  $('#previa').innerHTML = tx.trim() ? htmlTokens(tokensPedido(tx)) : '';
+  if (modo === 'host') { if (V.quem === meuId) V.texto = tx; }
+  else if (performance.now() - ultimoDigitando > 250) { ultimoDigitando = performance.now(); enviarAoHost({ t: 'd', texto: tx }); }
+});
+$('#sugestoes').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; const inp = $('#ped-in'); inp.value = b.textContent; inp.dispatchEvent(new Event('input')); inp.focus(); });
+$('#ped-form').addEventListener('submit', e => {
+  e.preventDefault(); const tx = $('#ped-in').value.trim(); if (!tx) return;
+  if (modo === 'host') receberPedido(meuId, tx); else enviarAoHost({ t: 'p', texto: tx });
+  fecharPedido();
+});
+
+/* =====================================================================
+   ENTRADA
+   ===================================================================== */
+const K = {}; let mouse = { x: 0, y: 0, baixo: false }, atkLatch = false;
+const joy = { id: null, ox: 0, oy: 0, x: 0, y: 0 }; let atkToque = false;
+const digitando = () => document.activeElement && document.activeElement.tagName === 'INPUT';
+addEventListener('keydown', e => {
+  if (digitando()) { if (e.key === 'Escape') document.activeElement.blur(); return; }
+  K[e.code] = true;
+  if (e.code === 'Space') { atkLatch = true; e.preventDefault(); }
+  if (e.code === 'Enter' && pedidoAberto) { $('#ped-in').focus(); e.preventDefault(); }
+});
+addEventListener('keyup', e => { K[e.code] = false; });
+addEventListener('blur', () => { for (const k in K) K[k] = false; mouse.baixo = false; });
+cv.addEventListener('mousemove', e => { mouse.x = e.clientX * DPR; mouse.y = e.clientY * DPR; });
+cv.addEventListener('mousedown', e => { iniciarAudio(); mouse.baixo = true; atkLatch = true; mouse.x = e.clientX * DPR; mouse.y = e.clientY * DPR; if (digitando()) document.activeElement.blur(); });
+addEventListener('mouseup', () => { mouse.baixo = false; });
+if (TOQUE) {
+  const z = $('#toque');
+  z.addEventListener('touchstart', e => {
+    iniciarAudio();
+    for (const t of e.changedTouches) {
+      if (t.target.id === 'bt-atk') { atkToque = true; atkLatch = true; $('#bt-atk').classList.add('ativo'); continue; }
+      if (joy.id === null && t.clientX < innerWidth * 0.55) { Object.assign(joy, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 }); const j = $('#joy'); j.style.display = 'block'; j.style.left = t.clientX + 'px'; j.style.top = t.clientY + 'px'; j.firstElementChild.style.transform = ''; }
+    }
+    e.preventDefault();
+  }, { passive: false });
+  z.addEventListener('touchmove', e => {
+    for (const t of e.changedTouches) if (t.identifier === joy.id) {
+      let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy), m = 55;
+      if (d > m) { dx *= m / d; dy *= m / d; }
+      joy.x = dx / m; joy.y = dy / m; $('#joy i').style.transform = `translate(${dx}px,${dy}px)`;
+    }
+    e.preventDefault();
+  }, { passive: false });
+  const soltar = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.x = joy.y = 0; $('#joy').style.display = 'none'; } if (t.target.id === 'bt-atk') { atkToque = false; $('#bt-atk').classList.remove('ativo'); } } };
+  z.addEventListener('touchend', soltar); z.addEventListener('touchcancel', soltar);
+}
+function lerInput() {
+  let mx = 0, my = 0;
+  if (!digitando()) { if (K.KeyW || K.ArrowUp) my -= 1; if (K.KeyS || K.ArrowDown) my += 1; if (K.KeyA || K.ArrowLeft) mx -= 1; if (K.KeyD || K.ArrowRight) mx += 1; }
+  mx += joy.x; my += joy.y;
+  const l = Math.hypot(mx, my); if (l > 1) { mx /= l; my /= l; }
+  let ax = 0, ay = 0;
+  const v = vis.get('j' + meuId);
+  if (!TOQUE && v) { const [sx, sy] = emTela(v.x, v.y); ax = mouse.x - sx; ay = mouse.y - sy; }
+  const atk = atkLatch || mouse.baixo || atkToque || (!digitando() && K.Space);
+  atkLatch = false;
+  return { mx, my, ax, ay, atk, auto: TOQUE };
+}
+
+/* =====================================================================
+   MENU
+   ===================================================================== */
+let meuRosto = ROSTOS[0];
+try { meuRosto = localStorage.getItem('desejos.rosto') || ROSTOS[Math.floor(Math.random() * ROSTOS.length)]; $('#nome').value = localStorage.getItem('desejos.nome') || ''; } catch (e) {}
+const meuNome = () => ($('#nome').value.replace(/[<>]/g, '').trim() || 'Você').slice(0, 14);
+$('#rostos').innerHTML = ROSTOS.map(r => `<button type="button" class="${r === meuRosto ? 'sel' : ''}">${r}</button>`).join('');
+$('#rostos').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; meuRosto = b.textContent; [...$('#rostos').children].forEach(x => x.classList.toggle('sel', x === b)); });
+function salvarPerfil() { try { localStorage.setItem('desejos.nome', meuNome()); localStorage.setItem('desejos.rosto', meuRosto); } catch (e) {} }
+function erroMenu(msg, neutro) { const e = $('#erro'); e.textContent = msg; e.style.color = neutro ? 'var(--muted)' : ''; }
+function entrarNoJogo() {
+  $('#menu').classList.remove('on'); $('#hud').classList.add('on');
+  if (TOQUE) $('#toque').classList.add('on');
+  avisar('iniciado');
+}
+function iniciarComoHost(online) {
+  iniciarAudio(); salvarPerfil();
+  modo = 'host'; botsDesejados = +$('#nbots').value;
+  T = 0; jogadores = [];
+  const eu = adicionarJogador({ nome: meuNome(), rosto: meuRosto, bot: false }); meuId = eu.id;
+  ajustarBots(); reiniciarPartida();
+  entrarNoJogo();
+  if (online) criarSalaOnline();
+}
+$('#b-solo').addEventListener('click', () => iniciarComoHost(false));
+$('#b-criar').addEventListener('click', () => iniciarComoHost(true));
+$('#b-entrar').addEventListener('click', () => { iniciarAudio(); salvarPerfil(); entrarSala($('#codigo').value); });
+$('#codigo').addEventListener('keydown', e => { if (e.key === 'Enter') $('#b-entrar').click(); });
+$('#btn-sair').addEventListener('click', () => { if (window.parent !== window) avisar('sair'); else location.reload(); });
+
+// Dicionário
+function montarDicionario() {
+  $('#dic-marcas').innerHTML = MARCAS.map(m => `<div><b>${esc(m.nome)}</b><i>${esc(m.pal)}</i>${esc(m.desc)}<br><code>${esc(m.ex)}</code></div>`).join('');
+  $('#dic-alvos').innerHTML = [
+    ['eu / me / mim', 'você mesmo (padrão de vire, cresça, voe…)'], ['todos / todo mundo / geral', 'todo mundo na arena, inclusive você'], ['outros / inimigos / eles', 'todo mundo menos você'],
+    ['alguém / aleatório', 'uma pessoa sorteada'], ['líder / primeiro', 'quem tem mais pontos'], ['último / perdedor', 'quem tem menos pontos'], ['bots / humanos', 'só os bots ou só as pessoas'], ['o nome de alguém', 'ex: “Bia vire galinha”'],
+  ].map(([a, b]) => `<div><b style="color:var(--alvo)">${esc(a)}</b><br>${esc(b)}</div>`).join('');
+  $('#dic-mods').innerHTML = [
+    ['5, dez, vinte…', 'quantidade: “ataque 10 abelhas”'], ['muitos / um monte / enxame / horda', 'muita coisa de uma vez'], ['10 segundos / 1 minuto', 'duração: “vire sapo 20 segundos”'], ['para sempre', 'até você ser derrubado'],
+    ['em 5 segundos / daqui 5 segundos', 'atrasa o desejo'], ['agora / já', 'acontece na hora'], ['gigante / enorme', 'coisas grandes e fortes'], ['mini / pequeno', 'coisas pequenininhas'], ['rápido / lento', 'velocidade'], ['furioso / bravo / feroz', 'dano em dobro'],
+    ['e , depois', 'separa vários pedidos: “vire dragão e chova pizza”'],
+  ].map(([a, b]) => `<div><b style="color:var(--num)">${esc(a)}</b><br>${esc(b)}</div>`).join('');
+  const cats = { animal: 'Animais', monstro: 'Monstros', pessoa: 'Pessoas', comida: 'Comidas (curam!)', objeto: 'Objetos', natureza: 'Natureza' };
+  $('#dic-ovos-n').textContent = `(${ovosAchados.size}/${OVOS.length} descobertos)`;
+  const cats2 = [...new Set(OVOS.map(o => o.cat))];
+  $('#dic-ovos').innerHTML = cats2.map(c => `<div style="font-weight:800;margin:12px 0 6px">${esc(c)} <span style="color:var(--muted);font-weight:600">${OVOS.filter(o => o.cat === c && ovosAchados.has(o.id)).length}/${OVOS.filter(o => o.cat === c).length}</span></div><div class="marcas ovos">` +
+    OVOS.filter(o => o.cat === c).map(o => ovosAchados.has(o.id) ? `<div><b>${o.e} ${esc(o.nome)}</b><br><code>${esc(o.ps[0])}</code></div>` : `<div class="nao"><b>❓ ???</b><br>${esc(o.dica)}</div>`).join('') + '</div>').join('');
+  $('#dic-coisas').innerHTML = Object.entries(cats).map(([c, t]) => `<div style="width:100%;font-weight:800;margin-top:6px">${t}</div>` + TODAS.filter(x => x.cat === c).map(x => `<span data-c="${esc(x.nome)}">${x.e} ${esc(x.nome)}</span>`).join('')).join('');
+}
+montarDicionario();
+$('#n-ovos').textContent = OVOS.length;
+const abrirDic = () => $('#dic').classList.add('on');
+$('#btn-dic').addEventListener('click', abrirDic); $('#b-dic-menu').addEventListener('click', abrirDic);
+$('#dic-fechar').addEventListener('click', () => $('#dic').classList.remove('on'));
+$('#dic').addEventListener('click', e => {
+  if (e.target.id === 'dic') $('#dic').classList.remove('on');
+  const s = e.target.closest('[data-c]'); if (!s) return;
+  if (pedidoAberto) { const inp = $('#ped-in'); inp.value = (inp.value.trim() + ' ' + s.dataset.c).trim(); inp.dispatchEvent(new Event('input')); $('#dic').classList.remove('on'); inp.focus(); }
+  else toast(`${s.textContent}: use num pedido, ex: “vire ${s.dataset.c}”`);
+});
+let tt0; function toast(msg, ms = 3200) { const t = $('#toast'); t.textContent = msg; t.classList.add('on'); clearTimeout(tt0); tt0 = setTimeout(() => t.classList.remove('on'), ms); }
+
+/* =====================================================================
+   LOOP
+   ===================================================================== */
+// A simulação roda num relógio próprio (setInterval) para não travar a partida
+// de todo mundo quando o anfitrião minimiza a janela; o desenho usa requestAnimationFrame.
+let ultimoTick = performance.now(), acSim = 0, acRede = 0, acInput = 0;
+const PASSO = 1 / 60;
+function tick() {
+  const agora = performance.now(), dt = Math.min(1, (agora - ultimoTick) / 1000); ultimoTick = agora;
+  if (modo === 'host') {
+    const eu = jogadores.find(p => p.id === meuId); if (eu) eu.input = lerInput();
+    acSim += dt; let n = 0;
+    while (acSim >= PASSO && n < 40) { simular(PASSO); acSim -= PASSO; n++; }
+    if (n >= 40) acSim = 0;
+    if (evLocal.length > 300) evLocal.splice(0, evLocal.length - 300);
+    acRede += dt;
+    if (acRede >= 0.05) { acRede = 0; if (conns.size) { const snap = montarSnap(true); for (const { c } of conns.values()) if (c.open) try { c.send(snap); } catch (e) {} } else evRede = []; }
+  } else if (modo === 'cliente') {
+    acInput += dt;
+    if (acInput >= 0.05) { acInput = 0; enviarAoHost({ t: 'i', ...lerInput() }); }
+  }
+}
+setInterval(tick, 1000 / 60);
+let ultimo = performance.now();
+function loop(agora) {
+  requestAnimationFrame(loop);
+  const dt = Math.min(0.05, (agora - ultimo) / 1000); ultimo = agora;
+  if (modo === 'host') {
+    S = montarSnap(false);
+    const evs = evLocal; evLocal = []; for (const e of evs) tratarEvento(e);
+  }
+  if (S) { desenhar(dt); atualizarHUD(); }
+}
+requestAnimationFrame(loop);
+
+</script>
+</body>
+</html>

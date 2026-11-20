@@ -7,6 +7,7 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | Jogo | Gênero | Subgênero | Duração |
 |---|---|---|---|
 | **A Casa Que Lembra** | Terror | Terror Psicológico | 15–25 min |
+| **Arena dos Desejos** | Party Game | Sandbox de Palavras | Partidas de 4 min |
 
 ### A Casa Que Lembra
 Vinte anos depois, você volta à casa onde sua irmã mais nova desapareceu. Para ir embora, precisa encontrar as cinco memórias dela, mas a casa não quer que você lembre.
@@ -19,6 +20,16 @@ Vinte anos depois, você volta à casa onde sua irmã mais nova desapareceu. Par
 - Dois finais
 
 **Controles:** `WASD` andar · `Mouse` olhar · `Shift` correr · `F` lanterna · `E` interagir · `Esc` pausar
+
+### Arena dos Desejos
+Todo mundo nasce numa arena. A cada rodada, alguém vira o Gênio e escreve um pedido em texto livre, e o jogo transforma as palavras-chave em ação:
+`vire borboleta`, `vire borboleta 10 segundos`, `ataque 5 tubarões`, `chova pizza`, `o chão é lava`, `Zé vire galinha`…
+
+- 27 palavras-marca, mais de 130 coisas, alvos, números, tempos e modificadores
+- Salas online com código de 4 letras (PeerJS/WebRTC) ou partida solo com bots
+- 139 easter eggs escondidos (Undertale, animes, games, memes, filmes e TV brasileira)
+
+**Controles:** `WASD` andar · `Mouse` mirar · `Clique`/`Espaço` atacar · `Enter` escrever o pedido
 
 ## Como jogar
 Abra o `index.html` no navegador (Chrome, Edge ou Firefox). É preciso estar conectado à internet, porque o three.js e o modelo 3D são carregados online.
