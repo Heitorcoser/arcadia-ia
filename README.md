@@ -8,6 +8,19 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 |---|---|---|---|
 | **A Casa Que Lembra** | Terror | Terror Psicológico | 15–25 min |
 | **Arena dos Desejos** | Party Game | Sandbox de Palavras | Partidas de 4 min |
+| **GONGO! O Show das 6 Provas** | Party Game | Party Royale (show de eliminação) | Temporadas de 7–9 min |
+
+### GONGO! O Show das 6 Provas
+Um game show apresentado por um robô: até 50 competidores (pessoas e bots) passam por 6 provas bem diferentes, e a cada uma o Gongo elimina uma parte. Só um vence.
+
+1. ⚡ **Corda de Laser**: lasers giram a partir do centro; pule na hora certa
+2. ❓ **Quiz Corre-Corre**: corra para o quadrado da resposta certa antes que o chão das erradas suma
+3. 💣 **Bomba-Relógio**: passe a bomba encostando nos outros antes que ela exploda
+4. 🧠 **Piso da Memória**: decore os símbolos do chão e corra para o certo quando o Gongo gritar
+5. 🧊 **Sumô no Gelo**: empurre os outros para fora de uma arena escorregadia que encolhe
+6. 🎨 **Final: Guerra de Tinta**: quem pintar mais chão com a sua cor vence o show
+
+**Controles:** `WASD` andar · `Espaço` ação da prova · salas online com código de 4 letras (até 50 pessoas)
 
 ### A Casa Que Lembra
 Vinte anos depois, você volta à casa onde sua irmã mais nova desapareceu. Para ir embora, precisa encontrar as cinco memórias dela, mas a casa não quer que você lembre.

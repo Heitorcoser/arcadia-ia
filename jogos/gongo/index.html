@@ -1,0 +1,1550 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>GONGO! O Show das 6 Provas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Baloo+2:wght@500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0d0718;--card:#1c1033;--card2:#2a1850;--line:#45297c;--txt:#fff6e8;--muted:#c4b3ea;--ouro:#ffd166;--rosa:#ff3d7f;--ciano:#4cc9f0;--verde:#5be38f}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:"Baloo 2",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+  #cv{position:fixed;inset:0;display:block;touch-action:none}
+  button{font:inherit;color:inherit;cursor:pointer}
+  input,select{font:inherit}
+  .disp{font-family:Bungee,"Baloo 2",system-ui,sans-serif;font-weight:400;letter-spacing:.5px}
+  .tela{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:16px;overflow:auto;
+    background:radial-gradient(ellipse at 50% -10%,#5b1d8a 0%,#1a0b30 45%,#0d0718 75%)}
+  .tela.on{display:flex}
+  .caixa{width:min(620px,100%);background:linear-gradient(180deg,#22123f,#170b2c);border:2px solid var(--line);border-radius:26px;padding:24px;box-shadow:0 20px 70px rgba(0,0,0,.55),inset 0 1px 0 rgba(255,255,255,.06);margin:auto}
+  .logo{text-align:center;margin-bottom:4px}
+  .logo .sino{font-size:54px;display:inline-block;animation:balanca 2.4s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(255,209,102,.55))}
+  @keyframes balanca{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(12deg)}}
+  .logo h1{margin:4px 0 0;font-size:clamp(44px,9vw,66px);line-height:.95;background:linear-gradient(180deg,#fff3c2,#ffd166 45%,#ff8c42);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #7a2a00) drop-shadow(0 0 22px rgba(255,140,66,.35))}
+  .logo .sub{margin:6px 0 0;font-size:15px;color:var(--muted);font-weight:700;letter-spacing:2px;text-transform:uppercase}
+  .provas-mini{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:16px 0 4px}
+  .provas-mini div{background:#120922;border:1px solid var(--line);border-radius:12px;padding:6px 2px;text-align:center;font-size:11.5px;line-height:1.15;color:var(--muted);font-weight:700}
+  .provas-mini div span{display:block;font-size:22px;margin-bottom:2px}
+  .provas-mini div.fin{border-color:var(--ouro);color:var(--ouro)}
+  label.r{display:block;font-size:13px;color:var(--muted);font-weight:700;margin:14px 0 6px}
+  .campo{width:100%;height:46px;border-radius:14px;border:2px solid var(--line);background:#120922;color:var(--txt);padding:0 14px;font-size:17px;outline:none}
+  .campo:focus{border-color:var(--ouro)}
+  .rostos{display:flex;flex-wrap:wrap;gap:6px}
+  .rostos button{width:42px;height:42px;border-radius:12px;border:2px solid var(--line);background:#120922;font-size:23px;padding:0}
+  .rostos button.sel{border-color:var(--ouro);background:#3a2160;transform:scale(1.06)}
+  .btn{height:50px;border-radius:15px;border:2px solid var(--line);font-weight:800;font-size:16.5px;padding:0 16px;background:var(--card2);transition:transform .12s,filter .12s}
+  .btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+  .btn.pri{background:linear-gradient(135deg,#ff3d7f,#ff8c42);border-color:transparent;box-shadow:0 8px 26px rgba(255,61,127,.35)}
+  .btn.sec{background:linear-gradient(135deg,#4cc9f0,#7b61ff);border-color:transparent;box-shadow:0 8px 26px rgba(76,201,240,.25)}
+  .btn.ouro{background:linear-gradient(135deg,#ffd166,#ff8c42);color:#2a1300;border-color:transparent;box-shadow:0 8px 26px rgba(255,209,102,.35)}
+  .grade2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+  .linha{display:flex;gap:10px;margin-top:10px}
+  .linha .campo{flex:1;text-transform:uppercase;letter-spacing:5px;text-align:center;font-weight:800}
+  .mini{font-size:13px;color:var(--muted);line-height:1.55;margin-top:14px}
+  .mini b{color:var(--txt)}
+  .erro{color:#ff8a8a;font-weight:700;min-height:22px;margin-top:10px;text-align:center}
+  select.campo{height:44px;font-size:15.5px}
+  .duas{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+  /* HUD */
+  #hud{position:fixed;inset:0;z-index:8;pointer-events:none;display:none}
+  #hud.on{display:block}
+  .chip{background:rgba(16,8,32,.78);border:2px solid rgba(255,255,255,.12);border-radius:14px;padding:4px 12px;backdrop-filter:blur(6px);font-weight:800}
+  #topo-esq{position:absolute;left:10px;top:10px;display:flex;gap:8px;align-items:center;pointer-events:auto}
+  .bq{width:40px;height:40px;border-radius:12px;border:2px solid rgba(255,255,255,.15);background:rgba(16,8,32,.78);font-size:17px;padding:0}
+  #sala{display:none;font-size:14px}
+  #topo-centro{position:absolute;left:50%;top:8px;transform:translateX(-50%);display:flex;gap:8px;align-items:center}
+  #prova-chip{font-size:15px;display:none;white-space:nowrap}
+  #relogio{font-size:24px;min-width:64px;text-align:center;display:none}
+  #relogio.urgente{color:#ff6b6b;animation:pulsa .5s infinite alternate}
+  @keyframes pulsa{to{transform:scale(1.08)}}
+  #vivos{position:absolute;right:10px;top:10px;font-size:15px;text-align:right;line-height:1.25}
+  #vivos small{display:block;font-size:12px;color:var(--muted);font-weight:700}
+  #banner{position:absolute;left:50%;top:50%;transform:translate(-50%,-58%);width:min(720px,94vw);text-align:center;opacity:0;transition:opacity .35s,transform .35s}
+  #banner.on{opacity:1;transform:translate(-50%,-50%)}
+  #banner .ic{font-size:clamp(54px,10vw,84px);line-height:1;filter:drop-shadow(0 6px 0 rgba(0,0,0,.35))}
+  #banner .num{font-size:15px;font-weight:800;letter-spacing:3px;color:var(--muted);text-transform:uppercase}
+  #banner h2{margin:2px 0 8px;font-size:clamp(28px,6vw,52px);line-height:1;text-shadow:0 4px 0 rgba(0,0,0,.4)}
+  #banner .regra{display:inline-block;background:rgba(16,8,32,.82);border:2px solid rgba(255,255,255,.12);border-radius:18px;padding:8px 18px;font-size:clamp(15px,2.3vw,19px);font-weight:700;line-height:1.4;max-width:640px}
+  #banner .regra b{color:var(--ouro)}
+  #banner .cont{font-size:clamp(60px,12vw,110px);line-height:1;margin-top:10px;color:var(--ouro);text-shadow:0 6px 0 #7a2a00}
+  #banner .meta{margin-top:8px;font-size:15px;color:var(--muted);font-weight:700}
+  #fala{position:absolute;left:50%;bottom:86px;transform:translateX(-50%);display:flex;align-items:center;gap:10px;opacity:0;transition:opacity .3s;max-width:92vw}
+  #fala.on{opacity:1}
+  #fala .rob{font-size:38px;filter:drop-shadow(0 0 10px rgba(255,209,102,.6))}
+  #fala .txt{background:#fff6e8;color:#2a1300;border-radius:16px 16px 16px 4px;padding:6px 14px;font-weight:800;font-size:16px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  #quiz{position:absolute;left:50%;top:58px;transform:translateX(-50%);width:min(760px,96vw);display:none}
+  #quiz.on{display:block;animation:desce .3s}
+  @keyframes desce{from{transform:translate(-50%,-16px);opacity:0}}
+  #quiz .perg{background:rgba(16,8,32,.9);border:2px solid var(--ciano);border-radius:18px;padding:8px 16px;font-size:clamp(17px,2.6vw,23px);font-weight:800;text-align:center;line-height:1.25}
+  #quiz .resps{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+  #quiz .resps div{border-radius:14px;padding:5px 12px;font-weight:800;font-size:clamp(14px,2.1vw,17px);display:flex;gap:8px;align-items:center;transition:opacity .3s,transform .3s;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.35)}
+  #quiz .resps div b{font-family:Bungee;font-weight:400;font-size:18px;width:26px;height:26px;border-radius:8px;background:rgba(0,0,0,.25);display:grid;place-items:center;flex-shrink:0}
+  #quiz .resps div.errada{opacity:.25;transform:scale(.96)} #quiz .resps div.certa{box-shadow:0 0 0 3px #fff,0 0 24px rgba(255,255,255,.6);transform:scale(1.03)}
+  #grito{position:absolute;left:50%;top:64px;transform:translateX(-50%);display:none;text-align:center}
+  #grito.on{display:block;animation:desce .3s}
+  #grito .t{background:rgba(16,8,32,.9);border:2px solid #a78bfa;border-radius:18px;padding:6px 20px;font-size:clamp(20px,3.4vw,30px);font-weight:800;display:inline-flex;align-items:center;gap:10px}
+  #grito .t span{font-size:1.6em;line-height:1}
+  #tinta{position:absolute;right:10px;top:66px;width:220px;display:none;padding:8px 10px;font-size:13.5px}
+  #tinta.on{display:block}
+  #tinta .l{display:flex;align-items:center;gap:6px;margin:3px 0;white-space:nowrap}
+  #tinta .l i{display:block;height:10px;border-radius:5px;min-width:3px}
+  #tinta .l span{overflow:hidden;text-overflow:ellipsis;flex:1}
+  #tinta .l.eu span{color:var(--ouro)}
+  #feed{position:absolute;left:10px;bottom:14px;display:flex;flex-direction:column;gap:4px;align-items:flex-start;font-size:14px;max-width:48vw}
+  #feed div{background:rgba(16,8,32,.78);border-radius:10px;padding:2px 10px;animation:entra .25s;font-weight:700}
+  @keyframes entra{from{transform:translateX(-20px);opacity:0}}
+  #dica{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:14px;color:var(--muted);font-weight:700;white-space:nowrap}
+  #dica b{color:var(--txt);background:rgba(255,255,255,.12);border-radius:7px;padding:0 7px}
+  #morte{position:absolute;left:50%;top:40%;transform:translate(-50%,-50%);text-align:center;display:none}
+  #morte.on{display:block;animation:bate .45s}
+  @keyframes bate{0%{transform:translate(-50%,-50%) scale(2.2);opacity:0}60%{transform:translate(-50%,-50%) scale(.92)}}
+  #morte h2{margin:0;font-size:clamp(30px,7vw,64px);color:#ff5d6c;text-shadow:0 5px 0 #4a0010,0 0 30px rgba(255,61,90,.5)}
+  #morte p{margin:6px 0 0;font-size:18px;font-weight:800}
+  #espiar{position:absolute;left:50%;bottom:44px;transform:translateX(-50%);display:none;align-items:center;gap:10px;pointer-events:auto;white-space:nowrap}
+  #espiar.on{display:flex}
+  #espiar button{height:36px;border-radius:11px;border:2px solid rgba(255,255,255,.18);background:rgba(76,201,240,.25);font-weight:800;padding:0 12px}
+  #lobby{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);width:min(560px,94vw);display:none;pointer-events:auto;text-align:center;padding:12px 14px}
+  #lobby.on{display:block}
+  #lobby .cod{font-size:34px;letter-spacing:8px;color:var(--ouro);line-height:1.1}
+  #lobby .gente{font-size:14px;color:var(--muted);margin:4px 0 8px;max-height:46px;overflow:hidden}
+  #lobby .acoes{display:flex;gap:8px;justify-content:center;align-items:center;flex-wrap:wrap}
+  #lobby select{height:44px;border-radius:13px;border:2px solid var(--line);background:#120922;color:var(--txt);padding:0 10px;font-weight:700}
+
+  /* toque */
+  #toque{position:fixed;inset:0;z-index:6;display:none;touch-action:none}
+  #toque.on{display:block}
+  #joy{position:absolute;width:130px;height:130px;border-radius:50%;border:3px solid rgba(255,255,255,.25);background:rgba(0,0,0,.18);display:none;transform:translate(-50%,-50%);pointer-events:none}
+  #joy i{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(255,255,255,.4)}
+  #bt-acao{position:absolute;right:24px;bottom:28px;width:96px;height:96px;border-radius:50%;border:3px solid rgba(255,255,255,.35);background:rgba(255,61,127,.45);display:grid;place-items:center;font-weight:800;font-size:13px;text-align:center;line-height:1.1;padding:6px}
+  #bt-acao.ativo{background:rgba(255,61,127,.85)}
+  #bt-acao.off{opacity:.25}
+
+  /* fim */
+  #fim{background:rgba(10,5,20,.86);z-index:25}
+  #fim h2{margin:0;font-size:clamp(28px,5vw,40px);color:var(--ouro)}
+  .podio{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:16px 0 10px}
+  .podio div{width:132px;text-align:center;border-radius:16px 16px 0 0;padding:10px 6px;font-weight:800;line-height:1.15;display:flex;flex-direction:column;align-items:center;justify-content:flex-start}
+  .podio .av{width:58px;height:58px;border-radius:50%;display:grid;place-items:center;font-size:32px;border:3px solid rgba(0,0,0,.25);margin-bottom:6px}
+  .podio .p1{height:210px;background:linear-gradient(#ffd166,#e3a400);color:#2a1300}
+  .podio .p2{height:165px;background:linear-gradient(#e4e6f2,#9aa0b8);color:#1a1a2a}
+  .podio .p3{height:135px;background:linear-gradient(#f0a56b,#b9662c);color:#2a1300}
+  .podio .pos{font-family:Bungee;font-size:26px}
+  .ranking{display:grid;grid-template-columns:1fr 1fr;gap:4px 14px;font-size:14px;text-align:left;margin:8px 0 4px;max-height:150px;overflow:auto}
+  .ranking div{display:flex;gap:6px;white-space:nowrap;overflow:hidden}
+  .ranking div.eu{color:var(--ouro)}
+  #fim-eu{font-size:18px;font-weight:800;margin:8px 0}
+  #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:40;background:#2a1850;border:2px solid var(--line);border-radius:14px;padding:8px 16px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;text-align:center;max-width:92vw}
+  #toast.on{opacity:1}
+  @media (max-width:640px){
+    .provas-mini{grid-template-columns:repeat(3,1fr)}
+    #tinta{width:160px;font-size:12px}
+    #prova-chip{font-size:12.5px}
+    #topo-centro{top:56px}
+    #quiz{top:100px}
+    #grito{top:100px}
+    #fala{bottom:140px}
+    #dica{display:none}
+    .podio div{width:96px}
+    .ranking{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<!-- MENU -->
+<div class="tela on" id="menu">
+  <div class="caixa">
+    <div class="logo"><span class="sino">🔔</span><h1 class="disp">GONGO!</h1><p class="sub">O show das 6 provas · até 50 competidores</p></div>
+    <div class="provas-mini" id="provas-mini"></div>
+    <div class="duas">
+      <div><label class="r" for="nome">Seu nome</label><input class="campo" id="nome" maxlength="14" placeholder="Digite seu nome" autocomplete="off"></div>
+      <div><label class="r" for="total">Competidores (com bots)</label>
+        <select class="campo" id="total"><option>10</option><option>20</option><option selected>30</option><option>40</option><option>50</option></select></div>
+    </div>
+    <label class="r">Seu rosto</label>
+    <div class="rostos" id="rostos"></div>
+    <div class="grade2">
+      <button class="btn pri" id="b-solo">🤖 Jogar com bots</button>
+      <button class="btn sec" id="b-criar">🌐 Criar sala online</button>
+    </div>
+    <div class="linha">
+      <input class="campo" id="codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
+      <button class="btn" id="b-entrar">Entrar na sala</button>
+    </div>
+    <div class="erro" id="erro"></div>
+    <div class="mini">
+      <b>Como funciona:</b> o robô Gongo apresenta o show. São <b>6 provas</b> seguidas e a cada uma uma parte dos competidores é eliminada. Quem chegar na <b>final</b> disputa a vitória na Guerra de Tinta.
+      Se você for eliminado, continua assistindo. Numa sala online cabem <b>até 50 pessoas</b>, e os bots completam as vagas.
+    </div>
+  </div>
+</div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="topo-esq"><button class="bq" id="btn-sair" title="Sair">✕</button><button class="bq" id="btn-som" title="Som">🔊</button><span class="chip" id="sala"></span></div>
+  <div id="topo-centro"><span class="chip" id="prova-chip"></span><span class="chip disp" id="relogio"></span></div>
+  <div class="chip" id="vivos"></div>
+  <div id="quiz"><div class="perg" id="q-perg"></div><div class="resps" id="q-resps"></div></div>
+  <div id="grito"><div class="t">Fique num <span id="grito-s"></span>!</div></div>
+  <div class="chip" id="tinta"></div>
+  <div id="banner"></div>
+  <div id="fala"><span class="rob">🤖</span><span class="txt" id="fala-t"></span></div>
+  <div id="feed"></div>
+  <div id="dica"></div>
+  <div id="morte"></div>
+  <div id="espiar"><span class="chip" id="espiar-t"></span><button id="b-espiar">👁 Próximo</button></div>
+  <div class="chip" id="lobby"></div>
+</div>
+
+<div id="toque"><div id="joy"><i></i></div><div id="bt-acao">AÇÃO</div></div>
+
+<div class="tela" id="fim"><div class="caixa" style="text-align:center">
+  <h2 class="disp">🔔 Fim do show!</h2>
+  <div class="podio" id="podio"></div>
+  <div id="fim-eu"></div>
+  <div class="ranking" id="ranking"></div>
+  <div class="grade2" id="fim-botoes"></div>
+  <div class="mini" id="fim-info"></div>
+</div></div>
+
+<div id="toast"></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script>
+"use strict";
+/* =====================================================================
+   GONGO! O Show das 6 Provas
+   Party royale: até 50 competidores (pessoas e bots) passam por 6 provas
+   bem diferentes; a cada uma, parte é eliminada. A final decide o campeão.
+   Rede: o anfitrião simula tudo e manda o estado 15x por segundo (PeerJS).
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const lerp = (a, b, k) => a + (b - a) * k;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const embaralhar = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const TAU = Math.PI * 2;
+const angNorm = a => ((a % TAU) + TAU) % TAU;
+const TOQUE = matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: 'gongo', evento, ...extra }, '*'); } catch (e) {} };
+const PARAM = new URLSearchParams(location.search);
+const VEL = clamp(+PARAM.get('vel') || 1, 1, 10); // só para testes: acelera a simulação
+
+/* =====================================================================
+   DADOS
+   ===================================================================== */
+const ROSTOS = ['😀','😎','🤠','🥸','🤓','😺','🐸','🐵','🦊','🐼','🐷','🐙','🤖','👽','🦄','🐔','🐧','🐻','🐯','🐨','🦁','👻','🤡','🐶','🐰','🦖','🐳','🦉'];
+const NOMES_BOT = ['Zé Bolacha','Tia Neide','Biscoito','Paçoca','Coxinha','Tonhão','Juju','Pipoca','Brigadeiro','Dona Cotinha','Capivara','Jabuti','Bolinha','Feijão','Tapioca','Pudim','Marquinhos','Lelê','Cuscuz','Quindim','Batatinha','Seu Lunga','Pastel','Mandioca','Rapadura','Docinho','Zezinho','Cocada','Peteca','Tio Jorge','Bibi','Vovó Zica','Gugu','Torresmo','Polenta','Xuxuzinho','Beto','Fofão','Nina','Caju','Pitoco','Guaraná','Mel','Taturana','Sabiá','Tucano','Pirulito','Chiclete','Boné','Faísca','Trovão','Pimenta','Açaí','Baião','Kiko','Lola','Dudu','Nenê','Bento','Tatá'];
+const SIMBOLOS = ['🍕','🐸','⭐','🎸','🍉','👻','🚀','🌵','🍩','⚽'];
+// [pergunta, resposta certa, errada, errada, errada]
+const PERGUNTAS = [
+  ['Qual é o maior planeta do Sistema Solar?','Júpiter','Saturno','Terra','Netuno'],
+  ['Quantas patas tem uma aranha?','8','6','10','12'],
+  ['Qual é a capital do Brasil?','Brasília','Rio de Janeiro','São Paulo','Salvador'],
+  ['Quantos lados tem um hexágono?','6','5','7','8'],
+  ['De que cor é a clorofila?','Verde','Azul','Vermelha','Amarela'],
+  ['Qual é o maior oceano da Terra?','Pacífico','Atlântico','Índico','Ártico'],
+  ['Quanto é 7 × 8?','56','54','64','48'],
+  ['Qual é o planeta mais perto do Sol?','Mercúrio','Vênus','Marte','Terra'],
+  ['Em que continente fica o Egito?','África','Ásia','Europa','Oceania'],
+  ['Qual é o maior mamífero do mundo?','Baleia-azul','Elefante','Girafa','Tubarão-baleia'],
+  ['Qual instrumento tem teclas brancas e pretas?','Piano','Violão','Bateria','Flauta'],
+  ['Quantos jogadores de um time de futebol ficam em campo?','11','10','9','12'],
+  ['Qual destes animais é um mamífero?','Morcego','Pinguim','Tubarão','Jacaré'],
+  ['Quanto é 100 ÷ 4?','25','20','40','24'],
+  ['Quantos estados tem o Brasil (sem contar o DF)?','26','27','25','24'],
+  ['Que gás as plantas tiram do ar para a fotossíntese?','Gás carbônico','Oxigênio','Hélio','Nitrogênio'],
+  ['Qual país tem o formato de uma bota?','Itália','Espanha','Portugal','Grécia'],
+  ['Quantos dias tem um ano bissexto?','366','365','364','360'],
+  ['Quem pintou a Mona Lisa?','Leonardo da Vinci','Michelangelo','Van Gogh','Picasso'],
+  ['Qual é a língua oficial do Brasil?','Português','Espanhol','Inglês','Tupi'],
+  ['A que temperatura a água ferve ao nível do mar?','100 °C','90 °C','120 °C','80 °C'],
+  ['Quantas cores tem o arco-íris na divisão tradicional?','7','5','6','8'],
+  ['Qual é o animal terrestre mais rápido?','Guepardo','Leão','Cavalo','Avestruz'],
+  ['Em que ano os portugueses chegaram ao Brasil?','1500','1492','1822','1600'],
+  ['Qual é a capital da Argentina?','Buenos Aires','Santiago','Montevidéu','Lima'],
+  ['Quantos ossos tem o corpo humano adulto?','206','150','300','98'],
+  ['Qual metal é líquido na temperatura ambiente?','Mercúrio','Ferro','Alumínio','Cobre'],
+  ['Qual rio tem o maior volume de água do mundo?','Amazonas','Nilo','Mississípi','Yangtzé'],
+  ['Qual destes é um réptil?','Tartaruga','Sapo','Golfinho','Salamandra'],
+  ['Qual é a fórmula química da água?','H₂O','CO₂','O₂','NaCl'],
+  ['Qual é a moeda do Japão?','Iene','Yuan','Won','Rúpia'],
+  ['Qual é a montanha mais alta do mundo?','Everest','K2','Aconcágua','Kilimanjaro'],
+  ['Quantos centímetros tem um metro?','100','10','1000','60'],
+  ['Qual é o maior estado do Brasil em área?','Amazonas','Pará','Mato Grosso','Minas Gerais'],
+  ['Azul misturado com amarelo dá qual cor?','Verde','Roxo','Laranja','Marrom'],
+  ['Qual inseto produz mel?','Abelha','Formiga','Borboleta','Joaninha'],
+  ['Quem escreveu "Dom Casmurro"?','Machado de Assis','José de Alencar','Monteiro Lobato','Jorge Amado'],
+  ['Qual órgão bombeia o sangue pelo corpo?','Coração','Pulmão','Fígado','Rim'],
+  ['Qual é a capital de Portugal?','Lisboa','Porto','Madri','Coimbra'],
+  ['Qual animal muda de cor para se camuflar?','Camaleão','Coruja','Zebra','Hipopótamo'],
+  ['Três ao quadrado (3²) é igual a…','9','6','12','3'],
+  ['Qual é o maior país da América do Sul?','Brasil','Argentina','Peru','Colômbia'],
+  ['A lagarta vira o quê?','Borboleta','Abelha','Besouro','Libélula'],
+  ['Qual planeta é chamado de "planeta vermelho"?','Marte','Júpiter','Vênus','Saturno'],
+  ['Quantas pernas tem um inseto?','6','8','4','10'],
+  ['Qual destes é um número primo?','7','9','15','21'],
+  ['Em que cidade fica o Cristo Redentor?','Rio de Janeiro','São Paulo','Salvador','Belo Horizonte'],
+  ['O sol ajuda o corpo a produzir qual vitamina?','Vitamina D','Vitamina C','Vitamina A','Vitamina B12'],
+  ['Qual é o maior osso do corpo humano?','Fêmur','Úmero','Tíbia','Crânio'],
+  ['Quantos zeros tem um milhão?','6','5','7','9'],
+  ['Qual é o maior peixe do mundo?','Tubarão-baleia','Baleia-azul','Tubarão-branco','Peixe-boi'],
+  ['A que temperatura a água congela?','0 °C','10 °C','-10 °C','4 °C'],
+  ['Qual é o continente mais populoso?','Ásia','África','Europa','América'],
+  ['Como se chama a água virando vapor?','Evaporação','Condensação','Solidificação','Fusão'],
+  ['O que pesa mais: 1 kg de algodão ou 1 kg de ferro?','Os dois pesam igual','O ferro','O algodão','Depende do vento'],
+  ['Quantos meses do ano têm 28 dias?','Todos os 12','Só 1','2','Nenhum'],
+  ['Se você ultrapassa o 2º lugar numa corrida, fica em que posição?','Segundo','Primeiro','Terceiro','Último'],
+  ['Qual é a capital da França?','Paris','Lyon','Roma','Londres'],
+  ['Qual é o maior animal terrestre?','Elefante-africano','Rinoceronte','Girafa','Hipopótamo'],
+  ['Quantas horas tem um dia?','24','12','48','20'],
+  ['Qual é o satélite natural da Terra?','Lua','Sol','Marte','Titã'],
+  ['Qual é a estação mais fria do ano?','Inverno','Outono','Primavera','Verão'],
+  ['Qual destes NÃO é um planeta?','Lua','Marte','Vênus','Urano'],
+  ['Quantos minutos tem uma hora?','60','100','30','90'],
+  ['Qual é a capital do Japão?','Tóquio','Pequim','Seul','Osaka'],
+  ['Quanto é 15 + 27?','42','32','45','37'],
+  ['Qual é o idioma com mais falantes nativos no mundo?','Mandarim','Inglês','Espanhol','Hindi'],
+  ['Qual animal bota ovos?','Galinha','Vaca','Cachorro','Gato'],
+  ['Qual é a cor da bandeira do Brasil que fica no losango?','Amarelo','Verde','Azul','Branco'],
+  ['Quantos lados tem um octógono?','8','6','10','12'],
+];
+const FALAS = {
+  intro: ['Que comece a prova!', 'O Gongo está de olho em vocês!', 'Boa sorte… vão precisar!', 'Respira fundo e vai!', 'Isso vai ficar lindo na TV!', 'Valendo!'],
+  elim: ['GONG! Tchau, tchau!', 'O Gongo não perdoa!', 'Essa vai pros melhores momentos!', 'Eliminado com estilo!', 'Ih, rapaz…', 'Que tombo!', 'A plateia foi à loucura!', 'Mais um pro sofá!'],
+  muitos: ['Que massacre!', 'Foi uma CHUVA de eliminações!', 'Metade do estúdio sumiu!', 'Alguém chama a ambulância de brinquedo!'],
+  sorte: ['Sorte! Ninguém sai dessa vez.', 'O Gongo ficou com pena. Todos continuam!'],
+  final: ['É A GRANDE FINAL!', 'Só os melhores chegaram aqui!', 'Pintem esse chão!'],
+};
+
+const PROVAS = [
+  { id: 'laser', nome: 'Corda de Laser', icone: '⚡', cor: '#ff3d7f', razao: .78, limite: 55, fimAuto: true, acao: 'Pular',
+    regra: 'Os lasers giram sem parar. Aperte <b>Espaço</b> para <b>pular</b> quando um chegar em você!' },
+  { id: 'quiz', nome: 'Quiz Corre-Corre', icone: '❓', cor: '#4cc9f0', razao: .72, limite: 95, acao: '',
+    regra: 'Leia a pergunta e corra para o quadrado da <b>resposta certa</b>. Quando o tempo acabar, o chão das erradas some!' },
+  { id: 'bomba', nome: 'Bomba-Relógio', icone: '💣', cor: '#ff8c42', razao: .68, limite: 150, acao: 'Arrancada',
+    regra: 'Está com a bomba? <b>Encoste em alguém</b> para passar. Quem estiver com ela na explosão, sai! <b>Espaço</b>: arrancada.' },
+  { id: 'memoria', nome: 'Piso da Memória', icone: '🧠', cor: '#a78bfa', razao: .62, limite: 120, acao: '',
+    regra: '<b>Decore os símbolos</b> do chão. Quando o Gongo gritar um deles, corra para um piso que tinha esse símbolo!' },
+  { id: 'sumo', nome: 'Sumô no Gelo', icone: '🧊', cor: '#7dd3fc', razao: .55, limite: 60, fimAuto: true, acao: 'Investida',
+    regra: 'O gelo escorrega e a arena encolhe. <b>Empurre os outros para fora!</b> <b>Espaço</b>: investida.' },
+  { id: 'tinta', nome: 'Guerra de Tinta', icone: '🎨', cor: '#ffd166', razao: 0, limite: 60, final: true, acao: 'Bomba de tinta',
+    regra: 'A GRANDE FINAL! Pinte o chão com a sua cor. Quem tiver <b>mais chão pintado</b> no fim, vence o show! <b>Espaço</b>: bomba de tinta.' },
+];
+
+/* =====================================================================
+   GEOMETRIA
+   ===================================================================== */
+const RJ = 18, MIN_VIVOS = 2, PASSO = 1 / 60, MAX_TOTAL = 50;
+const MEM = { n: 7, tam: 112, gap: 14 }; MEM.tot = MEM.n * MEM.tam + (MEM.n - 1) * MEM.gap;
+const TINTA = { cel: 24, cols: 50, rows: 35 };
+const ARENA = {
+  lobby: { forma: 'circ', r: 430 },
+  laser: { forma: 'circ', r: 540, hub: 64 },
+  quiz: { forma: 'ret', w: 540, h: 540, ponte: 26 },
+  bomba: { forma: 'ret', w: 620, h: 430, pil: [[-300, -170], [300, -170], [-300, 170], [300, 170], [0, 0]], pr: 54 },
+  memoria: { forma: 'ret', w: MEM.tot / 2, h: MEM.tot / 2 },
+  sumo: { forma: 'circ', r: 560 },
+  tinta: { forma: 'ret', w: TINTA.cols * TINTA.cel / 2, h: TINTA.rows * TINTA.cel / 2 },
+};
+const memCentro = i => { const c = i % MEM.n, r = Math.floor(i / MEM.n); return [-MEM.tot / 2 + MEM.tam / 2 + c * (MEM.tam + MEM.gap), -MEM.tot / 2 + MEM.tam / 2 + r * (MEM.tam + MEM.gap)]; };
+const memPiso = (x, y) => { const p = MEM.tam + MEM.gap, c = clamp(Math.floor((x + MEM.tot / 2 + MEM.gap / 2) / p), 0, MEM.n - 1), r = clamp(Math.floor((y + MEM.tot / 2 + MEM.gap / 2) / p), 0, MEM.n - 1); return r * MEM.n + c; };
+const quadrante = (x, y) => { const pt = ARENA.quiz.ponte; if (Math.abs(x) < pt || Math.abs(y) < pt) return -1; return (y < 0 ? 0 : 2) + (x < 0 ? 0 : 1); };
+
+// cores por id (as mesmas no anfitrião e nos clientes)
+function hslHex(h, s, l) { s /= 100; l /= 100; const k = n => (n + h / 30) % 12, a = s * Math.min(l, 1 - l), f = n => l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1))); return '#' + [f(0), f(8), f(4)].map(x => Math.round(x * 255).toString(16).padStart(2, '0')).join(''); }
+const COR = [], COR_ESC = [], COR_RGB = [];
+for (let i = 0; i < 256; i++) { const h = (i * 137.508 + 20) % 360, l = 56 + (i % 3) * 5; COR[i] = hslHex(h, 80, l); COR_ESC[i] = hslHex(h, 70, l - 26); COR_RGB[i] = [1, 3, 5].map(k => parseInt(COR[i].slice(k, k + 2), 16)); }
+// na final cada finalista ganha uma cor bem diferente das outras
+const PALETA = ['#ef4444', '#3b82f6', '#facc15', '#22c55e', '#a855f7', '#f97316', '#06b6d4', '#ec4899', '#84cc16', '#14b8a6', '#92400e', '#1e293b'];
+const PALETA_RGB = PALETA.map(c => [1, 3, 5].map(k => parseInt(c.slice(k, k + 2), 16)));
+const PALETA_ESC = PALETA.map(c => '#' + [1, 3, 5].map(k => Math.round(parseInt(c.slice(k, k + 2), 16) * 0.55).toString(16).padStart(2, '0')).join(''));
+let palAtual = null;
+const corJ = id => palAtual && palAtual[id] !== undefined ? PALETA[palAtual[id]] : COR[id];
+const corJEsc = id => palAtual && palAtual[id] !== undefined ? PALETA_ESC[palAtual[id]] : COR_ESC[id];
+const rgbJ = id => palAtual && palAtual[id] !== undefined ? PALETA_RGB[palAtual[id]] : COR_RGB[id];
+
+/* =====================================================================
+   ESTADO DO ANFITRIÃO (quem simula)
+   ===================================================================== */
+let modo = null, solo = false, meuId = null;
+const G = { jog: [], fase: 'menu', prova: -1, t: 0, dur: 0, n0: 0, alvo: 0, vivosIni: 0, ordem: [], px: {}, total: 30, temporada: 0, rol: 0, encerrando: 0, podio: null };
+let pend = [], evLocal = [], evRede = [];
+const F = { VIVO: 1, CAINDO: 2, BOMBA: 4, DASH: 8, IMUNE: 16, BOT: 32 };
+function ev(e) { evLocal.push(e); evRede.push(e); }
+function falar(tipo) { ev({ k: 'fala', t: pick(FALAS[tipo]) }); }
+const vivos = () => G.jog.filter(p => p.st === 'vivo');
+const nVivos = () => { let n = 0; for (const p of G.jog) if (p.st === 'vivo') n++; return n; };
+
+function idLivre() { const usados = new Set(G.jog.map(p => p.id)); for (let i = 1; i < 250; i++) if (!usados.has(i)) return i; return 250; }
+function novoJogador({ nome, rosto, bot }) {
+  const p = { id: idLivre(), nome, rosto, bot: !!bot, skill: bot ? rnd(.25, .95) : 1, st: 'vivo', x: 0, y: 0, vx: 0, vy: 0, h: 0, vh: 0,
+    fx: 1, fy: 0, input: { mx: 0, my: 0, a: 0 }, aVisto: 0, acaoCd: 0, dashT: 0, bomba: false, imune: 0, passCd: 0, cai: 0, ai: {}, pend: false };
+  G.jog.push(p); G.rol++; return p;
+}
+function removerJogador(id) { const i = G.jog.findIndex(p => p.id === id); if (i >= 0) { G.jog.splice(i, 1); G.rol++; } }
+
+function posLivre(id) {
+  const A = ARENA[id];
+  for (let k = 0; k < 40; k++) {
+    let x, y;
+    if (id === 'quiz') { x = rnd(-170, 170); y = rnd(-170, 170); }
+    else if (A.forma === 'circ') { const rmin = (A.hub || 0) + 50, rmax = (id === 'sumo' ? 430 : A.r - 60); const r = Math.sqrt(rnd(rmin * rmin, rmax * rmax)), a = rnd(0, TAU); x = Math.cos(a) * r; y = Math.sin(a) * r; }
+    else { x = rnd(-A.w + 50, A.w - 50); y = rnd(-A.h + 50, A.h - 50); }
+    if (A.pil && A.pil.some(([px, py]) => Math.hypot(x - px, y - py) < A.pr + 40)) continue;
+    if (G.jog.some(o => o.st === 'vivo' && o.spawnado && Math.hypot(o.x - x, o.y - y) < RJ * 2.2) && k < 35) continue;
+    return [x, y];
+  }
+  return [rnd(-80, 80), rnd(-80, 80)];
+}
+function espalhar(id) {
+  for (const p of G.jog) p.spawnado = false;
+  for (const p of G.jog) if (p.st === 'vivo') { const [x, y] = posLivre(id); Object.assign(p, { x, y, vx: 0, vy: 0, h: 0, vh: 0, spawnado: true }); }
+}
+
+/* ---------- movimento, ação e colisões ---------- */
+const idArena = () => G.fase === 'lobby' ? 'lobby' : (PROVAS[G.prova] || {}).id || 'lobby';
+function mover(p, dt) {
+  const id = idArena(), gelo = id === 'sumo';
+  let mx = p.input.mx || 0, my = p.input.my || 0; const m = Math.hypot(mx, my);
+  if (m > 1) { mx /= m; my /= m; }
+  const mm = Math.hypot(mx, my); if (mm > 0.15) { p.fx = mx / mm; p.fy = my / mm; }
+  if (gelo) {
+    p.vx += mx * 720 * dt; p.vy += my * 720 * dt;
+    const k = Math.exp(-0.55 * dt); p.vx *= k; p.vy *= k;
+    const v = Math.hypot(p.vx, p.vy), lim = p.dashT > 0 ? 900 : 370; if (v > lim) { p.vx *= lim / v; p.vy *= lim / v; }
+  } else {
+    const vmax = 250 * (p.bomba ? 1.08 : 1);
+    if (p.dashT > 0) { const k = Math.exp(-3 * dt); p.vx *= k; p.vy *= k; }
+    else { const k = Math.min(1, dt * 12); p.vx += (mx * vmax - p.vx) * k; p.vy += (my * vmax - p.vy) * k; }
+  }
+  p.x += p.vx * dt; p.y += p.vy * dt;
+  if (p.h > 0 || p.vh > 0) { p.vh -= 960 * dt; p.h += p.vh * dt; if (p.h <= 0) { p.h = 0; p.vh = 0; } }
+  p.dashT -= dt; p.acaoCd -= dt; p.imune -= dt; p.passCd -= dt;
+}
+function acao(p) {
+  const id = idArena();
+  if (id === 'laser' || id === 'lobby' || id === 'quiz' || id === 'memoria') { if (p.h === 0 && p.vh === 0) p.vh = 320; return; }
+  if (G.fase !== 'jogo' && G.fase !== 'intro') return;
+  if (p.acaoCd > 0) return;
+  if (id === 'bomba' || id === 'sumo') {
+    const sumo = id === 'sumo';
+    let dx = p.input.mx || 0, dy = p.input.my || 0; const m = Math.hypot(dx, dy);
+    if (m < 0.2) { dx = p.fx; dy = p.fy; } else { dx /= m; dy /= m; }
+    if (sumo) { p.vx += dx * 520; p.vy += dy * 520; p.acaoCd = 1.5; } else { p.vx = dx * 640; p.vy = dy * 640; p.acaoCd = 2.2; }
+    p.dashT = 0.25;
+    ev({ k: 'dash', id: p.id });
+  } else if (id === 'tinta' && G.fase === 'jogo') {
+    p.acaoCd = 5;
+    pintar(p.x, p.y, 100, p.id);
+    for (const o of G.jog) if (o !== p && o.st === 'vivo') { const dx = o.x - p.x, dy = o.y - p.y, d = Math.hypot(dx, dy); if (d < 130 && d > 1) { o.vx += dx / d * 420; o.vy += dy / d * 420; o.dashT = 0.2; } }
+    ev({ k: 'splash', id: p.id, x: Math.round(p.x), y: Math.round(p.y) });
+  }
+}
+function colisoes() {
+  const lista = G.jog.filter(p => p.st === 'vivo'), gelo = idArena() === 'sumo', bomba = idArena() === 'bomba' && G.fase === 'jogo';
+  for (let i = 0; i < lista.length; i++) {
+    const a = lista[i];
+    for (let j = i + 1; j < lista.length; j++) {
+      const b = lista[j], dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy, m = RJ * 2;
+      if (d2 >= (m + 6) * (m + 6)) continue;
+      const d = Math.sqrt(d2) || 0.01, nx = dx / d, ny = dy / d;
+      if (bomba && a.bomba !== b.bomba) {
+        const dono = a.bomba ? a : b, outro = a.bomba ? b : a;
+        if (dono.passCd <= 0 && outro.imune <= 0) { dono.bomba = false; outro.bomba = true; outro.passCd = 0.45; dono.imune = 1.1; ev({ k: 'pass', de: dono.id, para: outro.id }); }
+      }
+      if (d >= m) continue;
+      const sobra = (m - d) / 2; a.x -= nx * sobra; a.y -= ny * sobra; b.x += nx * sobra; b.y += ny * sobra;
+      if (gelo) {
+        const va = a.vx * nx + a.vy * ny, vb = b.vx * nx + b.vy * ny, rel = va - vb;
+        if (rel > 0) {
+          const e = 1.05, imp = rel * (1 + e) / 2;
+          let ka = 1, kb = 1;
+          if (a.dashT > 0 && b.dashT <= 0) kb = 1.7; else if (b.dashT > 0 && a.dashT <= 0) ka = 1.7;
+          a.vx -= imp * nx * ka; a.vy -= imp * ny * ka; b.vx += imp * nx * kb; b.vy += imp * ny * kb;
+          if (rel > 260) ev({ k: 'bate', x: Math.round((a.x + b.x) / 2), y: Math.round((a.y + b.y) / 2) });
+        }
+      } else if (a.dashT > 0 || b.dashT > 0) {
+        const quem = a.dashT > 0 ? a : b, alvo = quem === a ? b : a, s = quem === a ? 1 : -1;
+        alvo.vx += nx * s * 260; alvo.vy += ny * s * 260; alvo.dashT = Math.max(alvo.dashT, 0.12);
+      }
+    }
+  }
+}
+function limitar(p) {
+  const id = idArena(), A = ARENA[id];
+  if (A.forma === 'circ') {
+    if (id === 'sumo' && G.fase === 'jogo') return;
+    const d = Math.hypot(p.x, p.y), m = (id === 'sumo' ? G.px.R || A.r : A.r) - RJ;
+    if (d > m) { p.x *= m / d; p.y *= m / d; const rad = (p.vx * p.x + p.vy * p.y) / (m * m); if (rad > 0) { p.vx -= rad * p.x; p.vy -= rad * p.y; } }
+    if (A.hub) { const mi = A.hub + RJ, d2 = Math.hypot(p.x, p.y); if (d2 < mi) { if (d2 < 0.01) { p.x = mi; } else { p.x *= mi / d2; p.y *= mi / d2; } } }
+  } else {
+    if (p.x < -A.w + RJ) { p.x = -A.w + RJ; p.vx = Math.max(0, p.vx); } if (p.x > A.w - RJ) { p.x = A.w - RJ; p.vx = Math.min(0, p.vx); }
+    if (p.y < -A.h + RJ) { p.y = -A.h + RJ; p.vy = Math.max(0, p.vy); } if (p.y > A.h - RJ) { p.y = A.h - RJ; p.vy = Math.min(0, p.vy); }
+    if (A.pil) for (const [px, py] of A.pil) { const dx = p.x - px, dy = p.y - py, d = Math.hypot(dx, dy), m = A.pr + RJ; if (d < m) { if (d < 0.01) { p.x = px + m; continue; } p.x = px + dx / d * m; p.y = py + dy / d * m; } }
+  }
+}
+
+/* ---------- eliminações ---------- */
+function eliminar(p, como) { if (p.st !== 'vivo' || p.pend) return; p.pend = true; pend.push([p, como]); }
+function aplicarEliminacoes() {
+  if (!pend.length) return;
+  const lista = pend; pend = [];
+  for (const [p] of lista) p.pend = false;
+  if (G.encerrando > 0) { const R = PX[PROVAS[G.prova].id].resgatar; for (const [p] of lista) if (R) R(p); return; } // o gongo já bateu
+  if (nVivos() - lista.length < MIN_VIVOS) {
+    const R = PX[PROVAS[G.prova].id].resgatar; for (const [p] of lista) if (R) R(p);
+    falar('sorte'); return;
+  }
+  for (const [p, como] of lista) {
+    p.st = 'caindo'; p.cai = 0; p.como = como; p.bomba = false; p.elimProva = G.prova; G.ordem.push(p.id);
+    ev({ k: 'elim', id: p.id, c: como, x: Math.round(p.x), y: Math.round(p.y) });
+  }
+  if (lista.length >= 5) falar('muitos'); else if (Math.random() < 0.45) falar('elim');
+}
+
+/* =====================================================================
+   AS 6 PROVAS (lógica no anfitrião)
+   ===================================================================== */
+const PX = {
+  /* 1 ─ CORDA DE LASER: feixes giram a partir do centro; só quem está no ar escapa */
+  laser: {
+    iniciar() { G.px = { a: [rnd(0, TAU)], w: 0, dir: Math.random() < .5 ? 1 : -1, n: 1, prox: rnd(19, 23), aviso: 0 }; espalhar('laser'); },
+    passo(dt) {
+      const s = G.px, t = G.t;
+      const n = t < 12 ? 1 : t < 26 ? 2 : 3;
+      if (n !== s.n) { const a0 = s.a[0]; s.n = n; s.a = Array.from({ length: n }, (_, i) => a0 + i * TAU / n); ev({ k: 'som', s: 'laser' }); ev({ k: 'fala', t: n === 2 ? 'Dois lasers agora!' : 'TRÊS LASERS! Boa sorte!' }); }
+      s.aviso = t > s.prox - 1.3 ? 1 : 0;
+      if (t > s.prox) { s.dir *= -1; s.prox = t + rnd(6, 9); ev({ k: 'som', s: 'reverte' }); }
+      // nunca devagar demais: um laser lento fica tempo demais em cima de alguém e vira impossível de pular
+      s.w = Math.min(3.4, 1.45 + 0.042 * t) * s.dir;
+      const ant = s.a.slice(); for (let i = 0; i < s.a.length; i++) s.a[i] += s.w * dt;
+      if (t < 1) return; // um segundo de tolerância para quem largou em cima do laser
+      for (const p of G.jog) {
+        if (p.st !== 'vivo' || p.h >= 14) continue;
+        const d = Math.hypot(p.x, p.y); if (d < ARENA.laser.hub) continue;
+        const th = Math.atan2(p.y, p.x), w = (RJ * 0.8) / d;
+        for (let i = 0; i < s.a.length; i++) {
+          const sw = s.a[i] - ant[i]; let delta = angNorm(th - ant[i]); if (delta > Math.PI) delta -= TAU;
+          if (sw >= 0 ? (delta >= -w && delta <= sw + w) : (delta <= w && delta >= sw - w)) { eliminar(p, 'laser'); break; }
+        }
+      }
+    },
+    tempo() { return Math.max(0, PROVAS[0].limite - G.t); },
+    snap() { const s = G.px; return { a: s.a.map(v => +angNorm(v).toFixed(3)), w: +s.w.toFixed(3), av: s.aviso }; },
+    bot(p, dt) {
+      const s = G.px, d = Math.hypot(p.x, p.y), th = Math.atan2(p.y, p.x), aw = Math.abs(s.w) || 1.45;
+      let tmin = 9;
+      for (const a of s.a) { let dl = s.dir > 0 ? angNorm(th - a) : angNorm(a - th); dl -= (RJ * 0.8) / Math.max(d, 1); if (dl < -0.05) dl += TAU; tmin = Math.min(tmin, Math.max(0, dl) / aw); }
+      if (G.fase !== 'jogo') tmin = 9;
+      const ai = p.ai;
+      if (ai.tAnt === undefined || tmin > ai.tAnt + 0.25) {
+        // perto do centro o laser passa devagar por cima: o pulo tem que ser mais "em cima da hora"
+        const travessia = 2 * (RJ * 0.8) / Math.max(d, 1) / aw;
+        const erro = 0.008 + (1 - p.skill) * 0.05 + Math.min(0.06, G.t * 0.0015), r = Math.random();
+        ai.lead = r < erro * 0.5 ? rnd(0.66, 0.85) : r < erro ? -1 : Math.max(0.075, Math.min(rnd(0.09, 0.32), 0.5 - travessia));
+      }
+      ai.tAnt = tmin;
+      if (p.h === 0 && tmin < ai.lead) { p.input.a++; ai.lead = -1; }
+      if (tmin < 0.9 || p.h > 0) { parar(p); return; } // fica parado para o laser passar reto
+      ai.vag = (ai.vag || 0) - dt;
+      if (ai.vag <= 0 || !ai.dest) { ai.vag = rnd(1.5, 4); const r = rnd(200, 480), a = rnd(0, TAU); ai.dest = [Math.cos(a) * r, Math.sin(a) * r]; }
+      irPara(p, ai.dest[0], ai.dest[1], 20, 0.55);
+    },
+  },
+
+  /* 2 ─ QUIZ CORRE-CORRE: quatro quadrados, uma pergunta; o chão das erradas some */
+  quiz: {
+    iniciar() { G.px = { q: -1, o: [0, 1, 2, 3], ph: 'pausa', t: 1.2, num: 0, ok: -1, usadas: G.px && G.px.usadasQuiz || [] }; espalhar('quiz'); },
+    passo(dt) {
+      const s = G.px; s.t -= dt;
+      if (s.ph === 'pausa' && s.t <= 0) {
+        if (nVivos() <= G.alvo || s.num >= 8) return fimProva();
+        let livres = PERGUNTAS.map((_, i) => i).filter(i => !s.usadas.includes(i));
+        if (!livres.length) { s.usadas.length = 0; livres = PERGUNTAS.map((_, i) => i); }
+        s.q = pick(livres); s.usadas.push(s.q); s.o = embaralhar([0, 1, 2, 3]); s.ok = -1;
+        s.ph = 'p'; s.t = Math.max(7, 10.5 - s.num * 0.5); s.tot = s.t; s.num++;
+        for (const p of G.jog) p.ai.quiz = null;
+        ev({ k: 'som', s: 'pergunta' });
+      } else if (s.ph === 'p' && s.t <= 0) {
+        s.ph = 'r'; s.t = 2.8; s.ok = s.o.indexOf(0);
+        for (const p of G.jog) if (p.st === 'vivo' && quadrante(p.x, p.y) !== s.ok) eliminar(p, 'quiz');
+        ev({ k: 'som', s: 'revela' });
+      } else if (s.ph === 'r' && s.t <= 0) { s.ph = 'pausa'; s.t = 1.2; s.ok = -1; }
+    },
+    resgatar(p) { const ok = G.px.ok >= 0 ? G.px.ok : 0, c = [[-1, -1], [1, -1], [-1, 1], [1, 1]][ok]; p.x = c[0] * 270; p.y = c[1] * 270; },
+    tempo() { return G.px.ph === 'p' ? G.px.t : 0; },
+    snap() { const s = G.px; return { q: s.q, o: s.o, ph: s.ph, ok: s.ok }; },
+    bot(p, dt) {
+      const s = G.px, ai = p.ai;
+      if (s.ph !== 'p') { if (s.ph === 'pausa') irPara(p, ai.qx ?? p.x, ai.qy ?? p.y, 30, 0.5); else parar(p); return; }
+      if (!ai.quiz) {
+        const certo = Math.random() < 0.3 + 0.58 * p.skill, quad = certo ? s.o.indexOf(0) : pick([0, 1, 2, 3].filter(i => i !== s.o.indexOf(0)));
+        ai.quiz = { quad, dec: rnd(1.2, 5.5) * (1.2 - p.skill * 0.4), troca: Math.random() < 0.25 * (1 - p.skill) + 0.05 };
+        const sx = quad % 2 ? 1 : -1, sy = quad >= 2 ? 1 : -1; ai.qx = sx * rnd(80, 470); ai.qy = sy * rnd(80, 470);
+      }
+      const passou = s.tot - s.t, q = ai.quiz;
+      if (q.troca && s.t < 3.2 && !q.trocou) {
+        q.trocou = true; const cont = [0, 0, 0, 0]; for (const o of G.jog) if (o.st === 'vivo') { const k = quadrante(o.x, o.y); if (k >= 0) cont[k]++; }
+        const mais = cont.indexOf(Math.max(...cont)); if (mais !== q.quad) { q.quad = mais; const sx = mais % 2 ? 1 : -1, sy = mais >= 2 ? 1 : -1; ai.qx = sx * rnd(80, 470); ai.qy = sy * rnd(80, 470); }
+      }
+      if (passou < q.dec) { irPara(p, Math.sin(G.t + p.id) * 60, Math.cos(G.t * 1.3 + p.id) * 60, 20, 0.4); return; }
+      irPara(p, ai.qx, ai.qy, 18, 1);
+    },
+  },
+
+  /* 3 ─ BOMBA-RELÓGIO: bombas passam de mão em mão; quem segura na explosão sai */
+  bomba: {
+    iniciar() { G.px = { ph: 'pausa', t: 1.5, fu: 0, r: 0 }; espalhar('bomba'); },
+    passo(dt) {
+      const s = G.px; s.t -= dt;
+      if (s.ph === 'pausa' && s.t <= 0) {
+        const vv = vivos(); if (vv.length <= G.alvo) return fimProva();
+        const nb = clamp(Math.min(Math.round(vv.length * 0.25), vv.length - G.alvo), 1, vv.length - 1);
+        for (const p of embaralhar(vv.slice()).slice(0, nb)) { p.bomba = true; p.passCd = 1; }
+        s.ph = 'tic'; s.t = Math.max(9, rnd(14, 19) - s.r * 1.2); s.r++;
+        ev({ k: 'som', s: 'bomba' }); ev({ k: 'fala', t: nb === 1 ? 'Uma bomba está solta!' : `${nb} bombas soltas no estúdio!` });
+      } else if (s.ph === 'tic') {
+        s.fu = s.t;
+        if (s.t <= 0) {
+          for (const p of G.jog) if (p.st === 'vivo' && p.bomba) {
+            eliminar(p, 'bomba'); ev({ k: 'boom', x: Math.round(p.x), y: Math.round(p.y) });
+            for (const o of G.jog) if (o !== p && o.st === 'vivo') { const dx = o.x - p.x, dy = o.y - p.y, d = Math.hypot(dx, dy); if (d < 170 && d > 1) { o.vx += dx / d * 520 * (1 - d / 170); o.vy += dy / d * 520 * (1 - d / 170); o.dashT = 0.3; } }
+          }
+          for (const p of G.jog) p.bomba = false;
+          s.ph = 'pausa'; s.t = 2.6; s.fu = 0;
+        }
+      }
+    },
+    resgatar(p) { p.bomba = false; },
+    tempo() { return G.px.ph === 'tic' ? G.px.t : 0; },
+    snap() { return { ph: G.px.ph, fu: +G.px.fu.toFixed(1) }; },
+    bot(p, dt) {
+      const ai = p.ai, A = ARENA.bomba;
+      if (p.bomba) {
+        let alvo = null, md = 1e9;
+        for (const o of G.jog) if (o.st === 'vivo' && !o.bomba && o.imune <= 0) { const d = Math.hypot(o.x - p.x, o.y - p.y); if (d < md) { md = d; alvo = o; } }
+        if (!alvo) { parar(p); return; }
+        const lead = Math.min(0.4, md / 600) * p.skill; irPara(p, alvo.x + alvo.vx * lead, alvo.y + alvo.vy * lead, 0, 1);
+        desviarPilares(p);
+        if (md < 150 && p.acaoCd <= 0 && Math.random() < 0.02 + p.skill * 0.06) p.input.a++;
+        return;
+      }
+      let fx = 0, fy = 0, perigo = 0;
+      for (const o of G.jog) if (o.st === 'vivo' && o.bomba) { const dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy); if (d < 380 && d > 1) { const w = (380 - d) / 380; fx += dx / d * w; fy += dy / d * w; perigo = Math.max(perigo, w); } }
+      const bx = A.w - 90, by = A.h - 90;
+      if (p.x > bx) fx -= (p.x - bx) / 60; if (p.x < -bx) fx += (-bx - p.x) / 60; if (p.y > by) fy -= (p.y - by) / 60; if (p.y < -by) fy += (-by - p.y) / 60;
+      if (perigo > 0.05) {
+        const reac = (ai.reac = (ai.reac ?? rnd(0.1, 0.5) * (1.3 - p.skill)) - dt);
+        if (reac <= 0) { const m = Math.hypot(fx, fy) || 1; p.input.mx = fx / m; p.input.my = fy / m; desviarPilares(p); if (perigo > 0.72 && p.acaoCd <= 0 && Math.random() < 0.03 + p.skill * 0.08) p.input.a++; }
+      } else { ai.reac = undefined; ai.vag = (ai.vag || 0) - dt; if (ai.vag <= 0 || !ai.dest) { ai.vag = rnd(1, 3); ai.dest = posLivre('bomba'); } irPara(p, ai.dest[0], ai.dest[1], 20, 0.6); desviarPilares(p); }
+    },
+  },
+
+  /* 4 ─ PISO DA MEMÓRIA: decore os símbolos; o grito do Gongo diz qual piso fica de pé */
+  memoria: {
+    iniciar() { G.px = { ph: 'pausa', t: 1.4, r: 0, sym: [], k: [], alvo: -1, safe: null }; espalhar('memoria'); },
+    passo(dt) {
+      const s = G.px; s.t -= dt;
+      if (s.ph === 'pausa' && s.t <= 0) {
+        if (nVivos() <= G.alvo || s.r >= 6) return fimProva();
+        const K = Math.min(SIMBOLOS.length, 5 + s.r);
+        s.k = embaralhar(SIMBOLOS.map((_, i) => i)).slice(0, K);
+        const pisos = []; for (const k of s.k) for (let i = 0; i < 3; i++) pisos.push(k);
+        while (pisos.length < MEM.n * MEM.n) pisos.push(pick(s.k));
+        s.sym = embaralhar(pisos); s.alvo = -1; s.safe = null;
+        s.ph = 'mostra'; s.t = Math.max(2.6, 5.4 - s.r * 0.55); s.r++;
+        ev({ k: 'som', s: 'mostra' });
+      } else if (s.ph === 'mostra' && s.t <= 0) {
+        s.ph = 'esconde'; s.t = 0.7;
+        for (const p of G.jog) if (p.bot && p.st === 'vivo') { const pm = 0.3 + 0.55 * p.skill; p.ai.mem = s.sym.map(v => Math.random() < pm ? v : pick(s.k)); p.ai.memo = null; }
+        ev({ k: 'som', s: 'vira' });
+      } else if (s.ph === 'esconde' && s.t <= 0) {
+        const cont = {}; for (const v of s.sym) cont[v] = (cont[v] || 0) + 1;
+        const ops = s.k.filter(k => cont[k] >= 3 && cont[k] <= 9);
+        s.alvo = pick(ops.length ? ops : s.k); s.ph = 'corre'; s.t = Math.max(3.4, 5.6 - s.r * 0.35);
+        ev({ k: 'grito', s: s.alvo });
+      } else if (s.ph === 'corre' && s.t <= 0) {
+        s.ph = 'cai'; s.t = 2.6; s.safe = s.sym.map(v => v === s.alvo);
+        for (const p of G.jog) if (p.st === 'vivo' && !s.safe[memPiso(p.x, p.y)]) eliminar(p, 'memoria');
+        ev({ k: 'som', s: 'cai' });
+      } else if (s.ph === 'cai' && s.t <= 0) { s.ph = 'pausa'; s.t = 1.1; }
+    },
+    resgatar(p) { const s = G.px; const i = s.sym.findIndex(v => v === s.alvo); if (i >= 0) { const [x, y] = memCentro(i); p.x = x + rnd(-20, 20); p.y = y + rnd(-20, 20); } },
+    tempo() { return G.px.ph === 'corre' ? G.px.t : G.px.ph === 'mostra' ? G.px.t : 0; },
+    snap() { const s = G.px, ver = s.ph === 'mostra' || s.ph === 'esconde' || s.ph === 'cai'; return { ph: s.ph, sy: ver ? s.sym.map(v => String.fromCharCode(97 + v)).join('') : '', al: s.ph === 'corre' || s.ph === 'cai' ? s.alvo : -1, t: +s.t.toFixed(2) }; },
+    bot(p, dt) {
+      const s = G.px, ai = p.ai;
+      if (s.ph === 'corre') {
+        if (!ai.memo) {
+          ai.memo = { reac: rnd(0.25, 1.1) * (1.25 - p.skill * 0.4) };
+          const mem = ai.mem || s.sym.map(() => pick(s.k)), cand = [];
+          mem.forEach((v, i) => { if (v === s.alvo) cand.push(i); });
+          let best = -1, bd = 1e9; for (const i of cand) { const [x, y] = memCentro(i), d = Math.hypot(x - p.x, y - p.y) + rnd(0, 60); if (d < bd) { bd = d; best = i; } }
+          if (best < 0) best = Math.floor(Math.random() * MEM.n * MEM.n);
+          const [x, y] = memCentro(best); ai.memo.x = x + rnd(-28, 28); ai.memo.y = y + rnd(-28, 28);
+        }
+        ai.memo.reac -= dt; if (ai.memo.reac > 0) { parar(p); return; }
+        irPara(p, ai.memo.x, ai.memo.y, 6, 1);
+      } else if (s.ph === 'mostra' || s.ph === 'pausa') {
+        ai.vag = (ai.vag || 0) - dt; if (ai.vag <= 0 || !ai.dest) { ai.vag = rnd(1, 2.5); ai.dest = [p.x + rnd(-150, 150), p.y + rnd(-150, 150)]; }
+        irPara(p, ai.dest[0], ai.dest[1], 20, 0.45);
+      } else parar(p);
+    },
+  },
+
+  /* 5 ─ SUMÔ NO GELO: escorrega, empurra e a arena encolhe */
+  sumo: {
+    iniciar() { G.px = { R: ARENA.sumo.r }; espalhar('sumo'); },
+    passo(dt) {
+      const s = G.px; s.R = Math.max(175, ARENA.sumo.r - G.t * 8.5);
+      for (const p of G.jog) if (p.st === 'vivo' && Math.hypot(p.x, p.y) > s.R + 2) eliminar(p, 'sumo');
+    },
+    resgatar(p) { const d = Math.hypot(p.x, p.y) || 1, r = G.px.R * 0.7; p.x = p.x / d * r; p.y = p.y / d * r; p.vx = p.vy = 0; },
+    tempo() { return Math.max(0, PROVAS[4].limite - G.t); },
+    snap() { return { R: Math.round(G.px.R) }; },
+    bot(p, dt) {
+      // no gelo não dá para "ir até": o bot escolhe a velocidade que quer ter e acelera para corrigir a atual
+      const R = G.px.R, ai = p.ai, cuidado = 0.55 + p.skill * 0.45;
+      const guiar = (vx, vy) => { const dx = vx - p.vx, dy = vy - p.vy, d = Math.hypot(dx, dy); if (d < 12) { parar(p); return; } p.input.mx = dx / d; p.input.my = dy / d; };
+      const fx = p.x + p.vx * 0.8 * cuidado, fy = p.y + p.vy * 0.8 * cuidado, dFut = Math.hypot(fx, fy), d0 = Math.hypot(p.x, p.y);
+      if (dFut > R * 0.78 || d0 > R * 0.82) { const k = 200 / Math.max(d0, 1); guiar(-p.x * k, -p.y * k); if (d0 > R * 0.9 && p.acaoCd <= 0 && (p.vx * p.x + p.vy * p.y) > 0 && Math.random() < 0.2 * p.skill) { p.input.mx = -p.x / d0; p.input.my = -p.y / d0; p.input.a++; } return; }
+      for (const o of G.jog) if (o !== p && o.st === 'vivo' && o.dashT > 0) {
+        const dx = p.x - o.x, dy = p.y - o.y, d = Math.hypot(dx, dy);
+        if (d < 160 && (o.vx * dx + o.vy * dy) > 0 && Math.random() < 0.5 * p.skill) { const s = (p.x * dy - p.y * dx) > 0 ? -1 : 1; guiar(-dy / d * 260 * s, dx / d * 260 * s); return; }
+      }
+      let alvo = null, md = 1e9;
+      for (const o of G.jog) if (o !== p && o.st === 'vivo') { const d = Math.hypot(o.x - p.x, o.y - p.y); if (d < md) { md = d; alvo = o; } }
+      if (alvo && md < 240) {
+        const da = Math.hypot(alvo.x, alvo.y), dx = alvo.x - p.x, dy = alvo.y - p.y;
+        if (da > d0 * 0.9) { // ele está mais perto da borda: ataca
+          guiar(dx / md * 280, dy / md * 280);
+          const alinhado = (p.vx * dx + p.vy * dy) / (md * (Math.hypot(p.vx, p.vy) || 1)) > 0.6;
+          if (md < 160 && alinhado && p.acaoCd <= 0 && Math.random() < 0.03 + p.skill * 0.08) p.input.a++;
+        } else { const k = 160 / Math.max(d0, 1); guiar(-p.x * k * 0.5 - dy / md * 120, -p.y * k * 0.5 + dx / md * 120); }
+        return;
+      }
+      ai.ang = (ai.ang ?? rnd(0, TAU)) + dt * 0.5; const r = R * 0.35;
+      guiar((Math.cos(ai.ang) * r - p.x) * 0.9, (Math.sin(ai.ang) * r - p.y) * 0.9);
+    },
+  },
+
+  /* 6 ─ FINAL: GUERRA DE TINTA. Quem pintar mais chão, vence */
+  tinta: {
+    iniciar() {
+      G.px = { grid: new Uint8Array(TINTA.cols * TINTA.rows), pd: [], cheio: 0, pal: {} };
+      const vv = vivos(), A = ARENA.tinta;
+      vv.forEach((p, i) => { G.px.pal[p.id] = i % PALETA.length; });
+      vv.forEach((p, i) => { const a = i / vv.length * TAU; Object.assign(p, { x: Math.cos(a) * A.w * 0.75, y: Math.sin(a) * A.h * 0.75, vx: 0, vy: 0, h: 0, vh: 0 }); });
+    },
+    passo(dt) { for (const p of G.jog) if (p.st === 'vivo') pintar(p.x, p.y, 27, p.id); },
+    tempo() { return Math.max(0, PROVAS[5].limite - G.t); },
+    snap(rede) {
+      const s = G.px, o = { pal: s.pal };
+      if (rede) { o.pd = s.pd; s.pd = []; if (++s.cheio % 30 === 1) o.pg = Array.from(s.grid, v => String.fromCharCode(48 + v)).join(''); }
+      return o;
+    },
+    bot(p, dt) {
+      const ai = p.ai, s = G.px, A = ARENA.tinta;
+      ai.rep = (ai.rep || 0) - dt;
+      if (ai.rep <= 0 || !ai.dest) {
+        ai.rep = rnd(1.1, 2.6); let best = null, bs = -1e9;
+        for (let k = 0; k < 10; k++) {
+          const x = rnd(-A.w + 40, A.w - 40), y = rnd(-A.h + 40, A.h - 40); let sc = 0;
+          for (let i = -1; i <= 1; i++) for (let j = -1; j <= 1; j++) { const c = celula(x + i * 34, y + j * 34); if (c >= 0 && s.grid[c] !== p.id) sc += s.grid[c] ? 1.4 : 1; }
+          sc -= Math.hypot(x - p.x, y - p.y) / 260 * (0.6 + p.skill);
+          if (sc > bs) { bs = sc; best = [x, y]; }
+        }
+        ai.dest = best;
+      }
+      irPara(p, ai.dest[0], ai.dest[1], 30, 1);
+      if (p.acaoCd <= 0 && G.fase === 'jogo') {
+        let n = 0, t = 0; for (let k = 0; k < 12; k++) { const a = k / 12 * TAU, c = celula(p.x + Math.cos(a) * 70, p.y + Math.sin(a) * 70); if (c >= 0) { t++; if (s.grid[c] !== p.id) n++; } }
+        if (t && n / t > 0.6 && Math.random() < 0.05 + p.skill * 0.1) p.input.a++;
+      }
+    },
+  },
+};
+function celula(x, y) { const A = ARENA.tinta, c = Math.floor((x + A.w) / TINTA.cel), r = Math.floor((y + A.h) / TINTA.cel); if (c < 0 || r < 0 || c >= TINTA.cols || r >= TINTA.rows) return -1; return r * TINTA.cols + c; }
+function pintar(x, y, raio, id) {
+  const s = G.px, A = ARENA.tinta, cel = TINTA.cel;
+  const c0 = Math.max(0, Math.floor((x - raio + A.w) / cel)), c1 = Math.min(TINTA.cols - 1, Math.floor((x + raio + A.w) / cel));
+  const r0 = Math.max(0, Math.floor((y - raio + A.h) / cel)), r1 = Math.min(TINTA.rows - 1, Math.floor((y + raio + A.h) / cel));
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const cx = -A.w + (c + 0.5) * cel, cy = -A.h + (r + 0.5) * cel;
+    if ((cx - x) ** 2 + (cy - y) ** 2 > raio * raio) continue;
+    const i = r * TINTA.cols + c; if (s.grid[i] !== id) { s.grid[i] = id; s.pd.push(i, id); }
+  }
+}
+function irPara(p, x, y, parar = 12, vel = 1) { const dx = x - p.x, dy = y - p.y, d = Math.hypot(dx, dy); if (d < parar) { p.input.mx = 0; p.input.my = 0; return true; } const k = vel * Math.min(1, d / 60 + 0.35); p.input.mx = dx / d * k; p.input.my = dy / d * k; return false; }
+function parar(p) { p.input.mx = 0; p.input.my = 0; }
+function desviarPilares(p) {
+  const A = ARENA.bomba; let mx = p.input.mx, my = p.input.my; const m = Math.hypot(mx, my); if (m < 0.1) return;
+  for (const [px, py] of A.pil) { const dx = px - p.x, dy = py - p.y, d = Math.hypot(dx, dy); if (d < A.pr + 70 && (dx * mx + dy * my) / (d * m) > 0.55) { const s = (dx * my - dy * mx) > 0 ? 1 : -1; mx += -dy / d * s * 1.2; my += dx / d * s * 1.2; } }
+  const n = Math.hypot(mx, my) || 1; p.input.mx = mx / n * m; p.input.my = my / n * m;
+}
+
+/* =====================================================================
+   FLUXO DO SHOW
+   ===================================================================== */
+const alvoDe = (pr, n) => Math.max(MIN_VIVOS, Math.min(n - 1, Math.round(n * pr.razao)));
+function comecarTemporada() {
+  for (let i = G.jog.length - 1; i >= 0; i--) if (G.jog[i].bot) G.jog.splice(i, 1);
+  for (const p of G.jog) Object.assign(p, { st: 'vivo', bomba: false, elimProva: undefined, ai: {}, pend: false });
+  const usados = new Set(G.jog.map(p => p.nome)), nomes = embaralhar(NOMES_BOT.filter(n => !usados.has(n)));
+  while (G.jog.length < Math.max(G.total, 8) && G.jog.length < MAX_TOTAL) { const nome = nomes.pop() || 'Bot ' + G.jog.length; novoJogador({ nome, rosto: pick(ROSTOS), bot: true }); }
+  G.rol++; G.ordem = []; G.prova = -1; G.n0 = G.jog.length; G.temporada++; G.podio = null; G.px = {};
+  ev({ k: 'temporada', n: G.temporada });
+  proximaProva();
+}
+function proximaProva() {
+  G.prova++;
+  while (G.prova < 5) { const n = nVivos(), al = alvoDe(PROVAS[G.prova], n); if (al < n) break; ev({ k: 'fala', t: 'Poucos competidores: vamos pular uma prova!' }); G.prova++; }
+  const pr = PROVAS[G.prova];
+  G.alvo = pr.final ? 1 : alvoDe(pr, nVivos()); G.vivosIni = nVivos(); G.encerrando = 0;
+  for (const p of G.jog) Object.assign(p, { h: 0, vh: 0, vx: 0, vy: 0, bomba: false, acaoCd: 0, dashT: 0, imune: 0, passCd: 0, ai: {} });
+  const usadasQuiz = G.px && G.px.usadas;
+  PX[pr.id].iniciar(); if (usadasQuiz && pr.id === 'quiz') G.px.usadas = usadasQuiz;
+  G.fase = 'intro'; G.t = 0; G.dur = 6.5;
+  ev({ k: 'intro', pr: G.prova }); ev({ k: 'fala', t: pr.final ? pick(FALAS.final) : pick(FALAS.intro) });
+}
+function fimProva() {
+  G.encerrando = 0; for (const p of G.jog) p.bomba = false;
+  G.fase = 'resultado'; G.t = 0; G.dur = 4;
+  ev({ k: 'res', v: nVivos(), e: G.vivosIni - nVivos() });
+}
+function fimFinal() {
+  const cont = {}; for (const v of G.px.grid) if (v) cont[v] = (cont[v] || 0) + 1;
+  const fin = vivos().sort((a, b) => (cont[b.id] || 0) - (cont[a.id] || 0));
+  const ranking = fin.map(p => [p.id, cont[p.id] || 0]);
+  for (let i = G.ordem.length - 1; i >= 0; i--) if (G.jog.some(p => p.id === G.ordem[i])) ranking.push([G.ordem[i], -1 - (G.jog.find(p => p.id === G.ordem[i]).elimProva || 0)]);
+  G.podio = ranking; G.fase = 'fim'; G.t = 0; G.dur = solo ? 1e9 : 35;
+  ev({ k: 'fim' });
+}
+function voltarLobby() {
+  for (let i = G.jog.length - 1; i >= 0; i--) if (G.jog[i].bot) G.jog.splice(i, 1);
+  G.rol++; G.fase = 'lobby'; G.prova = -1; G.t = 0; G.podio = null; G.px = {};
+  for (const p of G.jog) { const [x, y] = posLivre('lobby'); Object.assign(p, { st: 'vivo', x, y, vx: 0, vy: 0, bomba: false }); }
+}
+
+function simular(dt) {
+  G.t += dt;
+  const pr = PROVAS[G.prova], X = pr && PX[pr.id];
+  for (const p of G.jog) {
+    if (p.st !== 'vivo') continue;
+    if (p.bot) { if (X && (G.fase === 'jogo' || G.fase === 'intro')) { try { X.bot(p, dt); } catch (e) { parar(p); } } else parar(p); }
+    if (p.input.a !== p.aVisto) { p.aVisto = p.input.a; acao(p); }
+  }
+  for (const p of G.jog) {
+    if (p.st === 'vivo') mover(p, dt);
+    else if (p.st === 'caindo') { p.cai += dt / 1.1; p.x += p.vx * dt * 0.6; p.y += p.vy * dt * 0.6; if (p.cai >= 1) { p.st = 'fora'; p.cai = 1; } }
+  }
+  colisoes();
+  for (const p of G.jog) if (p.st === 'vivo') limitar(p);
+  if (G.fase === 'jogo') {
+    X.passo(dt);
+    aplicarEliminacoes();
+    if (G.fase === 'jogo') {
+      if (pr.fimAuto && !G.encerrando && nVivos() <= G.alvo) G.encerrando = 1.2;
+      if (G.encerrando) { G.encerrando -= dt; if (G.encerrando <= 0) fimProva(); }
+      else if (G.t >= pr.limite) pr.final ? fimFinal() : fimProva();
+    }
+  } else if (G.fase === 'intro' && G.t >= G.dur) { G.fase = 'jogo'; G.t = 0; ev({ k: 'ja' }); }
+  else if (G.fase === 'resultado' && G.t >= G.dur) proximaProva();
+  else if (G.fase === 'fim' && G.t >= G.dur) { if (solo) comecarTemporada(); else voltarLobby(); }
+}
+
+/* ---------- foto do estado (enviada pela rede e usada pelo próprio anfitrião) ---------- */
+function flags(p) { let f = 0; if (p.st === 'vivo') f |= F.VIVO; if (p.st === 'caindo') f |= F.CAINDO; if (p.bomba) f |= F.BOMBA; if (p.dashT > 0) f |= F.DASH; if (p.imune > 0) f |= F.IMUNE; if (p.bot) f |= F.BOT; return f; }
+function montarSnap(rede) {
+  const j = [];
+  for (const p of G.jog) { if (p.st === 'fora' || p.st === 'plateia') continue; j.push(p.id, Math.round(p.x), Math.round(p.y), Math.round(p.h), flags(p), Math.round(p.cai * 100)); }
+  const pr = PROVAS[G.prova], X = pr && PX[pr.id];
+  let tr = 0; if (G.fase === 'intro' || G.fase === 'resultado') tr = G.dur - G.t; else if (G.fase === 'jogo' && X) tr = X.tempo(); else if (G.fase === 'fim') tr = solo ? 0 : G.dur - G.t;
+  const s = { t: 's', f: G.fase, p: G.prova, tr: +tr.toFixed(2), n0: G.n0, vv: nVivos(), al: G.alvo, rol: G.rol, j, x: X && G.fase !== 'lobby' ? X.snap(rede) : {} };
+  if (G.fase === 'fim') s.pod = G.podio;
+  if (rede) { s.ev = evRede; evRede = []; }
+  return s;
+}
+
+/* =====================================================================
+   REDE (PeerJS)
+   ===================================================================== */
+const PREFIXO = 'arcadia-gongo-v1-';
+let peer = null, conns = new Map(), conn = null, codigoSala = null;
+function roster() { return G.jog.map(p => [p.id, p.nome, p.rosto, p.bot ? 1 : 0]); }
+function enviarTodos(msg) { for (const { c } of conns.values()) if (c.open) try { c.send(msg); } catch (e) {} }
+function criarSalaOnline() {
+  if (!window.Peer) { erroMenu('Não deu para carregar o sistema de salas (sem internet?).'); return false; }
+  const tentar = (n = 0) => {
+    codigoSala = Array.from({ length: 4 }, () => pick('ABCDEFGHJKMNPQRSTUVWXYZ')).join('');
+    peer = new Peer(PREFIXO + codigoSala, { debug: 0 });
+    peer.on('open', () => { $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 ' + codigoSala; toast(`Sala ${codigoSala} criada! Passe o código para os amigos.`, 6000); });
+    peer.on('connection', c => { c.on('data', d => dadosDoCliente(c, d)); c.on('close', () => saiuCliente(c)); c.on('error', () => saiuCliente(c)); });
+    peer.on('error', e => {
+      if (e.type === 'unavailable-id' && n < 5) { peer.destroy(); tentar(n + 1); }
+      else if (['network', 'server-error', 'socket-error', 'socket-closed', 'browser-incompatible'].includes(e.type)) toast('O servidor de salas caiu. O show continua só com bots.', 5000);
+    });
+  };
+  tentar(); return true;
+}
+let ultRol = -1;
+function dadosDoCliente(c, d) {
+  if (!d || typeof d !== 'object') return;
+  if (d.t === 'oi') {
+    if (conns.has(c.peer)) return;
+    if (G.jog.filter(p => !p.bot).length >= MAX_TOTAL) { c.send({ t: 'cheio' }); return; }
+    let nome = String(d.nome || 'Jogador').replace(/[<>]/g, '').trim().slice(0, 14) || 'Jogador';
+    while (G.jog.some(p => p.nome === nome)) nome = nome.slice(0, 12) + Math.floor(Math.random() * 90 + 10);
+    // no meio do show: se tiver bot, a pessoa assume a vaga dele depois; por enquanto assiste
+    const p = novoJogador({ nome, rosto: ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false });
+    if (G.fase === 'lobby') { const [x, y] = posLivre('lobby'); Object.assign(p, { x, y }); }
+    else { p.st = 'plateia'; const bot = G.jog.find(o => o.bot && o.st === 'fora'); if (bot) removerJogador(bot.id); }
+    conns.set(c.peer, { c, pid: p.id });
+    c.send({ t: 'ola', id: p.id, sala: codigoSala, rol: roster() });
+    ev({ k: 'msg', t: `👋 ${p.nome} entrou${G.fase === 'lobby' ? '' : ' (assiste e joga a próxima temporada)'}` });
+    return;
+  }
+  const info = conns.get(c.peer); if (!info) return;
+  const p = G.jog.find(x => x.id === info.pid); if (!p) return;
+  if (d.t === 'i') { p.input.mx = clamp(+d.mx || 0, -1, 1); p.input.my = clamp(+d.my || 0, -1, 1); if (typeof d.a === 'number') p.input.a = d.a; }
+}
+function saiuCliente(c) {
+  const info = conns.get(c.peer); if (!info) return; conns.delete(c.peer);
+  const p = G.jog.find(x => x.id === info.pid); if (p) ev({ k: 'msg', t: `🚪 ${p.nome} saiu` });
+  removerJogador(info.pid);
+}
+let R = new Map(); // roster no cliente: id → {nome, rosto, bot}
+function aplicarRoster(l) { R = new Map(l.map(([id, nome, rosto, bot]) => [id, { nome, rosto, bot: !!bot }])); }
+function entrarSala(cod) {
+  cod = cod.toUpperCase().replace(/[^A-Z]/g, '');
+  if (cod.length !== 4) { erroMenu('O código tem 4 letras.'); return; }
+  if (!window.Peer) { erroMenu('Não deu para carregar o sistema de salas (sem internet?).'); return; }
+  erroMenu('Conectando…', true);
+  const limite = setTimeout(() => { erroMenu('Não achei a sala. Confira o código.'); try { peer.destroy(); } catch (e) {} }, 15000);
+  peer = new Peer({ debug: 0 });
+  peer.on('open', () => {
+    conn = peer.connect(PREFIXO + cod, { reliable: true });
+    conn.on('open', () => conn.send({ t: 'oi', nome: meuNome(), rosto: meuRosto }));
+    conn.on('data', d => {
+      if (d.t === 'ola') { clearTimeout(limite); meuId = d.id; codigoSala = d.sala; modo = 'cliente'; aplicarRoster(d.rol); entrarNoJogo(); $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 ' + codigoSala; }
+      else if (d.t === 's') receberSnap(d);
+      else if (d.t === 'rol') aplicarRoster(d.l);
+      else if (d.t === 'cheio') { clearTimeout(limite); erroMenu('Essa sala está cheia (50 pessoas).'); }
+    });
+    conn.on('close', () => { if (modo === 'cliente') { toast('O anfitrião fechou a sala.', 5000); setTimeout(() => location.reload(), 2600); } });
+  });
+  peer.on('error', e => { clearTimeout(limite); erroMenu(e.type === 'peer-unavailable' ? 'Sala não encontrada. Confira o código.' : 'Não foi possível conectar (' + e.type + ').'); });
+}
+let snapAnt = null, snapAtu = null;
+const gradeCli = new Uint8Array(TINTA.cols * TINTA.rows);
+function receberSnap(d) {
+  if (d.x) {
+    if (d.x.pg) for (let i = 0; i < gradeCli.length; i++) gradeCli[i] = d.x.pg.charCodeAt(i) - 48;
+    if (d.x.pd) for (let i = 0; i < d.x.pd.length; i += 2) gradeCli[d.x.pd[i]] = d.x.pd[i + 1];
+  }
+  if (d.f === 'intro' && d.p === 5 && (!snapAtu || snapAtu.d.p !== 5)) gradeCli.fill(0);
+  snapAnt = snapAtu; snapAtu = { d, at: performance.now() };
+  for (const e of d.ev || []) tratarEvento(e);
+}
+
+/* =====================================================================
+   ÁUDIO (tudo gerado na hora)
+   ===================================================================== */
+let AC = null, mestre = null, busMus = null, somModo = 0; // 0 tudo · 1 só efeitos · 2 mudo
+function iniciarAudio() {
+  if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
+  try { AC = new (window.AudioContext || window.webkitAudioContext)(); mestre = AC.createGain(); mestre.gain.value = 0.55; mestre.connect(AC.destination); busMus = AC.createGain(); busMus.gain.value = 0.16; busMus.connect(mestre); } catch (e) {}
+}
+function tom(f, dur, tipo = 'sine', v = 0.2, f2 = null, atraso = 0, saida = mestre) {
+  if (!AC || somModo === 2) return; const t = AC.currentTime + atraso, o = AC.createOscillator(), g = AC.createGain();
+  o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(saida); o.start(t); o.stop(t + dur + 0.05);
+}
+let ruidoBuf = null;
+function ruido(dur, freq, q = 1, v = 0.25, tipo = 'bandpass', atraso = 0, f2 = null) {
+  if (!AC || somModo === 2) return;
+  if (!ruidoBuf) { ruidoBuf = AC.createBuffer(1, AC.sampleRate * 2, AC.sampleRate); const d = ruidoBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  const t = AC.currentTime + atraso, s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = ruidoBuf; f.type = tipo; f.frequency.setValueAtTime(freq, t); if (f2) f.frequency.exponentialRampToValueAtTime(f2, t + dur); f.Q.value = q;
+  g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  s.connect(f).connect(g).connect(mestre); s.start(t); s.stop(t + dur + 0.05);
+}
+let ultGongo = 0;
+const SOM = {
+  gongo() { const a = performance.now(); if (a - ultGongo < 500) return; ultGongo = a; [[98, .5], [147, .3], [196, .22], [262, .12], [311, .08]].forEach(([f, v]) => tom(f, 2.6, 'sine', v, f * 0.985)); ruido(0.25, 900, 0.8, 0.2); },
+  bip(alto) { tom(alto ? 1320 : 660, alto ? 0.5 : 0.14, 'square', 0.12); },
+  pulo() { tom(330, 0.16, 'sine', 0.14, 700); },
+  zap() { tom(1500, 0.32, 'sawtooth', 0.13, 120); ruido(0.2, 3000, 2, 0.1); },
+  dash() { ruido(0.22, 1800, 0.7, 0.18, 'highpass', 0, 400); },
+  boom() { ruido(0.9, 600, 0.6, 0.6, 'lowpass', 0, 60); tom(70, 0.7, 'sine', 0.5, 35); },
+  splat() { ruido(0.3, 700, 1.2, 0.35, 'lowpass', 0, 200); tom(180, 0.2, 'sine', 0.2, 60); },
+  pass() { tom(880, 0.08, 'square', 0.08); tom(660, 0.08, 'square', 0.08, null, 0.06); },
+  tic(rap) { tom(rap ? 1800 : 1200, 0.04, 'square', 0.06); },
+  laser() { tom(220, 0.6, 'sawtooth', 0.12, 880); },
+  reverte() { tom(900, 0.25, 'square', 0.08, 300); tom(900, 0.25, 'square', 0.08, 300, 0.25); },
+  pergunta() { [523, 659, 784].forEach((f, i) => tom(f, 0.18, 'triangle', 0.15, null, i * 0.08)); },
+  revela() { tom(196, 0.5, 'square', 0.12); tom(147, 0.6, 'square', 0.1, null, 0.22); ruido(0.6, 300, 0.5, 0.3, 'lowpass', 0.2, 80); },
+  mostra() { [784, 988, 1175].forEach((f, i) => tom(f, 0.15, 'sine', 0.12, null, i * 0.07)); },
+  vira() { ruido(0.25, 2500, 1, 0.12, 'bandpass', 0, 600); },
+  grito() { tom(392, 0.15, 'square', 0.12); tom(523, 0.3, 'square', 0.12, null, 0.12); },
+  cai() { ruido(1.1, 400, 0.4, 0.35, 'lowpass', 0, 60); },
+  bate() { tom(140, 0.12, 'sine', 0.25, 70); ruido(0.08, 2000, 1, 0.12); },
+  bomba() { tom(110, 0.4, 'square', 0.1, 55); },
+  torcida(v = 0.12) { ruido(1.6, 1100, 0.3, v, 'bandpass'); ruido(1.4, 2300, 0.4, v * 0.6, 'bandpass', 0.1); },
+  fanfarra() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => { tom(f, 0.3, 'square', 0.1, null, i * 0.14); tom(f / 2, 0.3, 'triangle', 0.12, null, i * 0.14); }); },
+  ja() { tom(1047, 0.5, 'square', 0.12); tom(1568, 0.5, 'triangle', 0.08); },
+};
+// trilha: batida simples de programa de auditório, com andamento por prova
+const TRILHA = { lobby: [110, [0, 7, 12, 7]], laser: [132, [0, 0, 3, 5]], quiz: [104, [0, 4, 7, 4]], bomba: [140, [0, 1, 0, 6]], memoria: [96, [0, 7, 3, 10]], sumo: [120, [0, 5, 7, 5]], tinta: [138, [0, 4, 7, 12]] };
+let musPasso = 0, musProx = 0, musAtual = null;
+function tocarTrilha(nome) { musAtual = nome; }
+setInterval(() => {
+  if (!AC || !musAtual || somModo !== 0 || document.hidden) return;
+  const [bpm, notas] = TRILHA[musAtual] || TRILHA.lobby, passo = 60 / bpm / 2;
+  if (musProx < AC.currentTime) musProx = AC.currentTime + 0.05;
+  while (musProx < AC.currentTime + 0.2) {
+    const k = musPasso % 16, base = 55 * Math.pow(2, notas[Math.floor(k / 4) % 4] / 12);
+    if (k % 2 === 0) tom(base, passo * 0.9, 'triangle', 0.5, null, musProx - AC.currentTime, busMus);
+    if (k % 4 === 0) tom(120, 0.12, 'sine', 0.7, 45, musProx - AC.currentTime, busMus);
+    if (k % 4 === 2) { const t = musProx - AC.currentTime; if (ruidoBuf) { const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = ruidoBuf; f.type = 'highpass'; f.frequency.value = 6000; g.gain.setValueAtTime(0.25, AC.currentTime + t); g.gain.exponentialRampToValueAtTime(0.0001, AC.currentTime + t + 0.05); s.connect(f).connect(g).connect(busMus); s.start(AC.currentTime + t); s.stop(AC.currentTime + t + 0.08); } }
+    if (k === 0 || k === 6 || k === 10) tom(base * 4, passo * 0.6, 'square', 0.1, null, musProx - AC.currentTime, busMus);
+    musProx += passo; musPasso++;
+  }
+}, 80);
+
+/* =====================================================================
+   DESENHO
+   ===================================================================== */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let VW = 0, VH = 0, DPR = 1;
+function redim() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight; cv.width = VW * DPR; cv.height = VH * DPR; }
+addEventListener('resize', redim); redim();
+const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+const spr = new Map();
+function sprite(e) { let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
+const cam = { x: 0, y: 0, z: 1, tremor: 0 };
+let particulas = [], textos = [], flash = 0, espiado = null, euMorto = 0, euMortoMostrado = false;
+const plateia = {}; // assentos pré-calculados por arena
+function assentos(id) {
+  if (plateia[id]) return plateia[id];
+  const A = ARENA[id], l = [];
+  if (A.forma === 'circ') { for (let fila = 0; fila < 4; fila++) { const r = A.r + 90 + fila * 34, n = Math.floor(TAU * r / 30); for (let i = 0; i < n; i++) { const a = i / n * TAU + fila * 0.07; l.push([Math.cos(a) * r, Math.sin(a) * r, Math.random() * 360, Math.random() * TAU]); } } }
+  else { for (let fila = 0; fila < 4; fila++) { const w = A.w + 90 + fila * 34, h = A.h + 90 + fila * 34, per = 4 * (w + h), n = Math.floor(per * 2 / 30); for (let i = 0; i < n; i++) { let t = i / n * per * 2, x, y; if (t < 2 * w) { x = -w + t; y = -h; } else if ((t -= 2 * w) < 2 * h) { x = w; y = -h + t; } else if ((t -= 2 * h) < 2 * w) { x = w - t; y = h; } else { t -= 2 * w; x = -w; y = h - t; } l.push([x, y, Math.random() * 360, Math.random() * TAU]); } } }
+  return (plateia[id] = l);
+}
+let animo = 0; // empolgação da plateia
+const W2S = (x, y) => [(x - cam.x) * cam.z + VW / 2, (y - cam.y) * cam.z + VH / 2];
+
+function vistaAtual() {
+  if (modo === 'host') { const s = montarSnap(false); s.at = performance.now(); s.idade = 0; return montarVista(s, s, 1); }
+  if (!snapAtu) return null;
+  const k = snapAnt ? clamp((performance.now() - snapAtu.at) / 66, 0, 1) : 1;
+  const v = montarVista(snapAtu.d, snapAnt ? snapAnt.d : snapAtu.d, k);
+  v.idade = (performance.now() - snapAtu.at) / 1000;
+  return v;
+}
+function montarVista(atu, ant, k) {
+  const js = new Map(), antMap = new Map();
+  for (let i = 0; i < ant.j.length; i += 6) antMap.set(ant.j[i], i);
+  for (let i = 0; i < atu.j.length; i += 6) {
+    const id = atu.j[i], ia = antMap.get(id); let x = atu.j[i + 1], y = atu.j[i + 2], h = atu.j[i + 3];
+    if (ia !== undefined && ant !== atu) { const dx = x - ant.j[ia + 1], dy = y - ant.j[ia + 2]; if (dx * dx + dy * dy < 200 * 200) { x = lerp(ant.j[ia + 1], x, k); y = lerp(ant.j[ia + 2], y, k); h = lerp(ant.j[ia + 3], h, k); } }
+    js.set(id, { id, x, y, h, f: atu.j[i + 4], c: atu.j[i + 5] });
+  }
+  return { f: atu.f, p: atu.p, tr: atu.tr, n0: atu.n0, vv: atu.vv, al: atu.al, x: atu.x || {}, pod: atu.pod, js, idade: 0 };
+}
+function infoJog(id) { if (modo === 'host') { const p = G.jog.find(q => q.id === id); return p ? { nome: p.nome, rosto: p.rosto, bot: p.bot } : { nome: '?', rosto: '🙂', bot: true }; } return R.get(id) || { nome: '?', rosto: '🙂', bot: true }; }
+function gradeTinta() { return modo === 'host' ? (G.px.grid || gradeCli) : gradeCli; }
+const arenaDaVista = V => V.f === 'lobby' || V.p < 0 ? 'lobby' : PROVAS[V.p].id;
+
+function desenhar(V, dt) {
+  const id = arenaDaVista(V), A = ARENA[id], T = performance.now() / 1000;
+  palAtual = id === 'tinta' && V.x ? V.x.pal || null : null;
+  // câmera: segue você (ou quem você está assistindo)
+  const eu = V.js.get(meuId), euVivo = eu && (eu.f & F.VIVO);
+  if (!euVivo) { if (!espiado || !V.js.get(espiado) || !(V.js.get(espiado).f & F.VIVO)) { const vv = [...V.js.values()].filter(s => s.f & F.VIVO); espiado = vv.length ? pick(vv).id : null; } } else espiado = null;
+  const foco = euVivo ? eu : V.js.get(espiado);
+  const tamArena = A.forma === 'circ' ? A.r * 2 : Math.max(A.w * 2, A.h * 2 * VW / VH);
+  const inteira = id === 'quiz' || id === 'memoria' || V.f === 'intro' || V.f === 'fim' || V.f === 'resultado';
+  let zAlvo = inteira ? Math.min(VW / (A.forma === 'circ' ? A.r * 2 + 120 : A.w * 2 + 120), VH / (A.forma === 'circ' ? A.r * 2 + 160 : A.h * 2 + 200)) : Math.min(VW, VH) / 760;
+  // no quiz e na memória o painel de cima ocupa espaço: a arena desce um pouco
+  const topo = (id === 'quiz' && V.f === 'jogo') ? 190 : (id === 'memoria' && V.f === 'jogo') ? 110 : 0;
+  if (topo) zAlvo = Math.min(VW / (A.w * 2 + 100), (VH - topo - 90) / (A.h * 2 + 60));
+  zAlvo = clamp(zAlvo, 0.28, 1.6);
+  let tx = 0, ty = 0;
+  if (foco && !inteira) { tx = foco.x * 0.75; ty = foco.y * 0.75; } else if (foco && inteira && !topo) { tx = foco.x * 0.12; ty = foco.y * 0.12; }
+  if (topo) ty = -(topo / 2) / Math.max(zAlvo, 0.2);
+  cam.z = lerp(cam.z, zAlvo, Math.min(1, dt * 3)); cam.x = lerp(cam.x, tx, Math.min(1, dt * 4)); cam.y = lerp(cam.y, ty, Math.min(1, dt * 4));
+  void tamArena;
+
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  // fundo do estúdio
+  const fundo = ctx.createRadialGradient(VW / 2, VH * 0.35, 50, VW / 2, VH / 2, Math.max(VW, VH) * 0.8);
+  fundo.addColorStop(0, '#2a1152'); fundo.addColorStop(0.55, '#130926'); fundo.addColorStop(1, '#070310');
+  ctx.fillStyle = fundo; ctx.fillRect(0, 0, VW, VH);
+  // feixes de luz do estúdio
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (let i = 0; i < 4; i++) {
+    const a = Math.sin(T * 0.35 + i * 1.7) * 0.5, x0 = VW * (0.12 + i * 0.25), cor = ['255,61,127', '76,201,240', '255,209,102', '167,139,250'][i];
+    const g = ctx.createLinearGradient(x0, 0, x0 + Math.sin(a) * VH, VH); g.addColorStop(0, `rgba(${cor},.16)`); g.addColorStop(1, `rgba(${cor},0)`);
+    ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(x0 - 18, -10); ctx.lineTo(x0 + 18, -10); ctx.lineTo(x0 + Math.sin(a) * VH + 160, VH); ctx.lineTo(x0 + Math.sin(a) * VH - 160, VH); ctx.fill();
+  }
+  ctx.restore();
+
+  let sx = 0, sy = 0; if (cam.tremor > 0) { sx = rnd(-1, 1) * cam.tremor; sy = rnd(-1, 1) * cam.tremor; cam.tremor = Math.max(0, cam.tremor - dt * 30); }
+  ctx.setTransform(DPR * cam.z, 0, 0, DPR * cam.z, DPR * (VW / 2 - cam.x * cam.z + sx), DPR * (VH / 2 - cam.y * cam.z + sy));
+
+  // plateia
+  animo = Math.max(0, animo - dt * 0.4);
+  const ass = assentos(id), pulo = 2 + animo * 9;
+  for (const [x, y, h, f] of ass) { ctx.fillStyle = `hsl(${h} 60% ${38 + animo * 12}%)`; const b = Math.abs(Math.sin(T * (2 + animo * 6) + f)) * pulo; ctx.beginPath(); ctx.arc(x, y - b, 9, 0, TAU); ctx.fill(); }
+
+  desenharArena(V, id, T);
+
+  // jogadores (de cima para baixo para dar profundidade)
+  const lista = [...V.js.values()].filter(s => s.f & (F.VIVO | F.CAINDO)).sort((a, b) => a.y - b.y);
+  for (const s of lista) desenharJogador(s, V, T);
+  if (id === 'laser') desenharLasers(V, T, true);
+
+  // partículas e textos
+  for (let i = particulas.length - 1; i >= 0; i--) {
+    const q = particulas[i]; q.vida -= dt; if (q.vida <= 0) { particulas.splice(i, 1); continue; }
+    q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= (1 - dt * (q.atr || 1.5)); q.vy = q.vy * (1 - dt * (q.atr || 1.5)) + (q.g || 0) * dt; q.rot = (q.rot || 0) + (q.vr || 0) * dt;
+    const k = q.vida / q.max; ctx.globalAlpha = Math.min(1, k * 1.6);
+    ctx.fillStyle = q.cor;
+    if (q.tipo === 'c') { ctx.save(); ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.fillRect(-q.tam / 2, -q.tam / 4, q.tam, q.tam / 2); ctx.restore(); }
+    else if (q.tipo === 'e') { const sp = sprite(q.e); ctx.drawImage(sp, q.x - q.tam / 2, q.y - q.tam / 2, q.tam, q.tam); }
+    else { ctx.beginPath(); ctx.arc(q.x, q.y, q.tam * (0.4 + k * 0.6), 0, TAU); ctx.fill(); }
+  }
+  ctx.globalAlpha = 1;
+  for (let i = textos.length - 1; i >= 0; i--) {
+    const t = textos[i]; t.vida -= dt; if (t.vida <= 0) { textos.splice(i, 1); continue; }
+    t.y -= dt * 40; ctx.globalAlpha = Math.min(1, t.vida * 2);
+    ctx.font = `800 ${t.tam || 20}px "Baloo 2",sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 5; ctx.strokeStyle = 'rgba(0,0,0,.6)'; ctx.strokeText(t.txt, t.x, t.y); ctx.fillStyle = t.cor || '#fff'; ctx.fillText(t.txt, t.x, t.y);
+  }
+  ctx.globalAlpha = 1;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (flash > 0) { ctx.fillStyle = `rgba(255,255,255,${flash * 0.5})`; ctx.fillRect(0, 0, VW, VH); flash = Math.max(0, flash - dt * 2); }
+  // vinheta
+  const vin = ctx.createRadialGradient(VW / 2, VH / 2, Math.min(VW, VH) * 0.4, VW / 2, VH / 2, Math.max(VW, VH) * 0.75); vin.addColorStop(0, 'rgba(0,0,0,0)'); vin.addColorStop(1, 'rgba(0,0,0,.55)');
+  ctx.fillStyle = vin; ctx.fillRect(0, 0, VW, VH);
+}
+
+function chao(id, T) {
+  const A = ARENA[id];
+  ctx.save();
+  if (A.forma === 'circ') { ctx.beginPath(); ctx.arc(0, 0, A.r, 0, TAU); }
+  else { ctx.beginPath(); ctx.roundRect(-A.w, -A.h, A.w * 2, A.h * 2, 28); }
+  return A;
+}
+function desenharArena(V, id, T) {
+  const A = ARENA[id], x = V.x || {};
+  if (id === 'lobby') {
+    ctx.save(); ctx.beginPath(); ctx.arc(0, 0, A.r, 0, TAU); const g = ctx.createRadialGradient(0, 0, 40, 0, 0, A.r); g.addColorStop(0, '#3b1d6e'); g.addColorStop(1, '#1d0d3a'); ctx.fillStyle = g; ctx.fill();
+    ctx.lineWidth = 10; ctx.strokeStyle = '#ffd166'; ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 24; ctx.stroke(); ctx.restore();
+    for (let i = 0; i < 24; i++) { const a = i / 24 * TAU + T * 0.2; ctx.fillStyle = i % 2 ? '#ff3d7f' : '#4cc9f0'; ctx.globalAlpha = 0.5 + 0.5 * Math.sin(T * 4 + i); ctx.beginPath(); ctx.arc(Math.cos(a) * (A.r - 22), Math.sin(a) * (A.r - 22), 6, 0, TAU); ctx.fill(); }
+    ctx.globalAlpha = 0.16; ctx.font = '120px Bungee'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffd166'; ctx.fillText('GONGO!', 0, 0); ctx.globalAlpha = 1;
+    return;
+  }
+  if (id === 'laser') {
+    ctx.save(); ctx.beginPath(); ctx.arc(0, 0, A.r, 0, TAU); const g = ctx.createRadialGradient(0, 0, 30, 0, 0, A.r); g.addColorStop(0, '#2d2440'); g.addColorStop(1, '#16112a'); ctx.fillStyle = g; ctx.fill();
+    ctx.strokeStyle = 'rgba(255,61,127,.18)'; ctx.lineWidth = 3; for (let r = 120; r < A.r; r += 90) { ctx.beginPath(); ctx.arc(0, 0, r, 0, TAU); ctx.stroke(); }
+    ctx.lineWidth = 12; ctx.strokeStyle = '#ff3d7f'; ctx.shadowColor = '#ff3d7f'; ctx.shadowBlur = 26; ctx.beginPath(); ctx.arc(0, 0, A.r, 0, TAU); ctx.stroke(); ctx.restore();
+    desenharLasers(V, T, false);
+    return;
+  }
+  if (id === 'quiz') {
+    const S = ARENA.quiz, pt = S.ponte, cores = ['#e63946', '#2f80ed', '#f4b400', '#2bb673'], letras = 'ABCD', q = x.q >= 0 ? PERGUNTAS[x.q] : null;
+    ctx.save(); ctx.fillStyle = '#2b2440'; ctx.beginPath(); ctx.roundRect(-S.w - 14, -S.h - 14, S.w * 2 + 28, S.h * 2 + 28, 30); ctx.fill(); ctx.restore();
+    for (let k = 0; k < 4; k++) {
+      const sx = k % 2 ? 1 : -1, sy = k >= 2 ? 1 : -1, x0 = sx < 0 ? -S.w : pt, y0 = sy < 0 ? -S.h : pt, w = S.w - pt, h = S.h - pt;
+      const revelado = x.ph === 'r' && x.ok >= 0, buraco = revelado && k !== x.ok;
+      ctx.save(); ctx.beginPath(); ctx.roundRect(x0, y0, w, h, 22);
+      if (buraco) { const g = ctx.createRadialGradient(x0 + w / 2, y0 + h / 2, 10, x0 + w / 2, y0 + h / 2, w * 0.75); g.addColorStop(0, '#000'); g.addColorStop(1, '#120a20'); ctx.fillStyle = g; ctx.fill(); ctx.restore(); continue; }
+      ctx.fillStyle = cores[k]; ctx.globalAlpha = revelado ? 1 : 0.85; ctx.fill(); ctx.globalAlpha = 1;
+      if (revelado) { ctx.lineWidth = 10; ctx.strokeStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 30 + Math.sin(T * 10) * 10; ctx.stroke(); }
+      ctx.restore();
+      ctx.save(); ctx.globalAlpha = 0.22; ctx.fillStyle = '#fff'; ctx.font = '210px Bungee'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(letras[k], x0 + w / 2, y0 + h / 2 + 8); ctx.restore();
+      if (q && x.o) { const txt = q[1 + x.o[k]]; ctx.save(); ctx.font = '800 34px "Baloo 2",sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(0,0,0,.35)'; const ty = y0 + (sy < 0 ? 60 : h - 34); ctx.strokeText(txt, x0 + w / 2, ty); ctx.fillStyle = '#fff'; ctx.fillText(txt, x0 + w / 2, ty); ctx.restore(); }
+    }
+    return;
+  }
+  if (id === 'bomba') {
+    ctx.save(); ctx.beginPath(); ctx.roundRect(-A.w, -A.h, A.w * 2, A.h * 2, 30); const g = ctx.createLinearGradient(0, -A.h, 0, A.h); g.addColorStop(0, '#3a2a1f'); g.addColorStop(1, '#271a12'); ctx.fillStyle = g; ctx.fill(); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,255,255,.04)'; ctx.lineWidth = 2; for (let i = -A.w; i < A.w; i += 60) { ctx.beginPath(); ctx.moveTo(i, -A.h); ctx.lineTo(i, A.h); ctx.stroke(); } for (let j = -A.h; j < A.h; j += 60) { ctx.beginPath(); ctx.moveTo(-A.w, j); ctx.lineTo(A.w, j); ctx.stroke(); }
+    ctx.restore();
+    ctx.save(); ctx.lineWidth = 16; ctx.setLineDash([30, 30]); ctx.lineDashOffset = -T * 40; ctx.strokeStyle = '#f4b400'; ctx.beginPath(); ctx.roundRect(-A.w, -A.h, A.w * 2, A.h * 2, 30); ctx.stroke(); ctx.setLineDash([30, 30]); ctx.lineDashOffset = -T * 40 + 30; ctx.strokeStyle = '#1b1b1b'; ctx.stroke(); ctx.restore();
+    for (const [px, py] of A.pil) { ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.ellipse(px + 8, py + 14, A.pr, A.pr * 0.7, 0, 0, TAU); ctx.fill(); const g = ctx.createRadialGradient(px - 16, py - 20, 6, px, py, A.pr); g.addColorStop(0, '#ff9f68'); g.addColorStop(1, '#a3461a'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, A.pr, 0, TAU); ctx.fill(); ctx.lineWidth = 5; ctx.strokeStyle = '#ffd166'; ctx.stroke(); }
+    return;
+  }
+  if (id === 'memoria') {
+    const sy = x.sy || '', ph = x.ph;
+    ctx.fillStyle = '#0a0614'; ctx.fillRect(-A.w - 20, -A.h - 20, A.w * 2 + 40, A.h * 2 + 40);
+    for (let i = 0; i < MEM.n * MEM.n; i++) {
+      const [cx, cy] = memCentro(i), v = sy ? sy.charCodeAt(i) - 97 : -1, safe = ph === 'cai' && v === x.al;
+      let esc2 = 1, alpha = 1;
+      if (ph === 'cai' && !safe) { const k = clamp((2.6 - (x.t ?? 0)) / 1.2, 0, 1); esc2 = 1 - k * 0.75; alpha = 1 - k * 0.9; }
+      const vira = ph === 'esconde' ? Math.abs(Math.cos(((x.t ?? 0) / 0.7) * Math.PI)) : 1;
+      const t2 = MEM.tam * esc2;
+      ctx.save(); ctx.globalAlpha = alpha; ctx.translate(cx, cy); ctx.scale(vira, 1);
+      ctx.beginPath(); ctx.roundRect(-t2 / 2, -t2 / 2, t2, t2, 16);
+      const g = ctx.createLinearGradient(0, -t2 / 2, 0, t2 / 2);
+      if (safe) { g.addColorStop(0, '#8b5cf6'); g.addColorStop(1, '#5b21b6'); } else { g.addColorStop(0, '#3b2c5e'); g.addColorStop(1, '#271c42'); }
+      ctx.fillStyle = g; ctx.fill(); ctx.lineWidth = 4; ctx.strokeStyle = safe ? '#ffd166' : 'rgba(167,139,250,.45)'; if (safe) { ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 20; } ctx.stroke();
+      if (v >= 0) { const sp = sprite(SIMBOLOS[v]); ctx.shadowBlur = 0; ctx.drawImage(sp, -t2 * 0.36, -t2 * 0.4, t2 * 0.72, t2 * 0.72); }
+      else if (ph === 'corre') { ctx.shadowBlur = 0; ctx.fillStyle = 'rgba(255,255,255,.12)'; ctx.font = '800 54px "Baloo 2",sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('?', 0, 4); }
+      ctx.restore();
+    }
+    return;
+  }
+  if (id === 'sumo') {
+    const Rr = x.R || A.r;
+    ctx.save(); ctx.fillStyle = '#071a33'; ctx.beginPath(); ctx.arc(0, 0, A.r + 60, 0, TAU); ctx.fill();
+    ctx.strokeStyle = 'rgba(125,211,252,.12)'; ctx.lineWidth = 3; for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.arc(0, 0, Rr + 30 + i * 40 + (T * 20 % 40), 0, TAU); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(0, 0, Rr, 0, TAU); const g = ctx.createRadialGradient(-Rr * 0.3, -Rr * 0.3, 20, 0, 0, Rr); g.addColorStop(0, '#f0fbff'); g.addColorStop(0.6, '#bfe9fb'); g.addColorStop(1, '#7cc8ee'); ctx.fillStyle = g; ctx.fill(); ctx.clip();
+    ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 3; for (let i = 0; i < 9; i++) { const a = i * 0.7; ctx.beginPath(); ctx.moveTo(Math.cos(a) * 40, Math.sin(a) * 40); ctx.lineTo(Math.cos(a + 0.2) * 260, Math.sin(a + 0.2) * 260); ctx.lineTo(Math.cos(a - 0.1) * 520, Math.sin(a - 0.1) * 520); ctx.stroke(); }
+    ctx.restore();
+    ctx.save(); ctx.lineWidth = 14; ctx.strokeStyle = '#ff3d5a'; ctx.shadowColor = '#ff3d5a'; ctx.shadowBlur = 20 + Math.sin(T * 8) * 8; ctx.beginPath(); ctx.arc(0, 0, Rr, 0, TAU); ctx.stroke(); ctx.restore();
+    return;
+  }
+  if (id === 'tinta') {
+    ctx.save(); ctx.beginPath(); ctx.roundRect(-A.w, -A.h, A.w * 2, A.h * 2, 20); ctx.fillStyle = '#f2ecdf'; ctx.fill(); ctx.clip();
+    atualizarTelaTinta(); ctx.imageSmoothingEnabled = false; ctx.drawImage(telaTinta, -A.w, -A.h, A.w * 2, A.h * 2); ctx.imageSmoothingEnabled = true;
+    ctx.strokeStyle = 'rgba(0,0,0,.06)'; ctx.lineWidth = 1; for (let i = 0; i <= TINTA.cols; i++) { ctx.beginPath(); ctx.moveTo(-A.w + i * TINTA.cel, -A.h); ctx.lineTo(-A.w + i * TINTA.cel, A.h); ctx.stroke(); } for (let j = 0; j <= TINTA.rows; j++) { ctx.beginPath(); ctx.moveTo(-A.w, -A.h + j * TINTA.cel); ctx.lineTo(A.w, -A.h + j * TINTA.cel); ctx.stroke(); }
+    ctx.restore();
+    ctx.save(); ctx.lineWidth = 12; ctx.strokeStyle = '#ffd166'; ctx.shadowColor = '#ffd166'; ctx.shadowBlur = 22; ctx.beginPath(); ctx.roundRect(-A.w, -A.h, A.w * 2, A.h * 2, 20); ctx.stroke(); ctx.restore();
+  }
+}
+function desenharLasers(V, T, porCima) {
+  const x = V.x || {}; if (!x.a) return;
+  const ida = V.f === 'jogo' ? (V.idade || 0) : 0, r = ARENA.laser.r, hub = ARENA.laser.hub;
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  for (const a0 of x.a) {
+    const a = a0 + (x.w || 0) * ida, cx = Math.cos(a), cy = Math.sin(a), cor = x.av ? '255,209,102' : '255,61,127';
+    for (const [w, al] of [[34, 0.12], [18, 0.3], [7, 0.9]]) { ctx.strokeStyle = `rgba(${cor},${porCima ? al * 0.55 : al})`; ctx.lineWidth = w + Math.sin(T * 40) * 1.5; ctx.lineCap = 'round'; ctx.beginPath(); ctx.moveTo(cx * hub, cy * hub); ctx.lineTo(cx * r, cy * r); ctx.stroke(); }
+  }
+  ctx.restore();
+  if (!porCima) {
+    ctx.save(); const g = ctx.createRadialGradient(0, 0, 4, 0, 0, hub); g.addColorStop(0, '#fff'); g.addColorStop(0.4, '#ff7aa8'); g.addColorStop(1, '#7a0a35'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, hub, 0, TAU); ctx.fill();
+    ctx.lineWidth = 6; ctx.strokeStyle = '#ffd166'; ctx.setLineDash([12, 10]); ctx.lineDashOffset = T * 30; ctx.stroke(); ctx.restore();
+  }
+}
+const telaTinta = document.createElement('canvas'); telaTinta.width = TINTA.cols; telaTinta.height = TINTA.rows;
+const ctxT = telaTinta.getContext('2d'), imgT = ctxT.createImageData(TINTA.cols, TINTA.rows), cacheT = new Int16Array(TINTA.cols * TINTA.rows).fill(-1);
+let palChave = '';
+function atualizarTelaTinta() {
+  const g = gradeTinta(); let mudou = false;
+  const k = JSON.stringify(palAtual || {}); if (k !== palChave) { palChave = k; cacheT.fill(-1); }
+  for (let i = 0; i < g.length; i++) {
+    if (cacheT[i] === g[i]) continue; cacheT[i] = g[i]; mudou = true;
+    const o = i * 4; if (!g[i]) { imgT.data[o + 3] = 0; continue; }
+    const [r, gg, b] = rgbJ(g[i]); imgT.data[o] = r; imgT.data[o + 1] = gg; imgT.data[o + 2] = b; imgT.data[o + 3] = 255;
+  }
+  if (mudou) ctxT.putImageData(imgT, 0, 0);
+}
+function desenharJogador(s, V, T) {
+  const info = infoJog(s.id), eu = s.id === meuId, caindo = s.f & F.CAINDO;
+  let esc2 = 1, alpha = 1, rot = 0;
+  if (caindo) { const k = s.c / 100; esc2 = Math.max(0.05, 1 - k * 0.95); alpha = 1 - k * 0.6; rot = k * 6; }
+  const h = s.h || 0, x = s.x, y = s.y;
+  ctx.save(); ctx.globalAlpha = alpha;
+  if (!caindo) { const k = 1 - Math.min(0.6, h / 110); ctx.fillStyle = 'rgba(0,0,0,.32)'; ctx.beginPath(); ctx.ellipse(x, y + RJ * 0.6, RJ * 1.05 * k, RJ * 0.45 * k, 0, 0, TAU); ctx.fill(); }
+  if (eu && !caindo) { ctx.strokeStyle = 'rgba(255,255,255,.85)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.ellipse(x, y + RJ * 0.6, RJ * 1.45 + Math.sin(T * 6) * 2, RJ * 0.65, 0, 0, TAU); ctx.stroke(); }
+  if (s.f & F.DASH) { ctx.strokeStyle = 'rgba(255,255,255,.5)'; ctx.lineWidth = 4; for (let i = -1; i <= 1; i++) { ctx.beginPath(); ctx.moveTo(x - 30, y - h + i * 9); ctx.lineTo(x - 52, y - h + i * 9); ctx.stroke(); } }
+  ctx.translate(x, y - h - 4); ctx.rotate(rot); ctx.scale(esc2, esc2 * (h > 0 ? 1.08 : 1));
+  const c = corJ(s.id), ce = corJEsc(s.id);
+  ctx.fillStyle = c; ctx.strokeStyle = ce; ctx.lineWidth = 3.5; ctx.beginPath(); ctx.arc(0, 0, RJ, 0, TAU); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,255,255,.35)'; ctx.beginPath(); ctx.ellipse(-6, -8, 7, 4.5, -0.5, 0, TAU); ctx.fill();
+  ctx.drawImage(sprite(info.rosto), -RJ * 0.78, -RJ * 0.82, RJ * 1.56, RJ * 1.56);
+  ctx.restore();
+  if (caindo) return;
+  if (s.f & F.BOMBA) {
+    const bx = x, by = y - h - RJ - 24, pul = 1 + Math.sin(T * 14) * 0.08;
+    ctx.save(); ctx.translate(bx, by); ctx.scale(pul, pul); ctx.drawImage(sprite('💣'), -18, -18, 36, 36); ctx.restore();
+    if (Math.random() < 0.5) particulas.push({ x: bx + 10, y: by - 14, vx: rnd(-40, 40), vy: rnd(-90, -30), vida: 0.35, max: 0.35, cor: pick(['#ffd166', '#ff8c42', '#fff']), tam: 3 });
+  }
+  if (eu) { ctx.fillStyle = '#fff'; ctx.beginPath(); const ay = y - h - RJ - (s.f & F.BOMBA ? 50 : 20) + Math.sin(T * 5) * 3; ctx.moveTo(x - 8, ay - 10); ctx.lineTo(x + 8, ay - 10); ctx.lineTo(x, ay); ctx.fill(); }
+  if (!info.bot || eu || V.f === 'lobby' || (V.js.size <= 8)) {
+    ctx.font = `800 ${eu ? 15 : 13}px "Baloo 2",sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.65)';
+    const ny = y + RJ + 22; ctx.strokeText(info.nome, x, ny); ctx.fillStyle = eu ? '#ffd166' : '#fff'; ctx.fillText(info.nome, x, ny);
+  }
+}
+
+/* ---------- efeitos a partir dos eventos ---------- */
+function explosao(x, y, cor, n = 26, forca = 320) { for (let i = 0; i < n; i++) { const a = rnd(0, TAU), v = rnd(forca * 0.3, forca); particulas.push({ x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: rnd(0.4, 0.9), max: 0.9, cor: Array.isArray(cor) ? pick(cor) : cor, tam: rnd(4, 9) }); } }
+function confete(n = 120) { for (let i = 0; i < n; i++) particulas.push({ x: cam.x + rnd(-VW, VW) / cam.z / 2, y: cam.y - VH / cam.z / 2 - rnd(0, 200), vx: rnd(-60, 60), vy: rnd(80, 260), atr: 0.2, g: 60, vida: rnd(2.5, 4.5), max: 4.5, cor: pick(['#ff3d7f', '#ffd166', '#4cc9f0', '#5be38f', '#a78bfa', '#fff']), tam: rnd(8, 14), tipo: 'c', vr: rnd(-8, 8) }); }
+function lugarDe(id) { return null; }
+let feedItens = [];
+function addFeed(html) { feedItens.push({ html, t: performance.now() }); if (feedItens.length > 5) feedItens.shift(); renderFeed(); }
+function renderFeed() { $('#feed').innerHTML = feedItens.map(f => `<div>${f.html}</div>`).join(''); }
+setInterval(() => { const a = performance.now(); const n = feedItens.length; feedItens = feedItens.filter(f => a - f.t < 7000); if (n !== feedItens.length) renderFeed(); }, 1000);
+let falaTimer = 0;
+function mostrarFala(t) { $('#fala-t').textContent = t; $('#fala').classList.add('on'); clearTimeout(falaTimer); falaTimer = setTimeout(() => $('#fala').classList.remove('on'), 3200); }
+const COMO = { laser: 'foi zapeado ⚡', quiz: 'errou e caiu ❓', bomba: 'explodiu 💣', memoria: 'caiu do piso 🧠', sumo: 'escorregou para fora 🧊' };
+let elimLote = 0, elimLoteT = 0;
+function tratarEvento(e) {
+  switch (e.k) {
+    case 'elim': {
+      const info = infoJog(e.id);
+      explosao(e.x, e.y, e.c === 'laser' ? ['#ff3d7f', '#fff', '#ffd166'] : e.c === 'sumo' ? ['#bfe9fb', '#fff'] : [COR[e.id], '#fff'], 22, 300);
+      textos.push({ x: e.x, y: e.y - 30, txt: 'GONG!', vida: 1.1, cor: '#ffd166', tam: 22 });
+      SOM.gongo(); if (e.c === 'laser') SOM.zap();
+      animo = Math.min(1, animo + 0.15);
+      const a = performance.now(); if (a - elimLoteT > 600) elimLote = 0; elimLote++; elimLoteT = a;
+      if (elimLote <= 3) addFeed(`💥 <b style="color:${COR[e.id]}">${esc(info.nome)}</b> ${COMO[e.c] || 'saiu'}`);
+      else if (elimLote === 4) addFeed(`💥 …e mais gente caindo!`);
+      if (e.id === meuId) { euMorto = performance.now(); SOM.torcida(0.2); cam.tremor = 12; }
+      break;
+    }
+    case 'boom': explosao(e.x, e.y, ['#ff8c42', '#ffd166', '#ff3d3d', '#444'], 50, 520); cam.tremor = Math.max(cam.tremor, 14); flash = 0.5; SOM.boom(); break;
+    case 'pass': { SOM.pass(); const v = vistaUlt && vistaUlt.js.get(e.para); if (v) textos.push({ x: v.x, y: v.y - 50, txt: '💣 passou!', vida: 0.8, tam: 16, cor: '#ff8c42' }); break; }
+    case 'dash': if (e.id === meuId) SOM.dash(); break;
+    case 'splash': { explosao(e.x, e.y, corJ(e.id), 40, 420); SOM.splat(); if (Math.hypot(e.x - cam.x, e.y - cam.y) < 400) cam.tremor = Math.max(cam.tremor, 6); break; }
+    case 'bate': if (Math.hypot(e.x - cam.x, e.y - cam.y) < 500) SOM.bate(); break;
+    case 'som': if (SOM[e.s]) SOM[e.s](); break;
+    case 'fala': mostrarFala(e.t); break;
+    case 'msg': addFeed(esc(e.t)); break;
+    case 'grito': SOM.grito(); break;
+    case 'intro': mostrarIntro(e.pr); tocarTrilha(PROVAS[e.pr].id); SOM.torcida(0.1); break;
+    case 'ja': SOM.ja(); flash = 0.35; esconderBanner(); break;
+    case 'res': mostrarResultado(e.v, e.e); SOM.torcida(0.16); animo = 1; break;
+    case 'fim': SOM.fanfarra(); SOM.torcida(0.25); confete(220); animo = 1; tocarTrilha('lobby'); break;
+    case 'temporada': euMorto = 0; euMortoMostrado = false; $('#fim').classList.remove('on'); fimMostrado = false; break;
+  }
+}
+
+/* =====================================================================
+   HUD
+   ===================================================================== */
+let bannerTimer = 0;
+function mostrarIntro(i) {
+  const pr = PROVAS[i];
+  $('#banner').innerHTML = `<div class="ic">${pr.icone}</div><div class="num">${pr.final ? '🏆 a grande final' : `prova ${i + 1} de 6`}</div><h2 class="disp" style="color:${pr.cor}">${pr.nome}</h2><div class="regra">${pr.regra}</div><div class="cont" id="b-cont"></div><div class="meta" id="b-meta"></div>`;
+  $('#banner').classList.add('on'); clearTimeout(bannerTimer);
+}
+function mostrarResultado(v, e) {
+  $('#banner').innerHTML = `<div class="ic">✅</div><h2 class="disp" style="color:#5be38f">${v} classificados</h2><div class="regra">${e > 0 ? `${e} competidor${e > 1 ? 'es' : ''} eliminado${e > 1 ? 's' : ''} nesta prova.` : 'Ninguém caiu nessa!'}</div>`;
+  $('#banner').classList.add('on'); clearTimeout(bannerTimer); bannerTimer = setTimeout(esconderBanner, 3400);
+}
+function esconderBanner() { $('#banner').classList.remove('on'); }
+let fimMostrado = false, ultCont = -1, ultTic = 0, hudT = 0, vistaUlt = null;
+function atualizarHUD(V, dt) {
+  const eu = V.js.get(meuId), euVivo = eu && (eu.f & F.VIVO), pr = V.p >= 0 ? PROVAS[V.p] : null, emShow = V.f !== 'lobby' && V.f !== 'fim';
+  // relógio e contagem
+  const rel = $('#relogio');
+  if (emShow && V.f === 'jogo' && V.tr > 0) { rel.style.display = 'block'; const t = Math.ceil(V.tr); rel.textContent = t; rel.classList.toggle('urgente', t <= 3); }
+  else rel.style.display = 'none';
+  if (V.f === 'intro') {
+    const c = Math.ceil(V.tr), el = $('#b-cont');
+    if (el) el.textContent = c <= 3 ? c : '';
+    if (c !== ultCont && c <= 3 && c > 0) SOM.bip(false);
+    const m = $('#b-meta'); if (m) m.textContent = pr && !pr.final ? `${V.vv} competidores · ${V.al} se classificam` : `${V.vv} finalistas · só um vence`;
+    ultCont = c;
+  } else ultCont = -1;
+  // bomba: tique-taque
+  if (pr && pr.id === 'bomba' && V.f === 'jogo' && V.x.ph === 'tic') { const per = V.tr < 3 ? 0.18 : V.tr < 6 ? 0.4 : 0.8, a = performance.now() / 1000; if (a - ultTic > per) { ultTic = a; SOM.tic(V.tr < 3); } }
+  hudT -= dt; if (hudT > 0) return; hudT = 0.1;
+  $('#prova-chip').style.display = emShow && pr ? 'block' : 'none';
+  if (pr) $('#prova-chip').innerHTML = `${pr.icone} ${pr.final ? 'FINAL' : `Prova ${V.p + 1}/6`} · ${pr.nome}`;
+  $('#vivos').innerHTML = V.f === 'lobby' ? `👥 ${V.js.size} no estúdio` : `👥 ${V.vv} / ${V.n0}${emShow && pr && !pr.final ? `<small>classificam ${V.al}</small>` : ''}`;
+  // quiz
+  const quizOn = pr && pr.id === 'quiz' && V.f === 'jogo' && V.x.q >= 0 && (V.x.ph === 'p' || V.x.ph === 'r');
+  $('#quiz').classList.toggle('on', quizOn);
+  if (quizOn) {
+    const q = PERGUNTAS[V.x.q], cores = ['#e63946', '#2f80ed', '#f4b400', '#2bb673'];
+    const chave = V.x.q + V.x.ph;
+    if ($('#quiz').dataset.k !== chave) {
+      $('#quiz').dataset.k = chave; $('#q-perg').textContent = q[0];
+      $('#q-resps').innerHTML = V.x.o.map((o, k) => `<div class="${V.x.ph === 'r' ? (k === V.x.ok ? 'certa' : 'errada') : ''}" style="background:${cores[k]}"><b>${'ABCD'[k]}</b>${esc(q[1 + o])}</div>`).join('');
+    }
+  }
+  // memória
+  const grito = pr && pr.id === 'memoria' && V.f === 'jogo' && V.x.al >= 0;
+  $('#grito').classList.toggle('on', !!grito); if (grito) $('#grito-s').textContent = SIMBOLOS[V.x.al];
+  // final: placar de tinta
+  const tintaOn = pr && pr.id === 'tinta' && (V.f === 'jogo' || V.f === 'intro');
+  $('#tinta').classList.toggle('on', !!tintaOn);
+  if (tintaOn) {
+    const g = gradeTinta(), cont = {}; let tot = 0; for (const v of g) if (v) { cont[v] = (cont[v] || 0) + 1; tot++; }
+    const fin = [...V.js.values()].filter(s => s.f & F.VIVO).map(s => [s.id, cont[s.id] || 0]).sort((a, b) => b[1] - a[1]);
+    const max = Math.max(1, ...fin.map(f => f[1]));
+    $('#tinta').innerHTML = `<div style="font-weight:800;margin-bottom:4px">🎨 Chão pintado</div>` + fin.slice(0, 8).map(([id, n]) => `<div class="l${id === meuId ? ' eu' : ''}"><span>${esc(infoJog(id).nome)}</span><i style="width:${Math.round(n / max * 80)}px;background:${corJ(id)}"></i><b>${Math.round(n / g.length * 100)}%</b></div>`).join('');
+  }
+  // dica de ação / botão de toque
+  const acaoTxt = pr && emShow && euVivo ? pr.acao : V.f === 'lobby' ? 'Pular' : '';
+  $('#dica').innerHTML = euVivo && acaoTxt ? `<b>WASD</b> andar · <b>Espaço</b> ${acaoTxt.toLowerCase()}` : euVivo ? '<b>WASD</b> ou setas para andar' : '';
+  $('#bt-acao').textContent = acaoTxt || (euVivo ? '—' : '👁'); $('#bt-acao').classList.toggle('off', !acaoTxt && euVivo);
+  // eliminado / espiando
+  const morto = !euVivo && emShow;
+  if (eu && (eu.f & F.CAINDO) && euMorto && !euMortoMostrado) {
+    euMortoMostrado = true; const lugar = V.vv + 1;
+    $('#morte').innerHTML = `<h2 class="disp">ELIMINADO!</h2><p>${lugar}º lugar de ${V.n0} · ${pr ? pr.icone + ' ' + pr.nome : ''}</p>`;
+    $('#morte').classList.add('on'); setTimeout(() => $('#morte').classList.remove('on'), 3000);
+  }
+  const ehPlateia = !eu && emShow && !euMorto;
+  $('#espiar').classList.toggle('on', morto && !!espiado);
+  if (morto && espiado) $('#espiar-t').innerHTML = `${ehPlateia ? '🍿 Você entra na próxima temporada' : '👻 Você foi eliminado'} · assistindo <b style="color:${COR[espiado]}">${esc(infoJog(espiado).nome)}</b>`;
+  // lobby
+  const lob = V.f === 'lobby';
+  $('#lobby').classList.toggle('on', lob);
+  if (lob) {
+    const gente = [...V.js.keys()].map(id => esc(infoJog(id).nome));
+    const host = modo === 'host';
+    const html = `<div style="font-size:13px;color:var(--muted);font-weight:700">CÓDIGO DA SALA</div><div class="cod disp">${codigoSala || '····'}</div><div class="gente">${gente.length} no estúdio: ${gente.join(', ')}</div>` +
+      (host ? `<div class="acoes"><select id="lob-total">${[10, 20, 30, 40, 50].map(n => `<option ${n === G.total ? 'selected' : ''} value="${n}">${n} competidores</option>`).join('')}</select><button class="btn ouro" id="lob-comecar">▶ Começar o show</button></div><div class="mini" style="margin-top:6px">Os bots completam as vagas que sobrarem.</div>` : `<div class="mini" style="margin-top:0">Esperando o anfitrião começar o show… Enquanto isso, corra pelo estúdio (Espaço pula).</div>`);
+    const k = (host ? 'h' : 'c') + gente.join('|') + (codigoSala || '');
+    if ($('#lobby').dataset.k !== k) { $('#lobby').dataset.k = k; $('#lobby').innerHTML = html; if (host) { $('#lob-comecar').onclick = () => { iniciarAudio(); comecarTemporada(); }; $('#lob-total').onchange = e => { G.total = +e.target.value; }; } }
+  }
+  // fim
+  if (V.f === 'fim' && V.pod && !fimMostrado) { fimMostrado = true; mostrarFim(V); }
+  if (V.f !== 'fim' && fimMostrado) { fimMostrado = false; $('#fim').classList.remove('on'); }
+}
+function mostrarFim(V) {
+  const pod = V.pod, top = pod.slice(0, 3), ord = [top[1], top[0], top[2]], cls = ['p2', 'p1', 'p3'], pos = ['2º', '1º', '3º'];
+  $('#podio').innerHTML = ord.map((r, i) => r ? `<div class="${cls[i]}"><span class="pos">${pos[i]}</span><span class="av" style="background:${corJ(r[0])}">${infoJog(r[0]).rosto}</span>${esc(infoJog(r[0]).nome)}${r[1] >= 0 ? `<small>${Math.round(r[1] / (TINTA.cols * TINTA.rows) * 100)}% do chão</small>` : ''}</div>` : '').join('');
+  const meu = pod.findIndex(r => r[0] === meuId);
+  const venceu = meu === 0;
+  $('#fim-eu').innerHTML = meu < 0 ? '🍿 Você assistiu a esta temporada. Na próxima você joga!' : venceu ? '🏆 VOCÊ VENCEU O SHOW! O Gongo se curva para você.' : `Você ficou em <span style="color:var(--ouro)">${meu + 1}º lugar</span> de ${pod.length}.`;
+  $('#ranking').innerHTML = pod.slice(3, 50).map((r, i) => `<div class="${r[0] === meuId ? 'eu' : ''}">${i + 4}º <span style="color:${corJ(r[0])}">●</span> ${esc(infoJog(r[0]).nome)} <span style="color:var(--muted)">${r[1] >= 0 ? 'finalista' : PROVAS[-1 - r[1]].icone}</span></div>`).join('');
+  const host = modo === 'host';
+  $('#fim-botoes').innerHTML = host ? `<button class="btn ouro" id="fim-de-novo">🔔 ${solo ? 'Jogar de novo' : 'Nova temporada'}</button><button class="btn" id="fim-sair">Sair</button>` : `<button class="btn" id="fim-ver">Ver o estúdio</button><button class="btn" id="fim-sair">Sair</button>`;
+  $('#fim-info').textContent = host ? (solo ? '' : 'Se ninguém clicar, todos voltam para o estúdio em alguns segundos.') : 'Esperando o anfitrião começar a próxima temporada.';
+  if (host) $('#fim-de-novo').onclick = () => { if (solo) comecarTemporada(); else voltarLobby(); };
+  else $('#fim-ver').onclick = () => $('#fim').classList.remove('on');
+  $('#fim-sair').onclick = sair;
+  $('#fim').classList.add('on');
+  if (!avisouFim) { avisouFim = true; avisar('concluido', { final: venceu ? 'vitoria' : 'partida' }); }
+}
+let avisouFim = false;
+
+/* =====================================================================
+   ENTRADA (teclado e toque)
+   ===================================================================== */
+const teclas = {};
+let contAcao = 0;
+addEventListener('keydown', e => {
+  if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
+  teclas[e.code] = true;
+  if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) apertarAcao(); }
+  if (e.code === 'Escape' && $('#fim').classList.contains('on') && modo !== 'host') $('#fim').classList.remove('on');
+});
+addEventListener('keyup', e => { teclas[e.code] = false; });
+addEventListener('blur', () => { for (const k in teclas) teclas[k] = false; });
+function apertarAcao() {
+  iniciarAudio();
+  const V = vistaUlt; if (!V) return;
+  const eu = V.js.get(meuId);
+  if (!(eu && (eu.f & F.VIVO))) { proximoEspiado(); return; }
+  contAcao++;
+  if (modo === 'cliente') enviarAoHost();
+  if (PROVAS[V.p] && (PROVAS[V.p].acao === 'Pular') || V.f === 'lobby') { if (eu.h === 0) SOM.pulo(); }
+}
+function proximoEspiado() { const V = vistaUlt; if (!V) return; const vv = [...V.js.values()].filter(s => s.f & F.VIVO).map(s => s.id).sort((a, b) => a - b); if (!vv.length) return; const i = vv.indexOf(espiado); espiado = vv[(i + 1) % vv.length]; }
+$('#b-espiar').addEventListener('click', proximoEspiado);
+const joy = { id: null, x: 0, y: 0, mx: 0, my: 0 };
+(function () {
+  const z = $('#toque');
+  z.addEventListener('touchstart', e => {
+    iniciarAudio();
+    for (const t of e.changedTouches) {
+      if (t.target.id === 'bt-acao') { $('#bt-acao').classList.add('ativo'); apertarAcao(); continue; }
+      if (joy.id === null && t.clientX < innerWidth * 0.6) { joy.id = t.identifier; joy.x = t.clientX; joy.y = t.clientY; joy.mx = joy.my = 0; const j = $('#joy'); j.style.display = 'block'; j.style.left = joy.x + 'px'; j.style.top = joy.y + 'px'; j.firstElementChild.style.transform = ''; }
+    }
+    e.preventDefault();
+  }, { passive: false });
+  z.addEventListener('touchmove', e => {
+    for (const t of e.changedTouches) if (t.identifier === joy.id) { let dx = t.clientX - joy.x, dy = t.clientY - joy.y; const d = Math.hypot(dx, dy), m = 55; if (d > m) { dx = dx / d * m; dy = dy / d * m; } joy.mx = dx / m; joy.my = dy / m; $('#joy').firstElementChild.style.transform = `translate(${dx}px,${dy}px)`; }
+    e.preventDefault();
+  }, { passive: false });
+  const soltar = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.mx = joy.my = 0; $('#joy').style.display = 'none'; } } $('#bt-acao').classList.remove('ativo'); };
+  z.addEventListener('touchend', soltar); z.addEventListener('touchcancel', soltar);
+})();
+function lerInput() {
+  let mx = (teclas.KeyD || teclas.ArrowRight ? 1 : 0) - (teclas.KeyA || teclas.ArrowLeft ? 1 : 0), my = (teclas.KeyS || teclas.ArrowDown ? 1 : 0) - (teclas.KeyW || teclas.ArrowUp ? 1 : 0);
+  if (joy.id !== null) { mx = joy.mx; my = joy.my; }
+  const m = Math.hypot(mx, my); if (m > 1) { mx /= m; my /= m; }
+  return { mx: +mx.toFixed(2), my: +my.toFixed(2), a: contAcao };
+}
+function enviarAoHost() { if (conn && conn.open) try { conn.send({ t: 'i', ...lerInput() }); } catch (e) {} }
+
+/* =====================================================================
+   MENU
+   ===================================================================== */
+let meuRosto = localStorage.getItem('gongo.rosto') || pick(ROSTOS);
+function meuNome() { return ($('#nome').value.trim() || 'Você').slice(0, 14); }
+$('#nome').value = localStorage.getItem('gongo.nome') || '';
+$('#total').value = localStorage.getItem('gongo.total') || '30';
+$('#provas-mini').innerHTML = PROVAS.map(p => `<div class="${p.final ? 'fin' : ''}"><span>${p.icone}</span>${p.final ? 'Final: ' : ''}${p.nome.replace('Guerra de ', '')}</div>`).join('');
+function renderRostos() { $('#rostos').innerHTML = ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
+renderRostos();
+$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r; localStorage.setItem('gongo.rosto', meuRosto); renderRostos(); });
+function erroMenu(t, neutro) { $('#erro').textContent = t; $('#erro').style.color = neutro ? 'var(--muted)' : ''; }
+function salvarPrefs() { try { localStorage.setItem('gongo.nome', $('#nome').value.trim()); localStorage.setItem('gongo.total', $('#total').value); } catch (e) {} }
+function entrarNoJogo() {
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  $('#menu').classList.remove('on'); $('#hud').classList.add('on');
+  if (TOQUE) $('#toque').classList.add('on');
+  avisar('iniciado');
+}
+function comoHost(online) {
+  iniciarAudio(); salvarPrefs();
+  modo = 'host'; solo = !online; G.total = +$('#total').value || 30;
+  const eu = novoJogador({ nome: meuNome(), rosto: meuRosto, bot: false }); meuId = eu.id;
+  entrarNoJogo();
+  if (online) { if (!criarSalaOnline()) { modo = null; return; } voltarLobby(); tocarTrilha('lobby'); }
+  else comecarTemporada();
+}
+$('#b-solo').addEventListener('click', () => comoHost(false));
+$('#b-criar').addEventListener('click', () => comoHost(true));
+$('#b-entrar').addEventListener('click', () => { iniciarAudio(); salvarPrefs(); entrarSala($('#codigo').value); });
+$('#codigo').addEventListener('keydown', e => { if (e.key === 'Enter') $('#b-entrar').click(); });
+function sair() { if (window.parent !== window) avisar('sair'); else location.reload(); }
+$('#btn-sair').addEventListener('click', sair);
+$('#btn-som').addEventListener('click', () => { somModo = (somModo + 1) % 3; $('#btn-som').textContent = ['🔊', '🎵', '🔇'][somModo]; $('#btn-som').title = ['Som e música', 'Só efeitos (sem música)', 'Mudo'][somModo]; if (mestre) mestre.gain.value = somModo === 2 ? 0 : 0.55; });
+document.addEventListener('pointerdown', iniciarAudio, { once: true });
+let toastT = 0; function toast(m, ms = 3200) { const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('on'), ms); }
+
+/* =====================================================================
+   LAÇOS: simulação (relógio próprio) e desenho
+   ===================================================================== */
+let ultTick = performance.now(), acSim = 0, acRede = 0, acIn = 0, ultRolEnviado = -1;
+function tick() {
+  const agora = performance.now(), dt = Math.min(1.2, (agora - ultTick) / 1000); ultTick = agora;
+  if (modo === 'host') {
+    const eu = G.jog.find(p => p.id === meuId); if (eu) { const i = lerInput(); eu.input.mx = i.mx; eu.input.my = i.my; eu.input.a = i.a; }
+    acSim += dt * VEL; let n = 0;
+    while (acSim >= PASSO && n < 80 * VEL) { simular(PASSO); acSim -= PASSO; n++; }
+    if (n >= 80 * VEL) acSim = 0;
+    if (evLocal.length > 400) evLocal.splice(0, evLocal.length - 400);
+    acRede += dt;
+    if (conns.size) {
+      if (G.rol !== ultRolEnviado) { ultRolEnviado = G.rol; enviarTodos({ t: 'rol', l: roster() }); }
+      if (acRede >= 0.066) { acRede = 0; enviarTodos(montarSnap(true)); }
+    } else { evRede = []; if (G.px && G.px.pd) G.px.pd.length = 0; }
+  } else if (modo === 'cliente') {
+    acIn += dt; if (acIn >= 0.05) { acIn = 0; enviarAoHost(); }
+  }
+}
+setInterval(tick, 1000 / 60);
+let ultQuadro = performance.now();
+function quadro(agora) {
+  requestAnimationFrame(quadro);
+  const dt = Math.min(0.05, (agora - ultQuadro) / 1000); ultQuadro = agora;
+  if (modo === 'host') { const evs = evLocal; evLocal = []; for (const e of evs) tratarEvento(e); }
+  const V = vistaAtual(); if (!V) return;
+  vistaUlt = V;
+  desenhar(V, dt); atualizarHUD(V, dt);
+}
+requestAnimationFrame(quadro);
+if (PARAM.get('auto') === '1') { $('#total').value = PARAM.get('total') || '30'; comoHost(false); }
+</script>
+</body>
+</html>
