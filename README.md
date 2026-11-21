@@ -11,6 +11,19 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **GONGO! O Show das 6 Provas** | Party Game | Party Royale (show de eliminação) | Temporadas de 7–9 min |
 | **Detetive** | Dedução Social | Ladrões, detetives e clones | Partidas de 3–5 min |
 | **Roube um Emoji** | Tycoon | Coleção e roubo | Sem fim (progresso salvo) |
+| **Sete Noites na Neve** | Sobrevivência | Sobrevivência no frio | 20–30 min |
+
+### Sete Noites na Neve
+Seu avião caiu num vale congelado e o resgate só chega depois de sete noites. Um jogo de sobrevivência no frio em 3D:
+
+- 🔥 **Calor**: à noite e nas nevascas o frio corta. Fogueira, abrigo, tocha e casaco de pele seguram o frio.
+- 🍖 **Fome**: frutinhas nos arbustos, peixe nos buracos do lago congelado e coelhos nas armadilhas (asse no fogo: cru faz mal).
+- 🛠️ **Criar**: machado, fogueira, tocha, vara de pesca, armadilha, abrigo, casaco de pele e fogueira de sinal.
+- 🐺 **Lobos**: rondam no escuro, atacam quem está desprotegido e fogem do fogo e dos golpes.
+
+Dois finais: aguentar as sete noites, ou acender a fogueira de sinal no alto do morro à noite. O jogo salva a cada amanhecer.
+
+**Controles:** `WASD` andar · `Shift` correr · segurar `E` ação · `C` criar · `Q` comer · `F` tocha · `Espaço` ou clique golpe
 
 ### Roube um Emoji
 Um tycoon 3D de coleção e roubo para até 8 bases (pessoas e bots). Os emojis desfilam num tapete vermelho no meio do mapa:

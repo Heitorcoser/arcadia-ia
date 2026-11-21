@@ -188,11 +188,92 @@ const CAPA_EMOJI = `
   <text x="320" y="167" font-size="16" text-anchor="middle" fill="#1b1b2f" font-family="Arial,sans-serif" font-weight="bold">COLECIONE · LUCRE · ROUBE</text>
 </svg>`;
 
+const CAPA_NEVE = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="nc" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#040a1a"/><stop offset=".6" stop-color="#14284a"/><stop offset="1" stop-color="#2b4a74"/></linearGradient>
+    <radialGradient id="nf" cx="50%" cy="72%" r="42%"><stop offset="0" stop-color="#ffb347" stop-opacity=".75"/><stop offset=".45" stop-color="#ff7a1a" stop-opacity=".25"/><stop offset="1" stop-color="#ff7a1a" stop-opacity="0"/></radialGradient>
+    <linearGradient id="nn" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#e8f3ff"/><stop offset="1" stop-color="#9fb8d6"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#nc)"/>
+  <g fill="#fff"><circle cx="60" cy="40" r="1.4"/><circle cx="140" cy="80" r="1"/><circle cx="210" cy="30" r="1.6"/><circle cx="420" cy="50" r="1.2"/><circle cx="500" cy="25" r="1.5"/><circle cx="580" cy="90" r="1"/><circle cx="350" cy="20" r="1"/><circle cx="270" cy="95" r="1.2"/></g>
+  <circle cx="540" cy="70" r="26" fill="#e8f1ff"/><circle cx="530" cy="62" r="24" fill="#14284a" opacity=".25"/>
+  <path d="M0 230 L90 150 L170 215 L260 140 L360 220 L450 135 L560 210 L640 165 L640 360 L0 360Z" fill="#1c3458"/>
+  <path d="M0 270 Q160 225 320 255 T640 240 L640 360 L0 360Z" fill="url(#nn)"/>
+  <rect width="640" height="360" fill="url(#nf)"/>
+  <g fill="#10263f"><path d="M40 265 L70 175 L100 265Z"/><path d="M80 270 L118 160 L156 270Z"/><path d="M520 262 L556 165 L592 262Z"/><path d="M570 268 L600 190 L630 268Z"/></g>
+  <g fill="#e8f3ff"><path d="M60 205 L70 175 L80 205Z"/><path d="M106 195 L118 160 L130 195Z"/><path d="M545 198 L556 165 L567 198Z"/></g>
+  <g fill="#6a4426"><rect x="286" y="268" width="68" height="9" rx="4" transform="rotate(14 320 272)"/><rect x="286" y="268" width="68" height="9" rx="4" transform="rotate(-14 320 272)"/></g>
+  <path d="M320 205 C300 235 296 255 320 268 C344 255 340 235 320 205Z" fill="#ff7a1a"/>
+  <path d="M320 228 C309 245 309 258 320 265 C331 258 331 245 320 228Z" fill="#ffd75a"/>
+  <g fill="#8b9099"><circle cx="292" cy="276" r="6"/><circle cx="348" cy="276" r="6"/><circle cx="305" cy="281" r="5"/><circle cx="335" cy="281" r="5"/></g>
+  <g transform="translate(232 238)"><rect x="-10" y="-4" width="20" height="26" rx="5" fill="#2f6fd6"/><circle cx="0" cy="-12" r="9" fill="#f1c7a0"/><path d="M-9 -15 L0 -30 L9 -15Z" fill="#e2453c"/><rect x="-11" y="-6" width="22" height="5" rx="2" fill="#e2453c"/></g>
+  <g fill="#ffd34a"><circle cx="458" cy="246" r="2.6"/><circle cx="468" cy="246" r="2.6"/><circle cx="160" cy="252" r="2.4"/><circle cx="169" cy="252" r="2.4"/></g>
+  <g fill="#fff" opacity=".8"><circle cx="100" cy="120" r="2"/><circle cx="190" cy="170" r="1.6"/><circle cx="300" cy="140" r="2.2"/><circle cx="380" cy="110" r="1.8"/><circle cx="470" cy="160" r="2"/><circle cx="600" cy="130" r="1.6"/><circle cx="240" cy="60" r="1.8"/><circle cx="430" cy="200" r="1.4"/></g>
+  <text x="320" y="88" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="58" fill="#24476e">SETE NOITES</text>
+  <text x="320" y="84" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="58" fill="#f3fbff">SETE NOITES</text>
+  <text x="320" y="124" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="34" fill="#ff9a3c" letter-spacing="6">NA NEVE</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.4.2";
+window.ARCADIA_VERSAO = "1.5.0";
 
 window.JOGOS = [
+  {
+    id: "sete-noites",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Lançamento: vale congelado em 3D, calor e fome, criação, pesca, lobos, nevascas e dois finais.",
+    nome: "Sete Noites na Neve",
+    genero: "Sobrevivência",
+    subgenero: "Sobrevivência no frio",
+    corGenero: "#7cc4ff",
+    corDestaque: "#ff9a3c",
+    tags: ["Um jogador", "3D", "Criação", "Dia e noite", "Clima", "Progresso salvo", "Celular"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T17:00:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "20–30 min (salva a cada amanhecer)",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/sete-noites/index.html",
+    capa: CAPA_NEVE,
+    sinopse:
+      "Seu avião caiu num vale congelado e o resgate só chega depois de sete noites. Mantenha o fogo aceso, não passe fome e não deixe os lobos chegarem perto.",
+    descricao: [
+      "Sete Noites na Neve é um jogo de sobrevivência no frio em 3D. Você acorda ao lado do avião caído, com uma caixa de suprimentos e um vale inteiro coberto de neve: floresta de pinheiros, um lago congelado e um morro com uma bandeira lá no alto.",
+      "Quatro barras mandam em tudo: vida, calor, fome e energia. De dia o frio é suportável; à noite ele corta, e nas nevascas congela em segundos. Junte gravetos, pedras e madeira para criar machado, fogueira, tocha, vara de pesca, armadilha, abrigo e casaco de pele. Pesque nos buracos do gelo, cace coelhos e asse tudo no fogo, porque comida crua faz mal.",
+      "Quando escurece, os lobos saem. Eles rondam no escuro, têm medo de fogo e fogem de golpes, mas atacam quem fica sozinho no frio ou dorme sem uma fogueira por perto. São dois finais: aguentar as sete noites até o helicóptero chegar, ou montar uma fogueira de sinal no alto do morro e acendê-la à noite para ser visto antes."
+    ],
+    mecanicas: [
+      "Calor, fome, vida e energia: perto do fogo e do abrigo você esquenta, longe deles o frio vence",
+      "Ciclo de dia e noite de 4 minutos e nevascas que deixam tudo muito mais frio",
+      "Recursos no mapa: árvores, pedras, gravetos, arbustos com frutinhas, lago congelado e caixas do avião",
+      "8 criações: machado, fogueira, tocha, vara de pesca, armadilha, abrigo, casaco de pele e fogueira de sinal",
+      "Fogueiras gastam lenha, cozinham peixe e carne e afastam os lobos",
+      "Lobos que rondam, atacam quem está desprotegido e fogem do fogo, da tocha e dos golpes",
+      "Dormir no abrigo faz a noite passar rápido, mas sem fogo você acorda congelando",
+      "Bússola com o avião, o lago, o morro, a fogueira e o abrigo",
+      "Progresso salvo a cada amanhecer e dois finais"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar (Shift corre)"],
+      ["Arrastar o mouse / roda", "Girar e aproximar a câmera"],
+      ["E (segure)", "Pegar, cortar, quebrar, pescar, pôr lenha, assar, dormir"],
+      ["C", "Criar"],
+      ["Q", "Comer"],
+      ["F", "Acender ou apagar a tocha"],
+      ["Espaço / clique", "Golpe (espanta lobos)"]
+    ],
+    avisos: "Tem lobos e sustos leves à noite. Jogue com som: o vento e os uivos avisam o perigo.",
+    tecnologia: [
+      "Three.js r160 (WebGL) com terreno gerado por código, pinheiros instanciados, sombras, neve em partículas e céu que muda com a hora",
+      "Fogueiras e tochas com luz própria que tremula",
+      "Lobos com estados (rondar, atacar, fugir) que reagem ao fogo",
+      "Vento, fogo, uivos e efeitos gerados na hora com Web Audio API"
+    ]
+  },
   {
     id: "roube-um-emoji",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
