@@ -215,11 +215,91 @@ const CAPA_NEVE = `
   <text x="320" y="124" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="34" fill="#ff9a3c" letter-spacing="6">NA NEVE</text>
 </svg>`;
 
+const CAPA_MADANG = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="mc" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#0b1030"/><stop offset=".6" stop-color="#1b1440"/><stop offset="1" stop-color="#2a1630"/></linearGradient>
+    <radialGradient id="mp" cx="50%" cy="85%" r="60%"><stop offset="0" stop-color="#e3c08a"/><stop offset="1" stop-color="#a8804c"/></radialGradient>
+    <linearGradient id="mt" x1="0" x2="1"><stop offset="0" stop-color="#60a5fa"/><stop offset=".45" stop-color="#f472b6"/><stop offset=".8" stop-color="#fbbf24"/><stop offset="1" stop-color="#fff"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#mc)"/>
+  <path d="M0 40 Q80 70 160 48 T320 50 T480 46 T640 44" stroke="rgba(255,255,255,.25)" stroke-width="2" fill="none"/>
+  <g><ellipse cx="60" cy="72" rx="12" ry="16" fill="#ff4d4d"/><ellipse cx="160" cy="66" rx="12" ry="16" fill="#ffb02e"/><ellipse cx="250" cy="70" rx="12" ry="16" fill="#3b82f6"/><ellipse cx="390" cy="70" rx="12" ry="16" fill="#22c55e"/><ellipse cx="480" cy="66" rx="12" ry="16" fill="#f472b6"/><ellipse cx="580" cy="68" rx="12" ry="16" fill="#ff4d4d"/></g>
+  <path d="M40 150 Q320 95 600 150 L620 165 L20 165Z" fill="#2b2b38"/>
+  <path d="M60 165 L580 165 L560 205 L80 205Z" fill="#7a2e1b"/>
+  <g fill="#f5b301"><rect x="90" y="205" width="10" height="45"/><rect x="540" y="205" width="10" height="45"/></g>
+  <ellipse cx="320" cy="330" rx="420" ry="120" fill="url(#mp)"/>
+  <path d="M0 290 Q320 255 640 290" stroke="#c8a26b" stroke-width="9" fill="none"/>
+  <path d="M0 290 Q320 255 640 290" stroke="#8a6a3a" stroke-width="2" stroke-dasharray="8 8" fill="none"/>
+  <path d="M312 262 L328 262 L334 238 L306 238Z" fill="#e11d48"/>
+  <g transform="translate(130 300)"><circle r="22" fill="#3b82f6"/><text y="9" font-size="26" text-anchor="middle">😀</text></g>
+  <g transform="translate(205 286)"><circle r="20" fill="#60a5fa"/><text y="8" font-size="23" text-anchor="middle">🐯</text></g>
+  <g transform="translate(445 286)"><circle r="20" fill="#f87171"/><text y="8" font-size="23" text-anchor="middle">🐼</text></g>
+  <g transform="translate(515 300)"><circle r="22" fill="#ef4444"/><text y="9" font-size="26" text-anchor="middle">🦊</text></g>
+  <g transform="translate(560 226) rotate(-20)"><circle r="6" fill="#e8e2d0"/><path d="M0 -2 Q-8 -14 -6 -26 M0 -2 Q-2 -16 0 -28 M0 -2 Q4 -15 6 -26" stroke="#e11d48" stroke-width="3" fill="none"/></g>
+  <g transform="translate(78 224) rotate(15)"><rect x="-14" y="-14" width="28" height="28" fill="#2563eb"/><path d="M-14 -14 L14 14 M14 -14 L-14 14" stroke="rgba(0,0,0,.35)" stroke-width="2"/></g>
+  <g transform="translate(600 160)"><ellipse rx="22" ry="20" fill="#dbe6f5"/><rect x="-9" y="-30" width="18" height="12" fill="#dbe6f5"/><path d="M-6 -30 L-14 -62 M2 -30 L6 -64 M8 -30 L20 -58" stroke="#7a4a1a" stroke-width="3"/></g>
+  <text x="320" y="128" text-anchor="middle" font-family="Black Han Sans,Impact,Arial Black,sans-serif" font-size="26" fill="#f5b301" letter-spacing="10">마 당</text>
+  <text x="320" y="188" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="66" fill="#3a1a10">MADANG!</text>
+  <text x="320" y="182" text-anchor="middle" font-family="Impact,Arial Black,sans-serif" font-size="66" fill="url(#mt)">MADANG!</text>
+  <text x="320" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="16" fill="#fff8ec" letter-spacing="3">FESTIVAL DOS JOGOS COREANOS</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.5.0";
+window.ARCADIA_VERSAO = "1.6.0";
 
 window.JOGOS = [
+  {
+    id: "madang",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Lançamento: 6 brincadeiras tradicionais coreanas, salas online até 50 e bots.",
+    nome: "MADANG! Festival dos Jogos Coreanos",
+    genero: "Party Game",
+    subgenero: "Party Royale (brincadeiras tradicionais coreanas)",
+    corGenero: "#e11d48",
+    corDestaque: "#f5b301",
+    tags: ["Multijogador online", "Até 50 jogadores", "Bots", "2D", "Eliminação", "Cultura coreana", "Celular"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T17:25:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Festivais de 6–8 min",
+    classificacao: "Livre",
+    finais: 1,
+    caminho: "jogos/madang/index.html",
+    capa: CAPA_MADANG,
+    sinopse:
+      "Noite de festival no madang, o pátio da vila. Até 50 jogadores, entre pessoas e bots, enfrentam 6 brincadeiras tradicionais da Coreia, e a cada uma o tambor buk tira uma parte. Só um vence a Batalha de Piões.",
+    descricao: [
+      "MADANG! é um party royale com brincadeiras que existem de verdade e passam de geração em geração na Coreia. Numa sala online cabem até 50 pessoas, e os bots completam as vagas. O apresentador é o Dokkaebi, figura do folclore coreano, que comanda o festival ao som do tambor buk.",
+      "Na Flor de Mugunghwa (무궁화 꽃이 피었습니다) você anda enquanto o pegador canta de costas e congela quando ele vira. No Jegichagi (제기차기) mantém a peteca coreana no ar chutando na hora certa. No Tuho (투호) arremessa flechas dentro de um jarro. No Cabo de Guerra (줄다리기) dois times puxam no ritmo do grito “Yeongcha!”. No Ddakjichigi (딱지치기) os duelos são para virar o quadradinho de papel dobrado do adversário.",
+      "Quem sobrevive chega à grande final, a Batalha de Piões (팽이치기), brincadeira de inverno jogada no gelo: cada finalista é um pião, a chicotada dá mais giro e um tranco, e vence o último que continuar girando."
+    ],
+    mecanicas: [
+      "6 brincadeiras tradicionais coreanas, cada uma com um jeito diferente de jogar: congelar, ritmo, mira, força em time, duelo e física",
+      "Até 50 jogadores na mesma sala, misturando pessoas e bots com nível de habilidade próprio",
+      "Canto de verdade do 무궁화 꽃이 피었습니다, sílaba por sílaba, com o pegador que vira de surpresa",
+      "Cabo de guerra em dois times com bônus de puxão no ritmo do “영차!” (Yeongcha)",
+      "Duelos de ddakji em pares, com barra de força",
+      "Final com piões no gelo: giro que acaba, chicotadas e choques",
+      "Quem sai continua assistindo; pódio e ranking no fim",
+      "Controles de toque no celular, com joystick e botão de ação"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar"],
+      ["Espaço", "Ação da brincadeira (chutar, arremessar, puxar, bater, chicote)"],
+      ["Espaço (fora)", "Assistir outro jogador"],
+      ["🔊", "Som e música / só efeitos / mudo"]
+    ],
+    avisos: "Partidas online usam um servidor público gratuito (PeerJS) só para conectar os jogadores.",
+    tecnologia: [
+      "Canvas 2D com pátio de festival, lanternas, plateia em roupas típicas, partículas e textos em Hangul (fonte Black Han Sans)",
+      "Multijogador P2P por WebRTC (PeerJS): o anfitrião simula o festival e envia um estado compacto 15 vezes por segundo",
+      "IA de bots diferente para cada brincadeira",
+      "Trilha com tambores buk e janggu e melodia pentatônica, tudo gerado na hora com Web Audio API"
+    ]
+  },
   {
     id: "sete-noites",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
@@ -232,7 +312,7 @@ window.JOGOS = [
     corDestaque: "#ff9a3c",
     tags: ["Um jogador", "3D", "Criação", "Dia e noite", "Clima", "Progresso salvo", "Celular"],
     criadoEm: "2026-11-21",
-    lancadoEm: "2026-11-21T17:00:00-03:00", // o selo "Novo" some 2 dias depois
+    lancadoEm: "2026-11-21T16:50:00-03:00", // o selo "Novo" some 2 dias depois
     criadoPor: "Claude Opus 5.5 (Anthropic)",
     duracao: "20–30 min (salva a cada amanhecer)",
     classificacao: "Livre",
@@ -286,7 +366,7 @@ window.JOGOS = [
     corDestaque: "#ff5fa2",
     tags: ["Multijogador online", "Até 8 jogadores", "Bots", "3D", "Coleção", "Roubo", "Progresso salvo"],
     criadoEm: "2026-11-21",
-    lancadoEm: "2026-11-21T18:30:00-03:00", // o selo "Novo" some 2 dias depois
+    lancadoEm: "2026-11-21T15:34:00-03:00", // o selo "Novo" some 2 dias depois
     criadoPor: "Claude Opus 5.5 (Anthropic)",
     duracao: "Sem fim (progresso salvo)",
     classificacao: "Livre",

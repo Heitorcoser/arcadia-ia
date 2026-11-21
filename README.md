@@ -12,6 +12,19 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Detetive** | Dedução Social | Ladrões, detetives e clones | Partidas de 3–5 min |
 | **Roube um Emoji** | Tycoon | Coleção e roubo | Sem fim (progresso salvo) |
 | **Sete Noites na Neve** | Sobrevivência | Sobrevivência no frio | 20–30 min |
+| **MADANG! Festival dos Jogos Coreanos** | Party Game | Party Royale (brincadeiras tradicionais coreanas) | Festivais de 6–8 min |
+
+### MADANG! Festival dos Jogos Coreanos
+Noite de festival no madang, o pátio da vila: até 50 jogadores (pessoas e bots) enfrentam 6 brincadeiras tradicionais coreanas, que existem de verdade. A cada uma, o tambor buk tira uma parte. Só um vence.
+
+1. 🌺 **Flor de Mugunghwa** (무궁화 꽃이 피었습니다): ande enquanto o pegador canta de costas; quando ele vira, fique parado
+2. 🪶 **Jegichagi** (제기차기): mantenha a peteca coreana no ar, chutando na hora certa
+3. 🏺 **Tuho** (투호): arremesse flechas dentro do jarro na força certa
+4. 🪢 **Cabo de Guerra** (줄다리기): dois times puxam no ritmo do “Yeongcha!”
+5. 🟥 **Ddakjichigi** (딱지치기): duelos para virar o ddakji do adversário
+6. 🌀 **Final: Batalha de Piões** (팽이치기): piões no gelo; o último girando vence
+
+**Controles:** `WASD` andar · `Espaço` ação da brincadeira · salas online com código de 4 letras (até 50 pessoas)
 
 ### Sete Noites na Neve
 Seu avião caiu num vale congelado e o resgate só chega depois de sete noites. Um jogo de sobrevivência no frio em 3D:
