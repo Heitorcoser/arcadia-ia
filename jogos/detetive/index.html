@@ -11,7 +11,7 @@
   :root{--bg:#0c0f16;--card:#161b26;--card2:#1f2635;--line:#2f3a52;--txt:#f2ede3;--muted:#a9b1c4;--ouro:#f5c542;--verm:#ef4444;--azul:#60a5fa;--verde:#4ade80}
   *{box-sizing:border-box}
   html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:"Baloo 2",system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-  #cv{position:fixed;inset:0;display:block;touch-action:none}
+  #cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
   button{font:inherit;color:inherit;cursor:pointer}
   input,select{font:inherit}
   .maq{font-family:"Special Elite","Courier New",monospace}
@@ -831,7 +831,7 @@ const infoId = id => { if (modo === 'host') { const p = G.jog.find(q => q.id ===
 function desenhar(V, dt) {
   const T = performance.now() / 1000, pv = V.pv || {}, eu = V.js.get(pv.h);
   const alvo = eu || (V.f === 'lobby' ? null : null);
-  const z = clamp(Math.min(VW, VH) / 820, 0.45, 1.3);
+  const z = clamp(Math.min(VW, VH) / 820, 0.6, 1.3);
   cam.z = lerp(cam.z, z, Math.min(1, dt * 3));
   if (alvo) { cam.x = lerp(cam.x, alvo.x, Math.min(1, dt * 6)); cam.y = lerp(cam.y, alvo.y, Math.min(1, dt * 6)); }
   else if (espiaH && V.js.get(espiaH)) { const s = V.js.get(espiaH); cam.x = lerp(cam.x, s.x, Math.min(1, dt * 4)); cam.y = lerp(cam.y, s.y, Math.min(1, dt * 4)); }
@@ -971,6 +971,13 @@ function desenharCorpo(s, V, T) {
   ctx.strokeText(nome, x, y - RJ - 12); ctx.fillStyle = eu ? '#f5c542' : socio ? '#fca5a5' : '#fff'; ctx.fillText(nome, x, y - RJ - 12);
   if (s.pr > 0) { ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(x, y - 4, RJ + 7, 0, TAU); ctx.stroke(); ctx.strokeStyle = '#f5c542'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(x, y - 4, RJ + 7, -Math.PI / 2, -Math.PI / 2 + TAU * s.pr / 100); ctx.stroke(); }
   if (preso) { ctx.drawImage(sprite('⛓️'), x - 10, y + 2, 20, 20); }
+  // marcador fixo: mesmo disfarçado de outra pessoa, você sempre se acha
+  if (eu) {
+    const ay = y - RJ - 34 + Math.sin(T * 5) * 3;
+    ctx.fillStyle = '#f5c542'; ctx.strokeStyle = 'rgba(0,0,0,.75)'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x - 8, ay - 8); ctx.lineTo(x + 8, ay - 8); ctx.lineTo(x, ay + 2); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.font = '800 13px "Baloo 2",sans-serif'; ctx.lineWidth = 4; ctx.strokeText('VOCÊ', x, ay - 12); ctx.fillText('VOCÊ', x, ay - 12);
+  }
 }
 function desenharMapa(V, eu) {
   if (getComputedStyle(mapa).display === 'none') return;
@@ -1150,9 +1157,11 @@ function entrarNoJogo() { if (document.activeElement && document.activeElement.b
 function comoHost(online) {
   iniciarAudio(); salvarPrefs();
   modo = 'host'; solo = !online; G.total = +$('#total').value || 16; G.pref = online ? '' : $('#pref').value;
+  // sem o sistema de salas não dá para criar online: avisa no menu em vez de abrir uma tela vazia
+  if (online && !criarSalaOnline()) { modo = null; return; }
   const eu = novoJogador({ nome: meuNome(), rosto: meuRosto, bot: false }); meuId = eu.id;
   entrarNoJogo();
-  if (online) { if (!criarSalaOnline()) { modo = null; return; } voltarLobby(); } else comecarPartida();
+  if (online) voltarLobby(); else comecarPartida();
 }
 $('#b-solo').addEventListener('click', () => comoHost(false));
 $('#b-criar').addEventListener('click', () => comoHost(true));
