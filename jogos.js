@@ -121,7 +121,85 @@ const CAPA_GONGO = `
   <text x="320" y="44" font-size="16" text-anchor="middle" fill="#ffd166" font-family="Arial Black, sans-serif" letter-spacing="4" opacity=".9">6 PROVAS · 50 COMPETIDORES</text>
 </svg>`;
 
+const CAPA_DETETIVE = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="dl" cx="50%" cy="40%" r="70%"><stop offset="0" stop-color="#2a3550"/><stop offset="1" stop-color="#07090f"/></radialGradient>
+    <radialGradient id="dz" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff7d6" stop-opacity=".55"/><stop offset="1" stop-color="#fff7d6" stop-opacity="0"/></radialGradient>
+    <linearGradient id="dv" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9bd3ff" stop-opacity=".35"/><stop offset="1" stop-color="#9bd3ff" stop-opacity=".08"/></linearGradient>
+    <filter id="db"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#dl)"/>
+  <rect x="0" y="210" width="640" height="150" fill="#1a1f2c"/>
+  <g>
+    <rect x="30" y="60" width="170" height="150" fill="#2f2752" stroke="#3a3f4d" stroke-width="8"/><rect x="48" y="96" width="134" height="70" fill="url(#dv)"/><text x="115" y="88" font-size="16" text-anchor="middle" fill="#f5e6c4" font-family="Arial Black,sans-serif">GAMES</text><text x="78" y="145" font-size="30" text-anchor="middle">🎮</text><text x="150" y="145" font-size="30" text-anchor="middle">🕹️</text>
+    <rect x="440" y="60" width="170" height="150" fill="#3b2f52" stroke="#3a3f4d" stroke-width="8"/><rect x="458" y="96" width="134" height="70" fill="url(#dv)"/><text x="525" y="88" font-size="16" text-anchor="middle" fill="#f5e6c4" font-family="Arial Black,sans-serif">JOALHERIA</text><text x="490" y="145" font-size="30" text-anchor="middle">💍</text><text x="560" y="145" font-size="30" text-anchor="middle" opacity=".3">💎</text>
+    <path d="M540 118 l14 14 -8 10 14 12" stroke="#fff" stroke-width="2" fill="none" opacity=".8"/>
+    <text x="458" y="82" font-size="16">📷</text><circle cx="477" cy="70" r="3.5" fill="#f59e0b"/>
+  </g>
+  <g fill="#ff5a2a" opacity=".85">
+    <ellipse cx="452" cy="232" rx="4" ry="7" transform="rotate(-70 452 232)"/><ellipse cx="420" cy="246" rx="4" ry="7" transform="rotate(-70 420 246)"/><ellipse cx="388" cy="236" rx="4" ry="7" transform="rotate(-70 388 236)"/><ellipse cx="356" cy="250" rx="4" ry="7" transform="rotate(-70 356 250)"/><ellipse cx="324" cy="240" rx="4" ry="7" transform="rotate(-70 324 240)" opacity=".6"/><ellipse cx="292" cy="254" rx="4" ry="7" transform="rotate(-70 292 254)" opacity=".4"/>
+  </g>
+  <g font-family="Arial Black,sans-serif" text-anchor="middle">
+    ${[[150, 262, '#e98bd6', '🦊', 'ANA'], [228, 286, '#7fd0a6', '🐸', 'BETO'], [500, 286, '#e98bd6', '🦊', 'ANA'], [590, 258, '#8fb4ff', '🐼', 'CAIO']].map(([x, y, c, e, n]) => `<ellipse cx="${x}" cy="${y + 18}" rx="18" ry="6" fill="#000" opacity=".35"/><circle cx="${x}" cy="${y}" r="19" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="3"/><text x="${x}" y="${y + 8}" font-size="21">${e}</text><text x="${x}" y="${y - 26}" font-size="12" fill="#fff">${n}</text>`).join('')}
+    <text x="500" y="244" font-size="20" fill="#fca5a5">?</text><text x="150" y="222" font-size="20" fill="#fca5a5">?</text>
+  </g>
+  <circle cx="300" cy="150" r="88" fill="url(#dz)"/>
+  <circle cx="300" cy="150" r="62" fill="none" stroke="#f5c542" stroke-width="12"/>
+  <circle cx="300" cy="150" r="62" fill="#ffffff" opacity=".07"/>
+  <line x1="344" y1="194" x2="398" y2="250" stroke="#7a4a1a" stroke-width="18" stroke-linecap="round"/>
+  <text x="300" y="168" font-size="46" text-anchor="middle">🕵️</text>
+  <text x="320" y="336" font-size="30" text-anchor="middle" fill="#f5e6c4" font-family="Courier New,monospace" font-weight="bold" letter-spacing="8">DETETIVE</text>
+</svg>`;
+
 window.JOGOS = [
+  {
+    id: "detetive",
+    nome: "Detetive",
+    genero: "Dedução Social",
+    subgenero: "Ladrões, detetives e clones",
+    corGenero: "#60a5fa",
+    tags: ["Multijogador online", "Até 30 jogadores", "Bots", "2D", "Papéis secretos", "Disfarces", "Investigação"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T12:10:00-03:00",
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Partidas de 3–5 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/detetive/index.html",
+    capa: CAPA_DETETIVE,
+    sinopse:
+      "Noite no Shopping Estrela. Ladrões roubam as lojas, detetives seguem pegadas e farejam pistas, ajudantes vigiam as câmeras. O detalhe: cada um pode estar com o rosto e o nome de outra pessoa.",
+    descricao: [
+      "Detetive é um jogo de dedução social para até 30 pessoas ou bots. Cada um recebe um papel secreto: Ladrão, Detetive ou Ajudante. Os ladrões precisam levar os objetos de valor das lojas antes do tempo acabar. Os detetives precisam descobrir quem eles são e prendê-los.",
+      "O truque são os clones. Cada pessoa nasce com o próprio visual ou com o visual de outra pessoa, sempre com o nome e o rosto juntos, e o mesmo visual pode aparecer em dois corpos ao mesmo tempo. Então pode ter duas “Ana” andando pelo shopping, e só uma delas é a de verdade (ou nenhuma). Na metade da partida tem troca de turno e todo mundo muda de disfarce.",
+      "De fora de uma loja não dá para ver quem está lá dentro: só quem está na mesma loja ou quem olha as câmeras na Sala de Segurança. Os ladrões podem colocar a câmera de uma loja em loop, ou causar um apagão que desliga as luzes e as câmeras. Os detetives veem pegadas frescas dos ladrões e podem farejar quem roubou há pouco, mas cada prisão errada custa um distintivo. Os ajudantes fazem tarefas, consertam vitrines e câmeras e alimentam o quadro de pistas."
+    ],
+    mecanicas: [
+      "Três papéis secretos com habilidades próprias: Ladrão, Detetive e Ajudante",
+      "Disfarces com clones: você pode parecer outra pessoa, e o mesmo visual pode estar em até dois corpos",
+      "Troca de turno no meio da partida: todos mudam de disfarce",
+      "Visão por ambiente: dentro das lojas só vê quem está lá ou quem está nas câmeras",
+      "Câmeras ao vivo das 10 lojas na Sala de Segurança, com gravações que viram pistas",
+      "Ladrão burla câmeras (loop) e causa apagões; ajudantes consertam e religam a luz",
+      "Detetive vê pegadas que aparecem com alguns segundos de atraso, fareja e prende (2 distintivos)",
+      "Quadro de pistas compartilhado e selo ✅ para inocentados",
+      "Salas online com código de 4 letras (até 30 pessoas) e bots que investigam, roubam e vigiam"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar"],
+      ["Segurar Espaço", "Ação: roubar, prender, tarefa, câmeras, burlar ou consertar câmera"],
+      ["Q", "Habilidade: apagão (Ladrão) ou farejar (Detetive)"],
+      ["Espaço (preso)", "Assistir outro jogador"]
+    ],
+    avisos: "Partidas online usam um servidor público gratuito (PeerJS) só para conectar os jogadores.",
+    tecnologia: [
+      "Canvas 2D com shopping desenhado por código, minimapa e painel de câmeras ao vivo",
+      "Multijogador P2P por WebRTC (PeerJS): o anfitrião simula e manda para cada jogador só o que ele pode ver (papéis e posições escondidas não vão pela rede)",
+      "Bots com rotas entre lojas, que roubam quando ninguém vê, seguem pegadas e fazem turnos nas câmeras",
+      "Música de suspense e efeitos gerados com Web Audio API"
+    ]
+  },
   {
     id: "gongo",
     nome: "GONGO! O Show das 6 Provas",
@@ -130,6 +208,7 @@ window.JOGOS = [
     corGenero: "#ff3d7f",
     tags: ["Multijogador online", "Até 50 jogadores", "Bots", "2D", "Eliminação", "Game show", "Quiz"],
     criadoEm: "2026-11-20",
+    lancadoEm: "2026-11-20T20:32:20-03:00", // o selo "Novo" some 2 dias depois
     criadoPor: "Claude Opus 5.5 (Anthropic)",
     duracao: "Temporadas de 7–9 min",
     classificacao: "Livre",
@@ -174,7 +253,8 @@ window.JOGOS = [
     subgenero: "Sandbox de Palavras",
     corGenero: "#f59e0b",
     tags: ["Multijogador online", "Bots", "2D", "Caos", "Texto", "Arena", "Easter eggs"],
-    criadoEm: "2026-11-20",
+    criadoEm: "2026-11-19",
+    lancadoEm: "2026-11-19T22:18:58-03:00",
     criadoPor: "Claude Opus 5.5 (Anthropic)",
     duracao: "Partidas de 4 min",
     classificacao: "Livre",
@@ -221,6 +301,7 @@ window.JOGOS = [
     subgenero: "Terror Psicológico",
     tags: ["Primeira pessoa", "3D", "Exploração", "Narrativo", "Sobrevivência", "Single-player"],
     criadoEm: "2026-11-19",
+    lancadoEm: "2026-11-19T20:58:38-03:00",
     criadoPor: "Claude Opus 5.5 (Anthropic)",
     duracao: "15–25 min",
     classificacao: "16+",

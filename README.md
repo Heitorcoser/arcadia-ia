@@ -9,6 +9,23 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **A Casa Que Lembra** | Terror | Terror Psicológico | 15–25 min |
 | **Arena dos Desejos** | Party Game | Sandbox de Palavras | Partidas de 4 min |
 | **GONGO! O Show das 6 Provas** | Party Game | Party Royale (show de eliminação) | Temporadas de 7–9 min |
+| **Detetive** | Dedução Social | Ladrões, detetives e clones | Partidas de 3–5 min |
+
+### Detetive
+Noite no Shopping Estrela, com até 30 pessoas ou bots. Cada um recebe um papel secreto:
+
+- 🦹 **Ladrão**: rouba os objetos das lojas, coloca câmeras em loop e causa apagões.
+- 🕵️ **Detetive**: vê pegadas frescas, fareja quem roubou há pouco e prende (prisão errada custa um distintivo).
+- 🧰 **Ajudante**: vigia as câmeras ao vivo, conserta vitrines e câmeras, religa a luz e faz tarefas que inocentam gente.
+
+**Os clones:** cada pessoa nasce com o próprio visual ou com o de outra pessoa (nome e rosto sempre juntos), e o mesmo visual pode estar em dois corpos. Na metade da partida, todo mundo troca de disfarce. De fora de uma loja não dá para ver quem está lá dentro: só quem está na loja ou quem olha as câmeras.
+
+**Controles:** `WASD` andar · segurar `Espaço` ação · `Q` habilidade · salas online com código de 4 letras (até 30 pessoas)
+
+## Contas
+O botão **Entrar** da plataforma cria uma conta com verificação por e-mail e, se a pessoa quiser, verificação em duas etapas. Toda entrada na conta gera um aviso detalhado no e-mail do dono. O servidor roda em Google Apps Script na conta da empresa; veja [servidor-contas/LEIAME.md](servidor-contas/LEIAME.md).
+
+O selo **Novo** de cada jogo some sozinho 2 dias depois do lançamento (campo `lancadoEm` em `jogos.js`).
 
 ### GONGO! O Show das 6 Provas
 Um game show apresentado por um robô: até 50 competidores (pessoas e bots) passam por 6 provas bem diferentes, e a cada uma o Gongo elimina uma parte. Só um vence.

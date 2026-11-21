@@ -317,7 +317,10 @@
   const STAR = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.2l2.95 6.2 6.8.82-5 4.7 1.28 6.73L12 17.4l-6.03 3.25 1.28-6.73-5-4.7 6.8-.82z"/></svg>';
   const corG = j => j.corGenero || "#ef4444";
   const chipG = j => `background:${corG(j)}24;border-color:${corG(j)}66;color:${corG(j)}`;
-  const ehNovo = j => (Date.now() - new Date(j.criadoEm + "T12:00:00")) < 1000 * 60 * 60 * 24 * 14;
+  // selo "Novo": some 2 dias (48 h) depois do lançamento
+  const NOVO_MS = 1000 * 60 * 60 * 48;
+  const lancamento = j => new Date(j.lancadoEm || (j.criadoEm + "T00:00:00-03:00")).getTime();
+  const ehNovo = j => { const d = Date.now() - lancamento(j); return d >= 0 && d < NOVO_MS; };
 
   function estrelasHTML(valor, id, tamanho) {
     let h = `<span class="stars${id ? " interactive" : ""}" ${id ? `data-rate="${id}"` : ""} style="--s:${tamanho || 18}px" role="${id ? "slider" : "img"}" aria-label="Nota ${valor} de 5">`;
@@ -365,7 +368,7 @@
 
   // ---------- render ----------
   function renderHero() {
-    const j = [...JOGOS].sort((a, b) => b.criadoEm.localeCompare(a.criadoEm))[0];
+    const j = [...JOGOS].sort((a, b) => lancamento(b) - lancamento(a))[0];
     if (!j) { $("#hero").innerHTML = ""; return; }
     $("#hero").innerHTML = `
       <div class="hero-cover"><img src="${capaSrc(j)}" alt=""></div>
@@ -403,7 +406,7 @@
     const q = busca.trim().toLowerCase();
     let lista = JOGOS.filter(j => (filtro === "Todos" || j.genero === filtro) &&
       (!q || [j.nome, j.genero, j.subgenero, j.sinopse, ...(j.tags || [])].join(" ").toLowerCase().includes(q)));
-    if (ordem === "recentes") lista.sort((a, b) => b.criadoEm.localeCompare(a.criadoEm));
+    if (ordem === "recentes") lista.sort((a, b) => lancamento(b) - lancamento(a));
     if (ordem === "nota") lista.sort((a, b) => nota(b.id) - nota(a.id));
     if (ordem === "nome") lista.sort((a, b) => a.nome.localeCompare(b.nome));
     let h = lista.map(j => {
@@ -602,6 +605,9 @@
     const l = locais.map(j => ({ ...j, fonte: "local", chave: "l:" + j.id, capaUrl: j.capa || "", data: j.publicadoEm ? new Date(j.publicadoEm).toISOString().slice(0, 10) : "" }));
     return [...l, ...c];
   }
+  const novoP = j => { const t = j.fonte === "local" ? j.publicadoEm : new Date((j.publicadoEm || "") + "T00:00:00-03:00").getTime(); const d = Date.now() - t; return t && d >= 0 && d < NOVO_MS; };
+  // o selo some sozinho, mesmo com a página aberta
+  setInterval(() => { renderGrade(); renderGradeP(); }, 60 * 1000);
   const iconeGen = g => ({ "Obby / Parkour": "🧗", "Aventura": "🗺️", "Ação": "⚔️", "Plataforma": "🍄", "Puzzle": "🧩", "Corrida": "🏎️", "Terror": "👻", "Simulador": "🛠️", "Tycoon": "💰", "RPG": "🐉", "Party Game": "🎉", "Esporte": "⚽", "Arcade": "🕹️" }[g] || "🎮");
   function renderGradeP() {
     const q = busca.trim().toLowerCase();
@@ -613,6 +619,7 @@
           <span class="badge g" style="background:#8b5cf6">${esc(j.genero || "Outro")}</span>
           <span class="badge autor">por ${esc(j.autor || "Anônimo")}</span>
           ${j.fonte === "local" ? '<span class="badge local">Neste navegador</span>' : ""}
+          ${novoP(j) ? '<span class="badge new" style="top:auto;bottom:12px;right:12px">Novo</span>' : ""}
         </div>
         <div class="card-body">
           <h3>${esc(j.nome)}</h3>
