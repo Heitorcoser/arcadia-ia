@@ -138,6 +138,14 @@
   #fim-eu{font-size:18px;font-weight:800;margin:8px 0}
   #toast{position:fixed;left:50%;top:70px;transform:translateX(-50%);z-index:40;background:#2a1850;border:2px solid var(--line);border-radius:14px;padding:8px 16px;font-weight:800;opacity:0;transition:.3s;pointer-events:none;text-align:center;max-width:92vw}
   #toast.on{opacity:1}
+  @media (orientation:landscape) and (max-height:520px){
+    #quiz{left:10px;top:62px;transform:none;width:min(40vw,360px)}
+    @keyframes desce{from{transform:translateX(-16px);opacity:0}}
+    #quiz .perg{font-size:15px;padding:6px 10px}
+    #quiz .resps{grid-template-columns:1fr;gap:4px;margin-top:4px}
+    #quiz .resps div{font-size:14px;padding:3px 10px}
+    #quiz .resps div b{font-size:15px;width:22px;height:22px}
+  }
   @media (max-width:640px){
     .provas-mini{grid-template-columns:repeat(3,1fr)}
     #tinta{width:160px;font-size:12px}
@@ -1065,6 +1073,18 @@ function infoJog(id) { if (modo === 'host') { const p = G.jog.find(q => q.id ===
 function gradeTinta() { return modo === 'host' ? (G.px.grid || gradeCli) : gradeCli; }
 const arenaDaVista = V => V.f === 'lobby' || V.p < 0 ? 'lobby' : PROVAS[V.p].id;
 
+// retângulo da tela que o painel do quiz não cobre (embaixo dele, ou à direita no celular deitado)
+let quizRect = null;
+const DEITADO = matchMedia('(orientation:landscape) and (max-height:520px)');
+function areaLivreQuiz() {
+  const el = $('#quiz');
+  if (el.classList.contains('on')) { const r = el.getBoundingClientRect(); if (r.height > 0) quizRect = { l: r.left, r: r.right, b: r.bottom, w: r.width }; }
+  const m = 8, base = VH - (TOQUE ? 14 : 24);
+  let x0 = m, x1 = VW - m, y0 = 60, y1 = base;
+  if (DEITADO.matches) { x0 = (quizRect && quizRect.w < VW * 0.6 ? quizRect.r : Math.min(VW * 0.4, 360) + 10) + m; y0 = 56; }
+  else y0 = (quizRect && quizRect.w >= VW * 0.6 ? quizRect.b : Math.min(VH * 0.42, 260)) + m;
+  return { w: x1 - x0, h: y1 - y0, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2 };
+}
 function desenhar(V, dt) {
   const id = arenaDaVista(V), A = ARENA[id], T = performance.now() / 1000;
   palAtual = id === 'tinta' && V.x ? V.x.pal || null : null;
@@ -1076,11 +1096,15 @@ function desenhar(V, dt) {
   const inteira = id === 'quiz' || id === 'memoria' || V.f === 'intro' || V.f === 'fim' || V.f === 'resultado';
   let zAlvo = inteira ? Math.min(VW / (A.forma === 'circ' ? A.r * 2 + 120 : A.w * 2 + 120), VH / (A.forma === 'circ' ? A.r * 2 + 160 : A.h * 2 + 200)) : Math.min(VW, VH) / 760;
   // no quiz e na memória o painel de cima ocupa espaço: a arena desce um pouco
-  const topo = (id === 'quiz' && V.f === 'jogo') ? 190 : (id === 'memoria' && V.f === 'jogo') ? 110 : 0;
-  if (topo) zAlvo = Math.min(VW / (A.w * 2 + 100), (VH - topo - 90) / (A.h * 2 + 60));
-  zAlvo = clamp(zAlvo, 0.28, 1.6);
+  // no quiz a arena ocupa só o espaço livre ao lado do painel da pergunta (medido de verdade, serve para qualquer tela)
+  const livre = id === 'quiz' && V.f === 'jogo' ? areaLivreQuiz() : null;
+  const topo = livre ? 0 : (id === 'memoria' && V.f === 'jogo') ? 110 : 0;
+  if (livre) zAlvo = Math.min(livre.w / (A.w * 2 + 40), livre.h / (A.h * 2 + 40));
+  else if (topo) zAlvo = Math.min(VW / (A.w * 2 + 100), (VH - topo - 90) / (A.h * 2 + 60));
+  zAlvo = clamp(zAlvo, livre ? 0.1 : 0.28, 1.6);
   let tx = 0, ty = 0;
-  if (foco && !inteira) { tx = foco.x * 0.75; ty = foco.y * 0.75; } else if (foco && inteira && !topo) { tx = foco.x * 0.12; ty = foco.y * 0.12; }
+  if (foco && !inteira) { tx = foco.x * 0.75; ty = foco.y * 0.75; } else if (foco && inteira && !topo && !livre) { tx = foco.x * 0.12; ty = foco.y * 0.12; }
+  if (livre) { tx = (VW / 2 - livre.cx) / zAlvo; ty = (VH / 2 - livre.cy) / zAlvo; }
   if (topo) ty = -(topo / 2) / Math.max(zAlvo, 0.2);
   cam.z = lerp(cam.z, zAlvo, Math.min(1, dt * 3)); cam.x = lerp(cam.x, tx, Math.min(1, dt * 4)); cam.y = lerp(cam.y, ty, Math.min(1, dt * 4));
   void tamArena;
@@ -1173,7 +1197,7 @@ function desenharArena(V, id, T) {
       if (revelado) { ctx.lineWidth = 10; ctx.strokeStyle = '#fff'; ctx.shadowColor = '#fff'; ctx.shadowBlur = 30 + Math.sin(T * 10) * 10; ctx.stroke(); }
       ctx.restore();
       ctx.save(); ctx.globalAlpha = 0.22; ctx.fillStyle = '#fff'; ctx.font = '210px Bungee'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(letras[k], x0 + w / 2, y0 + h / 2 + 8); ctx.restore();
-      if (q && x.o) { const txt = q[1 + x.o[k]]; ctx.save(); ctx.font = '800 34px "Baloo 2",sans-serif'; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(0,0,0,.35)'; const ty = y0 + (sy < 0 ? 60 : h - 34); ctx.strokeText(txt, x0 + w / 2, ty); ctx.fillStyle = '#fff'; ctx.fillText(txt, x0 + w / 2, ty); ctx.restore(); }
+      if (q && x.o) { const txt = q[1 + x.o[k]], fs = Math.round(clamp(15 / cam.z, 34, 64)); ctx.save(); ctx.font = `800 ${fs}px "Baloo 2",sans-serif`; ctx.textAlign = 'center'; ctx.lineWidth = 6; ctx.strokeStyle = 'rgba(0,0,0,.35)'; const ty = y0 + (sy < 0 ? 26 + fs : h - fs * 0.8); ctx.strokeText(txt, x0 + w / 2, ty); ctx.fillStyle = '#fff'; ctx.fillText(txt, x0 + w / 2, ty); ctx.restore(); }
     }
     return;
   }
@@ -1380,7 +1404,7 @@ function atualizarHUD(V, dt) {
   }
   // dica de ação / botão de toque
   const acaoTxt = pr && emShow && euVivo ? pr.acao : V.f === 'lobby' ? 'Pular' : '';
-  $('#dica').innerHTML = euVivo && acaoTxt ? `<b>WASD</b> andar · <b>Espaço</b> ${acaoTxt.toLowerCase()}` : euVivo ? '<b>WASD</b> ou setas para andar' : '';
+  $('#dica').innerHTML = TOQUE ? '' : euVivo && acaoTxt ? `<b>WASD</b> andar · <b>Espaço</b> ${acaoTxt.toLowerCase()}` : euVivo ? '<b>WASD</b> ou setas para andar' : '';
   $('#bt-acao').textContent = acaoTxt || (euVivo ? '—' : '👁'); $('#bt-acao').classList.toggle('off', !acaoTxt && euVivo);
   // eliminado / espiando
   const morto = !euVivo && emShow;
