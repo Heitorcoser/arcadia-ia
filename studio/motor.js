@@ -446,6 +446,9 @@
 
     /* ---------------- Jogador e personagem ---------------- */
     let jogador = null, personagem = null, humanoide = null, raiz = null;
+    // avatar do jogador (criador de personagem do Studio): corpo com juntas e animações
+    const AV = N.avatar ? N.avatar.normalizar(opcoes.avatar || null) : null;
+    let avatarObj = null, animAv = null;
     const corpo = {}; // partes visuais
     const estado = { pos: new THREE.Vector3(0, 5, 0), vel: new THREE.Vector3(), chao: false, plataforma: null, yaw: 0, morto: false, animT: 0, pulando: false };
     const DIM = { w: 2, h: 5, d: 1.4 };
@@ -459,10 +462,11 @@
       personagem = new Inst('Model', jogador.Name, {}); jogador.personagem = personagem;
       const limb = (nome, tam, cor) => { const l = new Inst('__Limb', nome, { Position: [0, 0, 0], Size: tam, Orientation: [0, 0, 0], Color: cor, Material: 'SmoothPlastic', Transparency: 0, Anchored: true, CanCollide: false, Shape: 'Block', CastShadow: true }); l.pai = personagem; personagem.filhos.push(l); return l; };
       raiz = limb('HumanoidRootPart', [2, 2, 1], '#ffffff'); raiz.props.Transparency = 1;
-      corpo.cabeca = limb('Head', [1.2, 1.2, 1.2], '#ffcf9e');
-      corpo.tronco = limb('Torso', [2, 2, 1], opcoes.corCamisa || '#3b82f6');
-      corpo.be = limb('Left Arm', [1, 2, 1], '#ffcf9e'); corpo.bd = limb('Right Arm', [1, 2, 1], '#ffcf9e');
-      corpo.pe = limb('Left Leg', [1, 2, 1], opcoes.corCalca || '#1e3a8a'); corpo.pd = limb('Right Leg', [1, 2, 1], opcoes.corCalca || '#1e3a8a');
+      const pele = AV ? AV.pele : '#ffcf9e', camisa = AV ? AV.camisa : (opcoes.corCamisa || '#3b82f6'), calca = AV ? AV.calca : (opcoes.corCalca || '#1e3a8a');
+      corpo.cabeca = limb('Head', [1.2, 1.2, 1.2], pele);
+      corpo.tronco = limb('Torso', [2, 2, 1], camisa);
+      corpo.be = limb('Left Arm', [1, 2, 1], pele); corpo.bd = limb('Right Arm', [1, 2, 1], pele);
+      corpo.pe = limb('Left Leg', [1, 2, 1], calca); corpo.pd = limb('Right Leg', [1, 2, 1], calca);
       humanoide = new Inst('Humanoid', 'Humanoid', { Health: 100, MaxHealth: 100, WalkSpeed: players.props.CharacterWalkSpeed ?? 16, JumpPower: players.props.CharacterJumpPower ?? 50 });
       humanoide.pai = personagem; personagem.filhos.push(humanoide);
       personagem.pai = workspace; workspace.filhos.push(personagem);
@@ -470,7 +474,9 @@
       // rosto
       const cab = malhas.get(corpo.cabeca); const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#222'; g.fillRect(18, 22, 7, 10); g.fillRect(39, 22, 7, 10); g.lineWidth = 4; g.strokeStyle = '#222'; g.beginPath(); g.arc(32, 36, 12, 0.2, Math.PI - 0.2); g.stroke();
       const rosto = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true })); rosto.position.z = -0.51; rosto.rotation.y = Math.PI; cab.add(rosto);
-      estado.morto = false; estado.vel.set(0, 0, 0);
+      if (avatarObj) { cena.remove(avatarObj.grupo); avatarObj.dispose(); avatarObj = null; }
+      if (AV) { avatarObj = N.avatar.construir(THREE, AV); cena.add(avatarObj.grupo); animAv = N.avatar.animador(AV); animAv.definir('parado'); }
+      estado.morto = false; estado.vel.set(0, 0, 0); estado.emote = false;
       posicionarNoSpawn();
       jogador.sinal('CharacterAdded').Fire(personagem.p);
       personagem.ff = true; agendar(2, () => { if (personagem) personagem.ff = false; });
@@ -485,6 +491,8 @@
     function morrer(h) {
       if (h !== humanoide || estado.morto) return;
       estado.morto = true; h.sinal('Died').Fire(); som('lose');
+      if (avatarObj) avatarObj.grupo.visible = false; // as partes "de bloco" (com as cores do avatar) se desmontam
+      for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const m = malhas.get(corpo[k]); if (m) m.visible = true; }
       for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const l = corpo[k]; l.vel = [(Math.random() - 0.5) * 30, 15 + Math.random() * 20, (Math.random() - 0.5) * 30]; l.rotVel = [(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10]; }
       agendar(players.props.RespawnTime ?? 3, renascer);
     }
@@ -872,7 +880,16 @@ end
       [x, z] = off(-0.5, 0); set(corpo.pe, x, p.y + 1, z, -s, yaw);
       [x, z] = off(0.5, 0); set(corpo.pd, x, p.y + 1, z, s, yaw);
       const vis = distCam > 1.5;
-      for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const m = malhas.get(corpo[k]); if (m) m.visible = vis; }
+      for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const m = malhas.get(corpo[k]); if (m) m.visible = vis && !avatarObj; }
+      if (avatarObj) {
+        const vh = Math.hypot(estado.vel.x, estado.vel.z);
+        if (teclas.G && !estado.gAnt) estado.emote = !estado.emote; estado.gAnt = !!teclas.G;
+        if (vh > 1 || !estado.chao) estado.emote = false;
+        animAv.definir(!estado.chao ? 'pular' : vh > 1 ? 'andar' : estado.emote ? 'emote' : 'parado');
+        const pose = animAv.passo(dt, vh > 1 && estado.chao ? Math.max(0.6, vh / 16) : 1);
+        avatarObj.grupo.position.set(p.x, p.y, p.z); avatarObj.grupo.rotation.y = yaw;
+        avatarObj.aplicar(pose); avatarObj.grupo.visible = vis;
+      }
     }
     const alvoCam = new THREE.Vector3();
     function loop(agora) {

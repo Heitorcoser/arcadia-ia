@@ -155,6 +155,12 @@
   .modal .m-cab{display:flex;align-items:center;gap:10px;padding:16px 20px;border-bottom:1px solid var(--linha)}
   .modal .m-cab button{margin-left:auto;background:none;border:0;font-size:18px;color:var(--fraco)}
   .modal .m-corpo{padding:16px 20px}
+  .mk-abas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px} .mk-abas .btn.on{border-color:var(--azul);background:var(--painel2)}
+  .mk-grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px}
+  .mk-card{background:var(--painel2);border:1px solid var(--linha2);border-radius:10px;overflow:hidden;display:flex;flex-direction:column}
+  .mk-card .cp{aspect-ratio:16/9;background:#0d0f16;display:grid;place-items:center;font-size:34px} .mk-card .cp img{width:100%;height:100%;object-fit:cover}
+  .mk-card .tx{padding:8px 10px;flex:1;font-size:12.5px;color:var(--fraco)} .mk-card .tx b{display:block;color:var(--texto,#fff);font-size:13.5px;margin-bottom:2px}
+  .mk-card .ac{display:flex;gap:6px;padding:0 10px 10px} .mk-card .ac .btn{flex:1;height:30px}
   .modelos{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px}
   .modelo{background:var(--painel2);border:1px solid var(--linha);border-radius:10px;padding:14px 10px;text-align:center;line-height:1.35}
   .modelo span{font-size:30px;display:block;margin-bottom:6px}
@@ -242,6 +248,8 @@
 <input type="file" id="in-pasta" webkitdirectory hidden>
 
 <script src="nucleo.js"></script>
+<script src="avatar.js"></script>
+<script src="personagem.js"></script>
 <script src="studio.js"></script>
 <script src="paineis.js"></script>
 <script src="../conta.js?v=1.2.0"></script>
