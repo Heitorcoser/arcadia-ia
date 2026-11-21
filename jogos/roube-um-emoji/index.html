@@ -299,7 +299,7 @@ function baseLivre() { const usadas = new Set(G.jog.map(p => p.base)); for (let 
 function novoJogador({ nome, rosto, bot, base }) {
   const [x, z] = nascePos(base);
   const p = { id: idLivre(), nome, rosto, bot: !!bot, skill: bot ? rnd(0.35, 0.95) : 1, base, cor: CORES[base], x, z, vx: 0, vz: 0, kx: 0, kz: 0, rot: base < 4 ? 0 : Math.PI,
-    input: { mx: 0, mz: 0, e: false, s: 0 }, eAnt: false, sAnt: 0, money: 100, carry: null, stun: 0, slapCd: 0, slapT: 0, colT: 0, laserT: 0, hold: null, acao: null,
+    input: { mx: 0, mz: 0, e: false, s: 0, ep: 0 }, eAnt: false, sAnt: 0, epAnt: 0, money: 100, carry: null, stun: 0, slapCd: 0, slapT: 0, colT: 0, laserT: 0, hold: null, acao: null,
     ai: { cd: 0, obj: null, holdT: 0, roubarT: rnd(20, 40), travaT: rnd(10, 30) }, milionario: false };
   const B = G.bases[base]; B.dono = p.id; B.lock = 0; B.cofre = 0; B.slots = Array(10).fill(null);
   B.slots[0] = { t: 0, m: 0, e: 0 }; // todo mundo começa com uma Banana Fofoqueira
@@ -394,7 +394,8 @@ function atualizarJogador(p, dt) {
   if (p.input.s !== p.sAnt) { p.sAnt = p.input.s; if (p.stun <= 0 && p.slapCd <= 0) tapa(p); }
   // ação (E): instantânea na borda do aperto, ou segurando por um tempo
   const a = p.stun > 0 ? null : acaoDe(p); p.acao = a;
-  const e = !!p.input.e, borda = e && !p.eAnt; p.eAnt = e;
+  // cada aperto conta (contador ep), então um toque rápido não se perde em aparelho lento ou pela rede
+  const e = !!p.input.e, pulso = p.input.ep !== p.epAnt, borda = (e && !p.eAnt) || pulso; p.eAnt = e; p.epAnt = p.input.ep;
   if (a && a.ok) {
     if (a.tempo) {
       const chave = a.k + ':' + a.b + ':' + a.s;
@@ -626,7 +627,7 @@ function dadosDoCliente(c, d) {
   }
   const info = conns.get(c.peer); if (!info) return;
   const p = G.jog.find(x => x.id === info.pid); if (!p) return;
-  if (d.t === 'i') { p.input.mx = clamp(+d.mx || 0, -1, 1); p.input.mz = clamp(+d.mz || 0, -1, 1); p.input.e = !!d.e; if (typeof d.s === 'number') p.input.s = d.s; }
+  if (d.t === 'i') { p.input.mx = clamp(+d.mx || 0, -1, 1); p.input.mz = clamp(+d.mz || 0, -1, 1); p.input.e = !!d.e; if (typeof d.s === 'number') p.input.s = d.s; if (typeof d.ep === 'number') p.input.ep = d.ep; }
 }
 function saiu(c) {
   const info = conns.get(c.peer); if (!info) return; conns.delete(c.peer);
@@ -1195,11 +1196,11 @@ function atualizarHUD(V, dt) {
    CONTROLES
    ===================================================================== */
 const teclas = {};
-let contTapa = 0, segurandoAcao = false, eAte = 0; // eAte: um toque rápido no E não se perde entre dois ciclos
+let contTapa = 0, contE = 0, segurandoAcao = false; // contE: conta os apertos do E (um toque rápido nunca se perde)
 addEventListener('keydown', e => {
   if (document.activeElement && document.activeElement.tagName === 'INPUT') return;
   teclas[e.code] = true;
-  if (e.code === 'KeyE' && !e.repeat) { eAte = performance.now() + 120; if (modo === 'cliente') enviarAoHost(); }
+  if (e.code === 'KeyE' && !e.repeat) { contE++; if (modo === 'cliente') enviarAoHost(); }
   if ((e.code === 'Space' || e.code === 'KeyF') && !e.repeat) { e.preventDefault(); iniciarAudio(); contTapa++; if (modo === 'cliente') enviarAoHost(); }
   if (e.code === 'Space') e.preventDefault();
 });
@@ -1221,7 +1222,7 @@ const joy = { id: null, x: 0, y: 0, mx: 0, my: 0 }, olhar = { id: null, x: 0, y:
   z.addEventListener('touchstart', e => {
     iniciarAudio();
     for (const t of e.changedTouches) {
-      if (t.target.id === 'bt-acao') { segurandoAcao = true; eAte = performance.now() + 120; $('#bt-acao').classList.add('ativo'); continue; }
+      if (t.target.id === 'bt-acao') { segurandoAcao = true; contE++; $('#bt-acao').classList.add('ativo'); if (modo === 'cliente') enviarAoHost(); continue; }
       if (t.target.id === 'bt-tapa') { contTapa++; $('#bt-tapa').classList.add('ativo'); if (modo === 'cliente') enviarAoHost(); continue; }
       if (joy.id === null && t.clientX < innerWidth * 0.45) { joy.id = t.identifier; joy.x = t.clientX; joy.y = t.clientY; joy.mx = joy.my = 0; const j = $('#joy'); j.style.display = 'block'; j.style.left = joy.x + 'px'; j.style.top = joy.y + 'px'; }
       else if (olhar.id === null) { olhar.id = t.identifier; olhar.x = t.clientX; olhar.y = t.clientY; }
@@ -1250,7 +1251,7 @@ function lerInput() {
   if (joy.id !== null) { ix = joy.mx; iy = -joy.my; }
   const l = Math.hypot(ix, iy); if (l > 1) { ix /= l; iy /= l; }
   const fx = -Math.sin(cam.yaw), fz = -Math.cos(cam.yaw), rx = Math.cos(cam.yaw), rz = -Math.sin(cam.yaw);
-  return { mx: rx * ix + fx * iy, mz: rz * ix + fz * iy, e: !!(teclas.KeyE || segurandoAcao || performance.now() < eAte), s: contTapa };
+  return { mx: rx * ix + fx * iy, mz: rz * ix + fz * iy, e: !!(teclas.KeyE || segurandoAcao), s: contTapa, ep: contE };
 }
 function enviarAoHost() { if (conn && conn.open) try { conn.send({ t: 'i', ...lerInput() }); } catch (e) {} }
 
@@ -1363,5 +1364,7 @@ if (PARAM.get('auto') === '1') { $('#bots').value = PARAM.get('bots') || '5'; co
 // ganchos para testes automáticos
 window.__roube = { G, STATS, get meuId() { return meuId; }, cam, simular, executar, acaoDe };
 </script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.0.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.0.0";</script>
 </body>
 </html>

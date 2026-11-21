@@ -152,11 +152,100 @@ const CAPA_DETETIVE = `
   <text x="320" y="336" font-size="30" text-anchor="middle" fill="#f5e6c4" font-family="Courier New,monospace" font-weight="bold" letter-spacing="8">DETETIVE</text>
 </svg>`;
 
+const CAPA_EMOJI = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="ec" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2f8cff"/><stop offset=".55" stop-color="#9fd8ff"/><stop offset="1" stop-color="#e9f7ff"/></linearGradient>
+    <linearGradient id="et" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#b3123f"/><stop offset=".5" stop-color="#e0245e"/><stop offset="1" stop-color="#b3123f"/></linearGradient>
+    <radialGradient id="eb" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff3c2" stop-opacity=".9"/><stop offset="1" stop-color="#ffc53d" stop-opacity="0"/></radialGradient>
+    <linearGradient id="ez" x1="0" x2="1"><stop offset="0" stop-color="#ff5a5a"/><stop offset=".25" stop-color="#ffc53d"/><stop offset=".5" stop-color="#4ade80"/><stop offset=".75" stop-color="#4dabf7"/><stop offset="1" stop-color="#c084fc"/></linearGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#ec)"/>
+  <rect y="190" width="640" height="170" fill="#62bd55"/>
+  <polygon points="0,214 640,214 640,300 0,300" fill="#f4e8cf"/>
+  <polygon points="0,232 640,232 640,282 0,282" fill="url(#et)"/>
+  <rect y="228" width="640" height="5" fill="#ffc53d"/><rect y="281" width="640" height="5" fill="#ffc53d"/>
+  <g fill="#ffffff" opacity=".14"><polygon points="40,240 70,257 40,274 52,274 82,257 52,240"/><polygon points="200,240 230,257 200,274 212,274 242,257 212,240"/><polygon points="360,240 390,257 360,274 372,274 402,257 372,240"/><polygon points="520,240 550,257 520,274 532,274 562,257 532,240"/></g>
+  <g fill="#8e9aab"><rect x="20" y="176" width="150" height="46" rx="6"/><rect x="470" y="176" width="150" height="46" rx="6"/></g>
+  <g fill="#ff5a5a"><rect x="20" y="172" width="150" height="9" rx="4"/></g><g fill="#4dabf7"><rect x="470" y="172" width="150" height="9" rx="4"/></g>
+  <g stroke="#ff2a3a" stroke-width="3" opacity=".9"><line x1="470" y1="190" x2="620" y2="190"/><line x1="470" y1="202" x2="620" y2="202"/><line x1="470" y1="214" x2="620" y2="214"/></g>
+  <ellipse cx="320" cy="250" rx="70" ry="22" fill="url(#eb)"/>
+  <g font-size="44" text-anchor="middle">
+    <text x="70" y="262">🍌</text><text x="160" y="268">🦖</text><text x="480" y="266">🐉</text><text x="575" y="262">🍕</text>
+  </g>
+  <text x="320" y="268" font-size="70" text-anchor="middle">💎</text>
+  <text x="92" y="214" font-size="30" text-anchor="middle">🌈</text><text x="548" y="214" font-size="30" text-anchor="middle">🗿</text>
+  <text x="250" y="222" font-size="40" text-anchor="middle">😎</text>
+  <text x="285" y="205" font-size="26" text-anchor="middle">🫳</text>
+  <text x="400" y="222" font-size="40" text-anchor="middle">🤠</text>
+  <text x="372" y="205" font-size="26" text-anchor="middle">🖐️</text>
+  <g font-family="Arial Black,Impact,sans-serif" font-weight="900" text-anchor="middle" transform="rotate(-3 320 130)">
+    <text x="320" y="140" font-size="54" fill="#8a2c0d">ROUBE UM EMOJI</text>
+    <text x="320" y="135" font-size="54" fill="#e8590c">ROUBE UM EMOJI</text>
+    <text x="320" y="131" font-size="54" fill="#fff3c2">ROUBE UM EMOJI</text>
+  </g>
+  <rect x="215" y="150" width="210" height="24" rx="12" fill="url(#ez)"/>
+  <text x="320" y="167" font-size="16" text-anchor="middle" fill="#1b1b2f" font-family="Arial,sans-serif" font-weight="bold">COLECIONE · LUCRE · ROUBE</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.2.0";
+window.ARCADIA_VERSAO = "1.3.0";
 
 window.JOGOS = [
+  {
+    id: "roube-um-emoji",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Lançamento: desfile de emojis, bases com cofre e trava de laser, roubos, tapas, bots e salas online.",
+    nome: "Roube um Emoji",
+    genero: "Tycoon",
+    subgenero: "Coleção e roubo",
+    corGenero: "#ffc53d",
+    corDestaque: "#ff5fa2",
+    tags: ["Multijogador online", "Até 8 jogadores", "Bots", "3D", "Coleção", "Roubo", "Progresso salvo"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T18:30:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Sem fim (progresso salvo)",
+    classificacao: "Livre",
+    finais: 1,
+    caminho: "jogos/roube-um-emoji/index.html",
+    capa: CAPA_EMOJI,
+    sinopse:
+      "Os emojis desfilam num tapete vermelho. Compre os que puder, leve para a sua base, junte dinheiro a cada segundo e roube os mais raros das bases dos rivais, antes que eles roubem os seus.",
+    descricao: [
+      "Roube um Emoji é um tycoon 3D de coleção e roubo para até 8 bases, entre pessoas e bots. No meio do mapa, um tapete vermelho traz um desfile sem fim de emojis: da Banana Fofoqueira de $25 ao Moai Misterioso de $25 milhões. Chegue perto de um, aperte E e ele anda sozinho até um pedestal da sua base.",
+      "Cada emoji rende dinheiro por segundo, que se acumula no cofre dourado da base. Pise no cofre para coletar e compre emojis cada vez mais caros. São 30 emojis em 6 raridades (Comum, Raro, Épico, Lendário, Mítico e Secreto) e mutações de Ouro, Diamante e Arco-íris que multiplicam preço e renda. De vez em quando cai uma Chuva de Sorte e os raros aparecem 4 vezes mais.",
+      "A base só tem 10 pedestais, então o atalho é roubar: entre na base de um rival, segure E num emoji e corra para casa com ele. Quem leva um tapa larga o roubo na hora, e o emoji volta para o pedestal. Para se proteger, aperte o botão vermelho da sua base: lasers fecham a entrada por 40 segundos. Junte 1 milhão para virar milionário."
+    ],
+    mecanicas: [
+      "Desfile contínuo de emojis com preço, raridade e renda por segundo em cada etiqueta",
+      "30 emojis em 6 raridades e 3 mutações (Ouro ×2, Diamante ×4, Arco-íris ×8)",
+      "Base com 10 pedestais, cofre que acumula a renda e venda pela metade do preço",
+      "Roubo segurando E: o ladrão carrega o emoji e corre de volta para casa",
+      "Tapa que empurra, deixa tonto e faz o ladrão largar o roubo",
+      "Trava de laser por 40 segundos que impede rivais de entrar na base",
+      "Chuva de Sorte com raros 4× mais frequentes e desfile mais rápido",
+      "Bots com nível próprio que compram, vendem, coletam, roubam, trancam e defendem",
+      "Salas online com código de 4 letras (até 8 bases) e progresso salvo no modo com bots"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar"],
+      ["Arrastar o mouse / roda", "Girar e aproximar a câmera"],
+      ["E", "Comprar e trancar a base"],
+      ["Segurar E", "Roubar (base de rival) ou vender (sua base)"],
+      ["Espaço / clique", "Tapa"],
+      ["🔊", "Som e música / só efeitos / mudo"]
+    ],
+    avisos: "Partidas online usam um servidor público gratuito (PeerJS) só para conectar os jogadores.",
+    tecnologia: [
+      "Three.js r160 (WebGL) com sombras, céu em degradê, partículas e emojis desenhados em texturas",
+      "Multijogador P2P por WebRTC (PeerJS): o anfitrião simula tudo e envia um estado compacto 15 vezes por segundo, e os outros interpolam",
+      "Bots com rotas pelos corredores entre as bases e decisões de compra, roubo e defesa",
+      "Música e efeitos sonoros gerados na hora com Web Audio API"
+    ]
+  },
   {
     id: "detetive",
     versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)

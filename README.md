@@ -10,6 +10,19 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Arena dos Desejos** | Party Game | Sandbox de Palavras | Partidas de 4 min |
 | **GONGO! O Show das 6 Provas** | Party Game | Party Royale (show de eliminação) | Temporadas de 7–9 min |
 | **Detetive** | Dedução Social | Ladrões, detetives e clones | Partidas de 3–5 min |
+| **Roube um Emoji** | Tycoon | Coleção e roubo | Sem fim (progresso salvo) |
+
+### Roube um Emoji
+Um tycoon 3D de coleção e roubo para até 8 bases (pessoas e bots). Os emojis desfilam num tapete vermelho no meio do mapa:
+
+- 🛒 **Compre**: chegue perto de um emoji do desfile e aperte `E`; ele anda sozinho até um pedestal da sua base.
+- 💰 **Lucre**: cada emoji rende $/s, que se acumula no cofre dourado da base. Pise nele para coletar.
+- 🫳 **Roube**: segure `E` num emoji da base de um rival e corra para casa. Um tapa faz o ladrão largar o roubo.
+- 🔒 **Tranque**: o botão vermelho da base liga lasers que barram os rivais por 40 s.
+
+30 emojis em 6 raridades (Comum → Secreto), mutações de Ouro ×2, Diamante ×4 e Arco-íris ×8, e a Chuva de Sorte, quando os raros aparecem 4× mais. Junte $1 milhão para virar milionário. No modo com bots o progresso fica salvo no navegador.
+
+**Controles:** `WASD` andar · arrastar gira a câmera · `E` comprar/trancar · segurar `E` roubar/vender · `Espaço` ou clique tapa · salas online com código de 4 letras (até 8 bases)
 
 ### Detetive
 Noite no Shopping Estrela, com até 30 pessoas ou bots. Cada um recebe um papel secreto:
