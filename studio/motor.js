@@ -450,7 +450,7 @@
     const AV = N.avatar ? N.avatar.normalizar(opcoes.avatar || null) : null;
     let avatarObj = null, animAv = null;
     const corpo = {}; // partes visuais
-    const estado = { pos: new THREE.Vector3(0, 5, 0), vel: new THREE.Vector3(), chao: false, plataforma: null, yaw: 0, morto: false, animT: 0, pulando: false };
+    const estado = { pos: new THREE.Vector3(0, 5, 0), vel: new THREE.Vector3(), chao: false, plataforma: null, yaw: 0, corpoYaw: 0, morto: false, animT: 0, pulando: false };
     const DIM = { w: 2, h: 5, d: 1.4 };
     function criarJogador() {
       jogador = new Inst('Player', opcoes.nomeJogador || 'Jogador', { UserId: 1, DisplayName: opcoes.nomeJogador || 'Jogador' });
@@ -881,7 +881,8 @@ end
         const lim = Math.max(1, l); dx /= lim; dz /= lim;
         const alvoVx = dx * h.WalkSpeed, alvoVz = dz * h.WalkSpeed, k = Math.min(1, dt * (estado.chao ? 18 : 6));
         estado.vel.x += (alvoVx - estado.vel.x) * k; estado.vel.z += (alvoVz - estado.vel.z) * k;
-        if (l > 0.1) { const alvoYaw = Math.atan2(-dx, -dz); let d = alvoYaw - estado.corpoYaw; d = Math.atan2(Math.sin(d), Math.cos(d)); estado.corpoYaw = (estado.corpoYaw || 0) + d * Math.min(1, dt * 12); }
+        // o corpo vira para onde anda (corpoYaw começava sem valor e virava NaN: o boneco ficava sempre de frente)
+        if (l > 0.1) { const atual = Number.isFinite(estado.corpoYaw) ? estado.corpoYaw : 0, alvoYaw = Math.atan2(-dx, -dz); let d = alvoYaw - atual; d = Math.atan2(Math.sin(d), Math.cos(d)); estado.corpoYaw = atual + d * Math.min(1, dt * 12); }
         if ((teclas.Space) && estado.chao && h.JumpPower > 0) { estado.vel.y = h.JumpPower; estado.chao = false; estado.plataforma = null; }
         estado.vel.y -= (workspace.props.Gravity ?? 196.2) * dt;
         // plataformas móveis
