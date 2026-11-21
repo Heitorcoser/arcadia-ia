@@ -23,6 +23,16 @@ O site é estático (GitHub Pages) e não consegue mandar e-mails sozinho. Por i
 - As sessões duram 30 dias. Só o hash do token fica guardado.
 - “Esqueci minha senha” responde igual para e-mails cadastrados e não cadastrados, para não revelar quem tem conta.
 
+## Jeito rápido: um comando (Windows)
+
+No PowerShell do computador:
+
+```powershell
+powershell -ExecutionPolicy Bypass -c "irm https://raw.githubusercontent.com/Heitorcoser/arcadia-ia/main/servidor-contas/publicar.ps1 | iex"
+```
+
+Ele liga a API do Apps Script, entra na conta da empresa, cria o projeto, envia o `Code.gs`, publica como App da Web, pede a permissão de planilha/e-mail e mostra o link `/exec` (já copiado). Rodar de novo atualiza o mesmo projeto, com o mesmo link. Precisa do Node.js (`winget install OpenJS.NodeJS.LTS`).
+
 ## Como publicar (uma vez, uns 5 minutos)
 
 1. Entre no Google com **arcadiaaisupport@gmail.com** e abra <https://script.google.com>.
