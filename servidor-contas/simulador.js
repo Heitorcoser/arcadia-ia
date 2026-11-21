@@ -14,7 +14,18 @@ const fakeSheet = nome => {
   return {
     appendRow: r => dados.push(r.slice()), setFrozenRows() {},
     getDataRange: () => ({ getValues: () => dados.map(r => r.slice()) }),
-    getRange: (l, c) => ({ setValue: v => { dados[l - 1][c - 1] = v; } }),
+    getLastRow: () => { let n = dados.length; while (n > 0 && dados[n - 1].every(v => v === '' || v == null)) n--; return n; },
+    getLastColumn: () => dados.reduce((m, r) => Math.max(m, r.length), 0),
+    getRange: (l, c, nl = 1, nc = 1) => {
+      const cel = (i, j) => { const r = dados[l - 1 + i] || []; const v = r[c - 1 + j]; return v === undefined ? '' : v; };
+      const por = (i, j, v) => { while (dados.length < l + i) dados.push([]); dados[l - 1 + i][c - 1 + j] = v; };
+      return {
+        setValue: v => por(0, 0, v), getValue: () => cel(0, 0),
+        getValues: () => Array.from({ length: nl }, (_, i) => Array.from({ length: nc }, (_, j) => cel(i, j))),
+        setValues: m => m.forEach((r, i) => r.forEach((v, j) => por(i, j, v))),
+        clearContent: () => { for (let i = 0; i < nl; i++) for (let j = 0; j < nc; j++) por(i, j, ''); },
+      };
+    },
     deleteRow: l => dados.splice(l - 1, 1),
   };
 };

@@ -42,6 +42,7 @@
 <iframe id="moldura" sandbox="allow-scripts allow-pointer-lock allow-popups" allow="autoplay; fullscreen; gamepad"></iframe>
 <script src="nucleo.js"></script>
 <script src="motor.js"></script>
+<script src="../conta.js?v=1.2.0"></script>
 <script>
 (function () {
   const params = new URLSearchParams(location.search);
@@ -87,7 +88,11 @@
       if (h) projeto = await ASN.descompactar(h[1]);
       else if (params.get('arquivo')) { const r = await fetch(params.get('arquivo')); if (!r.ok) throw new Error('HTTP ' + r.status); projeto = await r.json(); }
       else if (params.get('local')) { const reg = await ASN.lerDb('publicados', params.get('local')); projeto = reg && reg.projeto; }
-    } catch (e) { $('#msg').textContent = 'Link de jogo inválido ou corrompido.'; return; }
+      else if (params.get('nuvem')) { // publicado para todo mundo por alguém com conta
+        const j = await window.ArcadiaConta.api('baixarConteudo', { id: params.get('nuvem'), contar: true });
+        projeto = JSON.parse(j.dados); projeto.autor = j.conteudo.autor + ' ✓';
+      }
+    } catch (e) { $('#msg').textContent = params.get('nuvem') ? 'Não deu para abrir: ' + e.message : 'Link de jogo inválido ou corrompido.'; $('.roda').style.display = 'none'; return; }
     if (!projeto) { $('#msg').innerHTML = 'Nenhum jogo para abrir.<br><a style="color:#93c5fd" href="index.html">Abrir o Arcádia Studio</a>'; $('.roda').style.display = 'none'; return; }
     document.title = (projeto.nome || 'Jogo') + ' · Arcádia';
     $('#titulo').textContent = projeto.nome || 'Jogo'; $('#autor').textContent = projeto.autor ? 'por ' + projeto.autor : '';

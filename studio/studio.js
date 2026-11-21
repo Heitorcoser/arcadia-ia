@@ -85,8 +85,29 @@
   async function salvar() {
     if (!proj) return; clearTimeout(timerSalvar); proj.atualizado = Date.now();
     for (const [id, cm] of editores) { if (id.startsWith('s:')) { const r = acharNo(id.slice(2)); if (r) r.no.props.Source = cm.getValue(); } }
-    try { await N.salvarDb('projetos', structuredClone(proj)); $('#salvo').textContent = 'Salvo ✓'; try { localStorage.setItem('studio.ultimo', proj.id); } catch (e) {} }
+    try { await N.salvarDb('projetos', structuredClone(proj)); $('#salvo').textContent = 'Salvo ✓'; try { localStorage.setItem('studio.ultimo', proj.id); } catch (e) {} agendarNuvemProj(); }
     catch (e) { $('#salvo').textContent = '⚠ não salvou'; saida('error', 'Erro ao salvar: ' + e.message); }
+  }
+
+  // com conta: o projeto também vai para a nuvem (abre em qualquer aparelho)
+  let timerNuvemProj = 0;
+  const Conta = () => window.ArcadiaConta || null;
+  function agendarNuvemProj() {
+    const C = Conta(); if (!C || !C.logado() || !proj) return;
+    clearTimeout(timerNuvemProj); const p = proj;
+    timerNuvemProj = setTimeout(() => {
+      const valor = JSON.stringify({ ...p, pasta: undefined });
+      C.api('salvarNuvem', { chave: 'studio.' + p.id, valor }).then(() => { if (proj === p) $('#salvo').textContent = 'Salvo ✓ ☁️'; })
+        .catch(e => { if (proj === p) { $('#salvo').textContent = 'Salvo ✓ (sem nuvem)'; saida('warn', '☁️ Não salvou na nuvem: ' + e.message); } });
+    }, 5000);
+  }
+  // capa pequena (o servidor guarda até ~44 mil caracteres)
+  async function miniCapa(url) {
+    if (!url) return '';
+    const img = await new Promise(ok => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ok(null); i.src = url; }); if (!img) return '';
+    const c = document.createElement('canvas'); c.width = 400; c.height = 225; c.getContext('2d').drawImage(img, 0, 0, 400, 225);
+    for (const q of [0.75, 0.6, 0.45, 0.3]) { const d = c.toDataURL('image/jpeg', q); if (d.length < 42000) return d; }
+    return '';
   }
 
   /* ===================== Abrir / criar projetos ===================== */
@@ -940,11 +961,33 @@
           <label class="campo"><span>Nome do jogo</span><input id="pb-nome" value="${esc(proj.nome)}"></label>
           <div class="linha2"><label class="campo"><span>Gênero</span><select id="pb-gen">${GENEROS.map(g => `<option ${g === proj.genero ? 'selected' : ''}>${g}</option>`).join('')}</select></label>
           <label class="campo"><span>Subgênero</span><input id="pb-sub" value="${esc(proj.subgenero || '')}" placeholder="ex: Obby de lava"></label></div>
-          <label class="campo"><span>Seu nome (autor)</span><input id="pb-autor" value="${esc(autor)}" placeholder="Como você quer aparecer"></label>
+          <label class="campo" style="${Conta() && Conta().logado() ? 'display:none' : ''}"><span>Seu nome (autor)</span><input id="pb-autor" value="${esc(autor)}" placeholder="Como você quer aparecer"></label>
           <label class="campo"><span>Descrição</span><textarea id="pb-desc" placeholder="Conte do que se trata o jogo e como jogar">${esc(proj.descricao || '')}</textarea></label>
-          <button class="btn-pri" id="pb-ok" style="height:36px">Publicar na aba “Jogos de Players”</button>
+          ${Conta() && Conta().logado()
+            ? `<button class="btn-pri" id="pb-online" style="height:38px;width:100%">🌍 Publicar para todo mundo · como ${esc(Conta().usuario().nome)} ✓</button>${proj.nuvemId ? '<div style="color:var(--fraco2);font-size:12px;margin-top:4px">Já está no ar: publicar de novo atualiza o mesmo jogo, sem perder curtidas e partidas.</div>' : ''}`
+            : `<div style="background:var(--painel2);border:1px solid var(--linha2);border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.5">🌍 <b>Publicar para todo mundo</b> precisa de uma conta (grátis). Com ela o jogo aparece em “Online” para qualquer pessoa, com o seu nome e o selo ✓.<br><button class="btn" id="pb-entrar" style="margin-top:6px">Entrar ou criar conta</button></div>`}
+          <button class="btn" id="pb-ok" style="height:34px;margin-top:8px">Publicar só neste navegador</button>
           <div id="pb-res" style="margin-top:14px"></div>
         </div></div></div>`);
+    const metaTela = () => ({ nome: $('#pb-nome').value.trim() || proj.nome, genero: $('#pb-gen').value, subgenero: $('#pb-sub').value.trim(), autor: $('#pb-autor').value.trim() || 'Anônimo', descricao: $('#pb-desc').value.trim() });
+    if ($('#pb-entrar')) $('#pb-entrar').onclick = () => { Conta() && Conta().abrir('entrar'); const volta = () => { removeEventListener('arcadia-conta', volta); if (Conta().logado()) telaPublicar(); }; addEventListener('arcadia-conta', volta); };
+    if ($('#pb-online')) $('#pb-online').onclick = async () => {
+      const b = $('#pb-online'), txt = b.textContent; b.disabled = true; b.textContent = '⏳ Enviando para o servidor…';
+      try {
+        const C = Conta(), meta = { ...metaTela(), autor: C.usuario().nome };
+        Object.assign(proj, { nome: meta.nome, genero: meta.genero, subgenero: meta.subgenero, descricao: meta.descricao, autor: meta.autor });
+        const pedido = async id => C.api('publicarConteudo', { tipo: 'jogo', id, nome: meta.nome, descricao: meta.descricao, genero: meta.genero, subgenero: meta.subgenero, capa: await miniCapa(capa), dados: JSON.stringify({ ...proj, pasta: undefined, capa: '' }) });
+        let r; try { r = await pedido(proj.nuvemId || ''); } catch (e) { if (!proj.nuvemId || !/outra pessoa|não existe/.test(e.message)) throw e; r = await pedido(''); } // projeto importado de outra pessoa: vira um novo
+        proj.nuvemId = r.conteudo.id; await publicar({ ...meta, capa });
+        const link = new URL('jogar.html?nuvem=' + encodeURIComponent(proj.nuvemId), location.href).href;
+        $('#pb-res').innerHTML = `<div style="color:var(--verde);font-weight:600;margin-bottom:8px">✓ No ar para todo mundo! Ele aparece em “Jogos de Players → 🌍 Online” na plataforma, com o seu nome ✓.</div>
+          <div class="campo"><span>Link para qualquer pessoa jogar</span><div class="caixa-link"><input readonly value="${esc(link)}"><button class="btn" id="pb-copiar">Copiar</button></div></div>
+          <a class="btn" style="display:inline-flex;align-items:center;text-decoration:none" href="../index.html#players" target="_blank">Ver na plataforma</a>`;
+        $('#pb-copiar').onclick = async () => { try { await navigator.clipboard.writeText(link); toast('🔗 Link copiado'); } catch (e) {} };
+        saida('ok', `🌍 Publicado para todo mundo: ${proj.nome}`);
+      } catch (e) { $('#pb-res').innerHTML = `<div style="color:#fca5a5;font-weight:600">⚠ ${esc(e.message)}</div>`; }
+      finally { b.disabled = false; b.textContent = txt; }
+    };
     $('#pb-ok').onclick = async () => {
       const meta = { nome: $('#pb-nome').value.trim() || proj.nome, genero: $('#pb-gen').value, subgenero: $('#pb-sub').value.trim(), autor: $('#pb-autor').value.trim() || 'Anônimo', descricao: $('#pb-desc').value.trim() };
       localStorage.setItem('studio.autor', meta.autor);
@@ -961,7 +1004,7 @@
     Object.assign(proj, { nome: meta.nome || proj.nome, genero: meta.genero || proj.genero || 'Outro', subgenero: meta.subgenero || '', descricao: meta.descricao || '', autor: meta.autor || proj.autor || 'Anônimo' });
     $('#nome-proj').value = proj.nome; await salvar();
     const capa = meta.capa ?? (ehCena() ? captura() : '');
-    const registro = { id: 'pub-' + proj.id, nome: proj.nome, autor: proj.autor, genero: proj.genero, subgenero: proj.subgenero, descricao: proj.descricao, capa, tipo: proj.tipo, publicadoEm: Date.now(), projeto: JSON.parse(JSON.stringify({ ...proj, pasta: undefined, capa: '' })) };
+    const registro = { id: 'pub-' + proj.id, nuvemId: proj.nuvemId || '', nome: proj.nome, autor: proj.autor, genero: proj.genero, subgenero: proj.subgenero, descricao: proj.descricao, capa, tipo: proj.tipo, publicadoEm: Date.now(), projeto: JSON.parse(JSON.stringify({ ...proj, pasta: undefined, capa: '' })) };
     await N.salvarDb('publicados', registro);
     const link = await gerarLink();
     saida('ok', `🚀 Publicado: ${proj.nome}`);
@@ -986,7 +1029,20 @@
       <div class="recentes">${lista.length ? lista.map(p => `<div class="recente" data-abrir="${p.id}" role="button"><span>${p.tipo === 'cena' ? '🌐' : '📦'}</span><span class="nm">${esc(p.nome)}</span>${p.pasta ? '<span style="color:var(--fraco2);font-size:12px">pasta do PC</span>' : ''}<span class="dt">${new Date(p.atualizado).toLocaleString('pt-BR')}</span><button data-apagar="${p.id}" title="Apagar">🗑️</button></div>`).join('') : '<div style="color:var(--fraco2)">Nenhum projeto ainda.</div>'}</div>
     </div>`);
     const caixa = $('#modal-caixa');
+    const C = Conta();
+    if (C && C.logado()) {
+      const rec = caixa.querySelector('.recentes'), div = document.createElement('div'); div.id = 'recentes-nuvem'; rec.after(div);
+      C.api('listarNuvem').then(r => {
+        const locais = new Set(lista.map(p => 'studio.' + p.id));
+        const so = r.dados.filter(d => d.chave.startsWith('studio.') && !locais.has(d.chave));
+        if (!so.length || !document.body.contains(div)) return;
+        div.innerHTML = `<div class="m-sec" style="margin-top:14px">☁️ Na sua conta (de outros aparelhos)</div><div class="recentes">${so.map(d => `<div class="recente" data-nuvem="${esc(d.chave)}" role="button"><span>☁️</span><span class="nm">${esc(d.chave.slice(7))}</span><span class="dt">${new Date(d.atualizadoEm).toLocaleString('pt-BR')}</span></div>`).join('')}</div>`;
+        div.querySelectorAll('[data-nuvem]').forEach(el => C.api('lerNuvem', { chave: el.dataset.nuvem }).then(x => { try { const p = JSON.parse(x.valor); el.querySelector('.nm').textContent = p.nome; el._p = p; } catch (e) {} }).catch(() => {}));
+      }).catch(() => {});
+    }
     caixa.onclick = async e => {
+      const nv = e.target.closest('[data-nuvem]');
+      if (nv) { let p = nv._p; if (!p) { try { p = JSON.parse((await C.api('lerNuvem', { chave: nv.dataset.nuvem })).valor); } catch (er) { return toast('Não deu para baixar: ' + er.message); } } await N.salvarDb('projetos', p); abrirProjeto(p); return; }
       const b = e.target.closest('button,[data-abrir]'); if (!b) return;
       if (b.dataset.apagar) { e.stopPropagation(); if (confirm('Apagar este projeto para sempre?')) { await N.apagarDb('projetos', b.dataset.apagar); telaInicial(); } return; }
       if (b.dataset.novoCena) { const m = MODELOS_CENA.find(x => x.k === b.dataset.novoCena); criarProjeto('cena', m.k === 'obby' ? 'Meu Obby' : 'Meu jogo 3D', m.k); }

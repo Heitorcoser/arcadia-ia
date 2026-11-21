@@ -97,12 +97,21 @@
   .ct-acessos div b{font-weight:600} .ct-acessos div small{color:var(--muted,#9696ab);display:block}
   .ct-girando{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:ctGira .8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes ctGira{to{transform:rotate(360deg)}}
+  .ct-verif{color:#22d3ee;font-weight:800;margin-left:3px}
+  .ct-selo{display:inline-flex;align-items:center;gap:5px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#67e8f9;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
+  .ct-vant{display:grid;gap:6px;font-size:13.5px;line-height:1.4} .ct-vant div{display:flex;gap:8px}
+  .ct-pubs{display:grid;gap:6px;max-height:220px;overflow:auto}
+  .ct-pub{display:flex;align-items:center;gap:10px;font-size:13px;background:var(--bg,#0a0a0f);border:1px solid var(--line,#262634);border-radius:10px;padding:6px 8px}
+  .ct-pub img,.ct-pub .ph{width:54px;height:32px;border-radius:6px;object-fit:cover;background:var(--surface,#13131b);display:grid;place-items:center;flex-shrink:0}
+  .ct-pub b{display:block;font-size:13.5px} .ct-pub small{color:var(--muted,#9696ab)} .ct-pub span.tx{flex:1;min-width:0}
+  .ct-pub button{border:0;background:none;color:var(--muted,#9696ab);cursor:pointer;font-size:15px}
+  #conta-lugar .ct-btn{height:28px;font-size:12.5px;border-radius:7px} #conta-lugar .ct-btn .av{width:20px;height:20px;font-size:11px;border-radius:6px}
   @media (max-width:520px){ .ct-btn span.nm{display:none} .ct-codigo input{width:40px;height:50px} }`;
 
   function montar() {
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     const b = document.createElement('button'); b.className = 'ct-btn'; b.id = 'ct-btn'; b.type = 'button';
-    const lugar = document.querySelector('header .top'); if (lugar) lugar.appendChild(b);
+    const lugar = document.querySelector('header .top') || document.getElementById('conta-lugar'); if (lugar) lugar.appendChild(b);
     b.addEventListener('click', () => ler() ? abrir('minha') : abrir('entrar'));
     const f = document.createElement('div'); f.className = 'ct-fundo'; f.id = 'ct-fundo';
     f.innerHTML = '<div class="ct-caixa" id="ct-caixa" role="dialog" aria-modal="true"></div>';
@@ -114,7 +123,7 @@
   }
   function atualizarBotao() {
     const b = $('#ct-btn'); if (!b) return; const c = ler();
-    if (c && c.usuario) { b.classList.remove('sem'); b.innerHTML = `<span class="av">${esc((c.usuario.nome || '?')[0].toUpperCase())}</span><span class="nm">${esc(c.usuario.nome)}</span>`; b.title = 'Minha conta'; }
+    if (c && c.usuario) { b.classList.remove('sem'); b.innerHTML = `<span class="av">${esc((c.usuario.nome || '?')[0].toUpperCase())}</span><span class="nm">${esc(c.usuario.nome)}<span class="ct-verif" title="Conta verificada">✓</span></span>`; b.title = 'Minha conta (verificada)'; }
     else { b.classList.add('sem'); b.innerHTML = '<span class="av">👤</span><span class="nm">Entrar</span>'; b.title = 'Entrar ou criar conta'; }
     window.dispatchEvent(new CustomEvent('arcadia-conta', { detail: c && c.usuario }));
   }
@@ -150,7 +159,7 @@
       }); };
     }
     else if (tela === 'criar') {
-      c.innerHTML = `${x}<h2>Criar conta</h2><p class="sub">É grátis. Vamos mandar um código para confirmar seu e-mail.</p>${semServidor}
+      c.innerHTML = `${x}<h2>Criar conta</h2><p class="sub">É grátis. Vamos mandar um código para confirmar seu e-mail.</p>${semServidor}<div class="ct-bloco">${VANTAGENS}</div>
         <form id="ct-form" autocomplete="on"><label class="ct-campo"><span>Seu nome nos jogos</span><input id="ct-nome" maxlength="24" autocomplete="nickname" required></label>
         <label class="ct-campo"><span>E-mail</span><input id="ct-email" type="email" autocomplete="email" required></label>
         ${campoSenha('ct-senha', 'Senha (mínimo 8 caracteres)', 'new-password')}<div class="ct-forca" style="margin:-6px 0 12px"><i id="ct-forca"></i></div>
@@ -207,7 +216,9 @@
     else if (tela === 'minha') {
       const conta = ler(); if (!conta) return render('entrar');
       const u = conta.usuario || {};
-      c.innerHTML = `${x}<h2>Minha conta</h2><p class="sub">${esc(u.nome)} · ${esc(u.email)}</p>
+      c.innerHTML = `${x}<h2>Minha conta</h2><p class="sub">${esc(u.nome)} · ${esc(u.email)}<br><span class="ct-selo">✓ Conta verificada${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span></p>
+        <div class="ct-bloco"><h4>🎮 Suas publicações</h4><div class="ct-pubs" id="ct-pubs"><span style="color:var(--muted,#9696ab);font-size:13px"><span class="ct-girando"></span>Carregando…</span></div>
+          <div style="margin-top:8px;font-size:12.5px;color:var(--muted,#9696ab)" id="ct-nuvem"></div></div>
         <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">🛡️ Verificação em duas etapas</b><br><small style="color:var(--muted,#9696ab)">Pede um código por e-mail em todo acesso</small></span><button class="ct-chave ${u.doisFatores ? 'on' : ''}" id="ct-chave" aria-label="Ligar ou desligar"></button></div>
           <div id="ct-confirma" style="display:none;margin-top:12px">${campoSenha('ct-senha', 'Digite sua senha para confirmar', 'current-password')}<button class="ct-sec" id="ct-salvar2f" style="width:100%"></button></div></div>
         <div class="ct-bloco"><h4>Seu nome nos jogos</h4><div class="ct-linha"><input id="ct-nome" class="ct-campo" style="margin:0;flex:1;height:40px;border-radius:10px;border:1px solid var(--line2,#33334a);background:var(--bg,#0a0a0f);color:inherit;padding:0 12px;font:15px Inter,sans-serif" maxlength="24" value="${esc(u.nome)}"><button class="ct-sec" id="ct-salvar-nome">Salvar</button></div></div>
@@ -222,6 +233,7 @@
         lista.innerHTML = (j.acessos.length ? j.acessos.map(a => `<div><span>${icone[a.resultado] || '•'}</span><span><b>${new Date(a.data).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })}</b> · ${esc(a.resultado === 'sucesso' ? a.metodo : a.resultado)}<small>${esc([a.dispositivo.navegador, a.dispositivo.sistema, a.dispositivo.tipo].filter(Boolean).join(' · ') || 'aparelho desconhecido')}</small></span></div>`).join('') : '<span style="color:var(--muted,#9696ab);font-size:13px">Nenhum acesso ainda.</span>')
           + `<div style="color:var(--muted,#9696ab);margin-top:4px">${j.sessoesAbertas} aparelho${j.sessoesAbertas === 1 ? '' : 's'} com a conta aberta agora.</div>`;
       }).catch(e => { const l = $('#ct-acessos'); if (l) l.textContent = e.message; if (!ler()) render('entrar'); });
+      carregarPublicacoes(conta);
       let querLigar = !u.doisFatores;
       $('#ct-chave').onclick = () => { querLigar = !$('#ct-chave').classList.contains('on'); $('#ct-confirma').style.display = 'block'; $('#ct-salvar2f').textContent = querLigar ? 'Ligar verificação em duas etapas' : 'Desligar verificação em duas etapas'; ligarVerSenha(); $('#ct-senha').focus(); };
       $('#ct-salvar2f').onclick = () => ocupado($('#ct-salvar2f'), async () => {
@@ -234,7 +246,8 @@
     }
     else if (tela === 'pronto') {
       const u = (ler() || {}).usuario || {};
-      c.innerHTML = `${x}<div class="ct-icone">🎉</div><h2>Oi, ${esc(u.nome)}!</h2><p class="sub">Você entrou. Seu nome já vai aparecer preenchido nos jogos. Sempre que alguém entrar na sua conta, você recebe um aviso no e-mail com os detalhes.</p><button class="ct-pri" id="ct-ok">Bora jogar</button>`;
+      c.innerHTML = `${x}<div class="ct-icone">🎉</div><h2>Oi, ${esc(u.nome)}!</h2><p class="sub">Você entrou. Seu nome já vai aparecer preenchido nos jogos. Sempre que alguém entrar na sua conta, você recebe um aviso no e-mail com os detalhes.</p>
+        <div class="ct-bloco"><h4>Com a sua conta você pode</h4>${VANTAGENS}</div><button class="ct-pri" id="ct-ok">Bora jogar</button>`;
       $('#ct-ok').onclick = fechar;
     }
     c.querySelector('.ct-x').onclick = fechar;
@@ -242,8 +255,21 @@
     ligarVerSenha();
     const pri = c.querySelector('input:not([type=checkbox])'); if (pri && tela !== 'codigo' && tela !== 'minha') setTimeout(() => pri.focus(), 50);
   }
+  const VANTAGENS = `<div class="ct-vant"><div>🌍<span><b>Publicar jogos para todo mundo</b> direto do Studio</span></div><div>✓<span><b>Selo de conta verificada</b> no seu nome e nos seus jogos</span></div><div>❤️<span><b>Curtir</b> os jogos da comunidade</span></div><div>☁️<span><b>Projetos, notas e progresso salvos na nuvem</b>, em qualquer aparelho</span></div></div>`;
+  async function carregarPublicacoes(conta) {
+    try {
+      const [p, n] = await Promise.all([api('meusConteudos', { token: conta.token }), api('listarNuvem', { token: conta.token }).catch(() => ({ dados: [] }))]);
+      const el = $('#ct-pubs'); if (!el) return;
+      el.innerHTML = p.conteudos.length ? p.conteudos.map(j => `<div class="ct-pub">${j.capa ? `<img src="${esc(j.capa)}" alt="">` : '<span class="ph">🎮</span>'}<span class="tx"><b>${esc(j.nome)}</b><small>▶ ${j.jogadas} partidas · ❤ ${j.curtidas}</small></span><button data-apagar-pub="${esc(j.id)}" title="Tirar do ar">🗑</button></div>`).join('')
+        : '<span style="color:var(--muted,#9696ab);font-size:13px">Nada publicado ainda. No Studio, use <b>Publicar → Para todo mundo</b>.</span>';
+      el.querySelectorAll('[data-apagar-pub]').forEach(b => b.onclick = async () => { if (!confirm('Tirar esta publicação do ar para todo mundo?')) return; b.disabled = true; try { await api('apagarConteudo', { token: conta.token, id: b.dataset.apagarPub }); carregarPublicacoes(conta); window.dispatchEvent(new CustomEvent('arcadia-publicacoes')); } catch (e) { erroTela(e.message); } });
+      const nv = $('#ct-nuvem'); if (nv) nv.textContent = n.dados.length ? `☁️ ${n.dados.length} ${n.dados.length === 1 ? 'item salvo' : 'itens salvos'} na nuvem (projetos, notas e progresso).` : '☁️ Seus projetos, notas e progresso vão ser salvos na nuvem automaticamente.';
+    } catch (e) { const el = $('#ct-pubs'); if (el) el.textContent = e.message; }
+  }
   function concluirLogin(j) { gravar({ token: j.token, usuario: j.usuario }); pendente = null; atualizarBotao(); render('pronto'); }
 
-  window.ArcadiaConta = { usuario: () => (ler() || {}).usuario || null, abrir, dispositivo };
+  // usado pela plataforma, Studio e jogos: chama o servidor já com o token da conta (se houver)
+  const apiConta = (acao, dados = {}) => { const c = ler(); return api(acao, c ? { token: c.token, ...dados } : dados); };
+  window.ArcadiaConta = { usuario: () => (ler() || {}).usuario || null, logado: () => !!ler(), abrir, dispositivo, api: apiConta, servidorLigado: () => !!servidor() };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
 })();
