@@ -23,6 +23,8 @@ Noite no Shopping Estrela, com até 30 pessoas ou bots. Cada um recebe um papel 
 **Controles:** `WASD` andar · segurar `Espaço` ação · `Q` habilidade · salas online com código de 4 letras (até 30 pessoas)
 
 ## Contas
+Quem tem conta pode **publicar jogos do Studio para todo mundo** (aba Jogos de Players → 🌍 Online, com o selo ✓ de conta verificada), **curtir** jogos da comunidade e ter **projetos do Studio e notas salvos na nuvem**, abrindo em qualquer aparelho. Tudo fica no mesmo servidor do Apps Script (abas Conteudos, Curtidas, Nuvem e Blobs da planilha).
+
 O botão **Entrar** da plataforma cria uma conta com verificação por e-mail e, se a pessoa quiser, verificação em duas etapas. Toda entrada na conta gera um aviso detalhado no e-mail do dono. O servidor roda em Google Apps Script na conta da empresa; veja [servidor-contas/LEIAME.md](servidor-contas/LEIAME.md).
 
 O selo **Novo** de cada jogo some sozinho 2 dias depois do lançamento (campo `lancadoEm` em `jogos.js`).

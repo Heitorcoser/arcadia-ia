@@ -176,6 +176,10 @@
   .badge.autor{left:auto;right:12px;background:rgba(10,10,15,.8);color:#d6d6e2;text-transform:none;letter-spacing:0;font-weight:600}
   .badge.local{left:12px;top:auto;bottom:12px;background:rgba(139,92,246,.9);color:#fff}
   .card-foot .acoes-p{display:flex;gap:6px}
+  .badge.online{left:12px;top:auto;bottom:12px;background:rgba(34,211,238,.92);color:#04212a}
+  .verif{color:#22d3ee;font-weight:800}
+  .btn.curtir{min-width:52px} .btn.curtir.on{color:#fb7185;border-color:#fb718566}
+  .players-intro .aviso-conta{display:inline-block;margin-top:6px;color:#67e8f9}
   .btn.icone{width:36px;padding:0;justify-content:center}
   @media (max-width:520px){ .criar span{display:none} }
 
@@ -261,12 +265,13 @@
       <h2>Jogos de Players</h2>
       <div class="filters" id="filtros-p">
         <button class="filter active" data-fonte="todos">Todos</button>
+        <button class="filter" data-fonte="online">🌍 Online</button>
         <button class="filter" data-fonte="comunidade">Comunidade</button>
         <button class="filter" data-fonte="local">Publicados neste navegador</button>
       </div>
       <a class="criar" href="studio/index.html">🛠️ Criar no Studio</a>
     </div>
-    <p class="players-intro">Jogos feitos por pessoas (e pelas IAs delas) no <a href="studio/index.html">Arcádia Studio</a>. Os da <b>Comunidade</b> estão no repositório e aparecem para todo mundo; os que você publica no Studio aparecem aqui na hora, só neste navegador, e podem ser compartilhados por link.</p>
+    <p class="players-intro">Jogos feitos por pessoas (e pelas IAs delas) no <a href="studio/index.html">Arcádia Studio</a>. Os <b>🌍 Online</b> foram publicados por quem tem conta e aparecem para todo mundo, com o selo <span class="verif">✓</span> de conta verificada. Os que você publica sem conta ficam só neste navegador.<br><span class="aviso-conta">Crie uma conta para publicar para todo mundo, curtir jogos e salvar suas notas na nuvem.</span></p>
     <div class="grid" id="grade-p"></div>
   </section>
 </main>
@@ -300,7 +305,7 @@
 /* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
    Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
    estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
-const VERSAO_HTML = "1.1.1";
+const VERSAO_HTML = "1.2.0";
 (function () {
   const carregar = v => {
     const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;
@@ -324,7 +329,7 @@ window.ARCADIA_INICIAR = () => {
   if (/ArcadiaApp|Electron/.test(navigator.userAgent)) document.documentElement.classList.add("em-app");
   const LS_AV = "arcadia.avaliacoes.v1", LS_ST = "arcadia.stats.v1";
   const ler = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } };
-  const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+  const gravar = (k, v, semNuvem) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} if (!semNuvem && typeof agendarNuvem === "function") agendarNuvem(); };
   let avaliacoes = ler(LS_AV), stats = ler(LS_ST);
   let filtro = "Todos", busca = "", ordem = "recentes", jogoAberto = null, inicioSessao = 0;
 
@@ -609,7 +614,8 @@ window.ARCADIA_INICIAR = () => {
 
   // ---------- jogos de players (Studio) ----------
   // "comunidade": comunidade/index.json no repositório · "local": IndexedDB que o Studio usa ao publicar
-  let fonteP = "todos", comunidade = [], locais = [];
+  let fonteP = "todos", comunidade = [], locais = [], online = [];
+  const Conta = () => window.ArcadiaConta || null;
   const lerLocais = () => new Promise(ok => {
     try {
       const r = indexedDB.open("arcadia-studio", 1);
@@ -626,24 +632,25 @@ window.ARCADIA_INICIAR = () => {
     return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
   }
   function jogosP() {
+    const o = online.map(j => ({ ...j, fonte: "online", chave: "o:" + j.id, capaUrl: j.capa || "", verificado: true, publicadoEm: j.criadoEm, data: new Date(j.atualizadoEm || j.criadoEm).toISOString().slice(0, 10) }));
     const c = comunidade.map(j => ({ ...j, fonte: "comunidade", chave: "c:" + j.id, capaUrl: j.capa ? "comunidade/" + j.capa : "", data: j.atualizadoEm || j.publicadoEm || "" }));
     const l = locais.map(j => ({ ...j, fonte: "local", chave: "l:" + j.id, capaUrl: j.capa || "", data: j.publicadoEm ? new Date(j.publicadoEm).toISOString().slice(0, 10) : "" }));
-    return [...l, ...c];
+    return [...o, ...l, ...c];
   }
-  const novoP = j => { const t = j.fonte === "local" ? j.publicadoEm : new Date((j.publicadoEm || "") + "T00:00:00-03:00").getTime(); const d = Date.now() - t; return t && d >= 0 && d < NOVO_MS; };
+  const novoP = j => { const t = j.fonte === "local" || j.fonte === "online" ? j.publicadoEm : new Date((j.publicadoEm || "") + "T00:00:00-03:00").getTime(); const d = Date.now() - t; return t && d >= 0 && d < NOVO_MS; };
   // o selo some sozinho, mesmo com a página aberta
   setInterval(() => { renderGrade(); renderGradeP(); }, 60 * 1000);
   const iconeGen = g => ({ "Obby / Parkour": "🧗", "Aventura": "🗺️", "Ação": "⚔️", "Plataforma": "🍄", "Puzzle": "🧩", "Corrida": "🏎️", "Terror": "👻", "Simulador": "🛠️", "Tycoon": "💰", "RPG": "🐉", "Party Game": "🎉", "Esporte": "⚽", "Arcade": "🕹️" }[g] || "🎮");
   function renderGradeP() {
     const q = busca.trim().toLowerCase();
-    const naComunidade = new Set(comunidade.map(c => "pub-" + c.projetoId));
-    const lista = jogosP().filter(j => (fonteP === "todos" ? !(j.fonte === "local" && naComunidade.has(j.id)) : j.fonte === fonteP) && (!q || [j.nome, j.autor, j.genero, j.subgenero, j.descricao].join(" ").toLowerCase().includes(q)));
+    const naComunidade = new Set(comunidade.map(c => "pub-" + c.projetoId)), noAr = new Set(online.map(o => o.id));
+    const lista = jogosP().filter(j => (fonteP === "todos" ? !(j.fonte === "local" && (naComunidade.has(j.id) || noAr.has(j.nuvemId))) : j.fonte === fonteP) && (!q || [j.nome, j.autor, j.genero, j.subgenero, j.descricao].join(" ").toLowerCase().includes(q)));
     let h = lista.map(j => `
       <article class="card de-player" data-jogar-p="${esc(j.chave)}">
         <div class="card-cover">${j.capaUrl ? `<img src="${esc(j.capaUrl)}" alt="Capa de ${esc(j.nome)}" loading="lazy">` : `<span class="ph">${iconeGen(j.genero)}</span>`}
           <span class="badge g" style="background:#8b5cf6">${esc(j.genero || "Outro")}</span>
-          <span class="badge autor">por ${esc(j.autor || "Anônimo")}</span>
-          ${j.fonte === "local" ? '<span class="badge local">Neste navegador</span>' : ""}
+          <span class="badge autor">por ${esc(j.autor || "Anônimo")}${j.verificado ? ' <span class="verif" title="Conta verificada">✓</span>' : ""}</span>
+          ${j.fonte === "local" ? '<span class="badge local">Neste navegador</span>' : j.fonte === "online" ? '<span class="badge online">🌍 Online</span>' : ""}
           ${novoP(j) ? '<span class="badge new" style="top:auto;bottom:12px;right:12px">Novo</span>' : ""}
         </div>
         <div class="card-body">
@@ -652,8 +659,9 @@ window.ARCADIA_INICIAR = () => {
           <div class="rating-row">${estrelasHTML(nota(j.chave), j.chave, 17)}<span class="rating-label">${rotulo(nota(j.chave))}</span></div>
           <p>${esc(j.descricao || "Sem descrição.")}</p>
           <div class="card-foot">
-            <span class="meta"><span>${j.data ? esc(new Date(j.data + "T12:00:00").toLocaleDateString("pt-BR")) : ""}</span></span>
+            <span class="meta"><span>${j.fonte === "online" ? `▶ ${j.jogadas || 0}` : j.data ? esc(new Date(j.data + "T12:00:00").toLocaleDateString("pt-BR")) : ""}</span></span>
             <span class="acoes-p">
+              ${j.fonte === "online" ? `<button class="btn small curtir ${j.curti ? "on" : ""}" data-curtir="${esc(j.id)}" title="${j.curti ? "Descurtir" : "Curtir"}">${j.curti ? "❤️" : "🤍"} ${j.curtidas || 0}</button>` : ""}
               <button class="btn small icone" data-link-p="${esc(j.chave)}" title="Copiar link para compartilhar">🔗</button>
               ${j.fonte === "local" ? `<button class="btn small icone" data-apagar-p="${esc(j.chave)}" title="Tirar da lista deste navegador">🗑</button>` : ""}
               <button class="btn small primary" data-jogar-p="${esc(j.chave)}">Jogar</button>
@@ -670,9 +678,16 @@ window.ARCADIA_INICIAR = () => {
     try { const r = await fetch("comunidade/index.json", { cache: "no-cache" }); const d = r.ok ? await r.json() : []; comunidade = Array.isArray(d) ? d : (d.jogos || []); } catch { comunidade = []; }
     locais = (await lerLocais()).sort((a, b) => (b.publicadoEm || 0) - (a.publicadoEm || 0));
     renderGradeP();
+    await carregarOnline();
   }
+  // jogos publicados por quem tem conta: ficam no servidor e aparecem para todo mundo
+  async function carregarOnline() {
+    const C = Conta(); if (!C || !C.servidorLigado()) return;
+    try { online = (await C.api("listarConteudo", { tipo: "jogo" })).conteudos || []; renderGradeP(); } catch (e) {}
+  }
+  addEventListener("arcadia-publicacoes", carregarOnline);
   const achaP = chave => jogosP().find(j => j.chave === chave);
-  const urlP = j => j.fonte === "comunidade" ? "studio/jogar.html?arquivo=" + encodeURIComponent("../comunidade/" + j.arquivo) : "studio/jogar.html?local=" + encodeURIComponent(j.id);
+  const urlP = j => j.fonte === "online" ? "studio/jogar.html?nuvem=" + encodeURIComponent(j.id) : j.fonte === "comunidade" ? "studio/jogar.html?arquivo=" + encodeURIComponent("../comunidade/" + j.arquivo) : "studio/jogar.html?local=" + encodeURIComponent(j.id);
   function jogarP(chave) {
     const j = achaP(chave); if (!j) return;
     jogoAberto = null;
@@ -690,6 +705,14 @@ window.ARCADIA_INICIAR = () => {
   }
   document.addEventListener("click", async e => {
     if (e.target.closest(".stars")) return;
+    const cu = e.target.closest("[data-curtir]"); if (cu) {
+      e.stopPropagation(); const C = Conta();
+      if (!C || !C.logado()) { toast("❤️ Entre na sua conta para curtir jogos"); C && C.abrir("entrar"); return; }
+      cu.disabled = true;
+      try { const r = await C.api("curtir", { id: cu.dataset.curtir }); const o = online.find(x => x.id === cu.dataset.curtir); if (o) Object.assign(o, { curti: r.curti, curtidas: r.curtidas }); renderGradeP(); }
+      catch (er) { toast(er.message); cu.disabled = false; }
+      return;
+    }
     const lk = e.target.closest("[data-link-p]"); if (lk) { e.stopPropagation(); linkP(lk.dataset.linkP); return; }
     const ap = e.target.closest("[data-apagar-p]"); if (ap) {
       e.stopPropagation(); const j = achaP(ap.dataset.apagarP);
@@ -703,6 +726,25 @@ window.ARCADIA_INICIAR = () => {
   // volta do Studio depois de publicar: atualiza a lista
   addEventListener("focus", () => lerLocais().then(l => { if (l.length !== locais.length || l.some((x, i) => x.publicadoEm !== (locais[i] || {}).publicadoEm)) { locais = l.sort((a, b) => (b.publicadoEm || 0) - (a.publicadoEm || 0)); renderGradeP(); } }));
   carregarP().then(() => { if (location.hash === "#players") $("#players").scrollIntoView(); });
+
+  /* ---------- nuvem: notas e estatísticas acompanham a conta ---------- */
+  var timerNuvem = 0, sincronizando = false; // var: gravar() pode ser chamado antes desta linha
+  function juntar(rem) {
+    const av = rem.avaliacoes || {}, sts = rem.stats || {};
+    for (const [id, r] of Object.entries(av)) { const l = avaliacoes[id]; if (!l || (r.data && (!l.data || r.data > l.data))) avaliacoes[id] = { ...(l || {}), ...r }; }
+    for (const [id, r] of Object.entries(sts)) { const l = st(id); l.jogadas = Math.max(l.jogadas || 0, r.jogadas || 0); l.tempo = Math.max(l.tempo || 0, r.tempo || 0); l.concluido = l.concluido || !!r.concluido; l.finais = [...new Set([...(l.finais || []), ...(r.finais || [])])]; }
+  }
+  async function sincronizar() {
+    const C = Conta(); if (!C || !C.logado() || sincronizando) return; sincronizando = true;
+    try {
+      const r = await C.api("lerNuvem", { chave: "plataforma" });
+      if (r.valor) { juntar(JSON.parse(r.valor)); gravar(LS_AV, avaliacoes, true); gravar(LS_ST, stats, true); renderTudo(); }
+      await C.api("salvarNuvem", { chave: "plataforma", valor: JSON.stringify({ avaliacoes, stats }) });
+    } catch (e) {} finally { sincronizando = false; }
+  }
+  function agendarNuvem() { const C = Conta(); if (!C || !C.logado()) return; clearTimeout(timerNuvem); timerNuvem = setTimeout(() => C.api("salvarNuvem", { chave: "plataforma", valor: JSON.stringify({ avaliacoes, stats }) }).catch(() => {}), 4000); }
+  addEventListener("arcadia-conta", e => { if (e.detail) sincronizar(); carregarOnline(); });
+  setTimeout(sincronizar, 800);
 
   let tt; function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 3200); }
 

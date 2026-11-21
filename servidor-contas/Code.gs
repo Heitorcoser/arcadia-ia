@@ -130,12 +130,13 @@ function criarSessao(conta, disp, metodo) {
   return { token: token, usuario: publico(conta) };
 }
 function contaDoToken(token) {
+  if (!token) throw erro('Entre na sua conta para fazer isso.', { sessao: false });
   var s = achar('Sessoes', 'hashToken', sha256(String(token || '')));
   if (!s || !(s.ativa === true || String(s.ativa) === 'TRUE') || Date.now() > Number(s.expira)) throw erro('Sua sessão terminou. Entre de novo.', { sessao: false });
   var c = achar('Contas', 'email', s.email); if (!c) throw erro('Conta não encontrada.', { sessao: false });
   return { conta: c, sessao: s };
 }
-function publico(c) { return { nome: c.nome, email: c.email, doisFatores: c.doisFatores === true || String(c.doisFatores) === 'TRUE', criadoEm: Number(c.criadoEm) }; }
+function publico(c) { return { id: String(c.id), nome: c.nome, email: c.email, doisFatores: c.doisFatores === true || String(c.doisFatores) === 'TRUE', criadoEm: Number(c.criadoEm) }; }
 function registrarAcesso(email, disp, metodo, resultado) {
   inserir('Acessos', { email: email, data: Date.now(), dispositivo: JSON.stringify(disp), metodo: metodo, resultado: resultado });
 }
@@ -243,6 +244,135 @@ var ACOES = {
   sair: function (r) { try { var x = contaDoToken(r.token); atualizar('Sessoes', x.sessao, { ativa: false }); } catch (e) {} return {}; },
   sairTodos: function (r) { var x = contaDoToken(r.token); var n = encerrarSessoes(x.conta.email, null); return { encerradas: n }; },
 };
+/* ---------------------------- conteúdo da comunidade e nuvem ----------------------------
+   Jogos (e depois personagens, animações e itens) publicados por quem tem conta ficam
+   visíveis para todo mundo. O conteúdo vai para a aba "Blobs" em pedaços de 45 mil
+   caracteres (limite de uma célula); assim não precisa de nenhuma permissão nova. */
+TABELAS.Conteudos = ['id', 'tipo', 'nome', 'descricao', 'genero', 'subgenero', 'autorId', 'autorNome', 'autorEmail', 'capa', 'criadoEm', 'atualizadoEm', 'jogadas', 'curtidas', 'tamanho', 'ativo'];
+TABELAS.Curtidas = ['id', 'email', 'data'];
+TABELAS.Nuvem = ['email', 'chave', 'atualizadoEm', 'tamanho'];
+var TIPOS = ['jogo', 'personagem', 'animacao', 'item'], LIMITE_CONTEUDOS = 60, BLOCO = 45000, MAX_BLOCOS = 44;
+function sim(v) { return v === true || String(v) === 'TRUE'; }
+function abaBlobs() { var ss = planilha(), sh = ss.getSheetByName('Blobs'); if (!sh) { sh = ss.insertSheet('Blobs'); sh.appendRow(['chave', 'partes']); sh.setFrozenRows(1); } return sh; }
+function linhaBlob(sh, chave) {
+  var n = sh.getLastRow(); if (n < 2) return -1;
+  var v = sh.getRange(2, 1, n - 1, 1).getValues();
+  for (var i = 0; i < v.length; i++) if (String(v[i][0]) === chave) return i + 2;
+  return -1;
+}
+function gravarBlob(chave, texto) {
+  texto = String(texto == null ? '' : texto);
+  var partes = []; for (var i = 0; i < texto.length; i += BLOCO) partes.push('~' + texto.slice(i, i + BLOCO)); // o "~" impede a planilha de ler o texto como fórmula ou número
+  if (partes.length > MAX_BLOCOS) throw erro('Grande demais: o limite é de uns 2 MB.');
+  var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l < 0) l = linhaBlob(sh, ''); // reaproveita uma linha apagada
+  var valores = [chave, partes.length].concat(partes);
+  if (l < 0) { sh.appendRow(valores); return; }
+  var larg = Math.max(sh.getLastColumn(), valores.length), linha = [];
+  for (var k = 0; k < larg; k++) linha.push(k < valores.length ? valores[k] : '');
+  sh.getRange(l, 1, 1, larg).setValues([linha]);
+}
+function lerBlob(chave) {
+  var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l < 0) return null;
+  var n = Number(sh.getRange(l, 2, 1, 1).getValues()[0][0]) || 0; if (!n) return '';
+  return sh.getRange(l, 3, 1, n).getValues()[0].map(function (p) { return String(p).slice(1); }).join('');
+}
+function apagarBlob(chave) { var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l > 0) sh.getRange(l, 1, 1, sh.getLastColumn()).clearContent(); }
+function limparTexto(t, max) { return String(t == null ? '' : t).replace(/[<>]/g, '').trim().slice(0, max); }
+function contaOpcional(token) { try { return token ? contaDoToken(token).conta : null; } catch (e) { return null; } }
+function metaConteudo(c, curtidos) {
+  return { id: String(c.id), tipo: c.tipo, nome: c.nome, descricao: c.descricao, genero: c.genero, subgenero: c.subgenero, autor: c.autorNome, autorId: String(c.autorId),
+    capa: String(c.capa || '').replace(/^~/, ''), criadoEm: Number(c.criadoEm), atualizadoEm: Number(c.atualizadoEm), jogadas: Number(c.jogadas || 0), curtidas: Number(c.curtidas || 0),
+    tamanho: Number(c.tamanho || 0), curti: !!(curtidos && curtidos[c.id]) };
+}
+function curtidosPor(conta) { var m = {}; if (conta) linhas('Curtidas').forEach(function (x) { if (x.email === conta.email) m[x.id] = true; }); return m; }
+function conteudoAtivo(id) { var c = achar('Conteudos', 'id', String(id || '')); if (!c || !sim(c.ativo)) throw erro('Esse conteúdo não existe mais.'); return c; }
+function chaveNuvem(ch) { ch = String(ch || ''); if (!/^[\w.:-]{1,80}$/.test(ch)) throw erro('Nome de dado inválido.'); return ch; }
+
+var ACOES_CONTEUDO = {
+  // publica (ou atualiza, se "id" for seu) um jogo, personagem, animação ou item para todo mundo
+  publicarConteudo: function (r) {
+    var conta = contaDoToken(r.token).conta, tipo = String(r.tipo || 'jogo');
+    if (TIPOS.indexOf(tipo) < 0) throw erro('Tipo de conteúdo inválido.');
+    var nome = limparTexto(r.nome, 60); if (nome.length < 2) throw erro('Dê um nome com pelo menos 2 letras.');
+    var dados = String(r.dados || ''); if (!dados) throw erro('Nada para publicar.');
+    try { JSON.parse(dados); } catch (e) { throw erro('O conteúdo está corrompido.'); }
+    var capa = String(r.capa || ''); if (!/^data:image\/(jpeg|png|webp);base64,[\w+\/=]+$/.test(capa) || capa.length > 44000) capa = '';
+    var agora = Date.now(), c = r.id ? achar('Conteudos', 'id', String(r.id)) : null;
+    if (c && c.autorEmail !== conta.email) throw erro('Esse conteúdo é de outra pessoa.');
+    var campos = { tipo: tipo, nome: nome, descricao: limparTexto(r.descricao, 600), genero: limparTexto(r.genero, 40), subgenero: limparTexto(r.subgenero, 60),
+      autorId: String(conta.id), autorNome: conta.nome, autorEmail: conta.email, capa: capa ? '~' + capa : '', atualizadoEm: agora, tamanho: dados.length, ativo: true };
+    if (c) atualizar('Conteudos', c, campos);
+    else {
+      var meus = linhas('Conteudos').filter(function (x) { return x.autorEmail === conta.email && sim(x.ativo); }).length;
+      if (meus >= LIMITE_CONTEUDOS) throw erro('Você já tem ' + LIMITE_CONTEUDOS + ' publicações. Apague alguma para publicar outra.');
+      c = { id: aleatorio().slice(0, 12), criadoEm: agora, jogadas: 0, curtidas: 0 };
+      for (var k in campos) c[k] = campos[k];
+      inserir('Conteudos', c);
+    }
+    gravarBlob('c:' + c.id, dados);
+    return { conteudo: metaConteudo(c) };
+  },
+  listarConteudo: function (r) {
+    var conta = contaOpcional(r.token), curt = curtidosPor(conta), tipo = r.tipo ? String(r.tipo) : '';
+    var l = linhas('Conteudos').filter(function (c) { return sim(c.ativo) && (!tipo || c.tipo === tipo) && (!r.autorId || String(c.autorId) === String(r.autorId)); })
+      .sort(function (a, b) { return Number(b.atualizadoEm) - Number(a.atualizadoEm); }).slice(0, 300);
+    return { conteudos: l.map(function (c) { return metaConteudo(c, curt); }) };
+  },
+  baixarConteudo: function (r) {
+    var c = conteudoAtivo(r.id), dados = lerBlob('c:' + c.id);
+    if (dados == null) throw erro('Esse conteúdo não existe mais.');
+    if (r.contar) atualizar('Conteudos', c, { jogadas: Number(c.jogadas || 0) + 1 });
+    return { conteudo: metaConteudo(c, curtidosPor(contaOpcional(r.token))), dados: dados };
+  },
+  apagarConteudo: function (r) {
+    var conta = contaDoToken(r.token).conta, c = conteudoAtivo(r.id);
+    if (c.autorEmail !== conta.email) throw erro('Esse conteúdo é de outra pessoa.');
+    atualizar('Conteudos', c, { ativo: false }); apagarBlob('c:' + c.id);
+    return {};
+  },
+  curtir: function (r) {
+    var conta = contaDoToken(r.token).conta, c = conteudoAtivo(r.id);
+    var ja = linhas('Curtidas').filter(function (x) { return x.id === String(c.id) && x.email === conta.email; })[0];
+    if (ja) aba('Curtidas').deleteRow(ja._linha); else inserir('Curtidas', { id: String(c.id), email: conta.email, data: Date.now() });
+    var n = Math.max(0, Number(c.curtidas || 0) + (ja ? -1 : 1)); atualizar('Conteudos', c, { curtidas: n });
+    return { curti: !ja, curtidas: n };
+  },
+  meusConteudos: function (r) {
+    var conta = contaDoToken(r.token).conta;
+    return { conteudos: linhas('Conteudos').filter(function (c) { return c.autorEmail === conta.email && sim(c.ativo); }).map(function (c) { return metaConteudo(c); }) };
+  },
+  perfil: function (r) {
+    var c = achar('Contas', 'id', String(r.autorId || '')); if (!c || !sim(c.verificado)) throw erro('Perfil não encontrado.');
+    var l = linhas('Conteudos').filter(function (x) { return String(x.autorId) === String(c.id) && sim(x.ativo); });
+    return { perfil: { id: String(c.id), nome: c.nome, membroDesde: Number(c.criadoEm), publicacoes: l.length, jogadas: l.reduce(function (a, x) { return a + Number(x.jogadas || 0); }, 0), curtidas: l.reduce(function (a, x) { return a + Number(x.curtidas || 0); }, 0) },
+      conteudos: l.map(function (x) { return metaConteudo(x); }) };
+  },
+  // nuvem: cada conta guarda seus dados (projetos do Studio, notas, progresso dos jogos)
+  salvarNuvem: function (r) {
+    var conta = contaDoToken(r.token).conta, ch = chaveNuvem(r.chave), valor = String(r.valor == null ? '' : r.valor), agora = Date.now();
+    gravarBlob('n:' + conta.id + ':' + ch, valor);
+    var ex = linhas('Nuvem').filter(function (x) { return x.email === conta.email && x.chave === ch; })[0];
+    if (ex) atualizar('Nuvem', ex, { atualizadoEm: agora, tamanho: valor.length }); else inserir('Nuvem', { email: conta.email, chave: ch, atualizadoEm: agora, tamanho: valor.length });
+    return { atualizadoEm: agora };
+  },
+  lerNuvem: function (r) {
+    var conta = contaDoToken(r.token).conta, ch = chaveNuvem(r.chave);
+    var ex = linhas('Nuvem').filter(function (x) { return x.email === conta.email && x.chave === ch; })[0];
+    return { valor: ex ? lerBlob('n:' + conta.id + ':' + ch) : null, atualizadoEm: ex ? Number(ex.atualizadoEm) : 0 };
+  },
+  listarNuvem: function (r) {
+    var conta = contaDoToken(r.token).conta;
+    return { dados: linhas('Nuvem').filter(function (x) { return x.email === conta.email; }).map(function (x) { return { chave: x.chave, atualizadoEm: Number(x.atualizadoEm), tamanho: Number(x.tamanho) }; }) };
+  },
+  apagarNuvem: function (r) {
+    var conta = contaDoToken(r.token).conta, ch = chaveNuvem(r.chave);
+    var ex = linhas('Nuvem').filter(function (x) { return x.email === conta.email && x.chave === ch; })[0];
+    if (ex) { aba('Nuvem').deleteRow(ex._linha); apagarBlob('n:' + conta.id + ':' + ch); }
+    return {};
+  },
+};
+for (var acaoNova in ACOES_CONTEUDO) ACOES[acaoNova] = ACOES_CONTEUDO[acaoNova];
+
 function encerrarSessoes(email, exceto) {
   var n = 0; linhas('Sessoes').forEach(function (s) { if (s.email === email && s.hashToken !== exceto && (s.ativa === true || String(s.ativa) === 'TRUE')) { atualizar('Sessoes', s, { ativa: false }); n++; } });
   return n;
