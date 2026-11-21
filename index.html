@@ -179,6 +179,8 @@
   .badge.online{left:12px;top:auto;bottom:12px;background:rgba(34,211,238,.92);color:#04212a}
   .verif{color:#22d3ee;font-weight:800}
   .btn.curtir{min-width:52px} .btn.curtir.on{color:#fb7185;border-color:#fb718566}
+  .card.mk .card-cover{aspect-ratio:16/9}
+  .card.mk .card-body p{min-height:0}
   .players-intro .aviso-conta{display:inline-block;margin-top:6px;color:#67e8f9}
   .btn.icone{width:36px;padding:0;justify-content:center}
   @media (max-width:520px){ .criar span{display:none} }
@@ -273,6 +275,19 @@
     </div>
     <p class="players-intro">Jogos feitos por pessoas (e pelas IAs delas) no <a href="studio/index.html">Arcádia Studio</a>. Os <b>🌍 Online</b> foram publicados por quem tem conta e aparecem para todo mundo, com o selo <span class="verif">✓</span> de conta verificada. Os que você publica sem conta ficam só neste navegador.<br><span class="aviso-conta">Crie uma conta para publicar para todo mundo, curtir jogos e salvar suas notas na nuvem.</span></p>
     <div class="grid" id="grade-p"></div>
+  </section>
+  <section id="marketplace">
+    <div class="section-head">
+      <h2>🛒 Marketplace</h2>
+      <div class="filters" id="filtros-m">
+        <button class="filter active" data-mtipo="personagem">🧍 Personagens</button>
+        <button class="filter" data-mtipo="animacao">💃 Animações</button>
+        <button class="filter" data-mtipo="item">🧩 Itens para o Studio</button>
+      </div>
+      <a class="criar" href="studio/index.html#personagem">🧍 Criar meu personagem</a>
+    </div>
+    <p class="players-intro">Personagens, animações e objetos criados pela comunidade no <a href="studio/index.html">Arcádia Studio</a>. Vista um personagem e ele aparece nos jogos do Studio; pegue animações para o seu personagem; use itens nos seus jogos. Para publicar aqui é preciso ter conta.</p>
+    <div class="grid" id="grade-m"></div>
   </section>
 </main>
 
@@ -709,7 +724,7 @@ window.ARCADIA_INICIAR = () => {
       e.stopPropagation(); const C = Conta();
       if (!C || !C.logado()) { toast("❤️ Entre na sua conta para curtir jogos"); C && C.abrir("entrar"); return; }
       cu.disabled = true;
-      try { const r = await C.api("curtir", { id: cu.dataset.curtir }); const o = online.find(x => x.id === cu.dataset.curtir); if (o) Object.assign(o, { curti: r.curti, curtidas: r.curtidas }); renderGradeP(); }
+      try { const r = await C.api("curtir", { id: cu.dataset.curtir }); for (const o of [...online, ...mercado].filter(x => x.id === cu.dataset.curtir)) Object.assign(o, { curti: r.curti, curtidas: r.curtidas }); renderGradeP(); renderMercado(); }
       catch (er) { toast(er.message); cu.disabled = false; }
       return;
     }
@@ -726,6 +741,46 @@ window.ARCADIA_INICIAR = () => {
   // volta do Studio depois de publicar: atualiza a lista
   addEventListener("focus", () => lerLocais().then(l => { if (l.length !== locais.length || l.some((x, i) => x.publicadoEm !== (locais[i] || {}).publicadoEm)) { locais = l.sort((a, b) => (b.publicadoEm || 0) - (a.publicadoEm || 0)); renderGradeP(); } }));
   carregarP().then(() => { if (location.hash === "#players") $("#players").scrollIntoView(); });
+
+  /* ---------- Marketplace: personagens, animações e itens da comunidade ---------- */
+  let mTipo = "personagem", mercado = [];
+  const MK = { personagem: ["🧍", "Vestir"], animacao: ["💃", "Pegar"], item: ["🧩", "Usar no Studio"] };
+  async function carregarMercado() {
+    const C = Conta(); const g = $("#grade-m"); if (!g) return;
+    if (!C || !C.servidorLigado()) { g.innerHTML = '<div class="empty">O Marketplace liga junto com o sistema de contas.</div>'; return; }
+    g.innerHTML = '<div class="empty">Carregando…</div>';
+    try { mercado = (await C.api("listarConteudo", { tipo: mTipo })).conteudos || []; renderMercado(); } catch (e) { g.innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
+  }
+  function renderMercado() {
+    const g = $("#grade-m"), q = busca.trim().toLowerCase(), [ic, verbo] = MK[mTipo];
+    const l = mercado.filter(i => !q || [i.nome, i.autor, i.descricao].join(" ").toLowerCase().includes(q));
+    g.innerHTML = l.length ? l.map(i => `<article class="card de-player mk">
+        <div class="card-cover">${i.capa ? `<img src="${esc(i.capa)}" alt="${esc(i.nome)}" loading="lazy">` : `<span class="ph">${ic}</span>`}<span class="badge autor">por ${esc(i.autor)} <span class="verif" title="Conta verificada">✓</span></span></div>
+        <div class="card-body"><h3>${esc(i.nome)}</h3><p>${esc(i.descricao || "")}</p>
+          <div class="card-foot"><span class="meta"><span>${i.jogadas} usos</span></span><span class="acoes-p">
+            <button class="btn small curtir ${i.curti ? "on" : ""}" data-curtir="${esc(i.id)}">${i.curti ? "❤️" : "🤍"} ${i.curtidas || 0}</button>
+            <button class="btn small primary" data-usar-m="${esc(i.id)}">${verbo}</button></span></div></div></article>`).join("")
+      : `<div class="empty">Nada aqui ainda. ${mTipo === "item" ? "No Studio, clique com o botão direito num modelo → Publicar no Marketplace." : 'Crie no <a href="studio/index.html#personagem">🧍 criador de personagem</a> e publique!'}</div>`;
+  }
+  function lerAvatar() { try { return JSON.parse(localStorage.getItem("arcadia.avatar")) || {}; } catch { return {}; } }
+  function salvarAvatar(av) { av.atualizado = Date.now(); try { localStorage.setItem("arcadia.avatar", JSON.stringify(av)); } catch {} const C = Conta(); if (C && C.logado()) C.api("salvarNuvem", { chave: "avatar", valor: JSON.stringify(av) }).catch(() => {}); }
+  async function usarMercado(id, botao) {
+    const C = Conta(); if (mTipo === "item") { location.href = "studio/index.html#marketplace=item"; return; }
+    botao.disabled = true;
+    try {
+      const j = await C.api("baixarConteudo", { id, contar: true }), d = JSON.parse(j.dados);
+      if (mTipo === "personagem") { delete d.marketId; salvarAvatar(d); toast(`🧍 Você está vestindo “${j.conteudo.nome}”. Ele aparece nos jogos do Studio.`); }
+      else { const av = lerAvatar(); av.custom = av.custom || {}; av.custom["m" + id] = d; salvarAvatar(av); toast(`💃 “${j.conteudo.nome}” guardada. Escolha em Meu personagem → Animações.`); }
+      const o = mercado.find(x => x.id === id); if (o) o.jogadas++; renderMercado();
+    } catch (e) { toast(e.message); botao.disabled = false; }
+  }
+  document.addEventListener("click", e => {
+    const f = e.target.closest("[data-mtipo]"); if (f) { mTipo = f.dataset.mtipo; document.querySelectorAll("#filtros-m .filter").forEach(b => b.classList.toggle("active", b === f)); carregarMercado(); return; }
+    const u = e.target.closest("[data-usar-m]"); if (u) usarMercado(u.dataset.usarM, u);
+  });
+  $("#busca").addEventListener("input", () => renderMercado());
+  addEventListener("arcadia-conta", carregarMercado);
+  carregarMercado();
 
   /* ---------- nuvem: notas e estatísticas acompanham a conta ---------- */
   var timerNuvem = 0, sincronizando = false; // var: gravar() pode ser chamado antes desta linha

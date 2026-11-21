@@ -41,6 +41,7 @@
 <div id="barra"><span>🎮</span><b id="titulo"></b><span id="autor" style="color:#9aa3b8"></span><a href="../index.html">Arcádia IA ↗</a></div>
 <iframe id="moldura" sandbox="allow-scripts allow-pointer-lock allow-popups" allow="autoplay; fullscreen; gamepad"></iframe>
 <script src="nucleo.js"></script>
+<script src="avatar.js"></script>
 <script src="motor.js"></script>
 <script src="../conta.js?v=1.2.0"></script>
 <script>
@@ -101,7 +102,7 @@
     // dentro da plataforma (que já tem a própria barra) o jogo ocupa a tela toda
     let naPlataforma = false; try { naPlataforma = window.top !== window; } catch (e) { naPlataforma = true; }
     if (naPlataforma) { f.style.top = '0'; f.style.height = '100%'; } else $('#barra').style.display = 'flex';
-    window.addEventListener('message', e => { if (e.source === f.contentWindow && e.data && e.data.tipo === 'aguardando') f.contentWindow.postMessage({ tipo: 'carregar', projeto }, '*'); });
+    window.addEventListener('message', e => { if (e.source === f.contentWindow && e.data && e.data.tipo === 'aguardando') f.contentWindow.postMessage({ tipo: 'carregar', projeto, opcoes: { avatar: ASN.avatar.lerSalvo(), nomeJogador: ((window.ArcadiaConta && ArcadiaConta.usuario()) || {}).nome || 'Jogador' } }, '*'); });
     f.src = 'jogar.html?embed=1';
   })();
 })();

@@ -161,6 +161,7 @@
       ['Projeto', [B('novo', '📄', 'Novo'), B('abrir', '📂', 'Abrir'), B('salvar', '💾', 'Salvar'), B('importar', '📥', 'Importar'), B('exportar', '📤', 'Exportar')]],
       ['Pasta do computador', [B('abrirPasta', '🗂️', 'Abrir pasta'), B('salvarPasta', '💽', 'Salvar na pasta', { desab: !proj || !proj.pasta })]],
       ['Compartilhar', [B('publicar', '🚀', 'Publicar'), B('link', '🔗', 'Link do jogo')]],
+      ['Comunidade', [B('personagem', '🧍', 'Meu personagem'), B('marketplace', '🛒', 'Marketplace')]],
     ];
     if (!ehCena()) return {
       arquivo: arq,
@@ -184,6 +185,7 @@
         ['Editar', [{ html: `<div class="mini-col"><label>Cor <input type="color" id="f-cor" value="#a3a2a5"></label><label>Material <select id="f-mat">${N.ENUMS.Material.map(m => `<option>${m}</option>`).join('')}</select></label></div>` }, B('ancorar', '⚓', 'Ancorar'), B('agrupar', '🧩', 'Agrupar'), B('desagrupar', '💥', 'Desagrupar')]],
         ['Histórico', [B('desfazer', '↶', 'Desfazer'), B('refazer', '↷', 'Refazer')]],
         ['Testar', [B('jogar', '▶', 'Jogar', { c: 'play' }), B('parar', '■', 'Parar', { c: 'stop' })]],
+        ['Comunidade', [B('personagem', '🧍', 'Meu personagem'), B('marketplace', '🛒', 'Marketplace')]],
       ],
       modelo: [
         ['Objetos', [B('n:PointLight', '🔆', 'Luz'), B('n:BillboardText', '🏷️', 'Texto 3D'), B('n:Sound', '🎵', 'Som'), B('n:ClickDetector', '🖱️', 'Clicável'), B('n:Model', '🧩', 'Modelo'), B('n:Folder', '📁', 'Pasta')]],
@@ -235,6 +237,8 @@
       focar, camInicio: () => { cam.pos.set(22, 18, 26); cam.yaw = Math.atan2(22, 26); cam.pitch = -0.5; },
       grade: () => { if (grade) grade.visible = !grade.visible; renderFaixa(); },
       docs: telaDocs, atalhos: telaAtalhos,
+      personagem: () => window.ASPersonagem.abrir({ aoSalvar: () => saida('ok', '🧍 Personagem salvo: ele aparece quando você aperta Jogar') }),
+      marketplace: () => telaMarketplace(),
       novoArquivo: () => novoArquivo(), novaPasta: () => novaPasta(), enviar: () => $('#in-arquivos').click(),
       executar: () => { mostrarAba('previa'); executarPrevia(); }, pararPrevia: () => { $('#vista-previa').innerHTML = ''; saida('info', 'Prévia parada'); },
       autoRec: () => { autoRecarregar = !autoRecarregar; renderFaixa(); }, zip: baixarZip, janela: abrirEmJanela,
@@ -501,7 +505,7 @@
       ...(r && r.no.ClassName === 'Script' ? [{ i: '📝', t: 'Abrir script', f: () => abrirScript(r.no.id) }] : []),
       '-', { i: '✂️', t: 'Recortar', k: 'Ctrl+X', f: recortar, desab: !r || serv }, { i: '📄', t: 'Copiar', k: 'Ctrl+C', f: copiar, desab: !r || serv }, { i: '📋', t: 'Colar dentro', k: 'Ctrl+V', f: () => colar(true), desab: !area }, { i: '⧉', t: 'Duplicar', k: 'Ctrl+D', f: duplicar, desab: !r || serv },
       '-', { i: '✏️', t: 'Renomear', k: 'F2', f: () => renomear(r.no.id), desab: !r || serv }, { i: '🧩', t: 'Agrupar como modelo', k: 'Ctrl+G', f: agrupar, desab: !r || serv }, { i: '💥', t: 'Desagrupar', k: 'Ctrl+U', f: desagrupar, desab: !r || r.no.ClassName !== 'Model' },
-      { i: '🎯', t: 'Focar câmera', k: 'F', f: focar, desab: !r }, '-', { i: '🗑️', t: 'Excluir', k: 'Del', f: excluirSel, desab: !r || serv },
+      { i: '🎯', t: 'Focar câmera', k: 'F', f: focar, desab: !r }, { i: '🛒', t: 'Publicar no Marketplace', f: publicarItem, desab: !r || serv }, '-', { i: '🗑️', t: 'Excluir', k: 'Del', f: excluirSel, desab: !r || serv },
     ]);
   }
   function aoSelecionar(daCena) {
@@ -733,7 +737,7 @@
   window.addEventListener('message', e => {
     const d = e.data; if (!d || typeof d !== 'object') return;
     if (d.fonte === 'as-jogo' && jogando && e.source === jogando.contentWindow) {
-      if (d.tipo === 'aguardando') jogando.contentWindow.postMessage({ tipo: 'carregar', projeto: JSON.parse(JSON.stringify({ ...proj, pasta: undefined })), opcoes: { studio: true, nomeJogador: localStorage.getItem('studio.autor') || 'Jogador' } }, '*');
+      if (d.tipo === 'aguardando') jogando.contentWindow.postMessage({ tipo: 'carregar', projeto: JSON.parse(JSON.stringify({ ...proj, pasta: undefined })), opcoes: { studio: true, avatar: N.avatar.lerSalvo(), nomeJogador: ((Conta() && Conta().usuario()) || {}).nome || localStorage.getItem('studio.autor') || 'Jogador' } }, '*');
       if (d.tipo === 'log') saida(d.nivel, d.texto, 'Jogo');
       if (d.tipo === 'captura' && esperaCaptura) { esperaCaptura(d.imagem); esperaCaptura = null; }
     }
@@ -1009,6 +1013,59 @@
     const link = await gerarLink();
     saida('ok', `🚀 Publicado: ${proj.nome}`);
     return { id: registro.id, link };
+  }
+
+  /* ===================== Marketplace ===================== */
+  async function publicarItem() {
+    const r = noSel(); if (!r || !ehCena()) return; const C = Conta();
+    if (!C || !C.logado()) { toast('🛒 Entre numa conta para publicar no Marketplace'); if (C) C.abrir('entrar'); return; }
+    const nome = prompt('Nome do item no Marketplace:', r.no.Name); if (!nome) return;
+    const descricao = prompt('Descrição (opcional): para que serve, como usar…', '') || '';
+    focar(); await new Promise(ok => setTimeout(ok, 350));
+    try {
+      await C.api('publicarConteudo', { tipo: 'item', nome, descricao, genero: r.no.ClassName, capa: await miniCapa(captura()), dados: JSON.stringify(N.copia(r.no)) });
+      toast('✓ Publicado no Marketplace'); saida('ok', `🛒 Item publicado no Marketplace: ${nome}`);
+    } catch (e) { toast('⚠ ' + e.message); }
+  }
+  async function usarDoMarketplace(tipo, id) {
+    const C = Conta(), j = await C.api('baixarConteudo', { id, contar: true }), dados = JSON.parse(j.dados);
+    if (tipo === 'item') {
+      if (!ehCena()) throw new Error('Abra um jogo 3D para inserir itens.');
+      const no = N.reidentificar(dados), pai = servico('Workspace'); pai.children.push(no);
+      sel = [no.id]; registrar(); reconstruirCena(); aoSelecionar(true); focar(); saida('ok', `🛒 Inserido do Marketplace: ${j.conteudo.nome} (por ${j.conteudo.autor})`);
+      return `✓ “${j.conteudo.nome}” inserido na cena`;
+    }
+    if (tipo === 'personagem') { N.avatar.salvar(Object.assign(dados, { marketId: undefined })); if (C.logado()) C.api('salvarNuvem', { chave: 'avatar', valor: JSON.stringify(N.avatar.lerSalvo()) }).catch(() => {}); return `✓ Você está vestindo “${j.conteudo.nome}”. Aperte Jogar para ver.`; }
+    if (tipo === 'animacao') {
+      if (!N.avatar.validaAnim(dados)) throw new Error('Animação inválida.');
+      const av = N.avatar.lerSalvo() || N.avatar.normalizar(null); av.custom['m' + id] = dados; N.avatar.salvar(av);
+      return `✓ Animação guardada. Escolha ela em 🧍 Meu personagem → Animações.`;
+    }
+  }
+  async function telaMarketplace(tipo = 'item') {
+    const C = Conta();
+    modal(`<div class="m-cab"><h2>🛒 Marketplace</h2><button data-fechar>✕</button></div><div class="m-corpo">
+      <div class="mk-abas">${[['item', '🧩 Itens'], ['personagem', '🧍 Personagens'], ['animacao', '💃 Animações']].map(([k, t]) => `<button class="btn ${k === tipo ? 'on' : ''}" data-mk="${k}">${t}</button>`).join('')}<span style="flex:1"></span><button class="btn" data-mkmeu>🧍 Meu personagem</button></div>
+      <p style="color:var(--fraco);font-size:12.5px;margin:0 0 10px">${tipo === 'item' ? 'Modelos prontos feitos pela comunidade. Para publicar um seu: botão direito num modelo do Explorer → <b>Publicar no Marketplace</b>.' : tipo === 'personagem' ? 'Personagens da comunidade: vista um e ele aparece nos jogos.' : 'Animações da comunidade: pegue e escolha em Meu personagem → Animações.'}</p>
+      <div id="mk-lista" class="mk-grade"><div style="color:var(--fraco2)">Carregando…</div></div><div id="mk-msg" style="margin-top:10px;font-weight:600"></div></div>`);
+    const cx = $('#modal-caixa');
+    cx.querySelectorAll('[data-mk]').forEach(b => b.onclick = () => telaMarketplace(b.dataset.mk));
+    cx.querySelector('[data-mkmeu]').onclick = () => { fecharModal(); acao('personagem'); };
+    const lista = $('#mk-lista');
+    if (!C || !C.servidorLigado()) { lista.innerHTML = '<div style="color:var(--fraco2)">O Marketplace precisa do servidor de contas.</div>'; return; }
+    try {
+      const r = await C.api('listarConteudo', { tipo }), itens = r.conteudos || [];
+      const verbo = { item: 'Inserir na cena', personagem: 'Vestir', animacao: 'Pegar' }[tipo];
+      lista.innerHTML = itens.length ? itens.map(i => `<div class="mk-card"><div class="cp">${i.capa ? `<img src="${esc(i.capa)}" alt="">` : { item: '🧩', personagem: '🧍', animacao: '💃' }[tipo]}</div>
+        <div class="tx"><b>${esc(i.nome)}</b>por ${esc(i.autor)} <span style="color:#22d3ee">✓</span> · ❤ ${i.curtidas} · ${i.jogadas} usos${i.descricao ? `<br>${esc(i.descricao).slice(0, 90)}` : ''}</div>
+        <div class="ac"><button class="btn" data-usar="${esc(i.id)}" ${tipo === 'item' && !ehCena() ? 'disabled title="Abra um jogo 3D"' : ''}>${verbo}</button></div></div>`).join('')
+        : `<div style="color:var(--fraco2)">Nada aqui ainda. Seja o primeiro a publicar!</div>`;
+      lista.querySelectorAll('[data-usar]').forEach(b => b.onclick = async () => {
+        b.disabled = true; const m = $('#mk-msg');
+        try { m.style.color = 'var(--verde)'; m.textContent = await usarDoMarketplace(tipo, b.dataset.usar); if (tipo === 'item') setTimeout(fecharModal, 700); }
+        catch (e) { m.style.color = '#fca5a5'; m.textContent = '⚠ ' + e.message; b.disabled = false; }
+      });
+    } catch (e) { lista.innerHTML = `<div style="color:#fca5a5">${esc(e.message)}</div>`; }
   }
 
   /* ===================== Telas: início, docs, atalhos ===================== */
@@ -1446,5 +1503,9 @@ TS:Create(p, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut,
     else telaInicial();
     if (q.get('mcp') === '1' || localStorage.getItem('studio.mcpAuto') === '1') { mcp.ativo = true; loopMcp(); }
     saida('info', 'Arcádia Studio pronto. Pressione F5 para jogar. Veja Exibir → Documentação para a API de scripts.');
+    // atalhos vindos da plataforma: #personagem, #marketplace, #marketplace=personagem
+    const h = location.hash.slice(1);
+    if (h === 'personagem') acao('personagem');
+    else if (h.startsWith('marketplace')) telaMarketplace(h.split('=')[1] || 'item');
   })();
 })();
