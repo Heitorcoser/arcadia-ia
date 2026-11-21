@@ -8,15 +8,18 @@ const fs = require('fs'), path = require('path'), http = require('http'), vm = r
 const PORTA = +process.argv[2] || 8790, PASTA_EMAILS = path.join(__dirname, 'emails-simulados');
 fs.mkdirSync(PASTA_EMAILS, { recursive: true });
 
-const abas = {}, props = {};
+const abas = {}, props = {}, colunas = {}; // colunas: como no Google, a aba nasce com 26 e o appendRow aumenta
 const fakeSheet = nome => {
   const dados = abas[nome] = abas[nome] || [];
+  if (!colunas[nome]) colunas[nome] = 26;
   return {
-    appendRow: r => dados.push(r.slice()), setFrozenRows() {},
+    appendRow: r => { dados.push(r.slice()); colunas[nome] = Math.max(colunas[nome], r.length); }, setFrozenRows() {},
+    getMaxColumns: () => colunas[nome], insertColumnsAfter: (c, n) => { colunas[nome] += n; },
     getDataRange: () => ({ getValues: () => dados.map(r => r.slice()) }),
     getLastRow: () => { let n = dados.length; while (n > 0 && dados[n - 1].every(v => v === '' || v == null)) n--; return n; },
     getLastColumn: () => dados.reduce((m, r) => Math.max(m, r.length), 0),
     getRange: (l, c, nl = 1, nc = 1) => {
+      if (c - 1 + nc > colunas[nome]) throw new Error('Os limites do intervalo estão fora das dimensões da planilha.');
       const cel = (i, j) => { const r = dados[l - 1 + i] || []; const v = r[c - 1 + j]; return v === undefined ? '' : v; };
       const por = (i, j, v) => { while (dados.length < l + i) dados.push([]); dados[l - 1 + i][c - 1 + j] = v; };
       return {
@@ -34,7 +37,7 @@ let enviados = 0;
 const ctx = {
   console, JSON, Date, Math, Object, String, Number, parseInt, Error,
   ContentService: { MimeType: { JSON: 'json' }, createTextOutput: t => ({ setMimeType: () => ({ texto: t }) }) },
-  LockService: { getScriptLock: () => ({ waitLock() {}, releaseLock() {} }) },
+  LockService: { getScriptLock: () => ({ waitLock() {}, tryLock: () => true, releaseLock() {} }) },
   PropertiesService: { getScriptProperties: () => ({ getProperty: k => props[k] || null, setProperty: (k, v) => { props[k] = v; } }) },
   SpreadsheetApp: { openById: () => ss, create: () => ss },
   Utilities: {
