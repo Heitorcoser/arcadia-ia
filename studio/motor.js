@@ -952,6 +952,7 @@ end
       parar() { rodando = false; removeEventListener('keydown', onKeyDown); removeEventListener('keyup', onKeyUp); for (const i of todas) pararSom(i); renderer.dispose(); },
       captura() { renderer.render(cena, camera); return renderer.domElement.toDataURL('image/jpeg', 0.85); },
       avancar(seg, teclasTeste) { Object.assign(teclas, teclasTeste || {}); for (let i = 0; i < Math.round(seg * 60); i++) passo(PASSO); for (const k in teclasTeste || {}) teclas[k] = false; poseCorpo(0); atualizarHud(); renderer.render(cena, camera); },
+      get angulos() { return { corpo: estado.corpoYaw, camera: estado.yaw }; }, // para testes: para onde o corpo e a câmera olham
       get jogadorPos() { return estado.pos.toArray().map(v => Math.round(v * 100) / 100); },
       get tempo() { return tempo; },
     };

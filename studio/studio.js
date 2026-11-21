@@ -793,7 +793,7 @@
     salvar();
     const f = document.createElement('iframe');
     f.setAttribute('sandbox', 'allow-scripts allow-pointer-lock'); f.setAttribute('allow', 'autoplay; fullscreen; gamepad');
-    f.src = 'jogar.html?embed=1&studio=1';
+    f.src = 'jogar.html?embed=1&studio=1&v=' + encodeURIComponent(window.VERSAO_STUDIO || ''); // com a versão: nunca abre um jogar.html velho do cache
     $('#vista-jogo').innerHTML = ''; $('#vista-jogo').appendChild(f); jogando = f;
     $('#faixa-jogo').classList.add('on'); gizmo && gizmo.detach(); mostrarVista();
     saida('info', '▶ Jogo iniciado'); marcarBarra();

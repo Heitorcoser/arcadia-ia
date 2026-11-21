@@ -19,6 +19,22 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/comment/comment.min.js"></script>
 <script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }</script>
+<script>
+/* Versão e cache: o navegador e o app guardam esta página por um tempo (até ~10 min no GitHub Pages).
+   Ao abrir, pergunta ao servidor (sem cache) a versão atual e, se esta página for velha, recarrega
+   com ?v=versão para pegar os arquivos novos. Mantenha igual a "versao" em ../versao.json. */
+window.VERSAO_STUDIO = "1.4.2";
+(function () {
+  fetch("../versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
+    const v = String(d.versao || ""); let tentou = "";
+    try { tentou = sessionStorage.getItem("arcadia.recarregou.studio") || ""; } catch (e) {}
+    if (!v || v === window.VERSAO_STUDIO || tentou === v) return;
+    try { sessionStorage.setItem("arcadia.recarregou.studio", v); } catch (e) {}
+    const q = new URLSearchParams(location.search); q.set("v", v);
+    location.replace(location.pathname + "?" + q.toString() + location.hash);
+  }).catch(() => {});
+})();
+</script>
 <style>
   :root{--bg:#16181f;--painel:#1f222b;--painel2:#272b36;--linha:#333847;--linha2:#424859;--txt:#e6e8ef;--fraco:#9aa1b5;--fraco2:#6c7389;--azul:#3b82f6;--azul2:#2563eb;--verde:#22c55e;--verm:#ef4444;--amar:#f59e0b;--sel:#2c4a7c}
   *{box-sizing:border-box}
@@ -326,11 +342,11 @@
 <input type="file" id="in-importar" accept=".zip,.json,.arcadia" hidden>
 <input type="file" id="in-pasta" webkitdirectory hidden>
 
-<script src="nucleo.js?v=1.4.1"></script>
-<script src="avatar.js?v=1.4.1"></script>
-<script src="personagem.js?v=1.4.1"></script>
-<script src="studio.js?v=1.4.1"></script>
-<script src="paineis.js?v=1.4.1"></script>
-<script src="../conta.js?v=1.4.1"></script>
+<script src="nucleo.js?v=1.4.2"></script>
+<script src="avatar.js?v=1.4.2"></script>
+<script src="personagem.js?v=1.4.2"></script>
+<script src="studio.js?v=1.4.2"></script>
+<script src="paineis.js?v=1.4.2"></script>
+<script src="../conta.js?v=1.4.2"></script>
 </body>
 </html>
