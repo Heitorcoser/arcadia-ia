@@ -75,6 +75,11 @@ A aba mostra os jogos publicados neste navegador e os da **comunidade** (`comuni
 ## Como jogar
 Abra o `index.html` no navegador (Chrome, Edge ou Firefox). É preciso estar conectado à internet, porque o three.js e o modelo 3D são carregados online.
 
+## Versões
+- A versão da plataforma aparece no rodapé (e a do app, quando aberto pelo app Android/Windows). Cada jogo mostra a própria versão na barra de cima ("Detetive · v1.2.0"), na ficha técnica e num selo no canto da tela do jogo.
+- Ao publicar uma mudança: aumente `window.ARCADIA_VERSAO` em `jogos.js`, `VERSAO_HTML` em `index.html` e `versao.json` (os três iguais). No jogo alterado, aumente `versao` em `jogos.js` e `window.VERSAO_JOGO` no fim do arquivo do jogo.
+- O site confere `versao.json` sem cache ao abrir: se a página estiver velha, recarrega sozinho. Os jogos abrem com `?v=versão`, então o app nunca usa um arquivo antigo do cache.
+
 ## Adicionar um jogo novo
 1. Crie a pasta `jogos/<id-do-jogo>/index.html`.
 2. Acrescente um objeto ao array `window.JOGOS` em `jogos.js`.

@@ -187,6 +187,7 @@
   footer{border-top:1px solid var(--line);padding:26px 0 40px;color:var(--faint);font-size:13px}
   footer .wrap{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
   footer .sp{margin-left:auto;display:flex;gap:8px}
+  footer .versao{font-weight:700;color:var(--muted, #9696ab);background:rgba(255,255,255,.06);border-radius:8px;padding:2px 9px}
 
   @media (max-width:820px){
     .cols{grid-template-columns:1fr}
@@ -273,6 +274,7 @@
 <footer>
   <div class="wrap">
     <span>Arcádia IA · todos os jogos desta plataforma foram criados por IA. As notas são suas e ficam salvas neste navegador.</span>
+    <span class="versao" id="versao"></span>
     <span class="sp">
       <button class="btn small" id="exportar">Exportar notas</button>
       <button class="btn small" id="importar">Importar notas</button>
@@ -294,10 +296,30 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="jogos.js"></script>
-<script src="conta.js"></script>
 <script>
-(() => {
+/* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
+   Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
+   estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
+const VERSAO_HTML = "1.1.0";
+(function () {
+  const carregar = v => {
+    const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;
+    const pronto = () => { if (++n === 2) (window.ARCADIA_INICIAR || (() => {}))(); };
+    for (const arq of ["jogos.js", "conta.js"]) { const el = document.createElement("script"); el.src = arq + q; el.async = false; el.onload = el.onerror = pronto; document.body.appendChild(el); }
+  };
+  fetch("versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
+    const v = String(d.versao || "");
+    let tentou = ""; try { tentou = sessionStorage.getItem("arcadia.recarregou") || ""; } catch (e) {}
+    if (v && v !== VERSAO_HTML && tentou !== v) {
+      try { sessionStorage.setItem("arcadia.recarregou", v); } catch (e) {}
+      location.replace(location.pathname + "?v=" + encodeURIComponent(v) + location.hash); return;
+    }
+    window.ARCADIA_VERSAO_SERVIDOR = v; carregar(v || VERSAO_HTML);
+  }).catch(() => carregar(VERSAO_HTML));
+})();
+</script>
+<script>
+window.ARCADIA_INICIAR = () => {
   const JOGOS = window.JOGOS || [];
   if (/ArcadiaApp|Electron/.test(navigator.userAgent)) document.documentElement.classList.add("em-app");
   const LS_AV = "arcadia.avaliacoes.v1", LS_ST = "arcadia.stats.v1";
@@ -476,6 +498,8 @@
                 <span>Subgênero</span><b>${esc(j.subgenero)}</b>
                 <span>Criado por</span><b>${esc(j.criadoPor)}</b>
                 <span>Lançado em</span><b>${dataBR(j.criadoEm)}</b>
+                <span>Versão</span><b>${esc(j.versao || "1.0.0")}${j.atualizadoEm && j.atualizadoEm !== j.criadoEm ? ` · atualizado em ${dataBR(j.atualizadoEm)}` : ""}</b>
+                ${j.novidades ? `<span>Novidades</span><b>${esc(j.novidades)}</b>` : ""}
                 <span>Duração</span><b>${esc(j.duracao)}</b>
                 <span>Finais</span><b>${j.finais || 1}</b>
                 <span>Classificação</span><b>${esc(j.classificacao)}</b>
@@ -512,8 +536,9 @@
     fecharDetalhes();
     jogoAberto = j;
     st(j.id).jogadas++; gravar(LS_ST, stats);
-    $("#player-nome").textContent = j.nome;
-    $("#frame").src = j.caminho;
+    $("#player-nome").textContent = j.nome + (j.versao ? " · v" + j.versao : "");
+    // ?v= faz o app/navegador baixar o arquivo novo do jogo em vez de usar um velho do cache
+    $("#frame").src = j.caminho + "?v=" + encodeURIComponent(j.versao || window.ARCADIA_VERSAO || "");
     $("#player").classList.add("open");
     document.body.style.overflow = "hidden";
     inicioSessao = performance.now();
@@ -682,7 +707,10 @@
   let tt; function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(tt); tt = setTimeout(() => t.classList.remove("show"), 3200); }
 
   renderTudo();
-})();
+  // versão visível no rodapé (e do app, quando aberto pelo app)
+  const app = (navigator.userAgent.match(/ArcadiaApp\/(\w+)\/([\d.]+)/) || []);
+  $("#versao").textContent = "Plataforma v" + (window.ARCADIA_VERSAO || VERSAO_HTML) + (app[2] ? ` · App ${app[1]} v${app[2]}` : "");
+};
 </script>
 </body>
 </html>

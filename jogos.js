@@ -152,9 +152,16 @@ const CAPA_DETETIVE = `
   <text x="320" y="336" font-size="30" text-anchor="middle" fill="#f5e6c4" font-family="Courier New,monospace" font-weight="bold" letter-spacing="8">DETETIVE</text>
 </svg>`;
 
+// Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
+// (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
+window.ARCADIA_VERSAO = "1.1.0";
+
 window.JOGOS = [
   {
     id: "detetive",
+    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Personagem visível no celular com a seta VOCÊ; câmeras, HUD e menu ajustados para tela deitada e tablet.",
     nome: "Detetive",
     genero: "Dedução Social",
     subgenero: "Ladrões, detetives e clones",
@@ -202,6 +209,9 @@ window.JOGOS = [
   },
   {
     id: "gongo",
+    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Quiz Corre-Corre legível no celular; banners, menu e Piso da Memória cabem na tela deitada.",
     nome: "GONGO! O Show das 6 Provas",
     genero: "Party Game",
     subgenero: "Party Royale (show de eliminação)",
@@ -248,6 +258,9 @@ window.JOGOS = [
   },
   {
     id: "arena-dos-desejos",
+    versao: "1.1.0", // a mesma do arquivo do jogo (const VERSAO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Tela certa em celulares e tablets (antes ficava maior que a tela).",
     nome: "Arena dos Desejos",
     genero: "Party Game",
     subgenero: "Sandbox de Palavras",
@@ -296,6 +309,8 @@ window.JOGOS = [
   },
   {
     id: "a-casa-que-lembra",
+    versao: "1.0.0", // a mesma do arquivo do jogo (const VERSAO)
+    atualizadoEm: "2026-11-21",
     nome: "A Casa Que Lembra",
     genero: "Terror",
     subgenero: "Terror Psicológico",
