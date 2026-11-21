@@ -637,9 +637,45 @@
       const btP = zona.querySelector('.as-pular'), jEl = zona.querySelector('.as-joy');
       btP.addEventListener('touchstart', e => { teclas.Space = true; ctxAudio(); e.preventDefault(); e.stopPropagation(); }, { passive: false });
       btP.addEventListener('touchend', e => { teclas.Space = false; e.preventDefault(); });
-      zona.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.target === btP) continue; if (t.clientX < innerWidth * 0.45 && joy.id === null) { Object.assign(joy, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 }); jEl.style.display = 'block'; jEl.style.left = t.clientX + 'px'; jEl.style.top = t.clientY + 'px'; } else if (olhar.id === null) Object.assign(olhar, { id: t.identifier, x: t.clientX, y: t.clientY }); } e.preventDefault(); }, { passive: false });
-      zona.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy); if (d > 50) { dx *= 50 / d; dy *= 50 / d; } joy.x = dx / 50; joy.y = dy / 50; jEl.firstChild.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === olhar.id) { estado.yaw -= (t.clientX - olhar.x) * 0.008; pitch = Math.max(-1.2, Math.min(1.35, pitch + (t.clientY - olhar.y) * 0.006)); olhar.x = t.clientX; olhar.y = t.clientY; } } e.preventDefault(); }, { passive: false });
-      const fim = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.x = joy.y = 0; jEl.style.display = 'none'; } if (t.identifier === olhar.id) olhar.id = null; } };
+      // lado esquerdo: joystick · lado direito: arrastar olha em volta, 2 dedos fazem pinça (zoom),
+      // toque rápido clica no mundo (ClickDetector), como o clique do mouse
+      const dedos = new Map(); let pinca = 0;
+      const doisDedos = () => { const l = [...dedos.values()]; return l.length >= 2 ? Math.hypot(l[0].x - l[1].x, l[0].y - l[1].y) || 1 : 0; };
+      zona.addEventListener('touchstart', e => {
+        ctxAudio();
+        for (const t of e.changedTouches) {
+          if (t.target === btP) continue;
+          if (t.clientX < innerWidth * 0.45 && joy.id === null) { Object.assign(joy, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 }); jEl.style.display = 'block'; jEl.style.left = t.clientX + 'px'; jEl.style.top = t.clientY + 'px'; continue; }
+          dedos.set(t.identifier, { x: t.clientX, y: t.clientY, x0: t.clientX, y0: t.clientY, t0: performance.now(), mov: 0 });
+          if (olhar.id === null) Object.assign(olhar, { id: t.identifier, x: t.clientX, y: t.clientY });
+          if (dedos.size === 2) pinca = doisDedos();
+        }
+        e.preventDefault();
+      }, { passive: false });
+      zona.addEventListener('touchmove', e => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === joy.id) { let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy); if (d > 50) { dx *= 50 / d; dy *= 50 / d; } joy.x = dx / 50; joy.y = dy / 50; jEl.firstChild.style.transform = `translate(${dx}px,${dy}px)`; continue; }
+          const f = dedos.get(t.identifier); if (!f) continue;
+          f.mov += Math.abs(t.clientX - f.x) + Math.abs(t.clientY - f.y); f.x = t.clientX; f.y = t.clientY;
+        }
+        if (dedos.size >= 2) { const d = doisDedos(); if (pinca) distCam = Math.max(0.5, Math.min(80, distCam * pinca / d)); pinca = d; }
+        else if (olhar.id !== null && dedos.has(olhar.id)) { const f = dedos.get(olhar.id); estado.yaw -= (f.x - olhar.x) * 0.008; pitch = Math.max(-1.2, Math.min(1.35, pitch + (f.y - olhar.y) * 0.006)); olhar.x = f.x; olhar.y = f.y; }
+        e.preventDefault();
+      }, { passive: false });
+      const fim = e => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === joy.id) { joy.id = null; joy.x = joy.y = 0; jEl.style.display = 'none'; continue; }
+          const f = dedos.get(t.identifier); if (!f) continue; dedos.delete(t.identifier);
+          if (e.type === 'touchend' && f.mov < 12 && performance.now() - f.t0 < 350 && !pinca) {
+            cliqueNoMundo(t.clientX, t.clientY);
+            // quem olha o InputBegan (UserInputService) também recebe o toque, como um clique
+            uis.sinal('InputBegan').Fire(objInput('MouseButton1', 'MouseButton1'), false);
+          }
+          if (t.identifier === olhar.id) { olhar.id = null; const outro = [...dedos.entries()][0]; if (outro) Object.assign(olhar, { id: outro[0], x: outro[1].x, y: outro[1].y }); }
+        }
+        if (dedos.size < 2) pinca = dedos.size ? -1 : 0; // -1: ainda não pode virar toque-clique
+        if (!dedos.size) pinca = 0;
+      };
       zona.addEventListener('touchend', fim); zona.addEventListener('touchcancel', fim);
     }
 

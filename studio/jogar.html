@@ -40,10 +40,10 @@
 <div id="erro"></div>
 <div id="barra"><span>🎮</span><b id="titulo"></b><span id="autor" style="color:#9aa3b8"></span><a href="../index.html">Arcádia IA ↗</a></div>
 <iframe id="moldura" sandbox="allow-scripts allow-pointer-lock allow-popups" allow="autoplay; fullscreen; gamepad"></iframe>
-<script src="nucleo.js"></script>
-<script src="avatar.js"></script>
-<script src="motor.js"></script>
-<script src="../conta.js?v=1.2.0"></script>
+<script src="nucleo.js?v=1.4.0"></script>
+<script src="avatar.js?v=1.4.0"></script>
+<script src="motor.js?v=1.4.0"></script>
+<script src="../conta.js?v=1.4.0"></script>
 <script>
 (function () {
   const params = new URLSearchParams(location.search);
@@ -67,7 +67,7 @@
       instancia = await ASM.iniciar($('#jogo'), projeto, Object.assign({ log }, opcoes));
       window.__jogo = instancia;
       $('#carregando').style.display = 'none';
-      const d = document.createElement('div'); d.className = 'dica'; d.textContent = matchMedia('(pointer: coarse)').matches ? 'Arraste para olhar · botão para pular' : 'WASD andar · Espaço pular · botão direito arrasta a câmera · roda do mouse aproxima';
+      const d = document.createElement('div'); d.className = 'dica'; d.textContent = matchMedia('(pointer: coarse)').matches ? 'Joystick à esquerda · arraste à direita para olhar · pinça aproxima · toque clica · botão pula' : 'WASD andar · Espaço pular · botão direito arrasta a câmera · roda do mouse aproxima';
       document.body.appendChild(d); setTimeout(() => d.style.opacity = 0, 6000);
       avisarPai({ tipo: 'pronto' });
     } catch (e) { log('error', 'Falha ao iniciar: ' + (e.message || e)); $('#msg').textContent = 'Não foi possível iniciar o jogo.'; }

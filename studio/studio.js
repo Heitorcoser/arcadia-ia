@@ -8,6 +8,7 @@
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const dorme = ms => new Promise(r => setTimeout(r, ms));
   const r3 = v => Math.round(v * 1000) / 1000;
+  const TOQUE = matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
 
   /* ===================== Estado ===================== */
   let proj = null, sel = [], faixaAtual = 'inicio', ferramenta = 'mover';
@@ -30,11 +31,16 @@
   function abrirMenu(x, y, itens) {
     const m = $('#menu');
     m.innerHTML = itens.map((it, i) => it === '-' ? '<hr>' : `<button data-i="${i}" ${it.desab ? 'disabled style="opacity:.4"' : ''}>${it.i || ''} ${esc(it.t)}${it.k ? `<span class="k">${esc(it.k)}</span>` : ''}</button>`).join('');
-    m.onclick = e => { const b = e.target.closest('button'); if (!b) return; const it = itens[+b.dataset.i]; fecharMenu(); if (it && it.f && !it.desab) it.f(); };
+    m.onclick = e => { if (performance.now() < menuProtegidoAte) return; const b = e.target.closest('button'); if (!b) return; const it = itens[+b.dataset.i]; fecharMenu(); if (it && it.f && !it.desab) it.f(); };
     m.classList.add('on'); const r = m.getBoundingClientRect();
-    m.style.left = Math.min(x, innerWidth - r.width - 6) + 'px'; m.style.top = Math.min(y, innerHeight - r.height - 6) + 'px';
+    m.style.left = Math.max(6, Math.min(x, innerWidth - r.width - 6)) + 'px'; m.style.top = Math.max(6, Math.min(y, innerHeight - r.height - 6)) + 'px';
   }
-  addEventListener('mousedown', e => { if (!e.target.closest('#menu')) fecharMenu(); });
+  // depois de um toque longo o navegador ainda solta um mousedown "de compatibilidade": ele não pode fechar o menu recém-aberto
+  // (vale até o dedo sair da tela e mais um instante; nesse tempo o menu também não aceita cliques)
+  let menuProtegidoAte = 0; const protegerMenu = () => { menuProtegidoAte = Infinity; };
+  const soltouDedo = () => { if (menuProtegidoAte === Infinity) menuProtegidoAte = performance.now() + 450; };
+  addEventListener('touchend', soltouDedo, true); addEventListener('touchcancel', soltouDedo, true);
+  addEventListener('mousedown', e => { if (performance.now() < menuProtegidoAte) return; if (!e.target.closest('#menu')) fecharMenu(); });
   function modal(html) { $('#modal-caixa').innerHTML = html; $('#modal').classList.add('on'); }
   function fecharModal() { $('#modal').classList.remove('on'); }
   $('#modal').addEventListener('mousedown', e => { if (e.target.id === 'modal' && proj) fecharModal(); });
@@ -294,7 +300,7 @@
       if (k.KeyE) cam.pos.y += v; if (k.KeyQ) cam.pos.y -= v;
     }
     camera.position.copy(cam.pos); camera.rotation.set(cam.pitch, cam.yaw, 0, 'YXZ');
-    const info = $('#info-cena'); if (info && ehCena()) info.textContent = `${malhas.size} partes · ${ferramenta === 'selecionar' ? 'Selecionar' : ferramenta === 'mover' ? 'Mover' : ferramenta === 'escala' ? 'Escalar' : 'Girar'} · botão direito: olhar · WASD/QE: voar`;
+    const info = $('#info-cena'); if (info && ehCena()) info.textContent = `${malhas.size} partes · ${ferramenta === 'selecionar' ? 'Selecionar' : ferramenta === 'mover' ? 'Mover' : ferramenta === 'escala' ? 'Escalar' : 'Girar'} · ${TOQUE ? '1 dedo: girar · 2 dedos: arrastar e pinça · toque: selecionar · segurar: menu' : 'botão direito: olhar · WASD/QE: voar'}`;
   }
   function eventosViewport(tela) {
     let baixo = null;
@@ -302,6 +308,7 @@
     tela.addEventListener('mouseenter', () => cam.sobre = true); tela.addEventListener('mouseleave', () => cam.sobre = false);
     tela.addEventListener('pointerdown', e => {
       tela.focus();
+      if (e.pointerType === 'touch') return; // toque tem gestos próprios (logo abaixo)
       if (e.button === 2) { cam.rmb = true; cam.ult = [e.clientX, e.clientY]; baixo = { x: e.clientX, y: e.clientY, b: 2 }; }
       if (e.button === 1) { cam.mmb = true; cam.ult = [e.clientX, e.clientY]; e.preventDefault(); }
       if (e.button === 0) baixo = { x: e.clientX, y: e.clientY, b: 0, gizmo: gizmo.axis !== null };
@@ -311,6 +318,7 @@
       if (cam.mmb) { const d = cam.pos.length() * 0.0015 + 0.03; const ld = new THREE.Vector3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw)); cam.pos.addScaledVector(ld, -(e.clientX - cam.ult[0]) * d); cam.pos.y += (e.clientY - cam.ult[1]) * d; cam.ult = [e.clientX, e.clientY]; }
     });
     addEventListener('pointerup', e => {
+      if (e.pointerType === 'touch') return;
       if (e.button === 2) cam.rmb = false; if (e.button === 1) cam.mmb = false;
       if (e.button === 0 && baixo && baixo.b === 0 && !baixo.gizmo && Math.hypot(e.clientX - baixo.x, e.clientY - baixo.y) < 5 && e.target === tela) clicarCena(e);
       baixo = null;
@@ -318,10 +326,72 @@
     tela.addEventListener('wheel', e => { e.preventDefault(); const fr = new THREE.Vector3(); camera.getWorldDirection(fr); cam.pos.addScaledVector(fr, -Math.sign(e.deltaY) * Math.max(2, cam.pos.y * 0.12)); }, { passive: false });
     tela.addEventListener('keydown', e => { cam.teclas[e.code] = true; });
     addEventListener('keyup', e => { cam.teclas[e.code] = false; });
+    gestosDeToque(tela);
     addEventListener('blur', () => { cam.teclas = {}; cam.rmb = cam.mmb = false; });
     // arrastar modelos da caixa para a cena
     tela.addEventListener('dragover', e => { if (e.dataTransfer.types.includes('text/arcadia-modelo')) e.preventDefault(); });
     tela.addEventListener('drop', e => { const m = e.dataTransfer.getData('text/arcadia-modelo'); if (m) { e.preventDefault(); inserirModelo(m, pontoNaTela(e.clientX, e.clientY)); } });
+  }
+  /* ---------- toque (celular e tablet) ----------
+     1 dedo arrastando: gira a câmera em volta do ponto que está no meio da tela
+     2 dedos: arrastar move a câmera de lado, pinça aproxima e afasta
+     toque rápido: seleciona · segurar parado: seleciona e abre o menu do objeto
+     arrastar as setas do gizmo continua movendo/girando o objeto */
+  const frenteCam = () => new THREE.Vector3(-Math.sin(cam.yaw) * Math.cos(cam.pitch), Math.sin(cam.pitch), -Math.cos(cam.yaw) * Math.cos(cam.pitch));
+  function gestosDeToque(tela) {
+    const toques = new Map(); let g = null, segurar = 0;
+    const lista = () => [...toques.values()];
+    const centro = () => { const l = lista(); return [l.reduce((a, p) => a + p.x, 0) / l.length, l.reduce((a, p) => a + p.y, 0) / l.length]; };
+    const abertura = () => { const [a, b] = lista(); return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+    const alvoOlhado = () => { const p = new THREE.Vector3(...pontoDeInsercao()), d = cam.pos.distanceTo(p); return d > 1 && d < 800 ? p : cam.pos.clone().addScaledVector(frenteCam(), 25); };
+    const mundoPorPixel = d => 2 * d * Math.tan(camera.fov * Math.PI / 360) / (renderer.domElement.clientHeight || 1);
+    const cancelarSegurar = () => { clearTimeout(segurar); segurar = 0; };
+    tela.addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'touch') return;
+      toques.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (toques.size === 1) {
+        g = { tipo: gizmo.axis !== null ? 'gizmo' : 'um', x: e.clientX, y: e.clientY, t0: performance.now(), mov: 0, pivo: null, dist: 0 };
+        cancelarSegurar();
+        if (ehCena() && !jogando) segurar = setTimeout(() => {
+          segurar = 0; if (!g || g.mov >= 10 || toques.size !== 1) return;
+          // em cima do gizmo o objeto já está selecionado; fora dele, seleciona o que está sob o dedo
+          if (g.tipo === 'um') clicarCena({ clientX: g.x, clientY: g.y });
+          g.tipo = 'feito'; if (navigator.vibrate) navigator.vibrate(15);
+          if (sel.length) { protegerMenu(); menuObjeto(g.x, g.y); }
+        }, 550);
+      } else if (toques.size === 2 && g && g.tipo !== 'gizmo') {
+        cancelarSegurar(); const [cx, cy] = centro(), alvo = alvoOlhado();
+        g = { tipo: 'dois', cx, cy, ab: abertura(), dist: Math.max(2, cam.pos.distanceTo(alvo)), mov: 99 };
+      }
+    });
+    tela.addEventListener('pointermove', e => {
+      if (e.pointerType !== 'touch' || !toques.has(e.pointerId) || !g) return;
+      const ant = toques.get(e.pointerId), dx = e.clientX - ant.x, dy = e.clientY - ant.y;
+      toques.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (g.tipo === 'gizmo') { g.mov += Math.abs(dx) + Math.abs(dy); if (g.mov >= 10) cancelarSegurar(); return; }
+      if (g.tipo === 'um') {
+        g.mov += Math.abs(dx) + Math.abs(dy); if (g.mov < 10) return;
+        cancelarSegurar();
+        if (!g.pivo) { g.pivo = alvoOlhado(); g.dist = cam.pos.distanceTo(g.pivo); }
+        cam.yaw -= dx * 0.008; cam.pitch = Math.max(-1.5, Math.min(1.5, cam.pitch - dy * 0.006));
+        cam.pos.copy(g.pivo).addScaledVector(frenteCam(), -g.dist);
+      } else if (g.tipo === 'dois' && toques.size >= 2) {
+        const [cx, cy] = centro(), ab = abertura(), k = mundoPorPixel(g.dist);
+        const lado = new THREE.Vector3(Math.cos(cam.yaw), 0, -Math.sin(cam.yaw)), cima = new THREE.Vector3(0, 1, 0).applyQuaternion(camera.quaternion);
+        cam.pos.addScaledVector(lado, -(cx - g.cx) * k).addScaledVector(cima, (cy - g.cy) * k);
+        const passo = g.dist * (1 - g.ab / ab), andar = Math.min(passo, g.dist - 1.5);
+        cam.pos.addScaledVector(frenteCam(), andar); g.dist = Math.max(1.5, g.dist - andar);
+        g.cx = cx; g.cy = cy; g.ab = ab;
+      }
+    });
+    const fim = e => {
+      if (e.pointerType !== 'touch' || !toques.has(e.pointerId)) return;
+      toques.delete(e.pointerId); cancelarSegurar();
+      if (g && g.tipo === 'um' && g.mov < 10 && performance.now() - g.t0 < 550 && !toques.size && e.type === 'pointerup') clicarCena(e);
+      if (!toques.size) g = null;
+      else if (toques.size === 1 && g && g.tipo === 'dois') { const [p] = lista(); g = { tipo: 'um', x: p.x, y: p.y, t0: 0, mov: 99, pivo: null, dist: 0 }; }
+    };
+    tela.addEventListener('pointerup', fim); tela.addEventListener('pointercancel', fim);
   }
   function pontoNaTela(cx, cy) {
     const r = renderer.domElement.getBoundingClientRect();
@@ -604,7 +674,7 @@
   function renderProps() {
     const el = $('#props'); if (!proj) { el.innerHTML = ''; return; }
     if (!ehCena()) return renderPropsArquivo();
-    if (!sel.length) { el.innerHTML = `<div class="p-vazio">Selecione um objeto na cena ou no Explorer para ver as propriedades.<br><br><b>Dica:</b> clique com o botão direito no Explorer para inserir objetos.</div>`; return; }
+    if (!sel.length) { el.innerHTML = `<div class="p-vazio">Selecione um objeto na cena ou no Explorer para ver as propriedades.<br><br><b>Dica:</b> ${TOQUE ? 'segure o dedo' : 'clique com o botão direito'} no Explorer para inserir objetos.</div>`; return; }
     if (sel.length > 1) { el.innerHTML = `<div class="p-vazio">${sel.length} objetos selecionados.<br>Use a faixa “Início” para mudar cor e material de todos.</div>`; return; }
     const r = acharNo(sel[0]); if (!r) { el.innerHTML = ''; return; }
     const n = r.no, def = N.CLASSES[n.ClassName] || {};
@@ -726,12 +796,12 @@
     f.src = 'jogar.html?embed=1&studio=1';
     $('#vista-jogo').innerHTML = ''; $('#vista-jogo').appendChild(f); jogando = f;
     $('#faixa-jogo').classList.add('on'); gizmo && gizmo.detach(); mostrarVista();
-    saida('info', '▶ Jogo iniciado');
+    saida('info', '▶ Jogo iniciado'); marcarBarra();
     setTimeout(() => f.focus(), 400);
   }
   function pararJogo() {
     if (!jogando) return; jogando.remove(); jogando = null; $('#vista-jogo').innerHTML = '';
-    $('#faixa-jogo').classList.remove('on'); mostrarVista(); atualizarGizmo(); saida('info', '■ Jogo parado');
+    $('#faixa-jogo').classList.remove('on'); mostrarVista(); atualizarGizmo(); saida('info', '■ Jogo parado'); marcarBarra();
   }
   $('#btn-parar-jogo').addEventListener('click', pararJogo);
   window.addEventListener('message', e => {
@@ -1046,7 +1116,7 @@
     const C = Conta();
     modal(`<div class="m-cab"><h2>🛒 Marketplace</h2><button data-fechar>✕</button></div><div class="m-corpo">
       <div class="mk-abas">${[['item', '🧩 Itens'], ['personagem', '🧍 Personagens'], ['animacao', '💃 Animações']].map(([k, t]) => `<button class="btn ${k === tipo ? 'on' : ''}" data-mk="${k}">${t}</button>`).join('')}<span style="flex:1"></span><button class="btn" data-mkmeu>🧍 Meu personagem</button></div>
-      <p style="color:var(--fraco);font-size:12.5px;margin:0 0 10px">${tipo === 'item' ? 'Modelos prontos feitos pela comunidade. Para publicar um seu: botão direito num modelo do Explorer → <b>Publicar no Marketplace</b>.' : tipo === 'personagem' ? 'Personagens da comunidade: vista um e ele aparece nos jogos.' : 'Animações da comunidade: pegue e escolha em Meu personagem → Animações.'}</p>
+      <p style="color:var(--fraco);font-size:12.5px;margin:0 0 10px">${tipo === 'item' ? 'Modelos prontos feitos pela comunidade. Para publicar um seu: ' + (TOQUE ? 'segure o dedo' : 'botão direito') + ' num modelo do Explorer (ou na cena) → <b>Publicar no Marketplace</b>.' : tipo === 'personagem' ? 'Personagens da comunidade: vista um e ele aparece nos jogos.' : 'Animações da comunidade: pegue e escolha em Meu personagem → Animações.'}</p>
       <div id="mk-lista" class="mk-grade"><div style="color:var(--fraco2)">Carregando…</div></div><div id="mk-msg" style="margin-top:10px;font-weight:600"></div></div>`);
     const cx = $('#modal-caixa');
     cx.querySelectorAll('[data-mk]').forEach(b => b.onclick = () => telaMarketplace(b.dataset.mk));
@@ -1118,7 +1188,7 @@
   function renderCaixa() {
     const f = ($('#busca-cx').value || '').toLowerCase();
     const cats = ehCena() ? CAIXA : [{ cat: 'Começar de um modelo', itens: Object.entries(MODELOS_ARQ).map(([k, m]) => ({ k: 'arq:' + k, i: m.i, t: m.t })) }, { cat: 'Adicionar arquivo', itens: [{ k: 'novo:html', i: '🌐', t: 'HTML' }, { k: 'novo:css', i: '🎨', t: 'CSS' }, { k: 'novo:js', i: '📜', t: 'JavaScript' }, { k: 'novo:ts', i: '🔷', t: 'TypeScript' }, { k: 'novo:py', i: '🐍', t: 'Python' }, { k: 'novo:lua', i: '🌙', t: 'Lua' }, { k: 'novo:json', i: '🧾', t: 'JSON' }, { k: 'enviar', i: '⬆️', t: 'Enviar do PC' }] }];
-    $('#caixa').innerHTML = cats.map(c => { const it = c.itens.filter(i => !f || i.t.toLowerCase().includes(f)); return it.length ? `<div class="cx-cat">${esc(c.cat)}</div><div class="cx-grade">${it.map(i => `<button class="cx-item" data-cx="${i.k}" draggable="${ehCena() && !/^(script|ui|svc)/.test(i.k)}" title="${esc(i.d || i.t)}"><span>${i.i}</span>${esc(i.t)}</button>`).join('')}</div>` : ''; }).join('');
+    $('#caixa').innerHTML = (ehCena() && !f ? '<button class="cx-market" data-cx="marketplace"><span>🛒</span><div><b>Marketplace</b><small>Modelos prontos feitos por outras pessoas</small></div></button>' : '') + cats.map(c => { const it = c.itens.filter(i => !f || i.t.toLowerCase().includes(f)); return it.length ? `<div class="cx-cat">${esc(c.cat)}</div><div class="cx-grade">${it.map(i => `<button class="cx-item" data-cx="${i.k}" draggable="${ehCena() && !/^(script|ui|svc)/.test(i.k)}" title="${esc(i.d || i.t)}"><span>${i.i}</span>${esc(i.t)}</button>`).join('')}</div>` : ''; }).join('');
   }
   $('#busca-cx').addEventListener('input', renderCaixa);
   $('#caixa').addEventListener('click', e => {
@@ -1126,7 +1196,8 @@
     if (k.startsWith('arq:')) return criarProjeto('arquivos', MODELOS_ARQ[k.slice(4)].t, k.slice(4));
     if (k.startsWith('novo:')) { const ext = k.slice(5); const nome = prompt('Nome do arquivo:', (ext === 'py' || ext === 'lua' ? 'main.' : ext === 'html' ? 'pagina.' : 'novo.') + ext); if (nome) { const c = (pastaAtual() ? pastaAtual() + '/' : '') + nome; proj.arquivos[c] = { conteudo: MODELO_POR_EXT[ext] || '' }; registrar(); renderArvore(); abrirArquivo(c); } return; }
     if (k === 'enviar') return $('#in-arquivos').click();
-    inserirModelo(k);
+    if (k === 'marketplace') return acao('marketplace');
+    inserirModelo(k); fecharGavetas();
   });
   $('#caixa').addEventListener('dragstart', e => { const b = e.target.closest('[data-cx]'); if (b) e.dataTransfer.setData('text/arcadia-modelo', b.dataset.cx); });
   function inserirModelo(k, ponto) {
@@ -1490,6 +1561,53 @@ local p = script.Parent
 TS:Create(p, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
   { Position = p.Position + Vector3.new(0, 10, 0) }):Play()</pre>
   <h3>Referência</h3><pre style="white-space:pre-wrap">${esc(DOCS_TEXTO)}</pre>`;
+
+  /* ===================== Celular e tablet =====================
+     Tela pequena: a cena ocupa tudo e os painéis viram gavetas por cima dela,
+     abertas pela barra de baixo. Toque (dedo): botões e linhas maiores. */
+  const mqMovel = matchMedia('(max-width: 1000px), (max-height: 620px)');
+  function modoMovel() {
+    const movel = mqMovel.matches;
+    document.body.classList.toggle('movel', movel); document.body.classList.toggle('toque', TOQUE);
+    if (!movel) fecharGavetas();
+    window.dispatchEvent(new Event('resize'));
+  }
+  function fecharGavetas() { for (const c of ['ver-esq', 'ver-dir', 'ver-baixo']) document.body.classList.toggle(c, false); marcarBarra(); }
+  function gaveta(qual) {
+    const c = 'ver-' + qual, aberta = document.body.classList.contains(c);
+    fecharGavetas(); if (!aberta) document.body.classList.add(c);
+    marcarBarra(); window.dispatchEvent(new Event('resize'));
+  }
+  function marcarBarra() {
+    $$('#barra-movel [data-g]').forEach(b => b.classList.toggle('on', document.body.classList.contains('ver-' + b.dataset.g)));
+    const j = $('#barra-movel [data-m="jogar"]'); if (j) j.innerHTML = jogando ? '<span>■</span>Parar' : '<span>▶</span>Jogar';
+  }
+  $('#barra-movel').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.g) return gaveta(b.dataset.g);
+    const m = b.dataset.m; fecharGavetas();
+    if (m === 'jogar') { jogando ? pararJogo() : jogar(); setTimeout(marcarBarra, 50); }
+    else acao(m);
+  });
+  $$('.fechar-gaveta').forEach(b => b.addEventListener('click', fecharGavetas));
+  // na gaveta da direita, Explorer e Propriedades viram abas (não cabem as duas na tela do celular)
+  $$('[data-aba-dir]').forEach(b => b.addEventListener('click', () => {
+    $('#dir').classList.toggle('aba-props', b.dataset.abaDir === 'props');
+    $$('[data-aba-dir]').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  mqMovel.addEventListener('change', modoMovel); modoMovel();
+  // segurar o dedo numa linha do Explorer abre o menu (no iPhone não existe "botão direito")
+  {
+    let t = 0, ini = null;
+    $('#arvore').addEventListener('pointerdown', e => {
+      if (e.pointerType !== 'touch') return; ini = { x: e.clientX, y: e.clientY, alvo: e.target };
+      clearTimeout(t); t = setTimeout(() => { if (!ini || $('#menu').classList.contains('on')) return; protegerMenu(); ini.alvo.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: ini.x, clientY: ini.y })); ini = null; }, 600);
+    });
+    $('#arvore').addEventListener('pointermove', e => { if (ini && Math.hypot(e.clientX - ini.x, e.clientY - ini.y) > 10) { clearTimeout(t); ini = null; } });
+    const parar = () => { clearTimeout(t); ini = null; };
+    $('#arvore').addEventListener('pointerup', parar); $('#arvore').addEventListener('pointercancel', parar); $('#arvore').addEventListener('scroll', parar);
+    addEventListener('touchstart', e => { if (!e.target.closest('#menu')) fecharMenu(); }, { passive: true });
+  }
 
   /* ===================== Início ===================== */
   (async function iniciar() {

@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Arcádia Studio</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
@@ -184,7 +184,76 @@
   #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:200;background:#2a2f3c;border:1px solid var(--linha2);padding:8px 16px;border-radius:9px;opacity:0;transition:.25s;pointer-events:none}
   #toast.on{opacity:1}
   #arrastar-arquivos{position:absolute;inset:0;z-index:20;background:rgba(59,130,246,.18);border:2px dashed var(--azul);display:none;align-items:center;justify-content:center;font-size:18px;font-weight:600}
-  @media (max-width:900px){ #corpo{--esq:0px;--dir:250px} }
+
+  /* atalho do Marketplace na caixa */
+  .cx-market{display:flex;align-items:center;gap:10px;width:100%;margin:8px 0 2px;padding:9px 10px;text-align:left;border-radius:9px;border:1px solid #3d64a8;background:linear-gradient(135deg,#1e3a6b,#2a2350);line-height:1.25}
+  .cx-market span{font-size:24px} .cx-market b{display:block;font-size:12.5px} .cx-market small{color:var(--fraco);font-size:11px}
+  .cx-market:hover{border-color:var(--azul);filter:brightness(1.12)}
+  .menu{max-height:calc(100vh - 12px);overflow:auto}
+  #vista-cena canvas{touch-action:none;-webkit-user-select:none;user-select:none}
+  /* ---------- celular e tablet ---------- */
+  #barra-movel{display:none}
+  .fechar-gaveta{display:none}
+  body.movel #app{height:100dvh;grid-template-rows:auto auto minmax(0,1fr) auto}
+  body.movel #topo{overflow-x:auto;scrollbar-width:none;gap:4px;padding:0 6px;height:42px}
+  body.movel #topo::-webkit-scrollbar,body.movel #faixa::-webkit-scrollbar{display:none}
+  body.movel .logo{font-size:0;gap:0;margin-right:2px} body.movel .logo i{width:24px;height:24px}
+  body.movel .aba-r{padding:0 9px;height:42px;flex-shrink:0}
+  body.movel #nome-proj{width:110px;min-width:70px;flex-shrink:1;margin-left:auto;padding:4px 6px}
+  body.movel #salvo,body.movel #btn-mcp{display:none}
+  body.movel #topo .pilula,body.movel .btn-pri{flex-shrink:0}
+  body.movel #ir-plataforma b{display:none}
+  body.movel #faixa{min-height:0;padding:2px 4px;scrollbar-width:none}
+  body.movel .grupo{padding:0 4px} body.movel .grupo .rot{display:none}
+  body.movel .fb{min-width:50px;height:48px;font-size:10.5px}
+  body.movel #corpo{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr);position:relative}
+  body.movel #centro{grid-column:1;grid-row:1}
+  body.movel #esq,body.movel #dir,body.movel #baixo{grid-column:auto;grid-row:auto;position:absolute;z-index:30;display:none;box-shadow:0 0 0 100vmax rgba(0,0,0,.28),0 10px 40px rgba(0,0,0,.6);border:1px solid var(--linha2)}
+  body.movel .divisoria{display:none}
+  body.movel .fechar-gaveta{display:block;margin-left:auto;background:none;border:0;color:var(--fraco);font-size:18px;padding:0 6px;line-height:1}
+  body.movel.ver-esq #esq{display:flex;left:0;top:0;bottom:0;width:min(330px,86vw);border-radius:0 12px 12px 0}
+  body.movel.ver-dir #dir{display:flex;right:0;top:0;bottom:0;width:min(380px,92vw);border-radius:12px 0 0 12px}
+  body.movel.ver-baixo #baixo{display:flex;left:0;right:0;bottom:0;height:min(55%,340px);border-radius:12px 12px 0 0}
+  body.movel #dir .metade{flex:1 1 0!important;border-top:0!important}
+  .abas-gaveta{display:none}
+  body.movel .abas-gaveta{display:flex;align-items:center;gap:4px;padding:4px 4px 0;background:#14161c;border-bottom:1px solid var(--linha);flex-shrink:0}
+  .abas-gaveta button[data-aba-dir]{flex:1;height:34px;background:none;border:0;border-bottom:2px solid transparent;color:var(--fraco);font-weight:600}
+  .abas-gaveta button[data-aba-dir].on{color:var(--txt);border-bottom-color:var(--azul)}
+  body.movel #dir:not(.aba-props) #metade-props,body.movel #dir.aba-props #metade-exp{display:none}
+  body.movel #metade-exp>.cab{font-size:0;gap:0} body.movel #metade-exp>.cab .acoes{font-size:13px}
+  body.movel #metade-props>.cab{display:none}
+  .cab .acoes + .fechar-gaveta{margin-left:4px!important}
+  body.movel #barra-movel{display:flex;gap:2px;justify-content:space-around;align-items:stretch;background:#121419;border-top:1px solid var(--linha);padding:3px 4px calc(3px + env(safe-area-inset-bottom));overflow-x:auto;scrollbar-width:none}
+  #barra-movel button{flex:1 0 auto;min-width:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;height:46px;background:none;border:1px solid transparent;border-radius:9px;font-size:10.5px;color:var(--fraco);touch-action:manipulation}
+  #barra-movel button span{font-size:19px;line-height:1.1}
+  #barra-movel button.on{background:var(--sel);border-color:#3d64a8;color:var(--txt)}
+  #barra-movel button[data-m="jogar"] span{color:var(--verde)}
+  body.movel #info-cena{font-size:10.5px;right:8px;white-space:normal}
+  body.movel .modal-fundo{padding:8px} body.movel .modal{max-height:calc(100dvh - 16px)}
+  body.movel .modal .m-cab{padding:12px 14px} body.movel .modal .m-corpo{padding:12px 14px}
+  body.movel .linha2{grid-template-columns:1fr}
+  body.movel .mk-grade{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  /* celular em pé: o topo quebra em duas linhas (abas em cima; nome, conta e Publicar embaixo) */
+  @media (max-width:600px){
+    body.movel #topo{flex-wrap:wrap;height:auto;row-gap:0;overflow:visible;padding-bottom:4px}
+    body.movel .aba-r{height:36px;padding:0 8px}
+    body.movel #nome-proj{flex:1 1 120px;text-align:left;margin-left:0}
+    #barra-movel button{flex:1 1 0;min-width:0;font-size:9.5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  }
+  @media (max-height:430px){ body.movel #faixa .fb{height:40px;min-width:44px} body.movel #faixa .fb span.ic{font-size:17px} body.movel #barra-movel button{height:40px} body.movel #barra-movel button span{font-size:17px} }
+  /* dedo: alvos maiores e campos sem zoom automático do iPhone */
+  body.toque .no{height:34px} body.toque .no .seta{width:24px;font-size:11px}
+  body.toque .p-lin{min-height:36px}
+  body.toque .p-lin input[type=text],body.toque .p-lin input[type=number],body.toque .p-lin select{height:30px;font-size:16px}
+  body.toque .p-lin input[type=color]{width:38px;height:30px}
+  body.toque .p-lin input[type=checkbox]{width:22px;height:22px}
+  body.toque #filtro-exp,body.toque #busca-cx,body.toque #cmd{font-size:16px;padding:7px 10px}
+  body.toque .cab{height:36px} body.toque .cab .acoes button{padding:4px 10px;font-size:15px}
+  body.toque .cx-item{padding:10px 3px}
+  body.toque .menu button{padding:11px 12px;font-size:14px}
+  body.toque .campo input,body.toque .campo textarea,body.toque .campo select{font-size:16px}
+  body.toque .btn{height:38px}
+  body.toque .aba{padding:0 14px}
 </style>
 </head>
 <body>
@@ -199,14 +268,14 @@
     <input id="nome-proj" title="Nome do projeto" spellcheck="false">
     <span id="salvo"></span>
     <button class="pilula" id="btn-mcp" title="Conectar uma IA pelo MCP"><i></i><span>MCP</span></button>
-    <a class="pilula" href="../index.html" style="text-decoration:none;color:inherit">🏠 Plataforma</a>
+    <a class="pilula" id="ir-plataforma" href="../index.html" style="text-decoration:none;color:inherit">🏠<b style="font-weight:inherit"> Plataforma</b></a>
     <span id="conta-lugar"></span>
     <button class="btn-pri" id="btn-publicar">Publicar</button>
   </div>
   <div id="faixa"></div>
   <div id="corpo">
     <aside class="painel" id="esq">
-      <div class="cab" id="cab-esq">🧰 Caixa de ferramentas</div>
+      <div class="cab"><span id="cab-esq">🧰 Caixa de ferramentas</span><button class="fechar-gaveta" title="Fechar">✕</button></div>
       <input id="busca-cx" placeholder="Buscar…" spellcheck="false">
       <div id="caixa"></div>
     </aside>
@@ -222,22 +291,32 @@
       </div>
     </main>
     <aside class="painel" id="dir">
-      <div class="metade">
+      <div class="abas-gaveta"><button data-aba-dir="exp" class="on">🌳 Explorer</button><button data-aba-dir="props">⚙️ Propriedades</button><button class="fechar-gaveta" title="Fechar">✕</button></div>
+      <div class="metade" id="metade-exp">
         <div class="cab">🌳 Explorer<div class="acoes"><button id="exp-novo" title="Inserir objeto">＋</button><button id="exp-recolher" title="Recolher tudo">⊟</button></div></div>
         <input id="filtro-exp" placeholder="Filtrar…" spellcheck="false">
         <div id="arvore" tabindex="0"></div>
       </div>
-      <div class="metade">
+      <div class="metade" id="metade-props">
         <div class="cab">⚙️ Propriedades</div>
         <div id="props"></div>
       </div>
     </aside>
     <section class="painel" id="baixo">
-      <div class="cab">📟 Saída<div class="acoes"><button id="limpar-saida" title="Limpar">🧹</button></div></div>
+      <div class="cab">📟 Saída<div class="acoes"><button id="limpar-saida" title="Limpar">🧹</button></div><button class="fechar-gaveta" title="Fechar">✕</button></div>
       <div id="saida"></div>
       <div id="comando"><span>&gt;</span><input id="cmd" placeholder="Barra de comando (JavaScript com a API studio.*). Ex: studio.criar({classe:'Part', propriedades:{Color:'#ff0000'}})" spellcheck="false"></div>
     </section>
   </div>
+  <nav id="barra-movel">
+    <button data-g="esq"><span>🧰</span>Caixa</button>
+    <button data-m="marketplace"><span>🛒</span>Marketplace</button>
+    <button data-g="dir"><span>🌳</span>Explorer</button>
+    <button data-g="baixo"><span>📟</span>Saída</button>
+    <button data-m="focar"><span>🎯</span>Focar</button>
+    <button data-m="desfazer"><span>↶</span>Desfazer</button>
+    <button data-m="jogar"><span>▶</span>Jogar</button>
+  </nav>
 </div>
 
 <div class="menu" id="menu"></div>
@@ -247,11 +326,11 @@
 <input type="file" id="in-importar" accept=".zip,.json,.arcadia" hidden>
 <input type="file" id="in-pasta" webkitdirectory hidden>
 
-<script src="nucleo.js"></script>
-<script src="avatar.js"></script>
-<script src="personagem.js"></script>
-<script src="studio.js"></script>
-<script src="paineis.js"></script>
-<script src="../conta.js?v=1.2.0"></script>
+<script src="nucleo.js?v=1.4.0"></script>
+<script src="avatar.js?v=1.4.0"></script>
+<script src="personagem.js?v=1.4.0"></script>
+<script src="studio.js?v=1.4.0"></script>
+<script src="paineis.js?v=1.4.0"></script>
+<script src="../conta.js?v=1.4.0"></script>
 </body>
 </html>
