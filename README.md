@@ -92,7 +92,7 @@ Abra o `index.html` no navegador (Chrome, Edge ou Firefox). É preciso estar con
 
 ## Versões
 - A versão da plataforma aparece no rodapé (e a do app, quando aberto pelo app Android/Windows). Cada jogo mostra a própria versão na barra de cima ("Detetive · v1.2.0"), na ficha técnica e num selo no canto da tela do jogo.
-- Ao publicar uma mudança: aumente `window.ARCADIA_VERSAO` em `jogos.js`, `VERSAO_HTML` em `index.html` e `versao.json` (os três iguais). No jogo alterado, aumente `versao` em `jogos.js` e `window.VERSAO_JOGO` no fim do arquivo do jogo.
+- Ao publicar uma mudança: aumente `window.ARCADIA_VERSAO` em `jogos.js`, `VERSAO_HTML` em `index.html`, `window.VERSAO_STUDIO` em `studio/index.html` e `studio/jogar.html` (e o `?v=` dos scripts deles) e `versao.json` (todos iguais). O Studio também confere `versao.json` ao abrir e recarrega sozinho se estiver velho. No jogo alterado, aumente `versao` em `jogos.js` e `window.VERSAO_JOGO` no fim do arquivo do jogo.
 - O site confere `versao.json` sem cache ao abrir: se a página estiver velha, recarrega sozinho. Os jogos abrem com `?v=versão`, então o app nunca usa um arquivo antigo do cache.
 
 ## Adicionar um jogo novo
