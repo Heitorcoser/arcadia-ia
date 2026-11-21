@@ -6,7 +6,7 @@
 (function () {
   'use strict';
   // Endereço do servidor de contas (o link do Apps Script publicado, termina em /exec).
-  const URL_SERVIDOR = '';
+  const URL_SERVIDOR = 'https://script.google.com/macros/s/AKfycbyIWeeBdIRzWCH6vUNYJEhMcqHQtU_uzD4FpvRHJyuYUlwUydrcdUTp3N_9FCu7N6d6/exec';
   const servidor = () => { try { return localStorage.getItem('arcadia.contasUrl') || URL_SERVIDOR; } catch (e) { return URL_SERVIDOR; } };
   const CHAVE = 'arcadia.conta';
 
