@@ -145,6 +145,12 @@
     #quiz .resps{grid-template-columns:1fr;gap:4px;margin-top:4px}
     #quiz .resps div{font-size:14px;padding:3px 10px}
     #quiz .resps div b{font-size:15px;width:22px;height:22px}
+    #banner .ic{font-size:34px} #banner .num{font-size:12px} #banner h2{font-size:26px;margin:0 0 4px}
+    #banner .regra{font-size:13px;padding:5px 12px;border-radius:14px} #banner .cont{font-size:42px;margin-top:4px} #banner .meta{font-size:12px;margin-top:4px}
+    #fala{bottom:8px} #fala .rob{font-size:26px} #fala .txt{font-size:13.5px;padding:4px 10px}
+    .caixa{padding:14px 18px;border-radius:20px} .logo .sino{font-size:30px} .logo h1{font-size:38px} .logo .sub{font-size:12px;margin-top:2px}
+    .provas-mini{margin:8px 0 2px} .provas-mini div{padding:4px 2px;font-size:10.5px} .provas-mini div span{font-size:17px}
+    label.r{margin:8px 0 4px} .campo{height:40px} .btn{height:44px} .grade2{margin-top:10px} .rostos button{width:36px;height:36px;font-size:19px}
   }
   @media (max-width:640px){
     .provas-mini{grid-template-columns:repeat(3,1fr)}
@@ -1034,7 +1040,7 @@ setInterval(() => {
 const cv = $('#cv'), ctx = cv.getContext('2d');
 let VW = 0, VH = 0, DPR = 1;
 function redim() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight; cv.width = VW * DPR; cv.height = VH * DPR; }
-addEventListener('resize', redim); redim();
+addEventListener('resize', redim); addEventListener('orientationchange', () => setTimeout(redim, 250)); redim();
 const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
 const spr = new Map();
 function sprite(e) { let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
@@ -1100,12 +1106,13 @@ function desenhar(V, dt) {
   const livre = id === 'quiz' && V.f === 'jogo' ? areaLivreQuiz() : null;
   const topo = livre ? 0 : (id === 'memoria' && V.f === 'jogo') ? 110 : 0;
   if (livre) zAlvo = Math.min(livre.w / (A.w * 2 + 40), livre.h / (A.h * 2 + 40));
-  else if (topo) zAlvo = Math.min(VW / (A.w * 2 + 100), (VH - topo - 90) / (A.h * 2 + 60));
-  zAlvo = clamp(zAlvo, livre ? 0.1 : 0.28, 1.6);
+  const baixo = DEITADO.matches ? 12 : 90;
+  if (!livre && topo) zAlvo = Math.min(VW / (A.w * 2 + 100), (VH - topo - baixo) / (A.h * 2 + 60));
+  zAlvo = clamp(zAlvo, livre || topo ? 0.1 : 0.28, 1.6);
   let tx = 0, ty = 0;
   if (foco && !inteira) { tx = foco.x * 0.75; ty = foco.y * 0.75; } else if (foco && inteira && !topo && !livre) { tx = foco.x * 0.12; ty = foco.y * 0.12; }
   if (livre) { tx = (VW / 2 - livre.cx) / zAlvo; ty = (VH / 2 - livre.cy) / zAlvo; }
-  if (topo) ty = -(topo / 2) / Math.max(zAlvo, 0.2);
+  if (topo) ty = (baixo - topo) / 2 / zAlvo;
   cam.z = lerp(cam.z, zAlvo, Math.min(1, dt * 3)); cam.x = lerp(cam.x, tx, Math.min(1, dt * 4)); cam.y = lerp(cam.y, ty, Math.min(1, dt * 4));
   void tamArena;
 

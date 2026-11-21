@@ -1473,7 +1473,7 @@ const cv = $('#cv'), ctx = cv.getContext('2d');
 let DPR = 1, S = null, cam = { x: W / 2, y: H / 2, z: 1 }, tremor = 0;
 const vis = new Map(), particulas = [];
 function redimensionar() { DPR = Math.min(window.devicePixelRatio || 1, 2); cv.width = innerWidth * DPR; cv.height = innerHeight * DPR; cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px'; }
-addEventListener('resize', redimensionar); redimensionar();
+addEventListener('resize', redimensionar); addEventListener('orientationchange', () => setTimeout(redimensionar, 250)); redimensionar();
 const SPR = new Map();
 const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
 function spr(e) {

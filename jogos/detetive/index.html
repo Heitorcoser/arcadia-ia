@@ -117,6 +117,26 @@
     .papeis{grid-template-columns:1fr}
     .tres{grid-template-columns:1fr 1fr}
   }
+  /* tela deitada (celular/tablet baixo): HUD compacto */
+  @media (max-height:520px){
+    #papel{width:210px;top:54px;font-size:11.5px;padding:6px 9px} #papel .t{font-size:14px} #papel .t span{font-size:18px} #papel .desc{display:none}
+    #papel .dis{margin-top:3px;padding:3px 7px}
+    #pistas{width:240px;max-height:32vh;top:auto;bottom:8px;font-size:11px;padding:6px 9px}
+    #topo-centro{top:8px;left:50%;right:auto;transform:translateX(-50%);flex-direction:row;align-items:center}
+    #relogio{font-size:17px;min-width:60px} #placar{font-size:12px}
+    #mapa{display:block;width:150px;height:auto;top:8px}
+    #feed{bottom:auto;top:110px;font-size:12px}
+    #dica{bottom:10px;font-size:12.5px}
+    #banner{top:50%} .cartao{padding:12px 16px;border-radius:18px} .cartao .ic{font-size:40px} .cartao h2{font-size:28px} .cartao p{font-size:13.5px;margin-top:3px}
+    #lobby{bottom:8px;padding:8px 10px} #lobby .cod{font-size:24px}
+    #bt-a{width:80px;height:80px;bottom:16px;right:16px} #bt-q{width:62px;height:62px;right:104px;bottom:24px}
+    #joy{width:110px;height:110px}
+    .caixa{padding:14px 16px;border-radius:18px} .logo .lupa{font-size:30px} .logo h1{font-size:36px} .logo .sub{margin-top:2px;font-size:13px}
+    .papeis{margin:10px 0 2px;gap:6px} .papeis div{padding:6px;font-size:11.5px} .papeis div span{font-size:20px} .papeis div b{font-size:13.5px}
+    label.r{margin:8px 0 4px} .campo{height:40px} .btn{height:44px} .grade2{margin-top:10px}
+  }
+  @media (max-width:700px){ #hud.cams #topo-centro{flex-direction:row;top:54px;right:auto;left:50%;transform:translateX(-50%)} }
+  #hud.cams #papel,#hud.cams #pistas,#hud.cams #mapa,#hud.cams #feed,#hud.cams #dica{display:none!important}
 </style>
 </head>
 <body>
@@ -789,7 +809,7 @@ setInterval(() => {
 const cv = $('#cv'), ctx = cv.getContext('2d'), mapa = $('#mapa'), mctx = mapa.getContext('2d');
 let VW = 0, VH = 0, DPR = 1;
 function redim() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH = innerHeight; cv.width = VW * DPR; cv.height = VH * DPR; }
-addEventListener('resize', redim); redim();
+addEventListener('resize', redim); addEventListener('orientationchange', () => setTimeout(redim, 250)); redim();
 const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
 const spr = new Map();
 function sprite(e) { let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
@@ -919,12 +939,19 @@ function desenhar(V, dt) {
 }
 // painel da Sala de Segurança: as 10 lojas ao vivo
 function desenharCameras(V, T) {
-  const pv = V.pv || {}, lojas = SALAS.filter(s => s.tipo === 'loja'), cols = VW < 700 ? 2 : 5, rows = Math.ceil(lojas.length / cols);
-  const pw = Math.min(VW - 24, 980), gap = 8, tw = (pw - gap * (cols + 1)) / cols, th = tw * 0.8, ph = rows * th + gap * (rows + 1) + 38;
-  const x0 = (VW - pw) / 2, y0 = Math.max(60, (VH - ph) / 2);
+  const pv = V.pv || {}, lojas = SALAS.filter(s => s.tipo === 'loja'), gap = 8;
+  // escolhe quantas colunas deixam as câmeras maiores sem sair da tela (em pé, deitado, tablet…)
+  const topo = VW <= 700 ? 100 : 52, livreW = Math.min(VW - 16, 980), livreH = VH - topo - 8;
+  let cols = 5, tw = 0;
+  for (const c of [2, 3, 4, 5]) {
+    const r = Math.ceil(lojas.length / c), wMax = (livreW - gap * (c + 1)) / c, hMax = (livreH - 38 - gap * (r + 1)) / r / 0.8, t = Math.min(wMax, hMax);
+    if (t > tw) { tw = t; cols = c; }
+  }
+  const rows = Math.ceil(lojas.length / cols), th = tw * 0.8, pw = tw * cols + gap * (cols + 1), ph = rows * th + gap * (rows + 1) + 38;
+  const x0 = (VW - pw) / 2, y0 = topo + Math.max(0, (livreH - ph) / 2);
   ctx.fillStyle = 'rgba(5,8,14,.93)'; ctx.strokeStyle = '#60a5fa'; ctx.lineWidth = 2; ctx.beginPath(); ctx.roundRect(x0, y0, pw, ph, 14); ctx.fill(); ctx.stroke();
   ctx.font = '800 15px "Baloo 2",sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = '#93c5fd'; ctx.fillText('📹 Câmeras de segurança · ao vivo', x0 + 14, y0 + 24);
-  ctx.textAlign = 'right'; ctx.fillStyle = '#a9b1c4'; ctx.font = '700 12.5px "Baloo 2",sans-serif'; ctx.fillText('afaste-se do painel para fechar', x0 + pw - 14, y0 + 24);
+  ctx.textAlign = 'right'; ctx.fillStyle = '#a9b1c4'; ctx.font = '700 12.5px "Baloo 2",sans-serif'; if (pw >= 560) ctx.fillText('afaste-se do painel para fechar', x0 + pw - 14, y0 + 24);
   const it = V.it || ''; let n = 0; const idxItem = {}; for (const s of lojas) s.vitrines.forEach((_, k) => { idxItem[s.i + ':' + k] = n++; });
   lojas.forEach((s, i) => {
     const cx = x0 + gap + (i % cols) * (tw + gap), cy = y0 + 38 + gap + Math.floor(i / cols) * (th + gap), k = Math.min(tw / s.w, th / s.h);
@@ -1026,6 +1053,7 @@ function atualizarHUD(V, dt) {
   alarmeT = Math.max(0, alarmeT - dt); $('#alarme').classList.toggle('on', alarmeT > 0 && Math.sin(performance.now() / 120) > 0);
   hudT -= dt; if (hudT > 0) return; hudT = 0.1;
   const pv = V.pv || {}, P = PAPEL[pv.pl], emJogo = V.f === 'jogo' || V.f === 'papel';
+  $('#hud').classList.toggle('cams', !!(pv.cam && V.f === 'jogo')); // painel de câmeras aberto: some o resto do HUD
   $('#relogio').textContent = V.f === 'jogo' ? mmss(V.tr) : V.f === 'papel' ? '…' : '—';
   $('#relogio').style.color = V.f === 'jogo' && V.tr < 60 ? '#fca5a5' : '';
   $('#placar').innerHTML = emJogo || V.f === 'fim' ? `🛍️ ${V.nr}/${V.me} roubos · 🚔 ${V.lp}/${V.lt} presos` : `👥 ${V.js.size} no shopping`;
@@ -1033,7 +1061,7 @@ function atualizarHUD(V, dt) {
   if (P && emJogo) {
     const dis = infoId(pv.dis);
     $('#papel').style.display = 'block'; $('#papel').style.borderColor = P.cor + '88';
-    $('#papel').innerHTML = `<div class="t"><span>${P.ic}</span>${P.nome}${pv.pr ? ' · preso' : ''}</div><div style="color:var(--muted)">${P.obj.replace('{meta}', V.me)}</div>
+    $('#papel').innerHTML = `<div class="t"><span>${P.ic}</span>${P.nome}${pv.pr ? ' · preso' : ''}</div><div class="desc" style="color:var(--muted)">${P.obj.replace('{meta}', V.me)}</div>
       <div class="dis">Seu disfarce: ${dis.rosto} ${esc(dis.nome)}</div>${pv.pl === 'detetive' ? `<div class="ins" title="Distintivos">${'⭐'.repeat(pv.ins)}${'·'.repeat(2 - pv.ins)}</div>` : ''}
       ${pv.pl === 'ladrao' && (pv.socios || []).length ? `<div style="margin-top:4px;color:#fca5a5">Seus parceiros têm contorno vermelho 🦹</div>` : ''}
       ${pv.pl === 'ladrao' ? `<div style="margin-top:4px">📷 Burlar câmera: ${pv.ch2 > 0 ? `<span style="color:var(--muted)">(${Math.ceil(pv.ch2)}s)</span>` : '✅'}${(pv.hk || []).length ? ` · em loop: ${pv.hk.map(i => SALAS[i].ic).join(' ')}` : ''}</div>` : ''}
