@@ -27,11 +27,14 @@ function doPost(e) {
     var fn = ACOES[req.acao];
     if (!fn) throw erro('Ação desconhecida.');
     var lock = LockService.getScriptLock();
-    lock.waitLock(25000);
+    // muitos pedidos ao mesmo tempo (ex.: salvar na nuvem enquanto publica): espera a vez; se demorar demais, avisa
+    if (!lock.tryLock(28000)) throw erro('O servidor está ocupado agora. Tente de novo em alguns segundos.');
     try { resp = fn(req); } finally { lock.releaseLock(); }
     resp.ok = true;
   } catch (err) {
-    resp = { ok: false, erro: err && err.publico ? err.message : 'Erro no servidor. Tente de novo.' };
+    // erro interno: manda um resumo curto junto, para dar para saber o que houve sem abrir os registros
+    var det = err && !err.publico ? String(err.message || err).replace(/\s+/g, ' ').slice(0, 140) : '';
+    resp = { ok: false, erro: err && err.publico ? err.message : 'Erro no servidor. Tente de novo.' + (det ? ' (' + det + ')' : '') };
     if (err && err.extra) for (var k in err.extra) resp[k] = err.extra[k];
     if (!(err && err.publico)) console.error(err && err.stack || err);
   }
@@ -268,6 +271,8 @@ function gravarBlob(chave, texto) {
   var valores = [chave, partes.length].concat(partes);
   if (l < 0) { sh.appendRow(valores); return; }
   var larg = Math.max(sh.getLastColumn(), valores.length), linha = [];
+  // a aba nasce com 26 colunas: um dado que cresce (passa de ~1 MB) precisa de colunas novas antes de escrever
+  var max = sh.getMaxColumns(); if (larg > max) sh.insertColumnsAfter(max, larg - max);
   for (var k = 0; k < larg; k++) linha.push(k < valores.length ? valores[k] : '');
   sh.getRange(l, 1, 1, larg).setValues([linha]);
 }

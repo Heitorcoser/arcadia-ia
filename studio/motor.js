@@ -446,6 +446,9 @@
 
     /* ---------------- Jogador e personagem ---------------- */
     let jogador = null, personagem = null, humanoide = null, raiz = null;
+    // avatar do jogador (criador de personagem do Studio): corpo com juntas e animações
+    const AV = N.avatar ? N.avatar.normalizar(opcoes.avatar || null) : null;
+    let avatarObj = null, animAv = null;
     const corpo = {}; // partes visuais
     const estado = { pos: new THREE.Vector3(0, 5, 0), vel: new THREE.Vector3(), chao: false, plataforma: null, yaw: 0, morto: false, animT: 0, pulando: false };
     const DIM = { w: 2, h: 5, d: 1.4 };
@@ -459,10 +462,11 @@
       personagem = new Inst('Model', jogador.Name, {}); jogador.personagem = personagem;
       const limb = (nome, tam, cor) => { const l = new Inst('__Limb', nome, { Position: [0, 0, 0], Size: tam, Orientation: [0, 0, 0], Color: cor, Material: 'SmoothPlastic', Transparency: 0, Anchored: true, CanCollide: false, Shape: 'Block', CastShadow: true }); l.pai = personagem; personagem.filhos.push(l); return l; };
       raiz = limb('HumanoidRootPart', [2, 2, 1], '#ffffff'); raiz.props.Transparency = 1;
-      corpo.cabeca = limb('Head', [1.2, 1.2, 1.2], '#ffcf9e');
-      corpo.tronco = limb('Torso', [2, 2, 1], opcoes.corCamisa || '#3b82f6');
-      corpo.be = limb('Left Arm', [1, 2, 1], '#ffcf9e'); corpo.bd = limb('Right Arm', [1, 2, 1], '#ffcf9e');
-      corpo.pe = limb('Left Leg', [1, 2, 1], opcoes.corCalca || '#1e3a8a'); corpo.pd = limb('Right Leg', [1, 2, 1], opcoes.corCalca || '#1e3a8a');
+      const pele = AV ? AV.pele : '#ffcf9e', camisa = AV ? AV.camisa : (opcoes.corCamisa || '#3b82f6'), calca = AV ? AV.calca : (opcoes.corCalca || '#1e3a8a');
+      corpo.cabeca = limb('Head', [1.2, 1.2, 1.2], pele);
+      corpo.tronco = limb('Torso', [2, 2, 1], camisa);
+      corpo.be = limb('Left Arm', [1, 2, 1], pele); corpo.bd = limb('Right Arm', [1, 2, 1], pele);
+      corpo.pe = limb('Left Leg', [1, 2, 1], calca); corpo.pd = limb('Right Leg', [1, 2, 1], calca);
       humanoide = new Inst('Humanoid', 'Humanoid', { Health: 100, MaxHealth: 100, WalkSpeed: players.props.CharacterWalkSpeed ?? 16, JumpPower: players.props.CharacterJumpPower ?? 50 });
       humanoide.pai = personagem; personagem.filhos.push(humanoide);
       personagem.pai = workspace; workspace.filhos.push(personagem);
@@ -470,7 +474,9 @@
       // rosto
       const cab = malhas.get(corpo.cabeca); const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); g.fillStyle = '#222'; g.fillRect(18, 22, 7, 10); g.fillRect(39, 22, 7, 10); g.lineWidth = 4; g.strokeStyle = '#222'; g.beginPath(); g.arc(32, 36, 12, 0.2, Math.PI - 0.2); g.stroke();
       const rosto = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true })); rosto.position.z = -0.51; rosto.rotation.y = Math.PI; cab.add(rosto);
-      estado.morto = false; estado.vel.set(0, 0, 0);
+      if (avatarObj) { cena.remove(avatarObj.grupo); avatarObj.dispose(); avatarObj = null; }
+      if (AV) { avatarObj = N.avatar.construir(THREE, AV); cena.add(avatarObj.grupo); animAv = N.avatar.animador(AV); animAv.definir('parado'); }
+      estado.morto = false; estado.vel.set(0, 0, 0); estado.emote = false;
       posicionarNoSpawn();
       jogador.sinal('CharacterAdded').Fire(personagem.p);
       personagem.ff = true; agendar(2, () => { if (personagem) personagem.ff = false; });
@@ -485,6 +491,8 @@
     function morrer(h) {
       if (h !== humanoide || estado.morto) return;
       estado.morto = true; h.sinal('Died').Fire(); som('lose');
+      if (avatarObj) avatarObj.grupo.visible = false; // as partes "de bloco" (com as cores do avatar) se desmontam
+      for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const m = malhas.get(corpo[k]); if (m) m.visible = true; }
       for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const l = corpo[k]; l.vel = [(Math.random() - 0.5) * 30, 15 + Math.random() * 20, (Math.random() - 0.5) * 30]; l.rotVel = [(Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10, (Math.random() - 0.5) * 10]; }
       agendar(players.props.RespawnTime ?? 3, renascer);
     }
@@ -629,9 +637,45 @@
       const btP = zona.querySelector('.as-pular'), jEl = zona.querySelector('.as-joy');
       btP.addEventListener('touchstart', e => { teclas.Space = true; ctxAudio(); e.preventDefault(); e.stopPropagation(); }, { passive: false });
       btP.addEventListener('touchend', e => { teclas.Space = false; e.preventDefault(); });
-      zona.addEventListener('touchstart', e => { for (const t of e.changedTouches) { if (t.target === btP) continue; if (t.clientX < innerWidth * 0.45 && joy.id === null) { Object.assign(joy, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 }); jEl.style.display = 'block'; jEl.style.left = t.clientX + 'px'; jEl.style.top = t.clientY + 'px'; } else if (olhar.id === null) Object.assign(olhar, { id: t.identifier, x: t.clientX, y: t.clientY }); } e.preventDefault(); }, { passive: false });
-      zona.addEventListener('touchmove', e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy); if (d > 50) { dx *= 50 / d; dy *= 50 / d; } joy.x = dx / 50; joy.y = dy / 50; jEl.firstChild.style.transform = `translate(${dx}px,${dy}px)`; } else if (t.identifier === olhar.id) { estado.yaw -= (t.clientX - olhar.x) * 0.008; pitch = Math.max(-1.2, Math.min(1.35, pitch + (t.clientY - olhar.y) * 0.006)); olhar.x = t.clientX; olhar.y = t.clientY; } } e.preventDefault(); }, { passive: false });
-      const fim = e => { for (const t of e.changedTouches) { if (t.identifier === joy.id) { joy.id = null; joy.x = joy.y = 0; jEl.style.display = 'none'; } if (t.identifier === olhar.id) olhar.id = null; } };
+      // lado esquerdo: joystick · lado direito: arrastar olha em volta, 2 dedos fazem pinça (zoom),
+      // toque rápido clica no mundo (ClickDetector), como o clique do mouse
+      const dedos = new Map(); let pinca = 0;
+      const doisDedos = () => { const l = [...dedos.values()]; return l.length >= 2 ? Math.hypot(l[0].x - l[1].x, l[0].y - l[1].y) || 1 : 0; };
+      zona.addEventListener('touchstart', e => {
+        ctxAudio();
+        for (const t of e.changedTouches) {
+          if (t.target === btP) continue;
+          if (t.clientX < innerWidth * 0.45 && joy.id === null) { Object.assign(joy, { id: t.identifier, ox: t.clientX, oy: t.clientY, x: 0, y: 0 }); jEl.style.display = 'block'; jEl.style.left = t.clientX + 'px'; jEl.style.top = t.clientY + 'px'; continue; }
+          dedos.set(t.identifier, { x: t.clientX, y: t.clientY, x0: t.clientX, y0: t.clientY, t0: performance.now(), mov: 0 });
+          if (olhar.id === null) Object.assign(olhar, { id: t.identifier, x: t.clientX, y: t.clientY });
+          if (dedos.size === 2) pinca = doisDedos();
+        }
+        e.preventDefault();
+      }, { passive: false });
+      zona.addEventListener('touchmove', e => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === joy.id) { let dx = t.clientX - joy.ox, dy = t.clientY - joy.oy; const d = Math.hypot(dx, dy); if (d > 50) { dx *= 50 / d; dy *= 50 / d; } joy.x = dx / 50; joy.y = dy / 50; jEl.firstChild.style.transform = `translate(${dx}px,${dy}px)`; continue; }
+          const f = dedos.get(t.identifier); if (!f) continue;
+          f.mov += Math.abs(t.clientX - f.x) + Math.abs(t.clientY - f.y); f.x = t.clientX; f.y = t.clientY;
+        }
+        if (dedos.size >= 2) { const d = doisDedos(); if (pinca) distCam = Math.max(0.5, Math.min(80, distCam * pinca / d)); pinca = d; }
+        else if (olhar.id !== null && dedos.has(olhar.id)) { const f = dedos.get(olhar.id); estado.yaw -= (f.x - olhar.x) * 0.008; pitch = Math.max(-1.2, Math.min(1.35, pitch + (f.y - olhar.y) * 0.006)); olhar.x = f.x; olhar.y = f.y; }
+        e.preventDefault();
+      }, { passive: false });
+      const fim = e => {
+        for (const t of e.changedTouches) {
+          if (t.identifier === joy.id) { joy.id = null; joy.x = joy.y = 0; jEl.style.display = 'none'; continue; }
+          const f = dedos.get(t.identifier); if (!f) continue; dedos.delete(t.identifier);
+          if (e.type === 'touchend' && f.mov < 12 && performance.now() - f.t0 < 350 && !pinca) {
+            cliqueNoMundo(t.clientX, t.clientY);
+            // quem olha o InputBegan (UserInputService) também recebe o toque, como um clique
+            uis.sinal('InputBegan').Fire(objInput('MouseButton1', 'MouseButton1'), false);
+          }
+          if (t.identifier === olhar.id) { olhar.id = null; const outro = [...dedos.entries()][0]; if (outro) Object.assign(olhar, { id: outro[0], x: outro[1].x, y: outro[1].y }); }
+        }
+        if (dedos.size < 2) pinca = dedos.size ? -1 : 0; // -1: ainda não pode virar toque-clique
+        if (!dedos.size) pinca = 0;
+      };
       zona.addEventListener('touchend', fim); zona.addEventListener('touchcancel', fim);
     }
 
@@ -872,7 +916,16 @@ end
       [x, z] = off(-0.5, 0); set(corpo.pe, x, p.y + 1, z, -s, yaw);
       [x, z] = off(0.5, 0); set(corpo.pd, x, p.y + 1, z, s, yaw);
       const vis = distCam > 1.5;
-      for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const m = malhas.get(corpo[k]); if (m) m.visible = vis; }
+      for (const k of ['cabeca', 'tronco', 'be', 'bd', 'pe', 'pd']) { const m = malhas.get(corpo[k]); if (m) m.visible = vis && !avatarObj; }
+      if (avatarObj) {
+        const vh = Math.hypot(estado.vel.x, estado.vel.z);
+        if (teclas.G && !estado.gAnt) estado.emote = !estado.emote; estado.gAnt = !!teclas.G;
+        if (vh > 1 || !estado.chao) estado.emote = false;
+        animAv.definir(!estado.chao ? 'pular' : vh > 1 ? 'andar' : estado.emote ? 'emote' : 'parado');
+        const pose = animAv.passo(dt, vh > 1 && estado.chao ? Math.max(0.6, vh / 16) : 1);
+        avatarObj.grupo.position.set(p.x, p.y, p.z); avatarObj.grupo.rotation.y = yaw;
+        avatarObj.aplicar(pose); avatarObj.grupo.visible = vis;
+      }
     }
     const alvoCam = new THREE.Vector3();
     function loop(agora) {
