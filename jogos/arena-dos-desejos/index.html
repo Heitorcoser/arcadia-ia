@@ -1770,7 +1770,7 @@ function lerInput() {
    MENU
    ===================================================================== */
 let meuRosto = ROSTOS[0];
-try { meuRosto = localStorage.getItem('desejos.rosto') || ROSTOS[Math.floor(Math.random() * ROSTOS.length)]; $('#nome').value = localStorage.getItem('desejos.nome') || ''; } catch (e) {}
+try { meuRosto = localStorage.getItem('desejos.rosto') || ROSTOS[Math.floor(Math.random() * ROSTOS.length)]; $('#nome').value = localStorage.getItem('desejos.nome') || (((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || '').slice(0, 14); } catch (e) {}
 const meuNome = () => ($('#nome').value.replace(/[<>]/g, '').trim() || 'Você').slice(0, 14);
 $('#rostos').innerHTML = ROSTOS.map(r => `<button type="button" class="${r === meuRosto ? 'sel' : ''}">${r}</button>`).join('');
 $('#rostos').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; meuRosto = b.textContent; [...$('#rostos').children].forEach(x => x.classList.toggle('sel', x === b)); });

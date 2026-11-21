@@ -1480,7 +1480,7 @@ function enviarAoHost() { if (conn && conn.open) try { conn.send({ t: 'i', ...le
    ===================================================================== */
 let meuRosto = localStorage.getItem('gongo.rosto') || pick(ROSTOS);
 function meuNome() { return ($('#nome').value.trim() || 'Você').slice(0, 14); }
-$('#nome').value = localStorage.getItem('gongo.nome') || '';
+$('#nome').value = localStorage.getItem('gongo.nome') || (() => { try { return ((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || ''; } catch (e) { return ''; } })().slice(0, 14);
 $('#total').value = localStorage.getItem('gongo.total') || '30';
 $('#provas-mini').innerHTML = PROVAS.map(p => `<div class="${p.final ? 'fin' : ''}"><span>${p.icone}</span>${p.final ? 'Final: ' : ''}${p.nome.replace('Guerra de ', '')}</div>`).join('');
 function renderRostos() { $('#rostos').innerHTML = ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
