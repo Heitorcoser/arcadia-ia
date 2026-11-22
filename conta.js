@@ -106,6 +106,17 @@
   .ct-pub b{display:block;font-size:13.5px} .ct-pub small{color:var(--muted,#9696ab)} .ct-pub span.tx{flex:1;min-width:0}
   .ct-pub button{border:0;background:none;color:var(--muted,#9696ab);cursor:pointer;font-size:15px}
   #conta-lugar .ct-btn{height:28px;font-size:12.5px;border-radius:7px} #conta-lugar .ct-btn .av{width:20px;height:20px;font-size:11px;border-radius:6px}
+  .ct-btn{position:relative}
+  .ct-badge{position:absolute;top:-7px;right:-7px;min-width:19px;height:19px;border-radius:10px;background:#ef4444;color:#fff;font:800 11px Inter,system-ui,sans-serif;display:grid;place-items:center;padding:0 5px;box-shadow:0 0 0 2px var(--bg,#0a0a0f)}
+  .ct-amg{display:grid;gap:6px;max-height:260px;overflow:auto}
+  .ct-amg>div{display:flex;align-items:center;gap:10px;background:var(--bg,#0a0a0f);border:1px solid var(--line,#262634);border-radius:11px;padding:7px 9px;font-size:13px}
+  .ct-amg .av{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;font-weight:800;position:relative;flex-shrink:0}
+  .ct-amg .av i{position:absolute;right:-3px;bottom:-3px;width:11px;height:11px;border-radius:50%;background:#52525b;border:2px solid var(--bg,#0a0a0f)} .ct-amg .av i.on{background:#22c55e}
+  .ct-amg .tx{flex:1;min-width:0} .ct-amg .tx b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .ct-amg .tx small{color:var(--muted,#9696ab)}
+  .ct-amg button{height:32px;border-radius:9px;border:1px solid var(--line2,#33334a);background:var(--surface2,#1a1a25);color:inherit;font:600 12.5px Inter,system-ui,sans-serif;cursor:pointer;padding:0 10px;flex-shrink:0}
+  .ct-amg button.ok{background:#22c55e;border-color:transparent;color:#052e12} .ct-amg button:disabled{opacity:.55;cursor:default}
+  .ct-cod{font:700 19px "Space Grotesk",ui-monospace,monospace;letter-spacing:3px;color:#fcd34d}
+  .ct-vazio{color:var(--muted,#9696ab);font-size:13px}
   @media (max-width:520px){ .ct-btn span.nm{display:none} .ct-codigo input{width:40px;height:50px} }`;
 
   function montar() {
@@ -120,10 +131,16 @@
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && f.classList.contains('on')) fechar(); });
     atualizarBotao();
     const c = ler(); if (c) api('eu', { token: c.token }).then(j => { c.usuario = j.usuario; gravar(c); atualizarBotao(); }).catch(() => {});
+    // presença: avisa que está on-line (e em qual jogo) e descobre se chegaram pedidos de amizade
+    if (/\/studio\//.test(location.pathname)) jogoAtual = 'Arcádia Studio';
+    presenca(); setInterval(() => { if (!document.hidden) presenca(); }, 120000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) presenca(); });
   }
+  let jogoAtual = '', pedidosPend = 0;
+  function presenca() { const c = ler(); if (!c || !servidor()) return; api('presenca', { token: c.token, jogo: jogoAtual }).then(j => { pedidosPend = j.pedidos || 0; atualizarBotao(); }).catch(() => {}); }
   function atualizarBotao() {
     const b = $('#ct-btn'); if (!b) return; const c = ler();
-    if (c && c.usuario) { b.classList.remove('sem'); b.innerHTML = `<span class="av">${esc((c.usuario.nome || '?')[0].toUpperCase())}</span><span class="nm">${esc(c.usuario.nome)}<span class="ct-verif" title="Conta verificada">✓</span></span>`; b.title = 'Minha conta (verificada)'; }
+    if (c && c.usuario) { b.classList.remove('sem'); b.innerHTML = `<span class="av">${esc((c.usuario.nome || '?')[0].toUpperCase())}</span><span class="nm">${esc(c.usuario.nome)}<span class="ct-verif" title="Conta verificada">✓</span></span>` + (pedidosPend > 0 ? `<span class="ct-badge" title="Pedidos de amizade">${pedidosPend}</span>` : ''); b.title = 'Minha conta (verificada)'; }
     else { b.classList.add('sem'); b.innerHTML = '<span class="av">👤</span><span class="nm">Entrar</span>'; b.title = 'Entrar ou criar conta'; }
     window.dispatchEvent(new CustomEvent('arcadia-conta', { detail: c && c.usuario }));
   }
@@ -144,6 +161,7 @@
   function validarSenha(s) { if (s.length < 8) throw new Error('A senha precisa ter pelo menos 8 caracteres.'); if (forca(s) < 2) throw new Error('Senha fraca demais. Misture letras, números ou símbolos.'); }
 
   function render(tela, extra) {
+    caixa().onclick = null; // cada tela liga os próprios cliques
     const c = caixa(), x = '<button class="ct-x" type="button" aria-label="Fechar">✕</button>';
     const semServidor = !servidor() ? `<div class="ct-bloco" style="border-color:#f59e0b55;color:#fcd34d;font-size:13.5px;line-height:1.5">⚙️ O sistema de contas ainda está sendo ligado. Você já pode jogar normalmente sem conta.</div>` : '';
 
@@ -217,6 +235,7 @@
       const conta = ler(); if (!conta) return render('entrar');
       const u = conta.usuario || {};
       c.innerHTML = `${x}<h2>Minha conta</h2><p class="sub">${esc(u.nome)} · ${esc(u.email)}<br><span class="ct-selo">✓ Conta verificada${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span></p>
+        <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">👥 Amigos</b><br><small style="color:var(--muted,#9696ab)">${pedidosPend > 0 ? `<b style="color:#fca5a5">${pedidosPend} pedido${pedidosPend > 1 ? 's' : ''} esperando resposta</b>` : 'Adicione amigos e veja quem está on-line'}</small></span><button class="ct-sec" data-ir="amigos">Abrir</button></div></div>
         <div class="ct-bloco"><h4>🎮 Suas publicações</h4><div class="ct-pubs" id="ct-pubs"><span style="color:var(--muted,#9696ab);font-size:13px"><span class="ct-girando"></span>Carregando…</span></div>
           <div style="margin-top:8px;font-size:12.5px;color:var(--muted,#9696ab)" id="ct-nuvem"></div></div>
         <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">🛡️ Verificação em duas etapas</b><br><small style="color:var(--muted,#9696ab)">Pede um código por e-mail em todo acesso</small></span><button class="ct-chave ${u.doisFatores ? 'on' : ''}" id="ct-chave" aria-label="Ligar ou desligar"></button></div>
@@ -244,6 +263,36 @@
       $('#ct-sair').onclick = async () => { api('sair', { token: conta.token }).catch(() => {}); gravar(null); atualizarBotao(); fechar(); };
       $('#ct-sair-todos').onclick = () => ocupado($('#ct-sair-todos'), async () => { await api('sairTodos', { token: conta.token }); gravar(null); atualizarBotao(); render('entrar'); erroTela('Pronto: sua conta foi fechada em todos os aparelhos.', true); });
     }
+    else if (tela === 'amigos') {
+      const conta = ler(); if (!conta) return render('entrar');
+      const carregando = '<span class="ct-vazio"><span class="ct-girando"></span>Carregando…</span>';
+      c.innerHTML = `${x}<h2>👥 Amigos</h2><p class="sub">Adicione pelo nome ou pelo código de amigo e veja quem está on-line e em qual jogo.</p>
+        <div class="ct-bloco"><div class="ct-linha"><span><small style="color:var(--muted,#9696ab)">Seu código de amigo</small><br><span class="ct-cod" id="ct-cod">········</span></span><button class="ct-sec" id="ct-copiar">Copiar</button></div></div>
+        <div class="ct-bloco"><h4>Adicionar amigo</h4><form id="ct-busca" class="ct-linha" style="gap:8px"><input id="ct-q" maxlength="24" placeholder="Nome ou código (ex.: A1B2C3D4)" autocomplete="off" style="flex:1;min-width:0;height:40px;border-radius:10px;border:1px solid var(--line2,#33334a);background:var(--bg,#0a0a0f);color:inherit;padding:0 12px;font:14px Inter,system-ui,sans-serif;outline:none"><button class="ct-sec" id="ct-buscar">Buscar</button></form><div class="ct-amg" id="ct-res" style="margin-top:8px"></div></div>
+        <div class="ct-bloco" id="ct-blk-rec" style="display:none"><h4>📨 Pedidos recebidos</h4><div class="ct-amg" id="ct-rec"></div></div>
+        <div class="ct-bloco"><h4 id="ct-tit-amg">Seus amigos</h4><div class="ct-amg" id="ct-amg">${carregando}</div></div>
+        <div class="ct-bloco" id="ct-blk-env" style="display:none"><h4>⏳ Pedidos enviados</h4><div class="ct-amg" id="ct-env"></div></div>
+        <div class="ct-erro" id="ct-erro"></div>
+        <div class="ct-rodape"><button class="ct-link" data-ir="minha">← Minha conta</button><button class="ct-link" id="ct-atualizar">Atualizar</button></div>`;
+      let ultimaBusca = '';
+      const buscar = async () => { const q = $('#ct-q').value.trim(); if (!q) return; ultimaBusca = q; const el = $('#ct-res'); el.innerHTML = carregando; try { const j = await api('buscarAmigos', { token: conta.token, q }); el.innerHTML = j.contas.length ? j.contas.map(k => linhaAmigo(k, botaoBusca(k))).join('') : '<span class="ct-vazio">Ninguém encontrado com esse nome ou código.</span>'; } catch (e) { el.innerHTML = `<span class="ct-vazio">${esc(e.message)}</span>`; } };
+      $('#ct-busca').onsubmit = e => { e.preventDefault(); buscar(); };
+      $('#ct-atualizar').onclick = () => { erroTela(''); carregarAmigos(conta); if (ultimaBusca) buscar(); };
+      $('#ct-copiar').onclick = async () => { const cod = $('#ct-cod').textContent; try { await navigator.clipboard.writeText(cod); erroTela('Código copiado! Mande para seus amigos.', true); } catch (e) { erroTela('Seu código: ' + cod, true); } };
+      c.onclick = async ev => {
+        const b = ev.target.closest('[data-ac]'); if (!b || b.disabled) return;
+        const ac = b.dataset.ac, id = b.dataset.id, nome = b.dataset.nome || '';
+        if (ac === 'remover' && !confirm(`Desfazer a amizade com ${nome}?`)) return;
+        const acoes = { pedir: ['pedirAmizade', {}], aceitar: ['responderAmizade', { aceitar: true }], recusar: ['responderAmizade', { aceitar: false }], remover: ['removerAmizade', {}], cancelar: ['removerAmizade', {}] };
+        b.disabled = true;
+        try {
+          const j = await api(acoes[ac][0], { token: conta.token, id, ...acoes[ac][1] });
+          erroTela(ac === 'pedir' ? (j.estado === 'aceita' ? `Agora você e ${nome} são amigos! 🎉` : `Pedido enviado para ${nome}.`) : ac === 'aceitar' ? `Agora você e ${nome} são amigos! 🎉` : ac === 'recusar' ? 'Pedido recusado.' : ac === 'cancelar' ? 'Pedido cancelado.' : 'Amizade desfeita.', true);
+          await carregarAmigos(conta); if (ultimaBusca) buscar();
+        } catch (e) { erroTela(e.message); b.disabled = false; }
+      };
+      carregarAmigos(conta);
+    }
     else if (tela === 'pronto') {
       const u = (ler() || {}).usuario || {};
       c.innerHTML = `${x}<div class="ct-icone">🎉</div><h2>Oi, ${esc(u.nome)}!</h2><p class="sub">Você entrou. Seu nome já vai aparecer preenchido nos jogos. Sempre que alguém entrar na sua conta, você recebe um aviso no e-mail com os detalhes.</p>
@@ -266,10 +315,31 @@
       const nv = $('#ct-nuvem'); if (nv) nv.textContent = n.dados.length ? `☁️ ${n.dados.length} ${n.dados.length === 1 ? 'item salvo' : 'itens salvos'} na nuvem (projetos, notas e progresso).` : '☁️ Seus projetos, notas e progresso vão ser salvos na nuvem automaticamente.';
     } catch (e) { const el = $('#ct-pubs'); if (el) el.textContent = e.message; }
   }
-  function concluirLogin(j) { gravar({ token: j.token, usuario: j.usuario }); pendente = null; atualizarBotao(); render('pronto'); }
+  function concluirLogin(j) { gravar({ token: j.token, usuario: j.usuario }); pendente = null; atualizarBotao(); render('pronto'); presenca(); }
+  /* ---------------- amigos ---------------- */
+  function tempoAtras(t) { const s = (Date.now() - t) / 1000; if (s < 3600) return `há ${Math.max(1, Math.round(s / 60))} min`; if (s < 86400) return `há ${Math.round(s / 3600)} h`; const d = Math.round(s / 86400); return d === 1 ? 'ontem' : `há ${d} dias`; }
+  function linhaAmigo(k, botoes) {
+    const st = k.online ? (k.jogo ? `🟢 jogando <b style="color:#86efac;display:inline">${esc(k.jogo)}</b>` : '🟢 on-line agora') : k.vistoEm ? 'visto ' + tempoAtras(k.vistoEm) : 'ainda não apareceu por aqui';
+    return `<div><span class="av">${esc((k.nome || '?')[0].toUpperCase())}<i class="${k.online ? 'on' : ''}"></i></span><span class="tx"><b>${esc(k.nome)}</b><small>#${esc(k.codigo)} · ${st}</small></span>${botoes}</div>`;
+  }
+  const bt = (ac, k, txt, cls = '') => `<button class="${cls}" data-ac="${ac}" data-id="${esc(k.id)}" data-nome="${esc(k.nome)}">${txt}</button>`;
+  function botaoBusca(k) { return k.relacao === 'amigo' ? '<button disabled>Amigos ✓</button>' : k.relacao === 'enviado' ? '<button disabled>Pedido enviado</button>' : k.relacao === 'recebido' ? bt('aceitar', k, 'Aceitar', 'ok') : bt('pedir', k, '＋ Adicionar', 'ok'); }
+  async function carregarAmigos(conta) {
+    try {
+      const j = await api('listarAmizades', { token: conta.token });
+      if (!$('#ct-amg')) return;
+      $('#ct-cod').textContent = j.meuCodigo;
+      $('#ct-blk-rec').style.display = j.recebidos.length ? '' : 'none'; $('#ct-rec').innerHTML = j.recebidos.map(k => linhaAmigo(k, bt('aceitar', k, 'Aceitar', 'ok') + bt('recusar', k, 'Recusar'))).join('');
+      $('#ct-blk-env').style.display = j.enviados.length ? '' : 'none'; $('#ct-env').innerHTML = j.enviados.map(k => linhaAmigo(k, bt('cancelar', k, 'Cancelar'))).join('');
+      const on = j.amigos.filter(k => k.online).length;
+      $('#ct-tit-amg').textContent = `Seus amigos · ${j.amigos.length}${on ? ` · ${on} on-line` : ''}`;
+      $('#ct-amg').innerHTML = j.amigos.length ? j.amigos.map(k => linhaAmigo(k, bt('remover', k, 'Desfazer'))).join('') : '<span class="ct-vazio">Você ainda não tem amigos aqui. Busque pelo nome ou passe o seu código.</span>';
+      pedidosPend = j.recebidos.length; atualizarBotao();
+    } catch (e) { const el = $('#ct-amg'); if (el) el.innerHTML = `<span class="ct-vazio">${esc(e.message)}</span>`; }
+  }
 
   // usado pela plataforma, Studio e jogos: chama o servidor já com o token da conta (se houver)
   const apiConta = (acao, dados = {}) => { const c = ler(); return api(acao, c ? { token: c.token, ...dados } : dados); };
-  window.ArcadiaConta = { usuario: () => (ler() || {}).usuario || null, logado: () => !!ler(), abrir, dispositivo, api: apiConta, servidorLigado: () => !!servidor() };
+  window.ArcadiaConta = { usuario: () => (ler() || {}).usuario || null, logado: () => !!ler(), abrir, dispositivo, api: apiConta, servidorLigado: () => !!servidor(), jogando: nome => { jogoAtual = String(nome || '').slice(0, 60); presenca(); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
 })();

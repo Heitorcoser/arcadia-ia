@@ -320,7 +320,7 @@
 /* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
    Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
    estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
-const VERSAO_HTML = "1.12.0";
+const VERSAO_HTML = "1.13.0";
 (function () {
   const carregar = v => {
     const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;
@@ -563,6 +563,7 @@ window.ARCADIA_INICIAR = () => {
     document.body.style.overflow = "hidden";
     inicioSessao = performance.now();
     setTimeout(() => $("#frame").focus(), 300);
+    if (window.ArcadiaConta && ArcadiaConta.jogando) ArcadiaConta.jogando(j.nome); // amigos veem em qual jogo você está
   }
   function sairDoJogo() {
     if (!$("#player").classList.contains("open")) return;
@@ -570,6 +571,7 @@ window.ARCADIA_INICIAR = () => {
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
     $("#frame").src = "about:blank";
     $("#player").classList.remove("open");
+    if (window.ArcadiaConta && ArcadiaConta.jogando) ArcadiaConta.jogando('');
     document.body.style.overflow = "";
     if (j) {
       st(j.id).tempo += (performance.now() - inicioSessao) / 1000; gravar(LS_ST, stats);
