@@ -118,6 +118,7 @@ Todo mundo nasce numa arena. A cada rodada, alguém vira o Gênio e escreve um p
 Um estúdio de jogos no navegador (`studio/index.html`), com layout parecido com o de estúdios de jogos populares: faixa de ferramentas, Explorer, Propriedades, viewport 3D com gizmo, editor de código com abas, Saída e barra de comando. Os painéis são redimensionáveis: arraste as bordas (duplo clique volta ao tamanho padrão).
 
 - **Jogos 3D**: partes, modelos prontos e scripts em **Lua** ou **JavaScript** com uma API parecida com a de estúdios populares (`Touched:Connect`, `Instance.new`, `leaderstats`, `TweenService`…).
+- **Multijogador nos jogos 3D**: o criador liga o botão 👥 **Multijogador** (ou `Players.Multiplayer`) e escolhe o máximo de jogadores. Quem abre o jogo cai num servidor com outras pessoas: vê os outros jogadores (avatar, nome e movimento), o placar de todos e conversa no chat (Enter). Cada jogador roda o mundo no próprio aparelho; para combinar coisas entre todos há o **RemoteEvent** (`FireServer`, `FireAllClients`, `FireClient`), além de `Players:GetPlayers()`, `PlayerAdded`/`PlayerRemoving` e `player.Chatted`. Se o anfitrião sair, outro jogador assume o servidor sem parar o jogo.
 - **Projetos de arquivos**: HTML/CSS/JS, TypeScript, JSX, Lua e Python, com pastas.
 - **Publicar**: o jogo aparece em **Jogos de Players** na plataforma e ganha um link para qualquer pessoa jogar.
 - **IA pelo MCP**: o servidor em [`mcp/`](mcp/README.md) deixa uma IA (Claude Code, Claude Desktop…) criar, testar e publicar jogos dentro do Studio.

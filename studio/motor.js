@@ -166,7 +166,7 @@
       },
       has(t, k) { return k === '__inst' || k in t.props || !!EVENTOS[k] || !!METODOS[k] || ['Name', 'ClassName', 'Parent'].includes(k) || t.filhos.some(f => f.Name === k); },
     };
-    const EVENTOS = { Touched: 1, TouchEnded: 1, MouseButton1Click: 1, Activated: 1, MouseEnter: 1, MouseLeave: 1, Changed: 1, ChildAdded: 1, ChildRemoved: 1, Died: 1, HealthChanged: 1, Destroying: 1, Ended: 1, CharacterAdded: 1 };
+    const EVENTOS = { OnServerEvent: 1, OnClientEvent: 1, Chatted: 1, Touched: 1, TouchEnded: 1, MouseButton1Click: 1, Activated: 1, MouseEnter: 1, MouseLeave: 1, Changed: 1, ChildAdded: 1, ChildRemoved: 1, Died: 1, HealthChanged: 1, Destroying: 1, Ended: 1, CharacterAdded: 1 };
     function definir(t, k, v) {
       if (t.props[k] === v && !Array.isArray(v)) return;
       t.props[k] = v;
@@ -248,9 +248,13 @@
       MoveToPos(v) { },
       // jogador
       LoadCharacter() { if (jogador) renascer(); },
-      Kick(msg) { mensagemFinal(msg || 'Você foi removido do jogo.'); },
-      GetPlayers() { return jogador ? [jogador.p] : []; },
-      GetPlayerFromCharacter(c) { return jogador && inst(c) === jogador.personagem ? jogador.p : undefined; },
+      Kick(msg) { if (inst(this) !== jogador) return log('warn', 'Kick só funciona no próprio jogador (LocalPlayer).'); mensagemFinal(msg || 'Você foi removido do jogo.'); },
+      GetPlayers() { return jogador ? [jogador, ...[...remotos.values()].map(r => r.inst)].map(p => p.p) : []; },
+      GetPlayerFromCharacter(c) { const m = inst(c); if (jogador && m === jogador.personagem) return jogador.p; for (const r of remotos.values()) if (r.inst.personagem === m) return r.inst.p; return undefined; },
+      // RemoteEvent (multijogador): FireServer vai para o anfitrião, FireAllClients para todos, FireClient para um jogador
+      FireServer(...a) { const t = inst(this); if (!t) return; if (!redeAtiva() || rede.souHost) { agendar(0, () => t.sinal('OnServerEvent').Fire(jogador.p, ...a.map(clonarArg))); return; } rede.remoto('srv', caminhoDe(t), a.map(serArg)); },
+      FireAllClients(...a) { const t = inst(this); if (!t) return; agendar(0, () => t.sinal('OnClientEvent').Fire(...a.map(clonarArg))); if (redeAtiva()) rede.remoto('todos', caminhoDe(t), a.map(serArg)); },
+      FireClient(pl, ...a) { const t = inst(this), alvo = inst(pl); if (!t || !alvo) return; if (alvo === jogador) agendar(0, () => t.sinal('OnClientEvent').Fire(...a.map(clonarArg))); else if (alvo.netId && redeAtiva()) rede.remoto('um', caminhoDe(t), a.map(serArg), alvo.netId); },
       // som
       Play() { const t = inst(this); if (t.ClassName === 'Sound') { t.props.Playing = true; tocarSom(t); } else if (t.tween) t.tween.play(); },
       Stop() { const t = inst(this); if (t.ClassName === 'Sound') { t.props.Playing = false; pararSom(t); } },
@@ -263,7 +267,7 @@
       // UserInputService
       IsKeyDown(k) { return !!teclas[deEnum(k)]; },
       // RunService
-      IsStudio() { return !!opcoes.studio; }, IsClient() { return true; }, IsServer() { return true; }, IsRunning() { return true; },
+      IsStudio() { return !!opcoes.studio; }, IsClient() { return true; }, IsServer() { return !redeAtiva() || rede.souHost; }, IsRunning() { return true; },
     });
 
     /* ---------------- Árvore inicial ---------------- */
@@ -446,6 +450,8 @@
 
     /* ---------------- Jogador e personagem ---------------- */
     let jogador = null, personagem = null, humanoide = null, raiz = null;
+    let rede = null; const remotos = new Map(); // multijogador: id na rede → jogador remoto
+    const redeAtiva = () => !!(rede && rede.conectado);
     // avatar do jogador (criador de personagem do Studio): corpo com juntas e animações
     const AV = N.avatar ? N.avatar.normalizar(opcoes.avatar || null) : null;
     let avatarObj = null, animAv = null;
@@ -844,20 +850,182 @@ end
     percorrerInst(dm, i => { if (i.ClassName === 'Script' && (emMundo(i) || dentroDe(i, sss))) iniciarScript(i); });
     for (const g of jogador.gui.filhos) percorrerInst(g, i => { if (i.ClassName === 'Script') iniciarScript(i); });
     agendar(0.05, () => players.sinal('PlayerAdded').Fire(jogador.p));
+    // multijogador: só quando o criador liga Players.Multiplayer e o jogo tem uma sala (aberto pelo jogar.html)
+    if (players.props.Multiplayer && opcoes.sala && window.ASR) iniciarRede();
 
     // HUD: placar (leaderstats) e vida
     const hud = document.createElement('div'); hud.className = 'as-hud'; container.appendChild(hud);
     function atualizarHud() {
       let html = '';
       const ls = jogador && jogador.filhos.find(f => f.Name === 'leaderstats');
-      if (ls && ls.filhos.length) {
+      if (remotos.size) html += placarMulti();
+      else if (ls && ls.filhos.length) {
         html += `<div class="as-placar"><div class="as-placar-cab"><span>${esc(jogador.Name)}</span></div>` + ls.filhos.filter(f => /Value$/.test(f.ClassName)).map(f => `<div><span>${esc(f.Name)}</span><b>${esc(typeof f.props.Value === 'number' ? Math.round(f.props.Value * 100) / 100 : f.props.Value)}</b></div>`).join('') + '</div>';
       }
       if (humanoide && humanoide.props.Health < humanoide.props.MaxHealth) html += `<div class="as-vida"><i style="width:${Math.max(0, humanoide.props.Health / humanoide.props.MaxHealth * 100)}%"></i></div>`;
       if (hud.innerHTML !== html) hud.innerHTML = html;
     }
     const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-    function mensagemFinal(msg) { const d = document.createElement('div'); d.className = 'as-kick'; d.textContent = msg; container.appendChild(d); parado = true; }
+    function mensagemFinal(msg) { const d = document.createElement('div'); d.className = 'as-kick'; d.textContent = msg; container.appendChild(d); parado = true; if (rede) rede.fechar(); }
+
+    /* ---------------- Multijogador ----------------
+       Cada jogador roda o mundo no próprio aparelho (rede.js). Aqui aparecem os outros
+       jogadores (avatar, nome, movimento), o placar de todos, o chat e os RemoteEvents. */
+    function iniciarRede() {
+      if (!document.getElementById('as-estilo-rede')) {
+        const st = document.createElement('style'); st.id = 'as-estilo-rede';
+        st.textContent = `.as-rede{position:absolute;left:10px;top:10px;z-index:8;display:flex;gap:6px;align-items:center;pointer-events:none;font:600 13px "Segoe UI",system-ui,sans-serif;color:#fff}
+.as-rede span{background:rgba(20,22,32,.72);border-radius:9px;padding:5px 10px;backdrop-filter:blur(6px)}
+.as-rede button{pointer-events:auto;border:0;border-radius:9px;background:rgba(20,22,32,.72);color:#fff;font-size:16px;width:34px;height:30px;cursor:pointer}
+.as-chat{position:absolute;left:10px;top:48px;z-index:7;width:min(380px,70vw);display:flex;flex-direction:column;gap:3px;pointer-events:none;font:14px "Segoe UI",system-ui,sans-serif;color:#fff}
+.as-chat div{background:rgba(20,22,32,.6);border-radius:8px;padding:3px 9px;transition:opacity 1s;text-shadow:0 1px 2px #000}
+.as-chat div b{color:#93c5fd}
+.as-chat-in{position:absolute;left:50%;bottom:120px;transform:translateX(-50%);z-index:9;width:min(460px,86vw);display:none}
+.as-chat-in input{width:100%;box-sizing:border-box;border:2px solid #60a5fa;border-radius:12px;background:rgba(15,17,26,.92);color:#fff;font:15px "Segoe UI",system-ui,sans-serif;padding:10px 14px;outline:none}`;
+        document.head.appendChild(st);
+      }
+      const barra = document.createElement('div'); barra.className = 'as-rede'; barra.innerHTML = '<span>👥 Procurando servidor…</span><button title="Chat (Enter)">💬</button>'; container.appendChild(barra);
+      const log_ = document.createElement('div'); log_.className = 'as-chat'; container.appendChild(log_);
+      const caixa = document.createElement('div'); caixa.className = 'as-chat-in'; caixa.innerHTML = '<input maxlength="160" placeholder="Escreva e aperte Enter (Esc fecha)">'; container.appendChild(caixa);
+      const entrada = caixa.querySelector('input');
+      const abrirChat = () => { for (const k in teclas) teclas[k] = false; caixa.style.display = 'block'; entrada.focus(); };
+      const fecharChat = () => { caixa.style.display = 'none'; entrada.value = ''; entrada.blur(); };
+      barra.querySelector('button').addEventListener('click', e => { e.stopPropagation(); caixa.style.display === 'block' ? fecharChat() : abrirChat(); });
+      entrada.addEventListener('keydown', e => {
+        e.stopPropagation();
+        if (e.key === 'Escape') fecharChat();
+        if (e.key === 'Enter') { const t = entrada.value.trim(); fecharChat(); if (t) { rede.chat(t); mostrarChat(jogador.Name, t, true); balao(avatarObj ? avatarObj.grupo : null, t); jogador.sinal('Chatted').Fire(t); } }
+      });
+      entrada.addEventListener('blur', () => setTimeout(() => { if (document.activeElement !== entrada) caixa.style.display = 'none'; }, 100));
+      addEventListener('keydown', e => { if (parado || caixa.style.display === 'block' || (e.target && /INPUT|TEXTAREA/.test(e.target.tagName))) return; if (e.key === 'Enter' || e.key === '/') { e.preventDefault(); abrirChat(); } });
+      function mostrarChat(nome, txt, meu) {
+        const d = document.createElement('div'); d.innerHTML = `<b style="${meu ? 'color:#fde68a' : ''}">${esc(nome)}:</b> ${esc(txt)}`; log_.appendChild(d);
+        while (log_.children.length > 7) log_.firstChild.remove();
+        setTimeout(() => { d.style.opacity = 0; setTimeout(() => d.remove(), 1000); }, 12000);
+      }
+      function sistema(txt) { const d = document.createElement('div'); d.style.color = '#cbd5e1'; d.textContent = txt; log_.appendChild(d); while (log_.children.length > 7) log_.firstChild.remove(); setTimeout(() => { d.style.opacity = 0; setTimeout(() => d.remove(), 1000); }, 6000); }
+
+      rede = window.ASR.conectar({ sala: opcoes.sala, nome: jogador.Name, avatar: AV || null, max: players.props.MaxPlayers || 10 });
+      const txtBarra = barra.querySelector('span');
+      rede.on('status', (t, i) => { txtBarra.textContent = t ? '👥 ' + t : `👥 ${i.jogadores} jogando · servidor ${i.servidor}`; });
+      rede.on('conectado', i => { jogador.props.UserId = 1000 + rede.meuId; log('log', `🌐 Multijogador: servidor ${i.servidor}${i.souHost ? ' (você é o anfitrião)' : ''}`); });
+      rede.on('entrou', (id, info) => { criarRemoto(id, info); sistema(`👋 ${info.nome} entrou`); });
+      rede.on('saiu', id => { const r = remotos.get(id); if (r) sistema(`🚪 ${r.inst.Name} saiu`); removerRemoto(id); });
+      rede.on('pos', (id, d) => { const r = remotos.get(id); if (!r || !d || !Array.isArray(d.p)) return; r.alvo.set(+d.p[0] || 0, +d.p[1] || 0, +d.p[2] || 0); r.alvoYaw = +d.y || 0; r.a = d.a || 'parado'; r.vel = +d.v || 0; r.morto = !!d.m; if (!r.temPos) { r.temPos = true; r.pos.copy(r.alvo); r.yaw = r.alvoYaw; } });
+      rede.on('ls', (id, v) => { const r = remotos.get(id); if (r && v && typeof v === 'object') aplicarLs(r.inst, v); });
+      rede.on('chat', (id, txt) => { const r = remotos.get(id); if (!r) return; mostrarChat(r.inst.Name, txt); balao(r.grupo, txt); r.inst.sinal('Chatted').Fire(txt); });
+      rede.on('re', (tipo, caminho, de, args) => {
+        const t = porCaminho(caminho); if (!t || t.ClassName !== 'RemoteEvent') return;
+        const a = (Array.isArray(args) ? args : []).map(desArg);
+        if (tipo === 'srv') { const pl = jogadorDe(de); if (pl) t.sinal('OnServerEvent').Fire(pl, ...a); }
+        else t.sinal('OnClientEvent').Fire(...a);
+      });
+    }
+    // jogadores remotos: um Player com personagem (HumanoidRootPart + Humanoid) e o avatar 3D com o nome em cima
+    function criarRemoto(id, info) {
+      if (remotos.has(id)) removerRemoto(id);
+      const nome = String((info && info.nome) || 'Jogador');
+      const pl = new Inst('Player', nome, { UserId: 1000 + id, DisplayName: nome }); pl.netId = id;
+      pl.pai = players; players.filhos.push(pl);
+      const mod = new Inst('Model', nome, {}); pl.personagem = mod;
+      const rr = new Inst('__Limb', 'HumanoidRootPart', { Position: [0, -1000, 0], Size: [2, 2, 1], Orientation: [0, 0, 0], Color: '#ffffff', Material: 'SmoothPlastic', Transparency: 1, Anchored: true, CanCollide: false, CanTouch: false, Shape: 'Block', CastShadow: false });
+      rr.pai = mod; mod.filhos.push(rr);
+      const hum = new Inst('Humanoid', 'Humanoid', { Health: 100, MaxHealth: 100, WalkSpeed: 16, JumpPower: 50 }); hum.pai = mod; mod.filhos.push(hum);
+      mod.pai = workspace; workspace.filhos.push(mod);
+      let av = null, anim = null; const grupo = new THREE.Group();
+      if (N.avatar) { const dados = N.avatar.normalizar((info && info.avatar) || null); av = N.avatar.construir(THREE, dados); anim = N.avatar.animador(dados); anim.definir('parado'); grupo.add(av.grupo); }
+      else { const m = new THREE.Mesh(new THREE.BoxGeometry(2, 5, 1), new THREE.MeshStandardMaterial({ color: '#3b82f6' })); m.position.y = 2.5; grupo.add(m); }
+      const tag = construtor.spriteTexto({ Text: nome, TextSize: 16, TextColor3: '#ffffff', BackgroundTransparency: 1 }); tag.position.y = 6.4; grupo.add(tag);
+      grupo.visible = false; cena.add(grupo);
+      const r = { id, inst: pl, mod, raiz: rr, hum, av, anim, grupo, tag, pos: new THREE.Vector3(), alvo: new THREE.Vector3(), yaw: 0, alvoYaw: 0, a: 'parado', vel: 0, morto: false, temPos: false, balao: null };
+      remotos.set(id, r);
+      players.sinal('PlayerAdded').Fire(pl.p); pl.sinal('CharacterAdded').Fire(mod.p);
+    }
+    function removerRemoto(id) {
+      const r = remotos.get(id); if (!r) return; remotos.delete(id);
+      players.sinal('PlayerRemoving').Fire(r.inst.p);
+      cena.remove(r.grupo); if (r.av) r.av.dispose(); if (r.balao) r.balao.material.map.dispose();
+      destruir(r.mod); destruir(r.inst);
+    }
+    function aplicarLs(pl, v) {
+      let pasta = pl.filhos.find(f => f.Name === 'leaderstats');
+      if (!pasta) { pasta = new Inst('Folder', 'leaderstats', {}); pasta.pai = pl; pl.filhos.push(pasta); }
+      for (const [k, val] of Object.entries(v)) {
+        let f = pasta.filhos.find(x => x.Name === k);
+        if (!f) { const cl = typeof val === 'number' ? (Number.isInteger(val) ? 'IntValue' : 'NumberValue') : typeof val === 'boolean' ? 'BoolValue' : 'StringValue'; f = new Inst(cl, k, N.copia(N.CLASSES[cl].props)); f.pai = pasta; pasta.filhos.push(f); }
+        definir(f, 'Value', val);
+      }
+    }
+    function lsLocal() { const ls = jogador && jogador.filhos.find(f => f.Name === 'leaderstats'); if (!ls) return null; const v = {}; for (const f of ls.filhos) if (/Value$/.test(f.ClassName)) v[f.Name] = f.props.Value; return v; }
+    function balao(grupo, txt) {
+      if (!grupo) return;
+      if (grupo.userData.balao) { grupo.remove(grupo.userData.balao); grupo.userData.balao.material.map.dispose(); }
+      const sp = construtor.spriteTexto({ Text: txt.length > 40 ? txt.slice(0, 38) + '…' : txt, TextSize: 15, TextColor3: '#111827', BackgroundTransparency: 0.05, BackgroundColor3: '#ffffff' });
+      sp.position.y = 7.4; grupo.add(sp); grupo.userData.balao = sp;
+      clearTimeout(grupo.userData.balaoT); grupo.userData.balaoT = setTimeout(() => { if (grupo.userData.balao === sp) { grupo.remove(sp); sp.material.map.dispose(); grupo.userData.balao = null; } }, 6000);
+    }
+    // argumentos dos RemoteEvents: números, textos, sim/não, Vector3, Color3, jogadores, partes, listas e tabelas simples
+    const caminhoDe = i => { const n = []; let x = i; while (x && x !== dm) { n.unshift(x.Name); x = x.pai; } return x === dm ? n.join('/') : null; };
+    const porCaminho = c => { let x = dm; for (const nome of String(c || '').split('/')) { x = x && x.filhos.find(f => f.Name === nome); } return x || null; };
+    const jogadorDe = id => id === rede.meuId ? jogador.p : (remotos.get(id) ? remotos.get(id).inst.p : undefined);
+    let avisouTabela = false;
+    function serArg(v, prof = 0) {
+      if (v === null || v === undefined) return null;
+      if (typeof v === 'number' || typeof v === 'string' || typeof v === 'boolean') return v;
+      if (v instanceof Vector3) return { $v: [v.X, v.Y, v.Z] };
+      if (v instanceof Color3) return { $c: v.toHex() };
+      const i = inst(v);
+      if (i) return i.ClassName === 'Player' ? { $p: i === jogador ? rede.meuId : i.netId } : { $i: caminhoDe(i) };
+      if (prof > 4) return null;
+      if (Array.isArray(v)) return v.map(x => serArg(x, prof + 1));
+      if (typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype) { const o = {}; for (const [k, x] of Object.entries(v)) o[k] = serArg(x, prof + 1); return { $o: o }; }
+      if (!avisouTabela) { avisouTabela = true; log('warn', 'RemoteEvent: tabelas do Lua não passam pela rede. Mande números, textos, Vector3, Color3, jogadores ou partes.'); }
+      return null;
+    }
+    function desArg(v) {
+      if (v === null || typeof v !== 'object') return v;
+      if (Array.isArray(v)) return v.map(desArg);
+      if (v.$v) return new Vector3(...v.$v);
+      if (v.$c) return Color3.fromHex(v.$c);
+      if ('$p' in v) return jogadorDe(v.$p);
+      if ('$i' in v) { const i = porCaminho(v.$i); return i ? i.p : undefined; }
+      if (v.$o) { const o = {}; for (const [k, x] of Object.entries(v.$o)) o[k] = desArg(x); return o; }
+      return undefined;
+    }
+    // sem rede o RemoteEvent chama o evento aqui mesmo (mesmo comportamento de quando se está sozinho no servidor)
+    const clonarArg = v => v;
+    // a cada quadro: manda onde você está (15 vezes por segundo) e move os outros com suavidade
+    let tPos = 0, tLs = 0, ultLs = '';
+    function passoRede(dt) {
+      tPos += dt; tLs += dt;
+      if (tPos >= 1 / 15 && rede.conectado) {
+        tPos = 0;
+        const vh = Math.hypot(estado.vel.x, estado.vel.z);
+        const a = estado.morto ? 'parado' : !estado.chao ? 'pular' : vh > 1 ? 'andar' : estado.emote ? 'emote' : 'parado';
+        rede.enviarPos({ p: [estado.pos.x, estado.pos.y, estado.pos.z].map(x => Math.round(x * 100) / 100), y: Math.round((estado.corpoYaw || 0) * 1000) / 1000, a, v: Math.round(vh * 10) / 10, m: estado.morto ? 1 : 0 });
+      }
+      if (tLs >= 0.5) { tLs = 0; const v = lsLocal(); const j = v ? JSON.stringify(v) : ''; if (j && j !== ultLs) { ultLs = j; rede.enviarLs(v); } }
+      for (const r of remotos.values()) {
+        if (!r.temPos) continue;
+        const k = Math.min(1, dt * 12);
+        if (r.pos.distanceTo(r.alvo) > 30) r.pos.copy(r.alvo); else r.pos.lerp(r.alvo, k); // teleporte: pula direto
+        let d = r.alvoYaw - r.yaw; d = Math.atan2(Math.sin(d), Math.cos(d)); r.yaw += d * k;
+        r.grupo.visible = !r.morto; r.grupo.position.copy(r.pos);
+        if (r.av) { r.av.grupo.rotation.y = r.yaw; r.anim.definir(r.a); r.av.aplicar(r.anim.passo(dt, r.a === 'andar' ? Math.max(0.6, r.vel / 16) : 1)); }
+        r.raiz.props.Position = [r.pos.x, r.pos.y + 3, r.pos.z]; r.raiz.aabb = null;
+      }
+    }
+    function placarMulti() {
+      const lista = [jogador, ...[...remotos.values()].map(r => r.inst)];
+      const lsDe = p => p.filhos.find(f => f.Name === 'leaderstats');
+      const nomes = []; for (const p of lista) { const ls = lsDe(p); if (ls) for (const f of ls.filhos) if (/Value$/.test(f.ClassName) && !nomes.includes(f.Name)) nomes.push(f.Name); }
+      const col = `display:grid;grid-template-columns:minmax(80px,1fr)${' auto'.repeat(nomes.length)};gap:14px`;
+      const val = (p, n) => { const ls = lsDe(p), f = ls && ls.filhos.find(x => x.Name === n); if (!f) return '–'; const v = f.props.Value; return esc(typeof v === 'number' ? Math.round(v * 100) / 100 : v); };
+      let h = `<div class="as-placar"><div class="as-placar-cab" style="${col}"><span>👥 ${lista.length}</span>${nomes.map(n => `<span>${esc(n)}</span>`).join('')}</div>`;
+      for (const p of lista) h += `<div style="${col}${p === jogador ? ';font-weight:800;color:#fff' : ''}"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(p.Name)}</span>${nomes.map(n => `<b>${val(p, n)}</b>`).join('')}</div>`;
+      return h + '</div>';
+    }
+
 
     /* ---------------- Loop ---------------- */
     let ultimo = performance.now(), acc = 0, rodando = true;
@@ -936,6 +1104,7 @@ end
       if (!parado) { acc += dt; let n = 0; while (acc >= PASSO && n < 8) { passo(PASSO); acc -= PASSO; n++; } if (n >= 8) acc = 0; }
       runService.sinal('RenderStepped').Fire(dt);
       poseCorpo(dt);
+      if (rede) passoRede(dt);
       // câmera
       alvoCam.set(estado.pos.x, estado.pos.y + 4.5, estado.pos.z);
       const cx = alvoCam.x + Math.sin(estado.yaw) * Math.cos(pitch) * distCam, cy = alvoCam.y + Math.sin(pitch) * distCam, cz = alvoCam.z + Math.cos(estado.yaw) * Math.cos(pitch) * distCam;
@@ -949,12 +1118,13 @@ end
     requestAnimationFrame(loop);
 
     return {
-      parar() { rodando = false; removeEventListener('keydown', onKeyDown); removeEventListener('keyup', onKeyUp); for (const i of todas) pararSom(i); renderer.dispose(); },
+      parar() { if (rede) rede.fechar(); rodando = false; removeEventListener('keydown', onKeyDown); removeEventListener('keyup', onKeyUp); for (const i of todas) pararSom(i); renderer.dispose(); },
       captura() { renderer.render(cena, camera); return renderer.domElement.toDataURL('image/jpeg', 0.85); },
-      avancar(seg, teclasTeste) { Object.assign(teclas, teclasTeste || {}); for (let i = 0; i < Math.round(seg * 60); i++) passo(PASSO); for (const k in teclasTeste || {}) teclas[k] = false; poseCorpo(0); atualizarHud(); renderer.render(cena, camera); },
+      avancar(seg, teclasTeste) { Object.assign(teclas, teclasTeste || {}); for (let i = 0; i < Math.round(seg * 60); i++) { passo(PASSO); if (rede && i % 4 === 0) passoRede(PASSO * 4); } for (const k in teclasTeste || {}) teclas[k] = false; poseCorpo(0); atualizarHud(); renderer.render(cena, camera); },
       get angulos() { return { corpo: estado.corpoYaw, camera: estado.yaw }; }, // para testes: para onde o corpo e a câmera olham
       get jogadorPos() { return estado.pos.toArray().map(v => Math.round(v * 100) / 100); },
       get tempo() { return tempo; },
+      get rede() { return rede ? { conectado: rede.conectado, souHost: rede.souHost, meuId: rede.meuId, servidor: rede.n, remotos: [...remotos.values()].map(r => ({ id: r.id, nome: r.inst.Name, pos: r.pos.toArray().map(v => Math.round(v * 10) / 10) })) } : null; }, // para testes
     };
   };
 })();

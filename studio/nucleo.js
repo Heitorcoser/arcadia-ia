@@ -17,7 +17,7 @@
   const CLASSES = {
     DataModel: { icone: '🎮', props: {} },
     Workspace: { servico: true, icone: '🌐', props: { Gravity: 196.2, FallenPartsDestroyHeight: -100 }, desc: 'Tudo que existe no mundo 3D' },
-    Players: { servico: true, icone: '👥', props: { RespawnTime: 3, CharacterWalkSpeed: 16, CharacterJumpPower: 50 }, desc: 'Configurações dos jogadores' },
+    Players: { servico: true, icone: '👥', props: { RespawnTime: 3, CharacterWalkSpeed: 16, CharacterJumpPower: 50, Multiplayer: false, MaxPlayers: 10 }, desc: 'Configurações dos jogadores (Multiplayer liga o multijogador)' },
     Lighting: { servico: true, icone: '💡', props: { ClockTime: 14, Brightness: 2, Ambient: '#7a8090', SkyColor: '#8ec5ff', FogColor: '#c9dcf0', FogEnd: 900, GlobalShadows: true }, desc: 'Luz, céu e neblina' },
     ReplicatedStorage: { servico: true, icone: '📦', props: {}, desc: 'Guarde modelos para clonar por script' },
     ServerScriptService: { servico: true, icone: '⚙️', props: {}, desc: 'Scripts que rodam quando o jogo começa' },
@@ -40,6 +40,7 @@
     NumberValue: { icone: '🔢', props: { Value: 0 }, desc: 'Guarda um número' },
     StringValue: { icone: '🔤', props: { Value: '' }, desc: 'Guarda um texto' },
     BoolValue: { icone: '✅', props: { Value: false }, desc: 'Guarda verdadeiro/falso' },
+    RemoteEvent: { icone: '📡', props: {}, desc: 'Manda mensagens entre os jogadores no multijogador (FireServer, FireAllClients, FireClient)' },
     ClickDetector: { icone: '🖱️', props: { MaxActivationDistance: 32 }, desc: 'Deixa a parte clicável (evento MouseClick)' },
     Humanoid: { icone: '🧍', props: { Health: 100, MaxHealth: 100, WalkSpeed: 16, JumpPower: 50 }, desc: 'Vida e movimento de um personagem' },
     Player: { icone: '🙂', props: { UserId: 1, DisplayName: '' }, desc: 'Um jogador' },
@@ -53,7 +54,7 @@
     TextXAlignment: ['Left', 'Center', 'Right'],
   };
   const SONS_PRONTOS = ['coin', 'jump', 'explosion', 'hit', 'win', 'lose', 'click', 'powerup', 'laser', 'music'];
-  const PODE_TER_FILHOS = c => !['Script', 'ClickDetector', 'Sound', 'IntValue', 'NumberValue', 'StringValue', 'BoolValue', 'PointLight', 'BillboardText'].includes(c);
+  const PODE_TER_FILHOS = c => !['Script', 'ClickDetector', 'Sound', 'IntValue', 'NumberValue', 'StringValue', 'BoolValue', 'PointLight', 'BillboardText', 'RemoteEvent'].includes(c);
   const EH_PARTE = c => c === 'Part' || c === 'SpawnLocation';
   const EH_UI = c => ['Frame', 'TextLabel', 'TextButton', 'ImageLabel'].includes(c);
   Object.assign(ASN, { CLASSES, ENUMS, SONS_PRONTOS, PODE_TER_FILHOS, EH_PARTE, EH_UI });
