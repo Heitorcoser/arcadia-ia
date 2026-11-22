@@ -378,6 +378,94 @@ var ACOES_CONTEUDO = {
 };
 for (var acaoNova in ACOES_CONTEUDO) ACOES[acaoNova] = ACOES_CONTEUDO[acaoNova];
 
+/* ---------------------------- amizades ----------------------------
+   Pedidos entre contas verificadas: pendente → aceita (ou some, se recusar).
+   Os ids vão com um "c" na frente: assim a planilha nunca transforma um id em número.
+   Presença: o site avisa de tempos em tempos que a pessoa está on-line (e em qual jogo). */
+TABELAS.Amizades = ['de', 'para', 'estado', 'criadoEm', 'atualizadoEm'];
+TABELAS.Presenca = ['id', 'quando', 'jogo'];
+var MAX_AMIGOS = 200, MAX_PEDIDOS = 50, ONLINE_MS = 3 * 60000;
+function cid(id) { return 'c' + String(id); }
+function codigoAmigo(id) { return String(id).slice(0, 8).toUpperCase(); }
+function mapaPresenca() { var m = {}; linhas('Presenca').forEach(function (p) { m[String(p.id)] = p; }); return m; }
+function cartaoConta(c, pres) {
+  var p = pres[cid(c.id)], on = !!(p && Date.now() - Number(p.quando) < ONLINE_MS);
+  return { id: String(c.id), nome: c.nome, codigo: codigoAmigo(c.id), desde: Number(c.criadoEm), online: on, vistoEm: p ? Number(p.quando) : 0, jogo: on ? String(p.jogo || '') : '' };
+}
+function amizadeEntre(a, b) {
+  var l = linhas('Amizades'), A = cid(a), B = cid(b);
+  for (var i = 0; i < l.length; i++) if ((l[i].de === A && l[i].para === B) || (l[i].de === B && l[i].para === A)) return l[i];
+  return null;
+}
+function relacoesDe(eu) {
+  var m = {}, E = cid(eu);
+  linhas('Amizades').forEach(function (x) {
+    if (x.de === E) m[String(x.para).slice(1)] = x.estado === 'aceita' ? 'amigo' : 'enviado';
+    else if (x.para === E) m[String(x.de).slice(1)] = x.estado === 'aceita' ? 'amigo' : 'recebido';
+  });
+  return m;
+}
+var ACOES_AMIGOS = {
+  // procura contas pelo nome (pedaço) ou pelo código de amigo (exato)
+  buscarAmigos: function (r) {
+    var conta = contaDoToken(r.token).conta, q = String(r.q || '').trim().replace(/^#/, '');
+    if (q.length < 2) throw erro('Digite pelo menos 2 letras do nome, ou o código de amigo.');
+    var qn = q.toLowerCase(), qc = q.toUpperCase(), pres = mapaPresenca(), rel = relacoesDe(conta.id);
+    var l = linhas('Contas').filter(function (c) { return sim(c.verificado) && String(c.id) !== String(conta.id) && (codigoAmigo(c.id) === qc || String(c.nome).toLowerCase().indexOf(qn) >= 0); })
+      .sort(function (a, b) { return (codigoAmigo(b.id) === qc) - (codigoAmigo(a.id) === qc); }).slice(0, 20);
+    return { contas: l.map(function (c) { var k = cartaoConta(c, pres); k.relacao = rel[k.id] || ''; return k; }) };
+  },
+  pedirAmizade: function (r) {
+    var conta = contaDoToken(r.token).conta, eu = String(conta.id), outro = achar('Contas', 'id', String(r.id || ''));
+    if (!outro || !sim(outro.verificado)) throw erro('Conta não encontrada.');
+    if (String(outro.id) === eu) throw erro('Esse é você 🙂');
+    var ex = amizadeEntre(eu, outro.id);
+    if (ex) {
+      if (ex.estado === 'aceita') throw erro('Vocês já são amigos.');
+      if (ex.de === cid(eu)) throw erro('Pedido já enviado. Agora é só esperar.');
+      atualizar('Amizades', ex, { estado: 'aceita', atualizadoEm: Date.now() }); // os dois pediram: já vira amizade
+      return { estado: 'aceita' };
+    }
+    var todas = linhas('Amizades'), E = cid(eu);
+    if (todas.filter(function (x) { return x.de === E && x.estado === 'pendente'; }).length >= MAX_PEDIDOS) throw erro('Você tem pedidos demais esperando resposta. Cancele alguns antes.');
+    if (todas.filter(function (x) { return (x.de === E || x.para === E) && x.estado === 'aceita'; }).length >= MAX_AMIGOS) throw erro('Você chegou ao limite de ' + MAX_AMIGOS + ' amigos.');
+    inserir('Amizades', { de: E, para: cid(outro.id), estado: 'pendente', criadoEm: Date.now(), atualizadoEm: Date.now() });
+    return { estado: 'pendente' };
+  },
+  responderAmizade: function (r) {
+    var eu = String(contaDoToken(r.token).conta.id), ex = amizadeEntre(eu, String(r.id || ''));
+    if (!ex || ex.estado !== 'pendente' || ex.para !== cid(eu)) throw erro('Esse pedido não existe mais.');
+    if (r.aceitar) atualizar('Amizades', ex, { estado: 'aceita', atualizadoEm: Date.now() }); else aba('Amizades').deleteRow(ex._linha);
+    return { estado: r.aceitar ? 'aceita' : '' };
+  },
+  // desfaz a amizade ou cancela um pedido enviado
+  removerAmizade: function (r) {
+    var eu = String(contaDoToken(r.token).conta.id), ex = amizadeEntre(eu, String(r.id || ''));
+    if (ex) aba('Amizades').deleteRow(ex._linha);
+    return {};
+  },
+  listarAmizades: function (r) {
+    var conta = contaDoToken(r.token).conta, E = cid(conta.id), pres = mapaPresenca(), contas = {};
+    linhas('Contas').forEach(function (c) { contas[cid(c.id)] = c; });
+    var amigos = [], recebidos = [], enviados = [];
+    linhas('Amizades').forEach(function (x) {
+      if (x.de !== E && x.para !== E) return;
+      var c = contas[x.de === E ? x.para : x.de]; if (!c) return;
+      var k = cartaoConta(c, pres); k.em = Number(x.atualizadoEm || x.criadoEm);
+      if (x.estado === 'aceita') amigos.push(k); else if (x.para === E) recebidos.push(k); else enviados.push(k);
+    });
+    amigos.sort(function (a, b) { return (b.online - a.online) || (b.vistoEm - a.vistoEm); });
+    return { meuCodigo: codigoAmigo(conta.id), amigos: amigos, recebidos: recebidos, enviados: enviados };
+  },
+  // "estou on-line" (e em qual jogo); devolve quantos pedidos de amizade estão esperando
+  presenca: function (r) {
+    var conta = contaDoToken(r.token).conta, id = cid(conta.id), p = achar('Presenca', 'id', id), jogo = limparTexto(r.jogo, 60);
+    if (p) atualizar('Presenca', p, { quando: Date.now(), jogo: jogo }); else inserir('Presenca', { id: id, quando: Date.now(), jogo: jogo });
+    return { pedidos: linhas('Amizades').filter(function (x) { return x.para === id && x.estado === 'pendente'; }).length };
+  },
+};
+for (var acaoAmigo in ACOES_AMIGOS) ACOES[acaoAmigo] = ACOES_AMIGOS[acaoAmigo];
+
 function encerrarSessoes(email, exceto) {
   var n = 0; linhas('Sessoes').forEach(function (s) { if (s.email === email && s.hashToken !== exceto && (s.ativa === true || String(s.ativa) === 'TRUE')) { atualizar('Sessoes', s, { ativa: false }); n++; } });
   return n;
