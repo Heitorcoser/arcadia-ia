@@ -190,14 +190,14 @@
         ['Inserir', [B('i:Block', '🧱', 'Bloco'), B('i:Ball', '⚪', 'Esfera'), B('i:Cylinder', '🥫', 'Cilindro'), B('i:Wedge', '📐', 'Rampa'), B('i:SpawnLocation', '🏁', 'Spawn')]],
         ['Editar', [{ html: `<div class="mini-col"><label>Cor <input type="color" id="f-cor" value="#a3a2a5"></label><label>Material <select id="f-mat">${N.ENUMS.Material.map(m => `<option>${m}</option>`).join('')}</select></label></div>` }, B('ancorar', '⚓', 'Ancorar'), B('agrupar', '🧩', 'Agrupar'), B('desagrupar', '💥', 'Desagrupar')]],
         ['Histórico', [B('desfazer', '↶', 'Desfazer'), B('refazer', '↷', 'Refazer')]],
-        ['Testar', [B('jogar', '▶', 'Jogar', { c: 'play' }), B('parar', '■', 'Parar', { c: 'stop' })]],
+        ['Testar', [B('jogar', '▶', 'Jogar', { c: 'play' }), B('parar', '■', 'Parar', { c: 'stop' }), B('multi', '👥', 'Multijogador', { on: multiLigado() })]],
         ['Comunidade', [B('personagem', '🧍', 'Meu personagem'), B('marketplace', '🛒', 'Marketplace')]],
       ],
       modelo: [
         ['Objetos', [B('n:PointLight', '🔆', 'Luz'), B('n:BillboardText', '🏷️', 'Texto 3D'), B('n:Sound', '🎵', 'Som'), B('n:ClickDetector', '🖱️', 'Clicável'), B('n:Model', '🧩', 'Modelo'), B('n:Folder', '📁', 'Pasta')]],
         ['Scripts', [B('script:Lua', '📜', 'Script Lua'), B('script:JavaScript', '📃', 'Script JS')]],
         ['Interface', [B('ui:ScreenGui', '🖥️', 'Tela'), B('ui:TextLabel', '🔤', 'Texto'), B('ui:TextButton', '🔘', 'Botão'), B('ui:Frame', '⬛', 'Caixa'), B('ui:ImageLabel', '🖼️', 'Imagem')]],
-        ['Valores', [B('n:IntValue', '🔢', 'Número'), B('n:StringValue', '🔤', 'Texto'), B('n:BoolValue', '✅', 'Sim/Não')]],
+        ['Valores', [B('n:IntValue', '🔢', 'Número'), B('n:StringValue', '🔤', 'Texto'), B('n:BoolValue', '✅', 'Sim/Não'), B('n:RemoteEvent', '📡', 'RemoteEvent')]],
         ['Encaixe na grade', [{ html: `<div class="mini-col"><label>Mover <input type="number" id="snap-mover" step="0.25" min="0" value="${snap.mover}"></label><label>Girar° <input type="number" id="snap-girar" step="5" min="0" value="${snap.girar}"></label></div>` }]],
       ],
       testar: [['Simulação', [B('jogar', '▶', 'Jogar', { c: 'play' }), B('parar', '■', 'Parar', { c: 'stop' })]], ['Captura', [B('captura', '📸', 'Foto da cena')]], ['Saída', [B('limparSaida', '🧹', 'Limpar saída')]]],
@@ -227,6 +227,8 @@
     renderProps(); if (reg) registrar(); else marcarSujo();
   }
 
+  function multiLigado() { const pl = proj && proj.cena && (proj.cena.children || []).find(c => c.ClassName === 'Players'); return !!(pl && pl.props.Multiplayer); }
+
   /* ===================== Ações ===================== */
   function acao(a) {
     const [nome, arg] = a.split(':');
@@ -245,6 +247,13 @@
       docs: telaDocs, atalhos: telaAtalhos,
       personagem: () => window.ASPersonagem.abrir({ aoSalvar: () => saida('ok', '🧍 Personagem salvo: ele aparece quando você aperta Jogar') }),
       marketplace: () => telaMarketplace(),
+      multi: () => {
+        const pl = proj && proj.cena && (proj.cena.children || []).find(c => c.ClassName === 'Players'); if (!pl) return toast('Só jogos 3D têm multijogador');
+        pl.props.Multiplayer = !pl.props.Multiplayer; if (!pl.props.MaxPlayers) pl.props.MaxPlayers = 10;
+        registrar(); renderFaixa(); renderProps();
+        toast(pl.props.Multiplayer ? `👥 Multijogador ligado: até ${pl.props.MaxPlayers} jogadores por servidor (mude em Players → Máx. jogadores)` : 'Multijogador desligado', 5000);
+        if (pl.props.Multiplayer) saida('info', '👥 Multijogador: quem abrir o jogo entra no mesmo servidor e vê os outros jogadores. Para testar, aperte Jogar em duas abas do Studio com este projeto. Scripts: RemoteEvent (FireServer/FireAllClients), Players:GetPlayers(), PlayerAdded/PlayerRemoving e player.Chatted.');
+      },
       novoArquivo: () => novoArquivo(), novaPasta: () => novaPasta(), enviar: () => $('#in-arquivos').click(),
       executar: () => { mostrarAba('previa'); executarPrevia(); }, pararPrevia: () => { $('#vista-previa').innerHTML = ''; saida('info', 'Prévia parada'); },
       autoRec: () => { autoRecarregar = !autoRecarregar; renderFaixa(); }, zip: baixarZip, janela: abrirEmJanela,
@@ -565,7 +574,7 @@
       { i: '📜', t: 'Script (Lua)', f: () => inserirScript('Lua') }, { i: '📃', t: 'Script (JavaScript)', f: () => inserirScript('JavaScript') }, '-',
       it('PointLight', 'Luz'), it('BillboardText', 'Texto 3D'), it('Sound', 'Som'), it('ClickDetector', 'Clicável'), '-',
       { i: '🖥️', t: 'Tela (ScreenGui)', f: () => inserirUI('ScreenGui') }, { i: '🔤', t: 'Texto (TextLabel)', f: () => inserirUI('TextLabel') }, { i: '🔘', t: 'Botão (TextButton)', f: () => inserirUI('TextButton') }, '-',
-      it('IntValue'), it('StringValue'), it('BoolValue'),
+      it('IntValue'), it('StringValue'), it('BoolValue'), it('RemoteEvent'),
     ];
   }
   function menuObjeto(x, y) {
@@ -670,7 +679,7 @@
 
   /* ===================== Propriedades ===================== */
   const ORDEM = ['Text', 'Source', 'Language', 'Enabled', 'Position', 'Size', 'Orientation', 'AnchorPoint', 'Shape', 'Color', 'Material', 'Transparency', 'Reflectance', 'Anchored', 'CanCollide', 'CanTouch', 'CastShadow', 'BackgroundColor3', 'BackgroundTransparency', 'TextColor3', 'TextSize', 'TextTransparency', 'Font', 'TextXAlignment', 'CornerRadius', 'Visible', 'ZIndex', 'Image', 'SoundId', 'Volume', 'Looped', 'Playing', 'PlaybackSpeed', 'Brightness', 'Range', 'StudsOffset', 'Value', 'MaxActivationDistance'];
-  const NOMES_PT = { Position: 'Posição', Size: 'Tamanho', Orientation: 'Rotação', Color: 'Cor', Material: 'Material', Transparency: 'Transparência', Reflectance: 'Reflexo', Anchored: 'Ancorado', CanCollide: 'Colide', CanTouch: 'Detecta toque', Shape: 'Forma', CastShadow: 'Faz sombra', Language: 'Linguagem', Source: 'Código', Enabled: 'Ativo', Text: 'Texto', TextColor3: 'Cor do texto', TextSize: 'Tamanho do texto', BackgroundColor3: 'Cor de fundo', BackgroundTransparency: 'Transp. do fundo', Visible: 'Visível', AnchorPoint: 'Ponto de âncora', CornerRadius: 'Arredondar', SoundId: 'Som', Volume: 'Volume', Looped: 'Repetir', Playing: 'Tocando', Gravity: 'Gravidade', ClockTime: 'Hora do dia', SkyColor: 'Cor do céu', FogEnd: 'Neblina (distância)', FogColor: 'Cor da neblina', Ambient: 'Luz ambiente', Brightness: 'Brilho', Range: 'Alcance', StudsOffset: 'Deslocamento', Value: 'Valor', RespawnTime: 'Tempo p/ renascer', CharacterWalkSpeed: 'Velocidade', CharacterJumpPower: 'Força do pulo', TextTransparency: 'Transp. do texto', Font: 'Fonte', TextXAlignment: 'Alinhamento', ZIndex: 'Camada', Image: 'Imagem (URL)', ImageId: 'Imagem', PlaybackSpeed: 'Velocidade', GlobalShadows: 'Sombras', FallenPartsDestroyHeight: 'Altura de queda', MaxActivationDistance: 'Distância máx.', ResetOnSpawn: 'Reinicia ao renascer', Volume2: '' };
+  const NOMES_PT = { Multiplayer: 'Multijogador', MaxPlayers: 'Máx. jogadores', Position: 'Posição', Size: 'Tamanho', Orientation: 'Rotação', Color: 'Cor', Material: 'Material', Transparency: 'Transparência', Reflectance: 'Reflexo', Anchored: 'Ancorado', CanCollide: 'Colide', CanTouch: 'Detecta toque', Shape: 'Forma', CastShadow: 'Faz sombra', Language: 'Linguagem', Source: 'Código', Enabled: 'Ativo', Text: 'Texto', TextColor3: 'Cor do texto', TextSize: 'Tamanho do texto', BackgroundColor3: 'Cor de fundo', BackgroundTransparency: 'Transp. do fundo', Visible: 'Visível', AnchorPoint: 'Ponto de âncora', CornerRadius: 'Arredondar', SoundId: 'Som', Volume: 'Volume', Looped: 'Repetir', Playing: 'Tocando', Gravity: 'Gravidade', ClockTime: 'Hora do dia', SkyColor: 'Cor do céu', FogEnd: 'Neblina (distância)', FogColor: 'Cor da neblina', Ambient: 'Luz ambiente', Brightness: 'Brilho', Range: 'Alcance', StudsOffset: 'Deslocamento', Value: 'Valor', RespawnTime: 'Tempo p/ renascer', CharacterWalkSpeed: 'Velocidade', CharacterJumpPower: 'Força do pulo', TextTransparency: 'Transp. do texto', Font: 'Fonte', TextXAlignment: 'Alinhamento', ZIndex: 'Camada', Image: 'Imagem (URL)', ImageId: 'Imagem', PlaybackSpeed: 'Velocidade', GlobalShadows: 'Sombras', FallenPartsDestroyHeight: 'Altura de queda', MaxActivationDistance: 'Distância máx.', ResetOnSpawn: 'Reinicia ao renascer', Volume2: '' };
   function renderProps() {
     const el = $('#props'); if (!proj) { el.innerHTML = ''; return; }
     if (!ehCena()) return renderPropsArquivo();
@@ -678,6 +687,7 @@
     if (sel.length > 1) { el.innerHTML = `<div class="p-vazio">${sel.length} objetos selecionados.<br>Use a faixa “Início” para mudar cor e material de todos.</div>`; return; }
     const r = acharNo(sel[0]); if (!r) { el.innerHTML = ''; return; }
     const n = r.no, def = N.CLASSES[n.ClassName] || {};
+    if (def.servico) for (const [k, v] of Object.entries(def.props || {})) if (!(k in n.props)) n.props[k] = N.copia(v); // projetos antigos ganham as propriedades novas (ex.: Multiplayer)
     const chaves = Object.keys(n.props).sort((a, b) => (ORDEM.indexOf(a) + 1 || 99) - (ORDEM.indexOf(b) + 1 || 99));
     let h = `<div class="p-desc"><b>${def.icone || ''} ${esc(n.ClassName)}</b>${def.desc ? ' · ' + esc(def.desc) : ''}</div><div class="p-sec">Dados</div>`;
     h += `<div class="p-lin"><label>Nome</label><div><input type="text" data-nome value="${esc(n.Name)}" ${def.servico ? 'disabled' : ''}></div></div>`;
@@ -807,7 +817,7 @@
   window.addEventListener('message', e => {
     const d = e.data; if (!d || typeof d !== 'object') return;
     if (d.fonte === 'as-jogo' && jogando && e.source === jogando.contentWindow) {
-      if (d.tipo === 'aguardando') jogando.contentWindow.postMessage({ tipo: 'carregar', projeto: JSON.parse(JSON.stringify({ ...proj, pasta: undefined })), opcoes: { studio: true, avatar: N.avatar.lerSalvo(), nomeJogador: ((Conta() && Conta().usuario()) || {}).nome || localStorage.getItem('studio.autor') || 'Jogador' } }, '*');
+      if (d.tipo === 'aguardando') jogando.contentWindow.postMessage({ tipo: 'carregar', projeto: JSON.parse(JSON.stringify({ ...proj, pasta: undefined })), opcoes: { studio: true, sala: 'studio-' + proj.id, avatar: N.avatar.lerSalvo(), nomeJogador: ((Conta() && Conta().usuario()) || {}).nome || localStorage.getItem('studio.autor') || 'Jogador' } }, '*');
       if (d.tipo === 'log') saida(d.nivel, d.texto, 'Jogo');
       if (d.tipo === 'captura' && esperaCaptura) { esperaCaptura(d.imagem); esperaCaptura = null; }
     }
@@ -1521,7 +1531,7 @@
   const DOCS_TEXTO = `ARCÁDIA STUDIO · API DE SCRIPTS (jogos 3D)
 Scripts podem ser em Lua (padrão) ou JavaScript. A API é parecida com a de estúdios populares.
 
-OBJETOS (classes): Part, SpawnLocation, Model, Folder, Script, PointLight, BillboardText, Sound, ClickDetector, ScreenGui, Frame, TextLabel, TextButton, ImageLabel, IntValue, NumberValue, StringValue, BoolValue.
+OBJETOS (classes): Part, SpawnLocation, Model, Folder, Script, PointLight, BillboardText, Sound, ClickDetector, ScreenGui, Frame, TextLabel, TextButton, ImageLabel, IntValue, NumberValue, StringValue, BoolValue, RemoteEvent.
 Serviços: Workspace (mundo 3D), Players, Lighting, ReplicatedStorage, ServerScriptService, StarterGui, SoundService, RunService, UserInputService, TweenService, Debris.
 
 PROPRIEDADES DE Part: Position (Vector3), Size (Vector3), Orientation (graus), Color (Color3), Material (Plastic, SmoothPlastic, Wood, Brick, Concrete, Grass, Sand, Metal, DiamondPlate, Neon, Glass, Ice, Marble, Slate, Fabric), Transparency, Anchored, CanCollide, CanTouch, Shape (Block, Ball, Cylinder, Wedge), Velocity.
@@ -1531,6 +1541,7 @@ GLOBAIS: game, workspace, script, print, warn, wait(s), task.wait/spawn/delay, V
 MÉTODOS: FindFirstChild(nome), WaitForChild(nome), GetChildren(), GetDescendants(), Clone(), Destroy(), IsA(classe), game:GetService(nome), Players:GetPlayerFromCharacter(modelo), model:MoveTo(Vector3), Sound:Play()/Stop(), Humanoid:TakeDamage(n), TweenService:Create(obj, info, {Prop = valor}):Play(), Debris:AddItem(obj, s).
 EVENTOS (:Connect(função)): part.Touched / TouchEnded (recebe a parte que tocou; hit.Parent é o personagem), ClickDetector.MouseClick (jogador), TextButton.MouseButton1Click, Players.PlayerAdded (jogador), player.CharacterAdded, Humanoid.Died, valor.Changed, RunService.Heartbeat (dt), UserInputService.InputBegan (input.KeyCode.Name).
 PERSONAGEM: player.Character contém HumanoidRootPart, Head, Torso, braços, pernas e Humanoid (Health, MaxHealth, WalkSpeed, JumpPower). player.RespawnLocation = parte (checkpoint). Placar: crie uma Folder "leaderstats" dentro do jogador com IntValue dentro.
+MULTIJOGADOR: ligue Players.Multiplayer (botão 👥 Multijogador na faixa Início) e escolha Players.MaxPlayers. Quem abrir o jogo entra num servidor com outras pessoas e vê os outros jogadores andando, com nome, placar (leaderstats) e chat (Enter). Cada jogador roda o mundo no próprio aparelho; o que precisa ser igual para todos você manda com RemoteEvent (coloque em ReplicatedStorage): remote:FireServer(...) chega em remote.OnServerEvent (jogador, ...) no anfitrião; remote:FireAllClients(...) chega em remote.OnClientEvent (...) em todos; remote:FireClient(jogador, ...) só nele. Os argumentos podem ser números, textos, true/false, Vector3, Color3, jogadores e partes. Players:GetPlayers() lista todos, Players.PlayerAdded/PlayerRemoving avisam quem entra e sai, player.Chatted recebe as mensagens do chat e RunService:IsServer() é true só no anfitrião.
 SONS PRONTOS (Sound.SoundId): coin, jump, explosion, hit, win, lose, click, powerup, laser, music, ou uma URL de áudio.
 Em JavaScript use "await wait(1)" e "obj.Touched.Connect(hit => {...})".
 
@@ -1555,6 +1566,19 @@ end)</pre>
   local moedas = Instance.new("IntValue")
   moedas.Name = "Moedas"
   moedas.Parent = stats
+end)</pre>
+  <h3>Multijogador</h3><p>Ligue o botão <b>👥 Multijogador</b> (ou Players → Multijogador). Quem abrir o jogo cai num servidor com outras pessoas, vê os outros jogadores, o placar de todos e pode conversar no chat (Enter). Para combinar coisas entre os jogadores use um <b>RemoteEvent</b>:</p><pre>-- Script em ServerScriptService (o RemoteEvent "Explosao" fica em ReplicatedStorage)
+local ev = game.ReplicatedStorage:WaitForChild("Explosao")
+ev.OnClientEvent:Connect(function(posicao)
+  local b = Instance.new("Part", workspace)
+  b.Shape = "Ball"; b.Size = Vector3.new(6, 6, 6); b.Position = posicao
+  b.Anchored = true; b.Color = Color3.fromRGB(255, 120, 0)
+  game:GetService("Debris"):AddItem(b, 1)
+end)
+game.Players.LocalPlayer.Chatted:Connect(function(msg)
+  if msg == "boom" then
+    ev:FireAllClients(game.Players.LocalPlayer.Character.HumanoidRootPart.Position)
+  end
 end)</pre>
   <h3>Animação com TweenService</h3><pre>local TS = game:GetService("TweenService")
 local p = script.Parent

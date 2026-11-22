@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Defesa da Feira</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#1d140c;--card:#2b1d11;--card2:#3a2816;--line:#5a3f22;--txt:#fff7e8;--muted:#e3c9a3;--ouro:#ffcc4d;--verde:#4ade80;--verm:#f87171;--topo:52px;--loja:100px}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:Nunito,system-ui,sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;overscroll-behavior:none}
+  button{font:inherit;color:inherit;cursor:pointer}
+  .disp{font-family:"Lilita One",Nunito,sans-serif;font-weight:400;letter-spacing:.5px}
+  #cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+  /* topo */
+  #topo{position:fixed;left:0;right:0;top:0;height:var(--topo);z-index:10;display:none;align-items:center;gap:6px;padding:0 8px;padding-left:max(8px,env(safe-area-inset-left));padding-right:max(8px,env(safe-area-inset-right));background:linear-gradient(180deg,#3a2614,#2a1b0e);border-bottom:3px solid #5a3f22}
+  #topo.on{display:flex}
+  .stat{display:flex;align-items:center;gap:4px;background:rgba(0,0,0,.3);border-radius:10px;padding:4px 10px;font-weight:900;font-size:17px;white-space:nowrap}
+  .stat small{font-weight:700;color:var(--muted);font-size:12px}
+  .esp{flex:1}
+  .bt{height:38px;min-width:38px;border-radius:11px;border:2px solid #6b4a27;background:#4a3219;font-weight:900;font-size:15px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:5px;white-space:nowrap;position:relative;overflow:hidden}
+  .bt:disabled{opacity:.45;cursor:default}
+  .bt.on{border-color:var(--ouro);background:#6b4a17}
+  .bt.verde{background:linear-gradient(180deg,#22c55e,#15803d);border-color:#14532d}
+  .bt .cd{position:absolute;left:0;bottom:0;height:4px;background:var(--ouro)}
+  /* loja */
+  #loja{position:fixed;z-index:9;display:none;gap:6px;padding:6px;background:linear-gradient(90deg,#2a1b0e,#3a2614);border-left:3px solid #5a3f22;overflow:auto}
+  #loja.on{display:flex}
+  .item{flex:0 0 auto;width:84px;border-radius:14px;border:2px solid #6b4a27;background:#4a3219;padding:5px 2px 4px;text-align:center;line-height:1.05;position:relative}
+  .item .ic{font-size:30px;display:block}
+  .item b{display:block;font-size:11.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .item span{display:block;font-size:13px;font-weight:900;color:var(--ouro)}
+  .item.sel{border-color:var(--ouro);box-shadow:0 0 0 2px var(--ouro) inset;background:#6b4a17}
+  .item.caro{opacity:.5}
+  .item kbd{position:absolute;left:5px;top:3px;font-size:10px;color:var(--muted);font-family:inherit}
+  @media (orientation:landscape){ #loja{right:0;top:var(--topo);bottom:0;width:var(--loja);flex-direction:column;align-items:center;padding-right:max(6px,env(safe-area-inset-right))} }
+  @media (orientation:portrait){ #loja{left:0;right:0;bottom:0;height:var(--loja);flex-direction:row;border-left:0;border-top:3px solid #5a3f22;padding-bottom:max(6px,env(safe-area-inset-bottom))} :root{--loja:96px} .item{width:76px} }
+  /* painel da torre */
+  #painel{position:fixed;z-index:11;left:10px;bottom:10px;width:250px;background:rgba(43,29,17,.96);border:2px solid #6b4a27;border-radius:16px;padding:10px 12px;display:none;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  #painel.on{display:block}
+  @media (orientation:portrait){ #painel{bottom:calc(var(--loja) + 8px);left:50%;transform:translateX(-50%);width:min(320px,94vw)} }
+  #painel h3{margin:0;font-size:18px;display:flex;align-items:center;gap:6px}
+  #painel .niv{color:var(--ouro);font-size:14px}
+  #painel .dados{font-size:13px;color:var(--muted);margin:5px 0 8px;line-height:1.45}
+  #painel .dados b{color:var(--txt)}
+  #painel .acoes{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  #painel .acoes .bt{height:40px;font-size:13.5px}
+  #painel .fechar{position:absolute;right:8px;top:6px;border:0;background:none;font-size:18px;color:var(--muted)}
+  /* aviso central */
+  #aviso{position:fixed;left:50%;top:22%;transform:translate(-50%,-50%);z-index:12;text-align:center;pointer-events:none;opacity:0;transition:opacity .3s;width:92vw}
+  #aviso.on{opacity:1}
+  #aviso h2{margin:0;font-size:clamp(28px,6vw,52px);color:var(--ouro);text-shadow:0 4px 0 #5a2d0c,0 8px 24px rgba(0,0,0,.6)}
+  #aviso p{margin:4px 0 0;font-weight:800;font-size:clamp(14px,2.6vw,19px);text-shadow:0 2px 6px #000}
+  #dica{position:fixed;z-index:11;left:50%;transform:translateX(-50%);top:calc(var(--topo) + 8px);background:rgba(0,0,0,.65);border-radius:12px;padding:6px 14px;font-weight:800;font-size:13.5px;display:none;text-align:center;max-width:92vw}
+  #dica.on{display:block}
+  /* telas */
+  .tela{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;padding:14px;overflow:auto;background:radial-gradient(ellipse at 50% 0%,#6b3a12 0%,#2b1a0b 55%,#170e06 85%)}
+  .tela.on{display:flex}
+  .caixa{width:min(860px,100%);margin:auto;text-align:center}
+  .logo{font-size:clamp(40px,9vw,76px);line-height:.9;margin:0;color:#ffcc4d;text-shadow:0 5px 0 #8a3b0d,0 10px 30px rgba(0,0,0,.6)}
+  .logo small{display:block;font-size:.34em;color:#fff1d6;text-shadow:0 2px 0 #8a3b0d;margin-top:6px}
+  .toldo{height:22px;margin:12px auto 16px;max-width:520px;border-radius:0 0 14px 14px;background:repeating-linear-gradient(90deg,#ef4444 0 30px,#fff7e8 30px 60px)}
+  .mapas{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-top:8px}
+  .mapa{background:linear-gradient(180deg,#3d2915,#2a1c0e);border:2px solid #6b4a27;border-radius:18px;padding:12px;text-align:left;position:relative}
+  .mapa .prev{height:96px;border-radius:12px;overflow:hidden;background:#000;margin-bottom:8px}
+  .mapa .prev canvas{width:100%;height:100%;display:block}
+  .mapa h3{margin:0;font-size:19px}
+  .mapa p{margin:3px 0 8px;color:var(--muted);font-size:13px;line-height:1.35}
+  .mapa .estrelas{position:absolute;right:12px;top:110px;font-size:17px;letter-spacing:1px}
+  .mapa .linha{display:flex;gap:6px}
+  .mapa .linha .bt{flex:1}
+  .mapa.trancado{opacity:.55}
+  .mini{font-size:13.5px;color:var(--muted);line-height:1.55;margin-top:14px;background:rgba(0,0,0,.25);border-radius:14px;padding:10px 14px;text-align:left}
+  .mini b{color:var(--txt)}
+  .fim{background:linear-gradient(180deg,#3d2915,#2a1c0e);border:2px solid #6b4a27;border-radius:22px;padding:22px;max-width:520px;margin:auto}
+  .fim h2{margin:0;font-size:clamp(30px,7vw,46px)}
+  .fim .big{font-size:44px;letter-spacing:6px;margin:8px 0}
+  .fim .res{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:10px 0 16px}
+  .fim .res div{background:rgba(0,0,0,.3);border-radius:12px;padding:6px 12px;font-weight:900}
+  .fim .res small{display:block;color:var(--muted);font-weight:700;font-size:11.5px}
+  .fim .linha{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .fim .bt{height:46px;padding:0 18px;font-size:16px}
+  @media (max-height:520px){
+    :root{--topo:44px;--loja:88px}
+    .stat{font-size:14px;padding:3px 7px}.bt{height:32px;min-width:32px;font-size:13px;padding:0 7px}
+    .item{width:72px;padding:3px 2px}.item .ic{font-size:22px}.item b{font-size:10px}.item span{font-size:11.5px}.item kbd{display:none}
+    #painel{width:220px;padding:8px 10px;left:6px;bottom:6px}#painel .dados{font-size:12px;margin:3px 0 6px}#painel .acoes .bt{height:34px}
+  }
+  @media (max-width:560px){ .stat{font-size:14px;padding:3px 7px} .stat small{display:none} .bt{height:34px;min-width:34px;padding:0 7px;font-size:13px} .bt .txt{display:none} }
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+
+<div id="topo">
+  <div class="stat" title="Fregueses: se acabarem, a feira fecha">❤️ <span id="vidas">20</span></div>
+  <div class="stat" title="Moedas">🪙 <span id="moedas">0</span></div>
+  <div class="stat" title="Onda">🌊 <span id="onda">0</span><small id="onda-tot"></small></div>
+  <div class="esp"></div>
+  <button class="bt" id="b-promo" title="Promoção relâmpago: todos os bichos param por 3 s (tecla Q)">📢<span class="txt">Promoção</span><i class="cd"></i></button>
+  <button class="bt" id="b-vassoura" title="Vassourada: toque no mapa para varrer os bichos (tecla W)">🧹<span class="txt">Vassoura</span><i class="cd"></i></button>
+  <button class="bt verde" id="b-onda" title="Começar a próxima onda (Espaço)">▶<span class="txt" id="b-onda-t">Começar</span></button>
+  <button class="bt" id="b-vel" title="Velocidade (F)" style="min-width:48px">⏩ <span id="vel">1x</span></button>
+  <button class="bt" id="b-pausa" title="Pausar (P)">⏸</button>
+  <button class="bt" id="b-sair" title="Sair">✕</button>
+</div>
+<div id="loja"></div>
+<div id="painel"></div>
+<div id="dica"></div>
+<div id="aviso"></div>
+
+<div class="tela on" id="menu"><div class="caixa">
+  <h1 class="logo disp">DEFESA DA FEIRA<small>Os bichos querem o seu pastel. Não deixe!</small></h1>
+  <div class="toldo"></div>
+  <div class="mapas" id="mapas"></div>
+  <div class="mini">
+    <b>Como jogar:</b> formigas, baratas, pombos, ratos e caramujos vêm pelo caminho atrás da barraca de pastel. Escolha uma barraca na loja e toque num espaço livre do chão para montá-la. Cada bicho derrotado dá moedas; com elas você monta mais barracas e melhora as que já tem (toque numa barraca). Se os bichos chegarem, você perde fregueses. Fique de olho nos <b>voadores</b> 🐦🪰: nem toda barraca alcança o céu.<br>
+    <b>Atalhos:</b> 1–7 escolhe a barraca · Espaço começa a onda · F acelera · P pausa · Q promoção · W vassoura · U melhora · S vende · Esc cancela.
+  </div>
+</div></div>
+<div class="tela" id="fim"><div class="fim" id="fim-c"></div></div>
+<div class="tela" id="pausa" style="background:rgba(10,6,2,.8)"><div class="fim"><h2 class="disp">⏸ Pausado</h2><p style="color:var(--muted)" id="pausa-info"></p><div class="linha"><button class="bt verde" id="b-continuar">Continuar</button><button class="bt" id="b-reiniciar">Recomeçar</button><button class="bt" id="b-menu2">Mapas</button></div></div></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   DEFESA DA FEIRA · tower defense
+   Bichos andam pelo caminho até a barraca de pastel. Barracas da feira
+   (torres) atacam, ganham níveis e se vendem. Ondas geradas por semente,
+   chefes a cada 5 ondas e modo infinito.
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const rnd = (a, b) => a + Math.random() * (b - a);
+const TAU = Math.PI * 2;
+const TOQUE = matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const PARAM = new URLSearchParams(location.search);
+const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: 'defesa-da-feira', evento, ...extra }, '*'); } catch (e) {} };
+const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
+const C = 64, COLS = 20, ROWS = 12, W = COLS * C, H = ROWS * C;
+const ler = (k, p) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? p; } catch (e) { return p; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+
+/* =====================================================================
+   MAPAS · caminhos em células [coluna, linha]; o último ponto é a barraca
+   ===================================================================== */
+const MAPAS = [
+  { id: 'rua', nome: 'Feira da Rua', desc: 'Domingo de manhã, rua fechada para a feira. Um caminho só, bom para aprender.', ondas: 15, dinheiro: 190, mult: 1,
+    chao: '#6b6f76', chao2: '#62666d', trilha: '#c8b48c', trilha2: '#b7a27a', borda: '#8f7a55',
+    caminhos: [[[-1, 2], [4, 2], [4, 8], [9, 8], [9, 3], [14, 3], [14, 9], [19, 9]]],
+    deco: [[1, 0, '⛱️'], [7, 0, '🍉'], [11, 0, '⛱️'], [17, 1, '🍍'], [0, 5, '📦'], [1, 10, '🛒'], [6, 5, '🌳'], [11, 6, '⛱️'], [12, 11, '🌳'], [17, 5, '📦'], [19, 0, '🌳'], [7, 11, '🍌'], [16, 6, '🌽']] },
+  { id: 'praca', nome: 'Praça da Matriz', desc: 'Os bichos chegam por duas ruas e se juntam na praça. Mais voadores.', ondas: 18, dinheiro: 230, mult: 1.25,
+    chao: '#5e8a4a', chao2: '#567f44', trilha: '#d9c7a0', trilha2: '#c7b48c', borda: '#9b8661',
+    caminhos: [[[-1, 2], [7, 2], [7, 6], [13, 6], [13, 2], [17, 2], [17, 9], [19, 9]], [[-1, 10], [7, 10], [7, 6], [13, 6], [13, 2], [17, 2], [17, 9], [19, 9]]],
+    deco: [[10, 3, '⛲'], [10, 9, '🌳'], [3, 5, '🌳'], [3, 7, '🌳'], [15, 5, '⛪'], [1, 0, '🌳'], [19, 0, '🌳'], [11, 11, '🌳'], [15, 11, '⛱️'], [4, 0, '🌷'], [19, 6, '🌷']] },
+  { id: 'mercadao', nome: 'Mercadão', desc: 'Corredores compridos cheios de bancas. O Rei Barata mora aqui.', ondas: 20, dinheiro: 260, mult: 2.1,
+    chao: '#8a6a4a', chao2: '#7f6143', trilha: '#e8dcc6', trilha2: '#d6c8ae', borda: '#a68f6c',
+    caminhos: [[[-1, 1], [17, 1], [17, 4], [2, 4], [2, 7], [17, 7], [17, 10], [0, 10]]],
+    deco: [[19, 0, '🧀'], [19, 3, '🥩'], [0, 3, '🐟'], [0, 6, '🥖'], [19, 6, '🍎'], [19, 9, '🥕'], [10, 2, '🍇'], [6, 5, '🍅'], [13, 8, '🥚'], [9, 11, '🌶️'], [4, 11, '🧄'], [15, 11, '🍋']] },
+];
+const ESTRELAS = ler('feira.estrelas', {}), RECORDE_INF = ler('feira.infinito', {});
+
+/* =====================================================================
+   BICHOS
+   ===================================================================== */
+const BICHOS = {
+  formiga: { nome: 'Formiga', e: '🐜', hp: 28, vel: 72, din: 4, dano: 1, r: 13 },
+  barata: { nome: 'Barata', e: '🪳', hp: 80, vel: 58, din: 7, dano: 1, arm: 3, r: 15 },
+  pombo: { nome: 'Pombo', e: '🐦', hp: 45, vel: 66, din: 8, dano: 1, voa: true, r: 15 },
+  mosca: { nome: 'Mosca', e: '🪰', hp: 16, vel: 100, din: 3, dano: 1, voa: true, r: 11 },
+  rato: { nome: 'Rato', e: '🐀', hp: 210, vel: 46, din: 13, dano: 2, r: 18 },
+  baratamae: { nome: 'Barata-mãe', e: '🪳', hp: 300, vel: 40, din: 18, dano: 2, arm: 5, r: 22, filhos: ['barata', 3] },
+  caramujo: { nome: 'Caramujo', e: '🐌', hp: 650, vel: 24, din: 28, dano: 3, regen: 0.008, r: 20 },
+  ratao: { nome: 'Ratão do Esgoto', e: '🐀', hp: 1100, vel: 30, din: 150, dano: 5, r: 36, chefe: true },
+  pomborei: { nome: 'Pombo-Rei', e: '🐦', hp: 1300, vel: 30, din: 200, dano: 4, voa: true, r: 34, chefe: true, coroa: true, invoca: ['pombo', 2, 6] },
+  reibarata: { nome: 'Rei Barata', e: '🪳', hp: 5000, vel: 22, din: 400, dano: 20, arm: 10, r: 44, chefe: true, coroa: true, invoca: ['barata', 4, 5] },
+};
+const CUSTO_ONDA = { formiga: 1, barata: 2.5, pombo: 2.5, mosca: 0.8, rato: 6, baratamae: 9, caramujo: 16 };
+
+/* =====================================================================
+   BARRACAS (torres)
+   ===================================================================== */
+const TORRES = [
+  { id: 'pastel', nome: 'Pastelaria', e: '🥟', cor: '#f59e0b', custo: 50, alc: 150, cad: 1.4, dano: 14, ar: true, tiro: 'pastel', desc: 'Atira pastéis num bicho. Acerta voadores.', n3: 'Nível 3: atira em 2 bichos ao mesmo tempo.' },
+  { id: 'caldo', nome: 'Caldo de Cana', e: '🥤', cor: '#84cc16', custo: 70, alc: 130, cad: 0.8, dano: 5, area: 50, lento: 0.4, ar: false, tiro: 'caldo', desc: 'Respinga caldo grudento: deixa os bichos lentos.', n3: 'Nível 3: deixa 60% mais lento e por mais tempo.' },
+  { id: 'pipoca', nome: 'Pipoqueiro', e: '🍿', cor: '#fde047', custo: 110, alc: 105, cad: 0.75, dano: 16, ar: false, tiro: 'pulso', desc: 'Estoura pipoca em volta: acerta todos os bichos perto.', n3: 'Nível 3: alcance bem maior.' },
+  { id: 'estilingue', nome: 'Estilingue', e: '🎯', cor: '#38bdf8', custo: 130, alc: 260, cad: 0.6, dano: 42, ar: true, contraAr: 2, tiro: 'pedra', desc: 'Alcance longo. Dano dobrado em voadores.', n3: 'Nível 3: 25% de chance de acerto crítico (dano triplo).' },
+  { id: 'ventilador', nome: 'Ventilador', e: '🌀', cor: '#a5f3fc', custo: 120, alc: 115, cad: 0.5, dano: 3, empurra: 45, ar: true, tiro: 'vento', desc: 'Sopra os bichos de volta no caminho.', n3: 'Nível 3: empurra bem mais longe.' },
+  { id: 'rojao', nome: 'Fogueteiro', e: '🎆', cor: '#ef4444', custo: 170, alc: 230, cad: 0.38, dano: 50, area: 75, ar: false, tiro: 'rojao', desc: 'Rojão com explosão em área.', n3: 'Nível 3: também derruba voadores.' },
+  { id: 'caixa', nome: 'Caixa', e: '💰', cor: '#22c55e', custo: 120, renda: 25, desc: 'Não ataca: rende moedas no fim de cada onda.', n3: 'Cada nível rende mais.' },
+];
+const ALVOS = ['primeiro', 'último', 'mais forte', 'mais perto'];
+function stats(t) {
+  const d = t.def, k = t.nivel - 1;
+  return {
+    dano: (d.dano || 0) * (1 + 0.5 * k), alc: (d.alc || 0) * (1 + 0.1 * k) * (d.id === 'pipoca' && t.nivel === 3 ? 1.3 : 1), cad: (d.cad || 0) * (1 + 0.15 * k),
+    lento: d.lento ? (t.nivel === 3 ? 0.6 : d.lento) : 0, empurra: d.empurra ? d.empurra * (t.nivel === 3 ? 1.7 : 1 + 0.15 * k) : 0,
+    ar: d.ar || (d.id === 'rojao' && t.nivel === 3), renda: d.renda ? [25, 45, 75][k] : 0, area: d.area ? d.area * (1 + 0.1 * k) : 0,
+  };
+}
+const custoMelhora = t => t.nivel >= 3 ? 0 : Math.round(t.def.custo * [0.8, 1.3][t.nivel - 1]);
+const valorVenda = t => Math.round(t.investido * 0.7);
+
+/* =====================================================================
+   ESTADO DA PARTIDA
+   ===================================================================== */
+let M = null, P = null, inimigos = [], torres = [], tiros = [], parts = [], textos = [], anims = [];
+let estado = 'menu', vel = 1, pausado = false, sel = null, compra = null, modoVassoura = false, hover = null;
+function novaPartida(idx, infinito) {
+  M = MAPAS[idx];
+  const caminhos = M.caminhos.map(cam => montarCaminho(cam));
+  const bloqueado = new Set(), caminho = new Set();
+  for (const cam of M.caminhos) for (let i = 0; i < cam.length - 1; i++) { const [a, b] = [cam[i], cam[i + 1]]; const dc = Math.sign(b[0] - a[0]), dr = Math.sign(b[1] - a[1]); let [c, r] = a; while (true) { if (c >= 0 && c < COLS && r >= 0 && r < ROWS) caminho.add(c + ',' + r); if (c === b[0] && r === b[1]) break; c += dc; r += dr; } }
+  for (const [c, r] of M.deco) bloqueado.add(c + ',' + r);
+  const fim = M.caminhos[0][M.caminhos[0].length - 1];
+  P = { idx, infinito: !!infinito, caminhos, caminho, bloqueado, fim, vidas: 20, moedas: M.dinheiro, onda: 0, total: infinito ? Infinity : M.ondas, fila: [], tOnda: 0, emOnda: false, espera: -1,
+    cdPromo: 0, cdVassoura: 0, congelado: 0, abates: 0, vazou: 0, ganhou: 0, tempo: 0, proxCaminho: 0 };
+  inimigos = []; torres = []; tiros = []; parts = []; textos = []; sel = null; compra = null; modoVassoura = false; vel = 1; pausado = false;
+  estado = 'jogo'; montarFundo(); renderLoja(); atualizarHud(); fecharPainel();
+  ['#menu', '#fim', '#pausa'].forEach(s => $(s).classList.remove('on')); $('#topo').classList.add('on'); $('#loja').classList.add('on');
+  redim();
+  aviso(M.nome, infinito ? 'Modo infinito: até onde você aguenta?' : `${M.ondas} ondas · monte barracas e toque em ▶ Começar`, 3200);
+  dica(TOQUE ? 'Toque numa barraca da loja e depois num espaço livre do chão' : 'Escolha uma barraca na loja (ou aperte 1–7) e clique num espaço livre', 6000);
+  avisar('iniciado'); som('onda');
+}
+function montarCaminho(cam) {
+  const pts = cam.map(([c, r]) => ({ x: c * C + C / 2, y: r * C + C / 2 }));
+  const acc = [0]; for (let i = 1; i < pts.length; i++) acc.push(acc[i - 1] + Math.hypot(pts[i].x - pts[i - 1].x, pts[i].y - pts[i - 1].y));
+  return { pts, acc, total: acc[acc.length - 1] };
+}
+function posNo(cam, d) {
+  d = clamp(d, 0, cam.total);
+  let i = 1; while (i < cam.acc.length - 1 && cam.acc[i] < d) i++;
+  const a = cam.pts[i - 1], b = cam.pts[i], seg = cam.acc[i] - cam.acc[i - 1] || 1, k = (d - cam.acc[i - 1]) / seg;
+  return { x: a.x + (b.x - a.x) * k, y: a.y + (b.y - a.y) * k, ang: Math.atan2(b.y - a.y, b.x - a.x) };
+}
+// voadores cortam caminho: voam de curva em curva pulando metade delas (sempre passam pelo meio do mapa)
+const voos = new Map();
+function caminhoVoo(cam) { if (voos.has(cam)) return voos.get(cam); const pts = cam.pts.filter((p, i) => i === 0 || i === cam.pts.length - 1 || i % 2 === 0); const v = montarCaminho(pts.map(p => [(p.x - C / 2) / C, (p.y - C / 2) / C])); voos.set(cam, v); return v; }
+
+/* ---------- ondas (geradas por semente: a mesma onda é sempre igual) ---------- */
+function semente(s) { return () => { s = (s * 1664525 + 1013904223) >>> 0; return s / 4294967296; }; }
+function gerarOnda(n) {
+  const rng = semente(M.id.charCodeAt(0) * 9973 + n * 7919), grupos = [];
+  const ultima = n === M.ondas && !P.infinito;
+  if (ultima) grupos.push({ tipo: 'reibarata', qtd: 1, int: 1, atraso: 4 });
+  else if (n % 10 === 0) grupos.push({ tipo: 'pomborei', qtd: 1, int: 1, atraso: 3 });
+  else if (n % 5 === 0) grupos.push({ tipo: 'ratao', qtd: 1, int: 1, atraso: 3 });
+  const lib = ['formiga']; if (n >= 3) lib.push('barata'); if (n >= 4) lib.push('pombo'); if (n >= 6) lib.push('mosca'); if (n >= 7) lib.push('rato'); if (n >= 9) lib.push('baratamae'); if (n >= 11) lib.push('caramujo');
+  const orc = (8 + n * 6 + n * n * 0.55) * (M.id === 'praca' ? 1.1 : M.id === 'mercadao' ? 1.45 : 1);
+  const ng = Math.min(7, 2 + Math.floor(n / 4)); let atraso = 0.5;
+  for (let g = 0; g < ng; g++) {
+    const tipo = g === 0 && lib.length > 1 ? lib[lib.length - 1] : lib[Math.floor(rng() * lib.length)];
+    const custo = CUSTO_ONDA[tipo], qtd = clamp(Math.round(orc / ng / custo), 1, 40), int = custo < 1 ? 0.5 : custo < 3 ? 0.8 : custo < 8 ? 1.3 : 2;
+    grupos.push({ tipo, qtd, int, atraso }); atraso += qtd * int * 0.55 + 1.2;
+  }
+  return grupos;
+}
+// o mapa fica mais difícil aos poucos: o multiplicador dele chega inteiro na onda 8
+const multHp = n => (1 + 0.11 * (n - 1) + 0.0065 * (n - 1) ** 2) * (1 + (M.mult - 1) * Math.min(1, n / 8));
+function comecarOnda() {
+  if (estado !== 'jogo' || P.emOnda) return;
+  if (P.onda >= P.total) return;
+  // começar antes da hora dá moedas de bônus
+  if (P.espera > 0) { const b = Math.round(P.espera * 2); if (b > 0) { P.moedas += b; texto(W / 2, 60, `+${b} 🪙 por chamar a onda antes`, '#ffcc4d', 18); } }
+  P.onda++; P.emOnda = true; P.espera = -1; P.tOnda = 0;
+  P.fila = gerarOnda(P.onda).map(g => ({ ...g, feitos: 0, prox: g.atraso }));
+  const chefe = P.fila.find(g => BICHOS[g.tipo].chefe);
+  if (chefe) { aviso(`⚠️ ${BICHOS[chefe.tipo].nome.toUpperCase()}`, 'Um chefe está vindo!', 2600); som('chefe'); }
+  else { aviso(`Onda ${P.onda}`, '', 1200); som('onda'); }
+  atualizarHud();
+}
+function criarInimigo(tipo, camIdx, d = 0, extra = {}) {
+  const def = BICHOS[tipo], n = Math.max(1, P.onda);
+  const hp = Math.round(def.hp * (def.chefe ? (1 + 0.05 * (n - 1)) * (1 + (M.mult - 1) * 0.6) : multHp(n)));
+  const camBase = P.caminhos[camIdx % P.caminhos.length], cam = def.voa ? caminhoVoo(camBase) : camBase;
+  const e = { tipo, def, hp, hpMax: hp, d, cam, vel: def.vel * (1 + Math.min(0.35, (n - 1) * 0.012)), lento: 0, lentoK: 0, congela: 0, x: 0, y: 0, ang: 0, morto: false, tInvoca: 0, bob: rnd(0, TAU), ...extra };
+  const p = posNo(cam, e.d); e.x = p.x; e.y = p.y; e.ang = p.ang;
+  inimigos.push(e); return e;
+}
+
+/* =====================================================================
+   SIMULAÇÃO
+   ===================================================================== */
+function passo(dt) {
+  if (estado !== 'jogo') return;
+  P.tempo += dt;
+  P.cdPromo = Math.max(0, P.cdPromo - dt); P.cdVassoura = Math.max(0, P.cdVassoura - dt); P.congelado = Math.max(0, P.congelado - dt);
+  // nascimento
+  if (P.emOnda) {
+    P.tOnda += dt;
+    for (const g of P.fila) while (g.feitos < g.qtd && P.tOnda >= g.prox) { criarInimigo(g.tipo, P.proxCaminho++); g.feitos++; g.prox += g.int; }
+    if (P.fila.every(g => g.feitos >= g.qtd) && !inimigos.length) fimDaOnda();
+  } else if (P.espera > 0) { P.espera -= dt; if (P.espera <= 0) comecarOnda(); }
+  // bichos
+  for (const e of inimigos) {
+    if (e.morto) continue;
+    if (e.def.regen && e.hp < e.hpMax && P.tempo - (e.ultDano || 0) > 2) e.hp = Math.min(e.hpMax, e.hp + e.hpMax * e.def.regen * dt);
+    if (e.def.invoca && !e.chegou) { e.tInvoca += dt; if (e.tInvoca >= e.def.invoca[2]) { e.tInvoca = 0; for (let i = 0; i < e.def.invoca[1]; i++) { const f = criarInimigo(e.def.invoca[0], 0, Math.max(0, e.d - 30 - i * 25)); if (e.def.voa) { f.cam = e.cam; } else f.cam = e.cam; f.d = Math.max(0, e.d - 20 - i * 22); } texto(e.x, e.y - 50, '📣 chamou reforços!', '#fca5a5', 15); som('invoca'); } }
+    e.lento = Math.max(0, e.lento - dt); e.congela = Math.max(0, e.congela - dt);
+    let v = e.vel * (e.lento > 0 ? 1 - e.lentoK : 1);
+    if (P.congelado > 0 && !(e.def.chefe && P.congelado < 1.5)) v = 0;
+    if (e.congela > 0) v = 0;
+    e.d += v * dt; e.bob += dt * (6 + v * 0.05);
+    const p = posNo(e.cam, e.d); e.x = p.x; e.y = p.y; e.ang = p.ang;
+    if (e.d >= e.cam.total) { e.morto = true; e.chegou = true; vazar(e); }
+  }
+  // barracas
+  for (const t of torres) {
+    if (!t.def.tiro) continue;
+    const s = stats(t); t.cd -= dt; t.pisca = Math.max(0, (t.pisca || 0) - dt);
+    if (t.cd > 0) continue;
+    const alvos = escolherAlvos(t, s, t.def.id === 'pastel' && t.nivel === 3 ? 2 : 1);
+    if (!alvos.length) continue;
+    t.cd = 1 / s.cad; t.pisca = 0.12; t.ang = Math.atan2(alvos[0].y - t.y, alvos[0].x - t.x);
+    disparar(t, s, alvos);
+  }
+  // tiros
+  for (const p of tiros) {
+    if (p.morto) continue;
+    if (p.alvo && !p.alvo.morto) { p.tx = p.alvo.x; p.ty = p.alvo.y; }
+    const dx = p.tx - p.x, dy = p.ty - p.y, d = Math.hypot(dx, dy), passoD = p.vel * dt;
+    p.giro += dt * 12;
+    if (d <= passoD + 6) { p.morto = true; impacto(p); continue; }
+    p.x += dx / d * passoD; p.y += dy / d * passoD;
+    if (p.rastro && Math.random() < 0.7) parts.push({ x: p.x, y: p.y, vx: rnd(-20, 20), vy: rnd(-20, 20), vida: 0.35, max: 0.35, cor: pick(['#fde047', '#fb923c', '#ef4444']), tam: rnd(3, 6) });
+  }
+  tiros = tiros.filter(p => !p.morto);
+  inimigos = inimigos.filter(e => !e.morto);
+}
+function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+function emAlcance(t, e, alc) { return Math.hypot(e.x - t.x, e.y - t.y) <= alc + e.def.r * 0.5; }
+function escolherAlvos(t, s, n) {
+  const lista = inimigos.filter(e => !e.morto && (s.ar || !e.def.voa) && emAlcance(t, e, s.alc));
+  if (!lista.length) return [];
+  const modo = t.alvo;
+  const prog = e => e.d / e.cam.total;
+  lista.sort(modo === 0 ? (a, b) => prog(b) - prog(a) : modo === 1 ? (a, b) => prog(a) - prog(b) : modo === 2 ? (a, b) => b.hp - a.hp : (a, b) => Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y));
+  return lista.slice(0, n);
+}
+function disparar(t, s, alvos) {
+  const d = t.def;
+  if (d.tiro === 'pulso') { // pipoca: acerta todos em volta
+    for (const e of inimigos) if (!e.morto && !e.def.voa && emAlcance(t, e, s.alc)) ferir(e, s.dano, t);
+    for (let i = 0; i < 14; i++) { const a = rnd(0, TAU); parts.push({ x: t.x, y: t.y, vx: Math.cos(a) * rnd(80, s.alc * 1.6), vy: Math.sin(a) * rnd(80, s.alc * 1.6), vida: 0.45, max: 0.45, e: '🍿', tam: 16 }); }
+    anims.push({ tipo: 'anel', x: t.x, y: t.y, r: s.alc, cor: '#fde047', vida: 0.3, max: 0.3 }); som('pipoca'); return;
+  }
+  if (d.tiro === 'vento') { // ventilador: empurra para trás todos em volta
+    for (const e of inimigos) if (!e.morto && emAlcance(t, e, s.alc)) { const k = e.def.chefe ? 0.25 : e.def.hp >= 300 ? 0.5 : e.def.voa ? 1.4 : 1; if ((e.empurrado || 0) < 200) { const emp = s.empurra * k; e.d = Math.max(0, e.d - emp); e.empurrado = (e.empurrado || 0) + emp; } ferir(e, s.dano, t); } // cada bicho só volta até 200 de caminho: nunca fica preso para sempre
+    anims.push({ tipo: 'anel', x: t.x, y: t.y, r: s.alc, cor: '#a5f3fc', vida: 0.45, max: 0.45 }); som('vento'); return;
+  }
+  for (const a of alvos) {
+    const p = { x: t.x, y: t.y - 6, alvo: a, tx: a.x, ty: a.y, vel: 520, torre: t, s, tipo: d.tiro, giro: 0, morto: false };
+    if (d.tiro === 'pastel') p.e = '🥟';
+    if (d.tiro === 'pedra') { p.vel = 950; p.cor = '#cbd5e1'; }
+    if (d.tiro === 'caldo') { p.vel = 420; p.e = '💧'; }
+    if (d.tiro === 'rojao') { p.vel = 380; p.e = '🚀'; p.rastro = true; }
+    tiros.push(p);
+  }
+  som(d.tiro === 'rojao' ? 'rojao' : d.tiro === 'pedra' ? 'estilingue' : 'tiro');
+}
+function impacto(p) {
+  const s = p.s, t = p.torre;
+  if (p.tipo === 'caldo' || p.tipo === 'rojao') {
+    for (const e of inimigos) {
+      if (e.morto || Math.hypot(e.x - p.tx, e.y - p.ty) > s.area + e.def.r * 0.5) continue;
+      if (e.def.voa && !s.ar) continue;
+      ferir(e, s.dano, t);
+      if (p.tipo === 'caldo') { e.lento = t.nivel === 3 ? 2.6 : 1.6; e.lentoK = Math.max(e.lento > 0 ? e.lentoK : 0, e.def.chefe ? s.lento * 0.5 : s.lento); }
+    }
+    if (p.tipo === 'rojao') { anims.push({ tipo: 'boom', x: p.tx, y: p.ty, r: s.area, vida: 0.4, max: 0.4 }); for (let i = 0; i < 18; i++) { const a = rnd(0, TAU); parts.push({ x: p.tx, y: p.ty, vx: Math.cos(a) * rnd(60, 260), vy: Math.sin(a) * rnd(60, 260), vida: 0.5, max: 0.5, cor: pick(['#fde047', '#fb923c', '#ef4444', '#fff']), tam: rnd(3, 7) }); } som('boom'); tremer(5); }
+    else { anims.push({ tipo: 'mancha', x: p.tx, y: p.ty, r: s.area, vida: 0.6, max: 0.6 }); som('splash'); }
+    return;
+  }
+  if (p.alvo && !p.alvo.morto) {
+    let dano = s.dano;
+    if (t.def.contraAr && p.alvo.def.voa) dano *= t.def.contraAr;
+    let crit = false; if (t.def.id === 'estilingue' && t.nivel === 3 && Math.random() < 0.25) { dano *= 3; crit = true; }
+    ferir(p.alvo, dano, t, crit);
+  }
+}
+function ferir(e, dano, t, crit) {
+  if (e.morto) return;
+  const real = Math.max(dano * 0.2, dano - (e.def.arm || 0));
+  e.hp -= real; e.flash = 0.08; e.ultDano = P.tempo;
+  if (crit) texto(e.x, e.y - 30, Math.round(real) + '!', '#fde047', 18);
+  if (e.hp <= 0) matar(e, t);
+}
+function matar(e, t) {
+  e.morto = true; P.abates++; if (t) t.abates = (t.abates || 0) + 1;
+  const din = e.def.din; P.moedas += din; P.ganhou += din;
+  texto(e.x, e.y - 18, '+' + din, '#ffcc4d', e.def.chefe ? 24 : 15);
+  for (let i = 0; i < (e.def.chefe ? 40 : 8); i++) { const a = rnd(0, TAU); parts.push({ x: e.x, y: e.y, vx: Math.cos(a) * rnd(40, 200), vy: Math.sin(a) * rnd(40, 200), vida: 0.5, max: 0.5, cor: e.def.chefe ? pick(['#ffcc4d', '#fff', '#ef4444']) : '#3f2a17', tam: rnd(2, 5) }); }
+  if (e.def.filhos) for (let i = 0; i < e.def.filhos[1]; i++) { const f = criarInimigo(e.def.filhos[0], 0, Math.max(0, e.d - i * 18)); f.cam = e.cam; f.d = Math.max(0, e.d - i * 18); }
+  if (e.def.chefe) { som('chefeMorre'); tremer(12); aviso('🏆 ' + e.def.nome + ' derrotado!', `+${din} moedas`, 2200); }
+  else som('morre');
+  atualizarHud();
+}
+function vazar(e) {
+  P.vidas -= e.def.dano; P.vazou += e.def.dano; tremer(e.def.chefe ? 14 : 5); som('vazou'); flash = 0.3;
+  texto(e.x, e.y - 20, `-${e.def.dano} ❤️`, '#f87171', 18);
+  if (P.vidas <= 0) { P.vidas = 0; atualizarHud(); setTimeout(() => terminar(false), 700); estado = 'fimjogo'; return; }
+  atualizarHud();
+}
+function fimDaOnda() {
+  P.emOnda = false;
+  const bonus = 20 + P.onda * 4; let renda = 0;
+  for (const t of torres) if (t.def.renda) { const r = stats(t).renda; renda += r; texto(t.x, t.y - 30, '+' + r, '#4ade80', 16); }
+  P.moedas += bonus + renda; P.ganhou += bonus + renda;
+  som('fimOnda');
+  if (!P.infinito && P.onda >= P.total) { atualizarHud(); setTimeout(() => terminar(true), 900); estado = 'fimjogo'; return; }
+  aviso(`Onda ${P.onda} limpa!`, `+${bonus} moedas${renda ? ` · +${renda} das caixas` : ''}`, 2200);
+  P.espera = 12; atualizarHud();
+}
+function terminar(venceu) {
+  estado = 'fim';
+  const est = venceu ? (P.vidas >= 18 ? 3 : P.vidas >= 10 ? 2 : 1) : 0;
+  if (venceu && est > (ESTRELAS[M.id] || 0)) { ESTRELAS[M.id] = est; gravar('feira.estrelas', ESTRELAS); }
+  let recInf = false; if (P.infinito && P.onda - 1 > (RECORDE_INF[M.id] || 0)) { RECORDE_INF[M.id] = P.onda - 1; gravar('feira.infinito', RECORDE_INF); recInf = true; }
+  const titulo = P.infinito ? `♾️ Você aguentou ${Math.max(0, P.onda - 1)} ondas` : venceu ? '🎉 A feira está salva!' : '😱 Os bichos levaram o pastel!';
+  $('#fim-c').innerHTML = `<h2 class="disp" style="color:${venceu || P.infinito ? '#ffcc4d' : '#f87171'}">${titulo}</h2>
+    ${venceu ? `<div class="big">${'⭐'.repeat(est)}${'<span style="opacity:.25">⭐</span>'.repeat(3 - est)}</div>` : ''}
+    ${recInf ? '<p style="color:#ffcc4d;font-weight:800">Novo recorde no modo infinito!</p>' : ''}
+    <div class="res"><div><small>Mapa</small>${M.nome}</div><div><small>Onda</small>${P.onda}${P.infinito ? '' : '/' + M.ondas}</div><div><small>Fregueses</small>${P.vidas}/20</div><div><small>Bichos derrotados</small>${P.abates}</div><div><small>Barracas</small>${torres.length}</div></div>
+    <div class="linha"><button class="bt verde" id="f-denovo">🔁 Jogar de novo</button>${venceu && !P.infinito ? '<button class="bt" id="f-inf">♾️ Modo infinito</button>' : ''}${venceu && P.idx < MAPAS.length - 1 ? '<button class="bt" id="f-prox">➡️ Próximo mapa</button>' : ''}<button class="bt" id="f-menu">🗺️ Mapas</button></div>`;
+  $('#fim').classList.add('on'); fecharPainel();
+  $('#f-denovo').onclick = () => novaPartida(P.idx, P.infinito);
+  $('#f-menu').onclick = irMenu;
+  if ($('#f-inf')) $('#f-inf').onclick = () => novaPartida(P.idx, true);
+  if ($('#f-prox')) $('#f-prox').onclick = () => novaPartida(P.idx + 1, false);
+  avisar('concluido', { final: venceu ? 'vitoria' : 'derrota' });
+  som(venceu ? 'vitoria' : 'derrota');
+}
+
+/* ---------- ações do jogador ---------- */
+const chave = (c, r) => c + ',' + r;
+function livre(c, r) { return c >= 0 && c < COLS && r >= 0 && r < ROWS && !P.caminho.has(chave(c, r)) && !P.bloqueado.has(chave(c, r)) && !torres.some(t => t.c === c && t.r === r) && !(c === P.fim[0] && r === P.fim[1]); }
+function montar(def, c, r) {
+  if (!livre(c, r)) { som('erro'); return false; }
+  if (P.moedas < def.custo) { som('erro'); texto(c * C + C / 2, r * C, 'Moedas insuficientes', '#f87171', 15); return false; }
+  P.moedas -= def.custo;
+  const t = { def, c, r, x: c * C + C / 2, y: r * C + C / 2, nivel: 1, cd: 0.2, alvo: 0, investido: def.custo, ang: -Math.PI / 2, abates: 0, nasc: 0.35 };
+  torres.push(t); som('montar');
+  for (let i = 0; i < 10; i++) parts.push({ x: t.x, y: t.y + 20, vx: rnd(-90, 90), vy: rnd(-120, -20), vida: 0.5, max: 0.5, cor: '#d6c8ae', tam: rnd(3, 6) });
+  atualizarHud(); return t;
+}
+function melhorar(t) {
+  const c = custoMelhora(t); if (!c) return;
+  if (P.moedas < c) { som('erro'); return; }
+  P.moedas -= c; t.investido += c; t.nivel++; t.nasc = 0.35; som('melhorar');
+  texto(t.x, t.y - 34, `Nível ${t.nivel}!`, '#ffcc4d', 17); atualizarHud(); abrirPainel(t);
+}
+function vender(t) {
+  const v = valorVenda(t); P.moedas += v; torres = torres.filter(x => x !== t); texto(t.x, t.y - 20, '+' + v, '#ffcc4d', 16); som('vender');
+  if (sel === t) fecharPainel(); atualizarHud();
+}
+function promocao() {
+  if (estado !== 'jogo' || P.cdPromo > 0) return;
+  P.congelado = 3; P.cdPromo = 40; som('promo'); aviso('📢 PROMOÇÃO RELÂMPAGO!', 'Todos os bichos param para olhar', 1600);
+  for (const e of inimigos) texto(e.x, e.y - 24, '😮', '#fff', 18);
+}
+function vassourada(x, y) {
+  const R = 95, dano = 120 + P.onda * 12;
+  for (const e of inimigos) if (!e.morto && Math.hypot(e.x - x, e.y - y) <= R + e.def.r * 0.5) { ferir(e, e.def.voa ? dano * 0.5 : dano, null); if (!e.def.chefe) e.d = Math.max(0, e.d - 25); }
+  anims.push({ tipo: 'vassoura', x, y, r: R, vida: 0.5, max: 0.5 });
+  P.cdVassoura = 25; modoVassoura = false; som('vassoura'); tremer(6); atualizarHud();
+}
+
+/* =====================================================================
+   ÁUDIO (gerado na hora)
+   ===================================================================== */
+let AC = null, mestre = null, mudo = false;
+function iniciarAudio() { if (AC) { if (AC.state === 'suspended') AC.resume(); return; } try { AC = new (window.AudioContext || window.webkitAudioContext)(); mestre = AC.createGain(); mestre.gain.value = 0.4; mestre.connect(AC.destination); } catch (e) {} }
+function tom(f, d, tipo = 'sine', v = 0.15, f2, atraso = 0) { if (!AC || mudo) return; const t = AC.currentTime + atraso, o = AC.createOscillator(), g = AC.createGain(); o.type = tipo; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + d); o.connect(g).connect(mestre); o.start(t); o.stop(t + d + 0.05); }
+let bufR = null;
+function ruido(d, f, v = 0.2, tipo = 'lowpass', f2) { if (!AC || mudo) return; if (!bufR) { bufR = AC.createBuffer(1, AC.sampleRate, AC.sampleRate); const x = bufR.getChannelData(0); for (let i = 0; i < x.length; i++) x[i] = Math.random() * 2 - 1; } const t = AC.currentTime, s = AC.createBufferSource(), fi = AC.createBiquadFilter(), g = AC.createGain(); s.buffer = bufR; fi.type = tipo; fi.frequency.setValueAtTime(f, t); if (f2) fi.frequency.exponentialRampToValueAtTime(f2, t + d); g.gain.setValueAtTime(v, t); g.gain.exponentialRampToValueAtTime(0.0001, t + d); s.connect(fi).connect(g).connect(mestre); s.start(t); s.stop(t + d + 0.05); }
+const SONS = {
+  tiro: () => tom(520, 0.07, 'triangle', 0.06, 300), estilingue: () => ruido(0.08, 3000, 0.08, 'highpass'), rojao: () => ruido(0.35, 1500, 0.12, 'bandpass', 400),
+  boom: () => { ruido(0.45, 700, 0.3, 'lowpass', 80); tom(90, 0.3, 'sine', 0.2, 40); }, pipoca: () => { for (let i = 0; i < 4; i++) tom(rnd(700, 1200), 0.04, 'square', 0.05, null, i * 0.04); },
+  vento: () => ruido(0.4, 900, 0.1, 'bandpass', 300), splash: () => ruido(0.15, 1200, 0.08, 'lowpass', 300), morre: () => tom(300, 0.08, 'square', 0.05, 140),
+  vazou: () => { tom(220, 0.25, 'sawtooth', 0.12, 110); }, montar: () => { tom(392, 0.08, 'triangle', 0.12); tom(523, 0.12, 'triangle', 0.12, null, 0.07); },
+  melhorar: () => [523, 659, 784, 1047].forEach((f, i) => tom(f, 0.12, 'triangle', 0.1, null, i * 0.06)), vender: () => { tom(988, 0.07, 'square', 0.07); tom(1319, 0.15, 'square', 0.07, null, 0.06); },
+  erro: () => tom(160, 0.15, 'square', 0.08), onda: () => [392, 523, 659].forEach((f, i) => tom(f, 0.14, 'square', 0.07, null, i * 0.09)),
+  fimOnda: () => [659, 784, 988].forEach((f, i) => tom(f, 0.16, 'triangle', 0.1, null, i * 0.08)), chefe: () => { for (let i = 0; i < 3; i++) tom(110, 0.35, 'sawtooth', 0.14, 80, i * 0.4); },
+  chefeMorre: () => [523, 659, 784, 1047, 1319].forEach((f, i) => tom(f, 0.2, 'square', 0.08, null, i * 0.08)), invoca: () => tom(600, 0.3, 'sawtooth', 0.06, 1200),
+  promo: () => { tom(880, 0.12, 'square', 0.1); tom(1175, 0.2, 'square', 0.1, null, 0.12); }, vassoura: () => ruido(0.3, 2500, 0.18, 'bandpass', 600),
+  vitoria: () => [523, 659, 784, 1047, 784, 1047].forEach((f, i) => tom(f, 0.2, 'square', 0.09, null, i * 0.13)), derrota: () => [392, 330, 262, 196].forEach((f, i) => tom(f, 0.35, 'triangle', 0.12, null, i * 0.2)),
+  clique: () => tom(900, 0.03, 'square', 0.05),
+};
+const ultSom = {};
+function som(n) { const a = performance.now(); if (ultSom[n] && a - ultSom[n] < 55) return; ultSom[n] = a; (SONS[n] || (() => {}))(); }
+
+/* =====================================================================
+   DESENHO · em pé no celular, o mapa gira 90° para caber
+   ===================================================================== */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let VW = 0, VH = 0, DPR = 1, MT = new DOMMatrix(), MI = new DOMMatrix(), GIRA = false, ESC = 1, tremor = 0, flash = 0, fundo = null, fundoGira = null;
+function redim() {
+  VW = innerWidth; VH = innerHeight; DPR = Math.min(2, devicePixelRatio || 1); cv.width = Math.round(VW * DPR); cv.height = Math.round(VH * DPR);
+  const cs = getComputedStyle(document.documentElement), topo = estado === 'menu' ? 0 : parseFloat(cs.getPropertyValue('--topo')) || 52, loja = estado === 'menu' ? 0 : parseFloat(cs.getPropertyValue('--loja')) || 100;
+  GIRA = VH > VW;
+  const ax = 0, ay = topo, aw = VW - (GIRA ? 0 : loja), ah = VH - topo - (GIRA ? loja : 0), m = 6;
+  if (!GIRA) { ESC = Math.min((aw - m * 2) / W, (ah - m * 2) / H); MT = new DOMMatrix().translate(ax + (aw - W * ESC) / 2, ay + (ah - H * ESC) / 2).scale(ESC); }
+  else { ESC = Math.min((aw - m * 2) / H, (ah - m * 2) / W); MT = new DOMMatrix().translate(ax + (aw - H * ESC) / 2 + H * ESC, ay + (ah - W * ESC) / 2).rotate(90).scale(ESC); }
+  MI = MT.inverse();
+  if (M && fundoGira !== GIRA) montarFundo();
+}
+addEventListener('resize', redim); addEventListener('orientationchange', () => setTimeout(redim, 250));
+const sprites = new Map();
+function sprite(e, tam = 64) { const k = e + tam; let c = sprites.get(k); if (c) return c; c = document.createElement('canvas'); c.width = c.height = tam; const g = c.getContext('2d'); g.font = `${tam * 0.8}px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, tam / 2, tam * 0.56); sprites.set(k, c); return c; }
+// emoji e textos ficam sempre "em pé" na tela, mesmo com o mapa girado
+function emPe(g, x, y, fn) { g.save(); g.translate(x, y); if (GIRA) g.rotate(-Math.PI / 2); fn(g); g.restore(); }
+function montarFundo(mapa = M, girar = GIRA) {
+  const giraAntes = GIRA; GIRA = girar; // os enfeites ficam em pé conforme o fundo vai ser mostrado
+  const c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  for (let r = 0; r < ROWS; r++) for (let col = 0; col < COLS; col++) { g.fillStyle = (r + col) % 2 ? mapa.chao : mapa.chao2; g.fillRect(col * C, r * C, C, C); }
+  // pedrinhas do chão
+  const rng = semente(mapa.id.length * 31);
+  g.globalAlpha = 0.18; for (let i = 0; i < 260; i++) { g.fillStyle = rng() < 0.5 ? '#000' : '#fff'; g.beginPath(); g.arc(rng() * W, rng() * H, rng() * 3 + 1, 0, TAU); g.fill(); } g.globalAlpha = 1;
+  // caminho
+  for (const cam of mapa.caminhos) {
+    const pts = cam.map(([cc, r]) => [cc * C + C / 2, r * C + C / 2]);
+    g.lineCap = 'round'; g.lineJoin = 'round';
+    g.strokeStyle = mapa.borda; g.lineWidth = C * 0.98; g.beginPath(); pts.forEach(([x, y], i) => i ? g.lineTo(x, y) : g.moveTo(x, y)); g.stroke();
+    g.strokeStyle = mapa.trilha; g.lineWidth = C * 0.84; g.stroke();
+  }
+  // paralelepípedos
+  g.globalAlpha = 0.35; g.strokeStyle = mapa.trilha2; g.lineWidth = 2;
+  for (const cam of mapa.caminhos) for (let i = 0; i < cam.length - 1; i++) { const [a, b] = [cam[i], cam[i + 1]], dc = Math.sign(b[0] - a[0]), dr = Math.sign(b[1] - a[1]); let [cc, r] = a; while (true) { if (cc >= 0 && cc < COLS && r >= 0 && r < ROWS) { for (let k = 0; k < 4; k++) g.strokeRect(cc * C + 8 + (k % 2) * 24 + (Math.floor(k / 2) % 2) * 6, r * C + 10 + Math.floor(k / 2) * 22, 20, 16); } if (cc === b[0] && r === b[1]) break; cc += dc; r += dr; } }
+  g.globalAlpha = 1;
+  // entrada(s)
+  for (const cam of mapa.caminhos) { const [cc, r] = cam[0]; emPe(g, Math.max(18, cc * C + C / 2 + 34), r * C + C / 2, gg => { gg.font = `26px ${FONTE_EMOJI}`; gg.textAlign = 'center'; gg.textBaseline = 'middle'; gg.fillText('🚧', 0, 0); }); }
+  // enfeites
+  for (const [cc, r, e] of mapa.deco) { g.fillStyle = 'rgba(0,0,0,.25)'; g.beginPath(); g.ellipse(cc * C + C / 2, r * C + C * 0.8, C * 0.32, C * 0.1, 0, 0, TAU); g.fill(); emPe(g, cc * C + C / 2, r * C + C / 2, gg => gg.drawImage(sprite(e, 96), -C * 0.42, -C * 0.45, C * 0.84, C * 0.84)); }
+  // a barraca de pastel (o que você defende)
+  const [fc, fr] = mapa.caminhos[0][mapa.caminhos[0].length - 1], fx = fc * C + C / 2, fy = fr * C + C / 2;
+  g.fillStyle = '#7c2d12'; g.fillRect(fx - 30, fy - 8, 60, 34);
+  for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#fff7e8' : '#ef4444'; g.fillRect(fx - 32 + i * 64 / 6, fy - 30, 64 / 6 + 0.5, 20); }
+  emPe(g, fx, fy + 6, gg => { gg.font = `26px ${FONTE_EMOJI}`; gg.textAlign = 'center'; gg.textBaseline = 'middle'; gg.fillText('🥟', 0, 0); });
+  GIRA = giraAntes;
+  if (mapa === M) { fundo = c; fundoGira = girar; }
+  return c;
+}
+function desenhar(dt, T) {
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0); ctx.fillStyle = '#1d140c'; ctx.fillRect(0, 0, VW, VH);
+  if (!M || estado === 'menu') return;
+  let sx = 0, sy = 0; if (tremor > 0) { sx = rnd(-1, 1) * tremor; sy = rnd(-1, 1) * tremor; tremor = Math.max(0, tremor - dt * 30); }
+  ctx.setTransform(new DOMMatrix().scale(DPR).translate(sx, sy).multiply(MT));
+  ctx.drawImage(fundo, 0, 0);
+  // grade ao escolher onde montar
+  if (compra) {
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (livre(c, r)) { ctx.fillStyle = 'rgba(255,255,255,.07)'; ctx.fillRect(c * C + 3, r * C + 3, C - 6, C - 6); }
+  }
+  // alcance da barraca escolhida / da que vai montar
+  const alcance = (x, y, alc, cor) => { ctx.fillStyle = cor + '22'; ctx.strokeStyle = cor + 'aa'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, alc, 0, TAU); ctx.fill(); ctx.stroke(); };
+  if (sel) { const s = stats(sel); if (s.alc) alcance(sel.x, sel.y, s.alc, '#ffffff'); }
+  if (compra && hover) {
+    const ok = livre(hover.c, hover.r) && P.moedas >= compra.custo, x = hover.c * C + C / 2, y = hover.r * C + C / 2;
+    if (compra.alc) alcance(x, y, compra.alc, ok ? '#4ade80' : '#f87171');
+    ctx.globalAlpha = 0.65; desenharTorre({ def: compra, x, y, nivel: 1, ang: -Math.PI / 2 }, T); ctx.globalAlpha = 1;
+    if (!ok) { ctx.strokeStyle = '#f87171'; ctx.lineWidth = 4; ctx.strokeRect(hover.c * C + 4, hover.r * C + 4, C - 8, C - 8); }
+  }
+  // manchas do chão (caldo)
+  for (const a of anims) if (a.tipo === 'mancha') { ctx.globalAlpha = 0.45 * a.vida / a.max; ctx.fillStyle = '#a3e635'; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * 0.8, 0, TAU); ctx.fill(); ctx.globalAlpha = 1; }
+  for (const t of torres) desenharTorre(t, T, dt);
+  // bichos (os de baixo por cima)
+  const lista = [...inimigos].sort((a, b) => (a.def.voa - b.def.voa) || (a.y - b.y));
+  for (const e of lista) desenharBicho(e, T, dt);
+  // tiros
+  for (const p of tiros) {
+    if (p.e) emPe(ctx, p.x, p.y, g => { g.rotate(p.tipo === 'rojao' ? Math.atan2(p.ty - p.y, p.tx - p.x) + Math.PI / 4 + (GIRA ? Math.PI / 2 : 0) : p.giro); g.drawImage(sprite(p.e), -12, -12, 24, 24); });
+    else { ctx.fillStyle = p.cor || '#fff'; ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, TAU); ctx.fill(); }
+  }
+  // efeitos
+  for (let i = anims.length - 1; i >= 0; i--) {
+    const a = anims[i]; a.vida -= dt; if (a.vida <= 0) { anims.splice(i, 1); continue; }
+    const k = 1 - a.vida / a.max;
+    if (a.tipo === 'anel') { ctx.strokeStyle = a.cor; ctx.globalAlpha = 1 - k; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * (0.3 + 0.7 * k), 0, TAU); ctx.stroke(); }
+    if (a.tipo === 'boom') { ctx.globalAlpha = 1 - k; const g = ctx.createRadialGradient(a.x, a.y, 2, a.x, a.y, a.r); g.addColorStop(0, '#fff7ae'); g.addColorStop(0.4, '#fb923c'); g.addColorStop(1, 'rgba(239,68,68,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(a.x, a.y, a.r * (0.5 + 0.5 * k), 0, TAU); ctx.fill(); }
+    if (a.tipo === 'vassoura') { ctx.globalAlpha = 1 - k; ctx.strokeStyle = '#fde68a'; ctx.lineWidth = 6; for (let j = 0; j < 3; j++) { ctx.beginPath(); ctx.arc(a.x, a.y, a.r * (0.4 + 0.25 * j), k * 8 + j, k * 8 + j + 2.4); ctx.stroke(); } emPe(ctx, a.x, a.y, g => { g.rotate(Math.sin(k * 12) * 0.8); g.drawImage(sprite('🧹', 96), -40, -40, 80, 80); }); }
+    ctx.globalAlpha = 1;
+  }
+  for (let i = parts.length - 1; i >= 0; i--) { const q = parts[i]; q.vida -= dt; if (q.vida <= 0) { parts.splice(i, 1); continue; } q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= 1 - dt * 3; q.vy *= 1 - dt * 3; ctx.globalAlpha = Math.min(1, q.vida / q.max * 1.6); if (q.e) emPe(ctx, q.x, q.y, g => g.drawImage(sprite(q.e), -q.tam / 2, -q.tam / 2, q.tam, q.tam)); else { ctx.fillStyle = q.cor; ctx.fillRect(q.x - q.tam / 2, q.y - q.tam / 2, q.tam, q.tam); } }
+  ctx.globalAlpha = 1;
+  for (let i = textos.length - 1; i >= 0; i--) { const t = textos[i]; t.vida -= dt; if (t.vida <= 0) { textos.splice(i, 1); continue; } t.sobe += dt * 40; ctx.globalAlpha = Math.min(1, t.vida * 2); emPe(ctx, t.x, t.y, g => { g.font = `900 ${t.tam}px Nunito,sans-serif`; g.textAlign = 'center'; g.lineWidth = 4; g.strokeStyle = 'rgba(0,0,0,.75)'; g.strokeText(t.txt, 0, -t.sobe); g.fillStyle = t.cor; g.fillText(t.txt, 0, -t.sobe); }); }
+  ctx.globalAlpha = 1;
+  if (modoVassoura && hover) { ctx.strokeStyle = '#fde68a'; ctx.setLineDash([10, 8]); ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(hover.x, hover.y, 95, 0, TAU); ctx.stroke(); ctx.setLineDash([]); }
+  if (P.congelado > 0) { ctx.fillStyle = `rgba(255,204,77,${Math.min(0.12, P.congelado * 0.05)})`; ctx.fillRect(0, 0, W, H); }
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (flash > 0) { ctx.fillStyle = `rgba(248,113,113,${flash * 0.5})`; ctx.fillRect(0, 0, VW, VH); flash = Math.max(0, flash - dt * 2); }
+}
+function desenharTorre(t, T, dt = 0) {
+  const d = t.def, s = 1 + (t.nasc > 0 ? Math.sin((0.35 - t.nasc) / 0.35 * Math.PI) * 0.25 : 0) + (t.pisca > 0 ? 0.06 : 0);
+  if (t.nasc > 0) t.nasc -= dt;
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(t.x, t.y + 22, 26, 8, 0, 0, TAU); ctx.fill();
+  // banquinha com toldo da cor da barraca (sempre em pé na tela, mesmo com o mapa girado)
+  emPe(ctx, t.x, t.y, g => {
+    g.scale(s, s);
+    g.fillStyle = '#5b3a1c'; g.beginPath(); g.roundRect(-25, -4, 50, 26, 6); g.fill();
+    g.fillStyle = d.cor; g.beginPath(); g.roundRect(-28, -26, 56, 18, 8); g.fill();
+    g.fillStyle = 'rgba(255,255,255,.55)'; for (let i = 0; i < 4; i++) g.fillRect(-26 + i * 14, -26, 7, 18);
+    g.drawImage(sprite(d.e, 96), -21, -16, 42, 42);
+  });
+  if (t.nivel > 1 || sel === t) emPe(ctx, t.x, t.y + 30, g => { g.font = '900 13px Nunito,sans-serif'; g.textAlign = 'center'; g.lineWidth = 3; g.strokeStyle = '#000'; const txt = '★'.repeat(t.nivel); g.strokeText(txt, 0, 4); g.fillStyle = '#ffcc4d'; g.fillText(txt, 0, 4); });
+  if (sel === t) { ctx.strokeStyle = '#ffcc4d'; ctx.lineWidth = 3; ctx.strokeRect(t.c * C + 2, t.r * C + 2, C - 4, C - 4); }
+}
+function desenharBicho(e, T) {
+  const d = e.def, tam = d.r * 2.4, vo = d.voa ? 10 + Math.sin(e.bob) * 4 : Math.abs(Math.sin(e.bob)) * 2;
+  ctx.fillStyle = 'rgba(0,0,0,.28)'; ctx.beginPath(); ctx.ellipse(e.x, e.y + d.r * 0.7, d.r * 0.9, d.r * 0.3, 0, 0, TAU); ctx.fill();
+  if (e.lento > 0) { ctx.fillStyle = 'rgba(163,230,53,.35)'; ctx.beginPath(); ctx.arc(e.x, e.y, d.r * 1.1, 0, TAU); ctx.fill(); }
+  emPe(ctx, e.x, e.y - vo, g => {
+    // vira para o lado em que anda (em pé na tela)
+    const dir = GIRA ? Math.sin(e.ang) : Math.cos(e.ang);
+    if (dir > 0.1) g.scale(-1, 1);
+    if (e.flash > 0 && !TOQUE) g.filter = 'brightness(2.2)';
+    g.drawImage(sprite(d.e, 96), -tam / 2, -tam / 2, tam, tam);
+    g.filter = 'none';
+    if (d.coroa) { g.scale(dir > 0.1 ? -1 : 1, 1); g.drawImage(sprite('👑'), -tam * 0.22, -tam * 0.85, tam * 0.44, tam * 0.44); }
+  });
+  e.flash = Math.max(0, (e.flash || 0) - 1 / 60);
+  if (P.congelado > 0 || e.congela > 0) emPe(ctx, e.x, e.y - d.r - 14, g => { g.font = `16px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.fillText('😮', 0, 0); });
+  if (e.hp < e.hpMax || d.chefe) {
+    const w = d.chefe ? 70 : Math.max(26, d.r * 2), k = Math.max(0, e.hp / e.hpMax);
+    emPe(ctx, e.x, e.y - vo - d.r - 8, g => { g.fillStyle = 'rgba(0,0,0,.6)'; g.fillRect(-w / 2 - 1, -1, w + 2, d.chefe ? 8 : 5); g.fillStyle = k > 0.5 ? '#4ade80' : k > 0.25 ? '#facc15' : '#f87171'; g.fillRect(-w / 2, 0, w * k, d.chefe ? 6 : 3); });
+  }
+}
+function texto(x, y, txt, cor, tam = 15) { textos.push({ x, y, txt, cor, tam, vida: 1.1, sobe: 0 }); }
+function tremer(n) { tremor = Math.max(tremor, n); }
+
+/* =====================================================================
+   HUD, LOJA E PAINEL
+   ===================================================================== */
+function atualizarHud() {
+  if (!P) return;
+  $('#vidas').textContent = P.vidas; $('#moedas').textContent = P.moedas;
+  $('#onda').textContent = P.onda; $('#onda-tot').textContent = P.infinito ? ' ♾️' : '/' + M.ondas;
+  for (const el of document.querySelectorAll('.item')) { const d = TORRES[+el.dataset.i]; el.classList.toggle('caro', P.moedas < d.custo); el.classList.toggle('sel', compra === d); }
+  if (sel) abrirPainel(sel, true);
+}
+function atualizarBotoes() {
+  if (!P) return;
+  const bo = $('#b-onda'), t = $('#b-onda-t');
+  bo.disabled = P.emOnda || estado !== 'jogo';
+  t.textContent = P.emOnda ? 'Onda…' : P.espera > 0 ? `Já! (${Math.ceil(P.espera)})` : P.onda === 0 ? 'Começar' : 'Próxima';
+  $('#b-promo').disabled = P.cdPromo > 0 || estado !== 'jogo'; $('#b-promo .cd').style.width = (P.cdPromo / 40 * 100) + '%';
+  $('#b-vassoura').disabled = P.cdVassoura > 0 || estado !== 'jogo'; $('#b-vassoura .cd').style.width = (P.cdVassoura / 25 * 100) + '%';
+  $('#b-vassoura').classList.toggle('on', modoVassoura);
+  $('#vel').textContent = vel + 'x';
+}
+function renderLoja() {
+  $('#loja').innerHTML = TORRES.map((d, i) => `<button class="item" data-i="${i}" title="${d.nome}: ${d.desc}"><kbd>${i + 1}</kbd><span class="ic">${d.e}</span><b>${d.nome}</b><span>🪙${d.custo}</span></button>`).join('');
+}
+$('#loja').addEventListener('click', e => { const b = e.target.closest('.item'); if (!b) return; iniciarAudio(); escolherCompra(TORRES[+b.dataset.i]); });
+function escolherCompra(d) {
+  if (estado !== 'jogo') return;
+  modoVassoura = false;
+  if (compra === d) { compra = null; dica(''); atualizarHud(); return; }
+  compra = d; fecharPainel(); som('clique');
+  dica(`${d.e} <b>${d.nome}</b> (🪙${d.custo}) · ${d.desc}${d.ar === false ? ' <span style="color:#fca5a5">Não acerta voadores.</span>' : ''} · ${TOQUE ? 'toque num espaço livre' : 'clique num espaço livre'} (Esc cancela)`, 0);
+  atualizarHud();
+}
+let dicaT = 0;
+function dica(html, ms = 4000) { const d = $('#dica'); clearTimeout(dicaT); if (!html) { d.classList.remove('on'); return; } d.innerHTML = html; d.classList.add('on'); if (ms) dicaT = setTimeout(() => d.classList.remove('on'), ms); }
+let avisoT = 0;
+function aviso(t, sub, ms = 2000) { $('#aviso').innerHTML = `<h2 class="disp">${t}</h2>${sub ? `<p>${sub}</p>` : ''}`; $('#aviso').classList.add('on'); clearTimeout(avisoT); avisoT = setTimeout(() => $('#aviso').classList.remove('on'), ms); }
+function abrirPainel(t, soAtualizar) {
+  sel = t; const d = t.def, s = stats(t), cm = custoMelhora(t);
+  const linhas = d.renda ? `Rende <b>🪙${s.renda}</b> no fim de cada onda.${t.nivel < 3 ? ` Próximo nível: <b>🪙${[25, 45, 75][t.nivel]}</b>.` : ''}`
+    : `Dano <b>${Math.round(s.dano)}</b>${d.contraAr ? ' (x2 em voadores)' : ''} · Alcance <b>${Math.round(s.alc)}</b> · <b>${s.cad.toFixed(2)}</b>/s${s.lento ? ` · Lentidão <b>${Math.round(s.lento * 100)}%</b>` : ''}${s.empurra ? ` · Empurra <b>${Math.round(s.empurra)}</b>` : ''}<br>${s.ar ? '✅ acerta voadores' : '🚫 não acerta voadores'} · ${t.abates || 0} bichos derrotados`;
+  const html = `<button class="fechar" id="p-fechar">✕</button><h3>${d.e} ${d.nome} <span class="niv">${'★'.repeat(t.nivel)}${'☆'.repeat(3 - t.nivel)}</span></h3>
+    <div class="dados">${linhas}${t.nivel < 3 ? `<br><i>${d.n3}</i>` : ''}</div>
+    <div class="acoes"><button class="bt verde" id="p-melhorar" ${!cm || P.moedas < cm ? 'disabled' : ''}>${cm ? `⬆️ Melhorar 🪙${cm}` : '⭐ Nível máximo'}</button><button class="bt" id="p-vender">💲 Vender +${valorVenda(t)}</button>
+    ${d.tiro ? `<button class="bt" id="p-alvo" style="grid-column:1/3">🎯 Mira: ${ALVOS[t.alvo]}</button>` : ''}</div>`;
+  const p = $('#painel'); if (soAtualizar && p.dataset.h === html) return; p.dataset.h = html; p.innerHTML = html; p.classList.add('on');
+  $('#p-fechar').onclick = fecharPainel; $('#p-melhorar').onclick = () => melhorar(t); $('#p-vender').onclick = () => vender(t);
+  if ($('#p-alvo')) $('#p-alvo').onclick = () => { t.alvo = (t.alvo + 1) % ALVOS.length; som('clique'); abrirPainel(t); };
+}
+function fecharPainel() { sel = null; $('#painel').classList.remove('on'); $('#painel').dataset.h = ''; }
+
+/* =====================================================================
+   ENTRADA
+   ===================================================================== */
+function paraMundo(cx, cy) { const p = MI.transformPoint(new DOMPoint(cx, cy)); return { x: p.x, y: p.y, c: Math.floor(p.x / C), r: Math.floor(p.y / C) }; }
+cv.addEventListener('pointermove', e => { if (estado !== 'jogo' || e.pointerType === 'touch') return; hover = paraMundo(e.clientX, e.clientY); });
+cv.addEventListener('pointerdown', e => {
+  iniciarAudio(); if (estado !== 'jogo') return;
+  const p = paraMundo(e.clientX, e.clientY); hover = p;
+  if (modoVassoura) { if (p.x >= 0 && p.x <= W && p.y >= 0 && p.y <= H) vassourada(p.x, p.y); return; }
+  const t = torres.find(t => t.c === p.c && t.r === p.r);
+  if (compra) {
+    if (t) { compra = null; dica(''); abrirPainel(t); atualizarHud(); return; }
+    if (p.c < 0 || p.c >= COLS || p.r < 0 || p.r >= ROWS) { compra = null; dica(''); atualizarHud(); return; }
+    const nova = montar(compra, p.c, p.r);
+    if (nova && (P.moedas < compra.custo || TOQUE)) { compra = null; dica(''); } // no celular cada toque monta uma; no computador dá para montar várias seguidas
+    atualizarHud(); return;
+  }
+  if (t) { som('clique'); abrirPainel(t); } else fecharPainel();
+});
+addEventListener('keydown', e => {
+  if (estado !== 'jogo') return;
+  if (/^Digit[1-7]$/.test(e.code)) escolherCompra(TORRES[+e.code.slice(5) - 1]);
+  else if (e.code === 'Space') { e.preventDefault(); comecarOnda(); }
+  else if (e.code === 'Escape') { if (compra || modoVassoura) { compra = null; modoVassoura = false; dica(''); atualizarHud(); } else if (sel) fecharPainel(); else pausar(); }
+  else if (e.code === 'KeyF') trocarVel();
+  else if (e.code === 'KeyP') pausar();
+  else if (e.code === 'KeyQ') promocao();
+  else if (e.code === 'KeyW') armarVassoura();
+  else if (e.code === 'KeyU' && sel) melhorar(sel);
+  else if (e.code === 'KeyS' && sel) vender(sel);
+});
+function trocarVel() { vel = vel === 1 ? 2 : vel === 2 ? 3 : 1; som('clique'); }
+function armarVassoura() { if (estado !== 'jogo' || P.cdVassoura > 0) return; modoVassoura = !modoVassoura; compra = null; fecharPainel(); dica(modoVassoura ? `🧹 ${TOQUE ? 'Toque' : 'Clique'} onde os bichos estão para varrer` : '', 0); atualizarHud(); }
+function pausar() { if (estado !== 'jogo') return; pausado = true; $('#pausa-info').textContent = `${M.nome} · onda ${P.onda}${P.infinito ? '' : '/' + M.ondas}`; $('#pausa').classList.add('on'); }
+function continuar() { pausado = false; $('#pausa').classList.remove('on'); ultimo = performance.now(); }
+$('#b-onda').onclick = () => { iniciarAudio(); comecarOnda(); };
+$('#b-vel').onclick = trocarVel;
+$('#b-pausa').onclick = pausar;
+$('#b-promo').onclick = promocao;
+$('#b-vassoura').onclick = armarVassoura;
+$('#b-continuar').onclick = continuar;
+$('#b-reiniciar').onclick = () => { continuar(); novaPartida(P.idx, P.infinito); };
+$('#b-menu2').onclick = () => { continuar(); irMenu(); };
+$('#b-sair').onclick = () => { if (window.parent !== window) avisar('sair'); else irMenu(); };
+addEventListener('blur', () => { if (estado === 'jogo' && !pausado) pausar(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden && estado === 'jogo' && !pausado) pausar(); });
+
+/* =====================================================================
+   MENU
+   ===================================================================== */
+function irMenu() {
+  estado = 'menu'; M = null; ['#fim', '#pausa'].forEach(s => $(s).classList.remove('on')); $('#topo').classList.remove('on'); $('#loja').classList.remove('on'); fecharPainel(); dica('');
+  $('#menu').classList.add('on'); renderMenu(); redim();
+}
+function renderMenu() {
+  $('#mapas').innerHTML = MAPAS.map((m, i) => {
+    const est = ESTRELAS[m.id] || 0, aberto = i === 0 || (ESTRELAS[MAPAS[i - 1].id] || 0) > 0, inf = RECORDE_INF[m.id];
+    return `<div class="mapa ${aberto ? '' : 'trancado'}"><div class="prev"><canvas data-m="${i}" width="${W / 4}" height="${H / 4}"></canvas></div>
+      <span class="estrelas">${'⭐'.repeat(est)}<span style="opacity:.25">${'⭐'.repeat(3 - est)}</span></span>
+      <h3 class="disp">${aberto ? '' : '🔒 '}${m.nome}</h3><p>${m.desc}<br><b>${m.ondas} ondas</b>${inf ? ` · ♾️ recorde: onda ${inf}` : ''}</p>
+      <div class="linha"><button class="bt verde" data-jogar="${i}" ${aberto ? '' : 'disabled'}>▶ Jogar</button><button class="bt" data-inf="${i}" ${est ? '' : 'disabled'} title="${est ? 'Ondas sem fim' : 'Vença o mapa para liberar'}">♾️ Infinito</button></div></div>`;
+  }).join('');
+  for (const c of document.querySelectorAll('.prev canvas')) { const g = c.getContext('2d'); g.drawImage(montarFundo(MAPAS[+c.dataset.m], false), 0, 0, c.width, c.height); }
+}
+$('#mapas').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || b.disabled) return; iniciarAudio(); if (b.dataset.jogar) novaPartida(+b.dataset.jogar, false); else if (b.dataset.inf) novaPartida(+b.dataset.inf, true); });
+
+/* =====================================================================
+   LAÇO
+   ===================================================================== */
+let ultimo = performance.now(), tBotoes = 0;
+function quadro(agora) {
+  requestAnimationFrame(quadro);
+  const dt = Math.min(0.05, (agora - ultimo) / 1000); ultimo = agora;
+  if (!pausado) for (let i = 0; i < vel; i++) passo(dt);
+  desenhar(pausado ? 0 : dt * (vel > 1 ? Math.min(vel, 2) : 1), agora / 1000);
+  tBotoes -= dt; if (tBotoes <= 0 && estado !== 'menu') { tBotoes = 0.1; atualizarBotoes(); if (P) { $('#moedas').textContent = P.moedas; } }
+}
+redim(); renderMenu(); requestAnimationFrame(quadro);
+if (PARAM.get('mapa') !== null) novaPartida(+PARAM.get('mapa') || 0, PARAM.get('inf') === '1');
+// ganchos para testes automáticos
+window.__feira = { desenhar, MAPAS, TORRES, BICHOS, passo, montar, melhorar, vender, comecarOnda, novaPartida, gerarOnda, livre, get P() { return P; }, get inimigos() { return inimigos; }, get torres() { return torres; }, get estado() { return estado; } };
+</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.0.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.0.0";</script>
+</body>
+</html>

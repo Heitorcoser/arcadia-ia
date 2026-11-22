@@ -245,16 +245,177 @@ const CAPA_MADANG = `
   <text x="320" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="16" fill="#fff8ec" letter-spacing="3">FESTIVAL DOS JOGOS COREANOS</text>
 </svg>`;
 
+const CAPA_ROLETA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="rf" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#5a1530"/><stop offset=".55" stop-color="#1a0b24"/><stop offset="1" stop-color="#0b0710"/></radialGradient>
+    <radialGradient id="ra" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff2d55" stop-opacity=".55"/><stop offset="1" stop-color="#ff2d55" stop-opacity="0"/></radialGradient>
+    <filter id="rb"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#rf)"/>
+  <g transform="translate(150 190)">
+    ${Array.from({ length: 12 }, (_, i) => { const a0 = i / 12 * Math.PI * 2 - 0.3, a1 = a0 + Math.PI * 2 / 12, R = 120, x0 = Math.cos(a0) * R, y0 = Math.sin(a0) * R, x1 = Math.cos(a1) * R, y1 = Math.sin(a1) * R; return `<path d="M0 0 L${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${i % 2 ? '#2a1640' : '#3a1d55'}" stroke="#ffd16655" stroke-width="2"/>`; }).join('')}
+    ${['😅', '👹', '👵', '🐔', '🧙', '🐉', '🟢', '🤡', '💀', '📐', '🦈', '🤖'].map((e, i) => { const a = (i + 0.5) / 12 * Math.PI * 2 - 0.3; return `<text x="${(Math.cos(a) * 84).toFixed(1)}" y="${(Math.sin(a) * 84 + 9).toFixed(1)}" font-size="24" text-anchor="middle">${e}</text>`; }).join('')}
+    <circle r="120" fill="none" stroke="#ffd166" stroke-width="8"/><circle r="24" fill="#ffd166"/><text y="9" font-size="24" text-anchor="middle">🎡</text>
+    <path d="M-14 -150 L14 -150 L0 -122 Z" fill="#ff4d5e"/>
+  </g>
+  <circle cx="470" cy="160" r="130" fill="url(#ra)"/>
+  <g stroke="#7f1d1d" stroke-width="13" stroke-linecap="round"><line x1="450" y1="160" x2="388" y2="120"/><line x1="490" y1="160" x2="552" y2="120"/><line x1="450" y1="180" x2="380" y2="210"/><line x1="490" y1="180" x2="560" y2="210"/></g>
+  <text x="470" y="200" font-size="110" text-anchor="middle">👹</text>
+  <g stroke="#fff" stroke-linecap="round" opacity=".9"><line x1="300" y1="40" x2="620" y2="300" stroke-width="5"/><line x1="610" y1="30" x2="330" y2="330" stroke-width="3"/></g>
+  <g stroke="#ff2d55" stroke-width="12" opacity=".35" filter="url(#rb)"><line x1="300" y1="40" x2="620" y2="300"/><line x1="610" y1="30" x2="330" y2="330"/></g>
+  <g font-size="26"><text x="360" y="300">🩴</text><text x="560" y="90">🩴</text><text x="300" y="110">🔥</text><text x="590" y="250">🐥</text></g>
+  <text x="320" y="345" font-size="26" text-anchor="middle" fill="#ffd166" font-family="Arial Black,sans-serif" letter-spacing="3">ROLETA DE CHEFÕES</text>
+</svg>`;
+
+const CAPA_FEIRA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="fx" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#6b6f76"/><rect width="20" height="20" fill="#62666d"/><rect x="20" y="20" width="20" height="20" fill="#62666d"/></pattern>
+  </defs>
+  <rect width="640" height="360" fill="url(#fx)"/>
+  <path d="M-20 90 H200 V250 H420 V120 H660" fill="none" stroke="#8f7a55" stroke-width="62" stroke-linejoin="round"/>
+  <path d="M-20 90 H200 V250 H420 V120 H660" fill="none" stroke="#d9c7a0" stroke-width="52" stroke-linejoin="round"/>
+  <g font-family="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif" text-anchor="middle">
+    <text x="40" y="104" font-size="30">🐜</text><text x="90" y="100" font-size="30">🐜</text><text x="150" y="104" font-size="34">🪳</text>
+    <text x="200" y="170" font-size="36">🐀</text><text x="300" y="262" font-size="30">🐌</text><text x="380" y="150" font-size="32">🐦</text><text x="470" y="70" font-size="26">🪰</text>
+    <text x="540" y="100" font-size="44">🐦</text><text x="540" y="62" font-size="24">👑</text>
+  </g>
+  <g>
+    <rect x="98" y="150" width="64" height="40" rx="8" fill="#5b3a1c"/><rect x="94" y="128" width="72" height="24" rx="9" fill="#f59e0b"/>
+    <rect x="296" y="150" width="64" height="40" rx="8" fill="#5b3a1c"/><rect x="292" y="128" width="72" height="24" rx="9" fill="#ef4444"/>
+    <rect x="478" y="176" width="64" height="40" rx="8" fill="#5b3a1c"/><rect x="474" y="154" width="72" height="24" rx="9" fill="#38bdf8"/>
+    <g fill="rgba(255,255,255,.55)"><rect x="98" y="128" width="9" height="24"/><rect x="116" y="128" width="9" height="24"/><rect x="134" y="128" width="9" height="24"/><rect x="152" y="128" width="9" height="24"/>
+    <rect x="296" y="128" width="9" height="24"/><rect x="314" y="128" width="9" height="24"/><rect x="332" y="128" width="9" height="24"/><rect x="350" y="128" width="9" height="24"/>
+    <rect x="478" y="154" width="9" height="24"/><rect x="496" y="154" width="9" height="24"/><rect x="514" y="154" width="9" height="24"/><rect x="532" y="154" width="9" height="24"/></g>
+    <g font-family="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif" text-anchor="middle" font-size="30"><text x="130" y="186">🥟</text><text x="328" y="186">🎆</text><text x="510" y="212">🎯</text></g>
+    <circle cx="328" cy="170" r="110" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3" stroke-dasharray="8 8"/>
+  </g>
+  <rect x="0" y="282" width="640" height="78" fill="rgba(29,20,12,.82)"/>
+  <rect x="0" y="282" width="640" height="12" fill="#ef4444"/>
+  <g fill="#fff7e8"><rect x="40" y="282" width="40" height="12"/><rect x="120" y="282" width="40" height="12"/><rect x="200" y="282" width="40" height="12"/><rect x="280" y="282" width="40" height="12"/><rect x="360" y="282" width="40" height="12"/><rect x="440" y="282" width="40" height="12"/><rect x="520" y="282" width="40" height="12"/><rect x="600" y="282" width="40" height="12"/></g>
+  <text x="320" y="340" font-size="38" text-anchor="middle" fill="#ffcc4d" stroke="#8a3b0d" stroke-width="2" font-family="Arial Black,sans-serif" letter-spacing="2">DEFESA DA FEIRA</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.6.0";
+window.ARCADIA_VERSAO = "1.11.0";
 
 window.JOGOS = [
   {
-    id: "madang",
+    id: "defesa-da-feira",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-21",
-    novidades: "Lançamento: 6 brincadeiras tradicionais coreanas, salas online até 50 e bots.",
+    novidades: "Lançamento: 3 mapas, 7 barracas com 3 níveis, 10 tipos de bicho com chefes, habilidades e modo infinito.",
+    nome: "Defesa da Feira",
+    genero: "Estratégia",
+    subgenero: "Tower Defense",
+    corGenero: "#f59e0b",
+    tags: ["Tower defense", "Estratégia", "2D", "Single-player", "Rejogável", "Humor", "Celular", "Brasil"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T22:15:04-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Mapas de 12–25 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/defesa-da-feira/index.html",
+    capa: CAPA_FEIRA,
+    sinopse:
+      "Domingo de feira e os bichos querem o seu pastel. Monte barracas de pastel, caldo de cana, pipoca, estilingue, ventilador e rojão no caminho das formigas, baratas, pombos, ratos e caramujos, e não deixe nenhum chegar.",
+    descricao: [
+      "Defesa da Feira é um tower defense: os bichos andam por um caminho até a barraca de pastel e você monta barracas da feira em volta para derrubá-los antes que cheguem. Cada bicho que chega leva fregueses; sem fregueses, a feira fecha.",
+      "São 7 barracas, cada uma com 3 níveis: a Pastelaria atira pastéis, o Caldo de Cana deixa os bichos lentos, o Pipoqueiro estoura pipoca em volta, o Estilingue derruba voadores de longe, o Ventilador sopra os bichos de volta, o Fogueteiro solta rojões que explodem em área e o Caixa rende moedas a cada onda. Dá para escolher a mira de cada barraca (primeiro, último, mais forte ou mais perto).",
+      "Os bichos variam: formigas rápidas, baratas com casco, pombos e moscas que voam por cima do caminho, ratos fortes, baratas-mães que soltam filhotes e caramujos que se curam. A cada 5 ondas vem um chefe: o Ratão do Esgoto, o Pombo-Rei (que chama reforços) e, no fim, o Rei Barata.",
+      "São 3 mapas (Feira da Rua, Praça da Matriz e Mercadão), com estrelas pelos fregueses que sobraram e um modo infinito para ver até onde você aguenta. No aperto, use a Promoção Relâmpago (todos os bichos param) ou a Vassourada."
+    ],
+    mecanicas: [
+      "7 barracas com 3 níveis e mira configurável",
+      "10 tipos de bicho: rápidos, com casco, voadores, que se curam e que se dividem",
+      "Chefes a cada 5 ondas, que chamam reforços",
+      "Voadores cortam caminho por cima do mapa: nem toda barraca alcança",
+      "Habilidades: Promoção Relâmpago e Vassourada",
+      "Começar a onda mais cedo dá moedas de bônus",
+      "3 mapas com estrelas e modo infinito com recorde",
+      "Velocidade 1x, 2x e 3x",
+      "Celular: em pé o mapa gira para caber; deitado a loja fica do lado"
+    ],
+    controles: [
+      ["Clique / toque", "Montar e escolher barraca"],
+      ["1 a 7", "Escolher barraca da loja"],
+      ["Espaço", "Começar a onda"],
+      ["U / S", "Melhorar / vender a barraca escolhida"],
+      ["Q / W", "Promoção / Vassourada"],
+      ["F", "Velocidade"],
+      ["P ou Esc", "Pausar"]
+    ],
+    tecnologia: [
+      "Canvas 2D com mapa em grade, caminhos por pontos e tiros que perseguem o alvo",
+      "Ondas geradas por semente: a mesma onda é sempre igual",
+      "No celular em pé o mapa gira 90° e emojis e textos continuam em pé",
+      "Efeitos sonoros gerados com Web Audio API"
+    ]
+  },
+  {
+    id: "roleta-de-chefoes",
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Superchefão final sorteado numa roleta dourada (6 superchefões de 3 fases), 16 chefões novos (28 no total), esquiva perfeita, especial, combo, 4 poderes novos e versão para celular com mira automática.",
+    nome: "Roleta de Chefões",
+    genero: "Ação",
+    subgenero: "Boss Rush roguelite",
+    corGenero: "#ff4d5e",
+    tags: ["Chefões", "Roguelite", "2D", "Bullet hell", "Single-player", "Rejogável", "Humor", "Celular"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T21:00:09-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Runs de 8–14 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/roleta-de-chefoes/index.html",
+    capa: CAPA_ROLETA,
+    sinopse:
+      "Uma roleta gigante sorteia 6 chefões entre 28 e, no fim, uma roleta dourada sorteia o superchefão final: o Rei das Maldições em forma ancestral, o Boitatá, o Noob Supremo e outros. Escolha um poder depois de cada luta e tente sair vivo.",
+    descricao: [
+      "Roleta de Chefões é um boss rush: só tem luta contra chefões, uma atrás da outra. A cada rodada uma roleta gira e sorteia quem você vai enfrentar, então nenhuma partida é igual à outra.",
+      "São 28 chefões, cada um com ataques e falas próprias e uma segunda fase: do Noob Lendário e da Vovó do Chinelo ao Polvo DJ, à Abelha Rainha, ao Saci Pererê (com redemoinhos que perseguem você), ao Boi-Bumbá, ao Kraken de Piscina (que apaga sua tela com tinta), à Coruja Hipnotizadora (que inverte seus controles), ao Astronauta Perdido (com poços de gravidade) e ao Caixa Eletrônico Possuído.",
+      "Depois do sexto chefão gira a roleta dourada e sai o superchefão final, com três fases: Rei das Maldições em Forma Ancestral (domínio com mil lâminas), Boitatá (serpente de fogo que deixa rastro em chamas), Noob Supremo (comandos de admin como /kill, /clone e /nuke), Sol de Meio-Dia de Janeiro, Máquina do Fim versão Ômega e a Bisavó do Chinelo de Ouro.",
+      "Esquive em cima de um ataque para fazer uma esquiva perfeita: o tempo desacelera e enche o especial, que limpa a tela e atordoa o chefe. Entre as lutas você escolhe 1 de 3 poderes entre 18, e no celular a mira e o tiro são automáticos."
+    ],
+    mecanicas: [
+      "28 chefões com padrões de ataque próprios e segunda fase",
+      "Roleta dourada no fim sorteia 1 de 6 superchefões com 3 fases",
+      "Esquiva perfeita: desvie em cima do ataque para desacelerar o tempo",
+      "Especial que limpa os tiros da tela e atordoa o chefe",
+      "Combo de acertos que aumenta o dano até +60%",
+      "Efeitos no chão e no jogador: mel, gelo, fogo, tornado, poço de gravidade, controles invertidos e escuridão",
+      "18 poderes em três raridades para montar sua build",
+      "Ataques avisados: cortes e lasers piscam antes de machucar, áreas mostram onde vão cair",
+      "Galeria de chefões descobertos, recorde de chefões, tempo e combo",
+      "Três dificuldades: Tranquilo, Normal e Pesadelo",
+      "Celular: câmera que segue você, joystick, mira e tiro automáticos e botões de esquiva e especial"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar"],
+      ["Mouse", "Mirar"],
+      ["Clique (segurar)", "Atirar"],
+      ["Espaço / Shift / botão direito", "Esquivar"],
+      ["Q", "Especial"],
+      ["Esc", "Pausar"],
+      ["Celular", "Dedo esquerdo anda, mira e tiro automáticos, botões de esquiva e especial"]
+    ],
+    avisos: "Muitos tiros e flashes na tela durante as lutas.",
+    tecnologia: [
+      "Canvas 2D com arena, partículas, tremida de tela e câmera lenta na esquiva perfeita",
+      "Ataques dos chefões escritos como roteiros com funções geradoras do JavaScript",
+      "Câmera que segue o jogador e afasta na roleta para caber em telas pequenas",
+      "Música que acelera a cada fase e efeitos sonoros gerados com Web Audio API"
+    ]
+  },
+  {
+    id: "madang",
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "MADANG! Festival dos Jogos Coreanos",
     genero: "Party Game",
     subgenero: "Party Royale (brincadeiras tradicionais coreanas)",
@@ -356,9 +517,9 @@ window.JOGOS = [
   },
   {
     id: "roube-um-emoji",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-21",
-    novidades: "Lançamento: desfile de emojis, bases com cofre e trava de laser, roubos, tapas, bots e salas online.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "Roube um Emoji",
     genero: "Tycoon",
     subgenero: "Coleção e roubo",
@@ -409,9 +570,9 @@ window.JOGOS = [
   },
   {
     id: "detetive",
-    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
+    versao: "1.3.0", // a mesma do arquivo do jogo (const VERSAO)
     atualizadoEm: "2026-11-21",
-    novidades: "Personagem visível no celular com a seta VOCÊ; câmeras, HUD e menu ajustados para tela deitada e tablet.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "Detetive",
     genero: "Dedução Social",
     subgenero: "Ladrões, detetives e clones",
@@ -459,9 +620,9 @@ window.JOGOS = [
   },
   {
     id: "gongo",
-    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
+    versao: "1.3.0", // a mesma do arquivo do jogo (const VERSAO)
     atualizadoEm: "2026-11-21",
-    novidades: "Quiz Corre-Corre legível no celular; banners, menu e Piso da Memória cabem na tela deitada.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "GONGO! O Show das 6 Provas",
     genero: "Party Game",
     subgenero: "Party Royale (show de eliminação)",
@@ -508,9 +669,9 @@ window.JOGOS = [
   },
   {
     id: "arena-dos-desejos",
-    versao: "1.1.0", // a mesma do arquivo do jogo (const VERSAO)
+    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
     atualizadoEm: "2026-11-21",
-    novidades: "Tela certa em celulares e tablets (antes ficava maior que a tela).",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "Arena dos Desejos",
     genero: "Party Game",
     subgenero: "Sandbox de Palavras",
