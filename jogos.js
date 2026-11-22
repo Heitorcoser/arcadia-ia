@@ -245,11 +245,83 @@ const CAPA_MADANG = `
   <text x="320" y="222" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="16" fill="#fff8ec" letter-spacing="3">FESTIVAL DOS JOGOS COREANOS</text>
 </svg>`;
 
+const CAPA_ROLETA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="rf" cx="50%" cy="30%" r="80%"><stop offset="0" stop-color="#5a1530"/><stop offset=".55" stop-color="#1a0b24"/><stop offset="1" stop-color="#0b0710"/></radialGradient>
+    <radialGradient id="ra" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ff2d55" stop-opacity=".55"/><stop offset="1" stop-color="#ff2d55" stop-opacity="0"/></radialGradient>
+    <filter id="rb"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+  <rect width="640" height="360" fill="url(#rf)"/>
+  <g transform="translate(150 190)">
+    ${Array.from({ length: 12 }, (_, i) => { const a0 = i / 12 * Math.PI * 2 - 0.3, a1 = a0 + Math.PI * 2 / 12, R = 120, x0 = Math.cos(a0) * R, y0 = Math.sin(a0) * R, x1 = Math.cos(a1) * R, y1 = Math.sin(a1) * R; return `<path d="M0 0 L${x0.toFixed(1)} ${y0.toFixed(1)} A${R} ${R} 0 0 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${i % 2 ? '#2a1640' : '#3a1d55'}" stroke="#ffd16655" stroke-width="2"/>`; }).join('')}
+    ${['😅', '👹', '👵', '🐔', '🧙', '🐉', '🟢', '🤡', '💀', '📐', '🦈', '🤖'].map((e, i) => { const a = (i + 0.5) / 12 * Math.PI * 2 - 0.3; return `<text x="${(Math.cos(a) * 84).toFixed(1)}" y="${(Math.sin(a) * 84 + 9).toFixed(1)}" font-size="24" text-anchor="middle">${e}</text>`; }).join('')}
+    <circle r="120" fill="none" stroke="#ffd166" stroke-width="8"/><circle r="24" fill="#ffd166"/><text y="9" font-size="24" text-anchor="middle">🎡</text>
+    <path d="M-14 -150 L14 -150 L0 -122 Z" fill="#ff4d5e"/>
+  </g>
+  <circle cx="470" cy="160" r="130" fill="url(#ra)"/>
+  <g stroke="#7f1d1d" stroke-width="13" stroke-linecap="round"><line x1="450" y1="160" x2="388" y2="120"/><line x1="490" y1="160" x2="552" y2="120"/><line x1="450" y1="180" x2="380" y2="210"/><line x1="490" y1="180" x2="560" y2="210"/></g>
+  <text x="470" y="200" font-size="110" text-anchor="middle">👹</text>
+  <g stroke="#fff" stroke-linecap="round" opacity=".9"><line x1="300" y1="40" x2="620" y2="300" stroke-width="5"/><line x1="610" y1="30" x2="330" y2="330" stroke-width="3"/></g>
+  <g stroke="#ff2d55" stroke-width="12" opacity=".35" filter="url(#rb)"><line x1="300" y1="40" x2="620" y2="300"/><line x1="610" y1="30" x2="330" y2="330"/></g>
+  <g font-size="26"><text x="360" y="300">🩴</text><text x="560" y="90">🩴</text><text x="300" y="110">🔥</text><text x="590" y="250">🐥</text></g>
+  <text x="320" y="345" font-size="26" text-anchor="middle" fill="#ffd166" font-family="Arial Black,sans-serif" letter-spacing="3">ROLETA DE CHEFÕES</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.6.0";
+window.ARCADIA_VERSAO = "1.7.0";
 
 window.JOGOS = [
+  {
+    id: "roleta-de-chefoes",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Lançamento: 12 chefões sorteados na roleta, 14 poderes e três dificuldades.",
+    nome: "Roleta de Chefões",
+    genero: "Ação",
+    subgenero: "Boss Rush roguelite",
+    corGenero: "#ff4d5e",
+    tags: ["Chefões", "Roguelite", "2D", "Bullet hell", "Single-player", "Rejogável", "Humor"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T21:00:09-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Runs de 6–12 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/roleta-de-chefoes/index.html",
+    capa: CAPA_ROLETA,
+    sinopse:
+      "Uma roleta gigante sorteia 6 chefões entre 12, do Noob Lendário ao Rei das Maldições. Derrote um por um, escolha um poder novo depois de cada luta e tente sair vivo.",
+    descricao: [
+      "Roleta de Chefões é um boss rush: só tem luta contra chefões, uma atrás da outra. A cada rodada uma roleta gira e sorteia quem você vai enfrentar, então nenhuma partida é igual à outra.",
+      "São 12 chefões, cada um com ataques e falas próprias e uma segunda fase quando a vida cai pela metade: o Noob Lendário que acabou de criar a conta, o Rei das Maldições de quatro braços (com cortes invisíveis e expansão de domínio), a Vovó do Chinelo com chinelos teleguiados, a Galinha Colossal, o Mago Glitch, o Dragão Pixel, o Rei Slime, o Palhaço do Caos, o Ceifador Atrasado, o Professor de Matemática com prova surpresa, o Tubarão de Asfalto e o Robô Faxineiro.",
+      "Entre uma luta e outra você escolhe 1 de 3 poderes: tiro triplo, ricochete, bala de fogo, escudo, vampiro, satélite que apaga tiros e outros. Derrote os 6 para vencer a roleta e tente bater seu recorde de tempo."
+    ],
+    mecanicas: [
+      "12 chefões com padrões de ataque próprios e segunda fase",
+      "Roleta que sorteia 6 chefões por partida, sem repetir",
+      "Esquiva com invencibilidade, mira com o mouse e tiro contínuo",
+      "14 poderes em três raridades para montar sua build",
+      "Ataques avisados: cortes e lasers piscam antes de machucar, áreas mostram onde vão cair",
+      "Galeria de chefões descobertos, recorde de chefões e de tempo",
+      "Três dificuldades: Tranquilo, Normal e Pesadelo",
+      "Controles de toque no celular com dois joysticks"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar"],
+      ["Mouse", "Mirar"],
+      ["Clique (segurar)", "Atirar"],
+      ["Espaço / Shift / botão direito", "Esquivar"],
+      ["Esc", "Pausar"]
+    ],
+    avisos: "Muitos tiros e flashes na tela durante as lutas.",
+    tecnologia: [
+      "Canvas 2D com arena, partículas, tremida de tela e câmera lenta ao levar dano",
+      "Ataques dos chefões escritos como roteiros com funções geradoras do JavaScript",
+      "Música que acelera na segunda fase e efeitos sonoros gerados com Web Audio API"
+    ]
+  },
   {
     id: "madang",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)

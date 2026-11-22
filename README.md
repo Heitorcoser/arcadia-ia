@@ -13,6 +13,12 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Roube um Emoji** | Tycoon | Coleção e roubo | Sem fim (progresso salvo) |
 | **Sete Noites na Neve** | Sobrevivência | Sobrevivência no frio | 20–30 min |
 | **MADANG! Festival dos Jogos Coreanos** | Party Game | Party Royale (brincadeiras tradicionais coreanas) | Festivais de 6–8 min |
+| **Roleta de Chefões** | Ação | Boss Rush roguelite | Runs de 6–12 min |
+
+### Roleta de Chefões
+Uma roleta sorteia 6 chefões entre 12. Derrote um por um e escolha 1 de 3 poderes depois de cada luta. Os chefões são o Noob Lendário, o Rei das Maldições, a Vovó do Chinelo, a Galinha Colossal, o Mago Glitch, o Dragão Pixel, o Rei Slime, o Palhaço do Caos, o Ceifador Atrasado, o Professor de Matemática, o Tubarão de Asfalto e o Robô Faxineiro. Cada um tem ataques próprios e uma segunda fase.
+
+**Controles:** `WASD` andar · `Mouse` mirar · `Clique` atirar · `Espaço`/`Shift` esquivar · `Esc` pausar
 
 ### MADANG! Festival dos Jogos Coreanos
 Noite de festival no madang, o pátio da vila: até 50 jogadores (pessoas e bots) enfrentam 6 brincadeiras tradicionais coreanas, que existem de verdade. A cada uma, o tambor buk tira uma parte. Só um vence.
