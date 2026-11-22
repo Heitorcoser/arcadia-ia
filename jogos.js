@@ -297,11 +297,91 @@ const CAPA_FEIRA = `
   <text x="320" y="340" font-size="38" text-anchor="middle" fill="#ffcc4d" stroke="#8a3b0d" stroke-width="2" font-family="Arial Black,sans-serif" letter-spacing="2">DEFESA DA FEIRA</text>
 </svg>`;
 
+const CAPA_BAIA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bc" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2b1a6b"/><stop offset=".45" stop-color="#ff5c8a"/><stop offset=".7" stop-color="#ffb06b"/><stop offset="1" stop-color="#ffd9a0"/></linearGradient>
+    <linearGradient id="bm" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#2a7fa8"/><stop offset="1" stop-color="#103a5c"/></linearGradient>
+    <linearGradient id="bt" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#fff2c4"/><stop offset=".45" stop-color="#ff9f45"/><stop offset=".75" stop-color="#ff4fa3"/><stop offset="1" stop-color="#7b5cff"/></linearGradient>
+    <radialGradient id="bs" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#fff6d0"/><stop offset=".5" stop-color="#ffb347"/><stop offset="1" stop-color="#ff5c8a" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="640" height="360" fill="url(#bc)"/>
+  <circle cx="470" cy="215" r="90" fill="url(#bs)"/>
+  <g fill="#3a1f5c"><rect x="20" y="120" width="46" height="140"/><rect x="72" y="80" width="40" height="180"/><rect x="118" y="140" width="52" height="120"/><rect x="176" y="100" width="34" height="160"/><rect x="214" y="150" width="44" height="110"/><rect x="262" y="130" width="30" height="130"/></g>
+  <g fill="#ffd28a" opacity=".85"><rect x="28" y="130" width="6" height="6"/><rect x="44" y="150" width="6" height="6"/><rect x="80" y="96" width="6" height="6"/><rect x="96" y="120" width="6" height="6"/><rect x="128" y="160" width="6" height="6"/><rect x="150" y="180" width="6" height="6"/><rect x="184" y="120" width="6" height="6"/><rect x="224" y="170" width="6" height="6"/><rect x="270" y="150" width="6" height="6"/></g>
+  <rect x="62" y="140" width="80" height="14" rx="3" fill="#ff3fa4" opacity=".9"/><rect x="180" y="170" width="70" height="12" rx="3" fill="#2ee6ff" opacity=".9"/>
+  <rect y="255" width="640" height="105" fill="url(#bm)"/>
+  <path d="M0 255 L330 255 L300 360 L0 360Z" fill="#f3d9a4"/>
+  <path d="M0 258 L320 258" stroke="#fff" stroke-width="3" opacity=".6"/>
+  <g transform="translate(560 190)"><circle r="56" fill="none" stroke="#fff" stroke-width="3"/><g stroke="#fff" stroke-width="1.5" opacity=".7"><line x1="-56" y1="0" x2="56" y2="0"/><line x1="0" y1="-56" x2="0" y2="56"/><line x1="-40" y1="-40" x2="40" y2="40"/><line x1="40" y1="-40" x2="-40" y2="40"/></g><g fill="#ffe14d"><circle cx="56" cy="0" r="4"/><circle cx="-56" cy="0" r="4"/><circle cx="0" cy="56" r="4"/><circle cx="0" cy="-56" r="4"/></g><g fill="#2ee6ff"><circle cx="40" cy="40" r="4"/><circle cx="-40" cy="-40" r="4"/></g><g fill="#ff3fa4"><circle cx="40" cy="-40" r="4"/><circle cx="-40" cy="40" r="4"/></g><path d="M-10 0 L-30 70 M10 0 L30 70" stroke="#fff" stroke-width="4"/></g>
+  <rect x="480" y="258" width="160" height="8" fill="#9b7653"/>
+  <g stroke="#3a2410" stroke-width="7" fill="none"><path d="M355 330 Q350 260 372 200"/><path d="M420 335 Q428 270 412 215"/></g>
+  <g fill="#1f6b3a"><path d="M372 200 l-44 6 l40 -16z M372 200 l40 -4 l-36 -12z M372 200 l-24 30 l20 -32z M372 200 l30 28 l-26 -30z M372 200 l2 -40 l6 38z"/><path d="M412 215 l-40 8 l36 -18z M412 215 l42 -2 l-38 -14z M412 215 l-20 28 l16 -30z M412 215 l28 24 l-24 -28z"/></g>
+  <g transform="translate(150 300)"><rect x="-58" y="-16" width="116" height="26" rx="8" fill="#ff4fa3"/><path d="M-30 -16 L-16 -36 L26 -36 L40 -16Z" fill="#1a2438"/><circle cx="-34" cy="12" r="11" fill="#16161c"/><circle cx="34" cy="12" r="11" fill="#16161c"/><rect x="50" y="-10" width="8" height="5" fill="#fff"/></g>
+  <text x="250" y="152" text-anchor="middle" font-family="Impact,Anton,Arial Black,sans-serif" font-size="70" fill="#2a0b3d">BAÍA NEON</text>
+  <text x="250" y="146" text-anchor="middle" font-family="Impact,Anton,Arial Black,sans-serif" font-size="70" fill="url(#bt)">BAÍA NEON</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.11.0";
+window.ARCADIA_VERSAO = "1.12.0";
 
 window.JOGOS = [
+  {
+    id: "baia-neon",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Lançamento: cidade litorânea em 3D, carros com derrapagem, polícia de 1 a 5 estrelas, 5 trabalhos, táxi, corrida, flamingos e rádio.",
+    nome: "Baía Neon",
+    genero: "Ação",
+    subgenero: "Mundo aberto (direção e perseguição)",
+    corGenero: "#ff4fa3",
+    corDestaque: "#ff9f45",
+    tags: ["Mundo aberto", "3D", "Carros", "Perseguição", "Missões", "Rádio", "Progresso salvo", "Celular"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T23:20:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Livre (missões de 2–6 min)",
+    classificacao: "12+",
+    finais: 2,
+    caminho: "jogos/baia-neon/index.html",
+    capa: CAPA_BAIA,
+    sinopse:
+      "Uma cidade litorânea inteira ao pôr do sol: dirija qualquer carro, faça trabalhos para a Rê, vença a corrida da orla, fuja da polícia e prepare o grande golpe do porto.",
+    descricao: [
+      "Baía Neon é um mundo aberto em 3D numa cidade inventada à beira-mar. Tem o Centro de prédios de vidro, a Vila Pastel de prédios coloridos, a avenida da Orla com coqueiros e calçadão, o Píer com roda-gigante e o Porto Velho cheio de contêineres. O dia passa e, à noite, as janelas, os postes e os letreiros de neon acendem.",
+      "Você anda pela cidade e pega qualquer carro: os estacionados ou os do trânsito, puxando o motorista. Os carros têm física própria, com derrapagem no freio de mão, batidas, fumaça e até explosão. Cada um tem rádio, com três estações de música gerada na hora: synthwave, bossa e funk.",
+      "Atropelar, roubar carro na frente da polícia ou bater numa viatura rende estrelas de procurado. Com mais estrelas vêm mais viaturas e, a partir de 3, um helicóptero com holofote. Para escapar, suma da vista deles até as estrelas apagarem, ou passe na oficina de pintura. Se a polícia te cercar parado, você é preso. Os trabalhos da Rê (entrega, táxi, corrida de rua e fuga) levam ao Grande Golpe, a missão final. Há ainda 12 flamingos dourados escondidos."
+    ],
+    mecanicas: [
+      "Cidade aberta com 6 bairros, praia, mar, píer com roda-gigante e porto",
+      "6 carros diferentes (compacto, esportivo, SUV, táxi, viatura e carro-forte) com derrapagem, dano e explosão",
+      "Trânsito que segue as ruas e para atrás dos outros; pedestres que andam, fogem e podem ser atropelados",
+      "Nível de procurado de 1 a 5 estrelas, com viaturas que perseguem e helicóptero",
+      "5 trabalhos com história, corridas de táxi com gorjeta e corrida de rua contra 3 pilotos",
+      "12 flamingos dourados colecionáveis",
+      "Ciclo de dia e noite com janelas acesas, postes, letreiros de neon e brilho",
+      "Rádio com 3 estações de música gerada na hora",
+      "Radar giratório, celular com mapa da cidade e progresso salvo",
+      "Controles de toque no celular (joystick, acelerador e freio de mão)"
+    ],
+    controles: [
+      ["W A S D / setas", "Andar e dirigir"],
+      ["Shift", "Correr (a pé)"],
+      ["F", "Entrar e sair do carro"],
+      ["Espaço", "Freio de mão (no carro) / pular (a pé)"],
+      ["R / H", "Trocar a rádio / buzina"],
+      ["Tab", "Celular: mapa e trabalhos"],
+      ["Arrastar o mouse", "Girar a câmera"]
+    ],
+    avisos: "Tem perseguições policiais, batidas e atropelamentos sem sangue. Inspirado nos jogos de mundo aberto, mas a cidade, os personagens e as marcas são todos inventados.",
+    tecnologia: [
+      "Three.js r160 (WebGL) com prédios mesclados por material, texturas de janela desenhadas por código e pós-processamento de brilho (bloom) no computador",
+      "Física de carro própria (aderência lateral, freio de mão, colisões com prédios, postes e outros carros)",
+      "IA de trânsito, de polícia e de corrida por um grafo das ruas",
+      "Motor, pneus, sirene, efeitos e três rádios gerados na hora com Web Audio API"
+    ]
+  },
   {
     id: "defesa-da-feira",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)

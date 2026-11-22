@@ -6,6 +6,7 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 
 | Jogo | Gênero | Subgênero | Duração |
 |---|---|---|---|
+| **Baía Neon** | Ação | Mundo aberto (direção e perseguição) | Livre (missões de 2–6 min) |
 | **A Casa Que Lembra** | Terror | Terror Psicológico | 15–25 min |
 | **Arena dos Desejos** | Party Game | Sandbox de Palavras | Partidas de 4 min |
 | **GONGO! O Show das 6 Provas** | Party Game | Party Royale (show de eliminação) | Temporadas de 7–9 min |
@@ -36,6 +37,15 @@ Uma roleta sorteia 6 chefões entre 28 e, no fim, uma **roleta dourada** sorteia
 - 📱 **Celular**: câmera que segue você, mira e tiro automáticos, botões de esquiva e especial
 
 **Controles:** `WASD` andar · `Mouse` mirar · `Clique` atirar · `Espaço`/`Shift` esquivar · `Q` especial · `Esc` pausar
+
+### Baía Neon
+Mundo aberto em 3D numa cidade litorânea inventada: Centro, Vila Pastel, Orla, Píer com roda-gigante e Porto Velho, com dia e noite e letreiros de neon.
+
+- 🚗 Pegue qualquer carro (até os do trânsito, puxando o motorista). Tem física com derrapagem, dano e rádio com 3 estações.
+- ⭐ Nível de procurado de 1 a 5 estrelas, com viaturas e helicóptero. Suma da vista deles ou passe na oficina de pintura para escapar.
+- 📱 5 trabalhos da Rê (entrega, táxi, corrida de rua, fuga e o Grande Golpe) e 12 flamingos dourados.
+
+**Controles:** `WASD` andar/dirigir · `F` entrar/sair · `Espaço` freio de mão · `R` rádio · `Tab` celular
 
 ### MADANG! Festival dos Jogos Coreanos
 Noite de festival no madang, o pátio da vila: até 50 jogadores (pessoas e bots) enfrentam 6 brincadeiras tradicionais coreanas, que existem de verdade. A cada uma, o tambor buk tira uma parte. Só um vence.
