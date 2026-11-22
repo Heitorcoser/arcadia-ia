@@ -322,11 +322,87 @@ const CAPA_BAIA = `
   <text x="250" y="146" text-anchor="middle" font-family="Impact,Anton,Arial Black,sans-serif" font-size="70" fill="url(#bt)">BAÍA NEON</text>
 </svg>`;
 
+const CAPA_GOL = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <rect width="640" height="360" fill="#0d1f14"/>
+  <g><rect x="0" y="40" width="64" height="250" fill="#33974c"/><rect x="64" y="40" width="64" height="250" fill="#2a8640"/><rect x="128" y="40" width="64" height="250" fill="#33974c"/><rect x="192" y="40" width="64" height="250" fill="#2a8640"/><rect x="256" y="40" width="64" height="250" fill="#33974c"/><rect x="320" y="40" width="64" height="250" fill="#2a8640"/><rect x="384" y="40" width="64" height="250" fill="#33974c"/><rect x="448" y="40" width="64" height="250" fill="#2a8640"/><rect x="512" y="40" width="64" height="250" fill="#33974c"/><rect x="576" y="40" width="64" height="250" fill="#2a8640"/></g>
+  <g stroke="#fff" stroke-opacity=".85" stroke-width="3" fill="none">
+    <rect x="10" y="40" width="620" height="250"/><line x1="320" y1="40" x2="320" y2="290"/><circle cx="320" cy="165" r="44"/>
+    <rect x="530" y="95" width="100" height="140"/><rect x="590" y="130" width="40" height="70"/>
+  </g>
+  <rect x="630" y="135" width="10" height="60" fill="#fff" fill-opacity=".25"/>
+  <path d="M630 135 l8 -8 v60 l-8 8" stroke="#fff" stroke-width="4" fill="none"/>
+  <g>
+    <ellipse cx="452" cy="176" rx="12" ry="7" fill="rgba(0,0,0,.3)"/>
+    <ellipse cx="448" cy="168" rx="11" ry="16" fill="#1d4ed8"/><rect x="444" y="152" width="8" height="32" fill="#fff"/><circle cx="450" cy="168" r="8" fill="#c68642"/>
+    <ellipse cx="560" cy="200" rx="11" ry="16" fill="#84cc16"/><circle cx="558" cy="200" r="8" fill="#8d5524"/>
+    <ellipse cx="360" cy="230" rx="11" ry="16" fill="#f97316"/><rect x="356" y="214" width="8" height="32" fill="#1c1917"/><circle cx="360" cy="230" r="8" fill="#e0ac69"/>
+    <ellipse cx="250" cy="120" rx="11" ry="16" fill="#1d4ed8"/><rect x="246" y="104" width="8" height="32" fill="#fff"/><circle cx="250" cy="120" r="8" fill="#5c3a1e"/>
+  </g>
+  <path d="M470 168 Q 540 120 612 160" stroke="#ffd23f" stroke-width="3" stroke-dasharray="7 6" fill="none"/>
+  <circle cx="612" cy="160" r="9" fill="#fff" stroke="#111" stroke-width="2"/><circle cx="612" cy="160" r="3" fill="#111"/>
+  <g fill="#fff" opacity=".7"><circle cx="0" cy="8" r="2.5" fill="#facc15"/><circle cx="37" cy="21" r="2.5" fill="#ef4444"/><circle cx="74" cy="8" r="2.5" fill="#3b82f6"/><circle cx="111" cy="21" r="2.5" fill="#fff"/><circle cx="148" cy="8" r="2.5" fill="#22c55e"/><circle cx="185" cy="21" r="2.5" fill="#facc15"/><circle cx="222" cy="8" r="2.5" fill="#ef4444"/><circle cx="259" cy="21" r="2.5" fill="#3b82f6"/><circle cx="296" cy="8" r="2.5" fill="#fff"/><circle cx="333" cy="21" r="2.5" fill="#22c55e"/><circle cx="370" cy="8" r="2.5" fill="#facc15"/><circle cx="407" cy="21" r="2.5" fill="#ef4444"/><circle cx="444" cy="8" r="2.5" fill="#3b82f6"/><circle cx="481" cy="21" r="2.5" fill="#fff"/><circle cx="518" cy="8" r="2.5" fill="#22c55e"/><circle cx="555" cy="21" r="2.5" fill="#facc15"/><circle cx="592" cy="8" r="2.5" fill="#ef4444"/><circle cx="629" cy="21" r="2.5" fill="#3b82f6"/><circle cx="26" cy="8" r="2.5" fill="#fff"/><circle cx="63" cy="21" r="2.5" fill="#22c55e"/><circle cx="100" cy="8" r="2.5" fill="#facc15"/><circle cx="137" cy="21" r="2.5" fill="#ef4444"/><circle cx="174" cy="8" r="2.5" fill="#3b82f6"/><circle cx="211" cy="21" r="2.5" fill="#fff"/><circle cx="248" cy="8" r="2.5" fill="#22c55e"/><circle cx="285" cy="21" r="2.5" fill="#facc15"/><circle cx="322" cy="8" r="2.5" fill="#ef4444"/><circle cx="359" cy="21" r="2.5" fill="#3b82f6"/><circle cx="396" cy="8" r="2.5" fill="#fff"/><circle cx="433" cy="21" r="2.5" fill="#22c55e"/><circle cx="470" cy="8" r="2.5" fill="#facc15"/><circle cx="507" cy="21" r="2.5" fill="#ef4444"/><circle cx="544" cy="8" r="2.5" fill="#3b82f6"/><circle cx="581" cy="21" r="2.5" fill="#fff"/><circle cx="618" cy="8" r="2.5" fill="#22c55e"/><circle cx="15" cy="21" r="2.5" fill="#facc15"/><circle cx="52" cy="8" r="2.5" fill="#ef4444"/><circle cx="89" cy="21" r="2.5" fill="#3b82f6"/><circle cx="126" cy="8" r="2.5" fill="#fff"/><circle cx="163" cy="21" r="2.5" fill="#22c55e"/><circle cx="200" cy="8" r="2.5" fill="#facc15"/><circle cx="237" cy="21" r="2.5" fill="#ef4444"/><circle cx="274" cy="8" r="2.5" fill="#3b82f6"/><circle cx="311" cy="21" r="2.5" fill="#fff"/><circle cx="348" cy="8" r="2.5" fill="#22c55e"/><circle cx="385" cy="21" r="2.5" fill="#facc15"/><circle cx="422" cy="8" r="2.5" fill="#ef4444"/><circle cx="459" cy="21" r="2.5" fill="#3b82f6"/><circle cx="496" cy="8" r="2.5" fill="#fff"/><circle cx="533" cy="21" r="2.5" fill="#22c55e"/><circle cx="570" cy="8" r="2.5" fill="#facc15"/><circle cx="607" cy="21" r="2.5" fill="#ef4444"/><circle cx="4" cy="8" r="2.5" fill="#3b82f6"/><circle cx="41" cy="21" r="2.5" fill="#fff"/><circle cx="78" cy="8" r="2.5" fill="#22c55e"/><circle cx="115" cy="21" r="2.5" fill="#facc15"/><circle cx="152" cy="8" r="2.5" fill="#ef4444"/><circle cx="189" cy="21" r="2.5" fill="#3b82f6"/><circle cx="226" cy="8" r="2.5" fill="#fff"/><circle cx="263" cy="21" r="2.5" fill="#22c55e"/></g>
+  <rect x="0" y="292" width="640" height="68" fill="rgba(4,16,9,.85)"/>
+  <text x="320" y="342" font-size="46" text-anchor="middle" fill="#fff" font-family="Impact,Arial Black,sans-serif" letter-spacing="3">GOL DE <tspan fill="#ffd23f">PLACA</tspan></text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.14.0";
+window.ARCADIA_VERSAO = "1.15.0";
 
 window.JOGOS = [
+  {
+    id: "gol-de-placa",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-22",
+    novidades: "Lançamento: futebol 5 contra 5 com amistoso, Copa Arcádia com pênaltis, 2 jogadores no mesmo computador e online 1 contra 1.",
+    nome: "Gol de Placa",
+    genero: "Esporte",
+    subgenero: "Futebol arcade",
+    corGenero: "#22c55e",
+    tags: ["Futebol", "Esporte", "2D", "Multiplayer", "Online", "Local", "Celular", "Controle"],
+    criadoEm: "2026-11-22",
+    lancadoEm: "2026-11-22T18:50:11-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Partidas de 2–6 min",
+    classificacao: "Livre",
+    finais: 3,
+    caminho: "jogos/gol-de-placa/index.html",
+    capa: CAPA_GOL,
+    sinopse:
+      "Futebol arcade 5 contra 5 visto de cima. Chute para onde o jogador está olhando: um toque é um passe, segurar o botão é uma bomba. Jogue contra o computador, na Copa Arcádia, com um amigo no mesmo computador ou online.",
+    descricao: [
+      "Gol de Placa é um futebol arcade com 5 jogadores de cada lado (4 na linha e o goleiro). Você controla o jogador mais perto da bola e troca quando quiser.",
+      "O chute é um botão só: a bola vai para onde o jogador está olhando. Um toque rápido é um passe leve; segurando o botão a barra enche e o chute sai mais forte. Sem a bola, o mesmo botão dá um carrinho. Dá para correr mais segurando Shift, até cansar.",
+      "São 8 times fictícios, cada um com ataque, defesa e velocidade: Tubarões do Litoral, Onças da Serra, Galos do Sertão, Lobos do Pampa, Tucanos da Mata, Abelhas FC, Dragões do Vale e Botos Cor-de-Rosa. Os goleiros mergulham, espalmam e agarram; tem lateral, escanteio, tiro de meta, intervalo e comemoração de gol.",
+      "Modos: Amistoso contra o computador (três dificuldades), Copa Arcádia (8 times em mata-mata, com disputa de pênaltis no empate), 2 jogadores no mesmo computador (teclado ou dois controles) e Online 1 contra 1, com código de sala ou sala pública."
+    ],
+    mecanicas: [
+      "Um botão de chute: toque = passe leve, segurar = chute forte, sempre para onde o jogador olha",
+      "Carrinho sem a bola, corrida com fôlego e troca de jogador",
+      "Goleiros que mergulham, espalmam e agarram",
+      "Lateral, escanteio, tiro de meta, intervalo e comemoração de gol",
+      "Copa Arcádia em mata-mata com disputa de pênaltis",
+      "2 jogadores no mesmo computador e online 1 contra 1 (sala com código ou pública)",
+      "8 times com ataque, defesa e velocidade diferentes",
+      "Controles de toque no celular e suporte a controle (gamepad)"
+    ],
+    controles: [
+      ["W A S D / setas", "Mover"],
+      ["K, J ou Espaço", "Chutar para onde olha (toque = passe, segurar = forte) · sem bola: carrinho"],
+      ["Q", "Trocar de jogador"],
+      ["Shift", "Correr"],
+      ["Esc", "Pausar"],
+      ["2 jogadores", "P1: WASD, G chuta, F troca · P2: setas, ponto chuta, vírgula troca"],
+      ["Controle", "A ou B chuta, X troca, RT corre"]
+    ],
+    tecnologia: [
+      "Canvas 2D com câmera que segue a bola, bola com altura, quique, traves e rede",
+      "Inteligência dos jogadores por posição (formação, pressão, cobertura e apoio)",
+      "Online com PeerJS (WebRTC): o anfitrião simula a partida e o convidado manda os comandos",
+      "Apito, chutes e torcida gerados com Web Audio API"
+    ]
+  },
   {
     id: "baia-neon",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)

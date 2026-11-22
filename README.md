@@ -16,6 +16,17 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **MADANG! Festival dos Jogos Coreanos** | Party Game | Party Royale (brincadeiras tradicionais coreanas) | Festivais de 6–8 min |
 | **Roleta de Chefões** | Ação | Boss Rush roguelite | Runs de 8–14 min |
 | **Defesa da Feira** | Estratégia | Tower Defense | Mapas de 12–25 min |
+| **Gol de Placa** | Esporte | Futebol arcade | Partidas de 2–6 min |
+
+### Gol de Placa
+Futebol arcade 5 contra 5 visto de cima, com 8 times fictícios.
+
+- ⚽ **Um botão de chute**: a bola vai para onde o jogador olha; um toque é passe leve, segurar é chute forte (sem a bola, vira carrinho)
+- 🧤 **Goleiros** que mergulham, espalmam e agarram; lateral, escanteio, tiro de meta e intervalo
+- 🏆 **Copa Arcádia**: 8 times em mata-mata, com disputa de pênaltis no empate
+- 🎮 **2 jogadores** no mesmo computador (teclado ou controles) e 🌐 **online 1 contra 1** (sala com código ou pública)
+
+**Controles:** `WASD`/setas movem · `K`/`J`/`Espaço` chuta · `Q` troca de jogador · `Shift` corre · `Esc` pausa
 
 ### Defesa da Feira
 Domingo de feira e os bichos querem o seu pastel. Um tower defense com 3 mapas (Feira da Rua, Praça da Matriz e Mercadão), estrelas e modo infinito.
