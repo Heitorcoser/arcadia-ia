@@ -169,9 +169,9 @@
 <div class="modal" id="modal"><div class="jan" id="jan"></div></div>
 
 <script src="pubchem.js?v=1"></script>
-<script src="dados.js?v=2"></script>
-<script src="quimica.js?v=6"></script>
-<script src="motor.js?v=8"></script>
+<script src="dados.js?v=3"></script>
+<script src="quimica.js?v=9"></script>
+<script src="motor.js?v=10"></script>
 <script>
 'use strict';
 const $ = s => document.querySelector(s);
@@ -186,13 +186,13 @@ const FERRAMENTAS = [
   ['desenhar', '✏️', 'Colocar'], ['apagar', '🧽', 'Apagar'], ['aquecer', '🔥', 'Aquecer'], ['resfriar', '❄️', 'Resfriar'], ['temp', '🌡️', 'Definir °C'], ['faisca', '⚡', 'Faísca / corrente'],
   ['ima', '🧲', 'Ímã'], ['martelo', '🔨', 'Martelo'], ['ph', '🧫', 'Fita de pH'], ['inspecionar', '🔍', 'Inspecionar'], ['geiger', '☢️', 'Geiger'], ['coletar', '🥤', 'Coletar amostra'],
 ];
-const ABAS = [['tabela', 'Tabela'], ['gas', 'Gases'], ['liquido', 'Líquidos'], ['solido', 'Sólidos'], ['compostos', 'Compostos'], ['solucoes', 'Soluções'], ['lab', 'Laboratório']];
+const ABAS = [['tabela', 'Tabela'], ['gas', 'Gases'], ['liquido', 'Líquidos'], ['solido', 'Sólidos'], ['compostos', 'Compostos'], ['solucoes', 'Soluções'], ['casa', 'Casa'], ['lab', 'Laboratório']];
 $('#ferr').innerHTML = FERRAMENTAS.map(([k, ic, n]) => `<button data-f="${k}" class="${k === UI.ferr ? 'on' : ''}" title="${n}">${ic} <span>${n}</span></button>`).join('');
 $('#ferr').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; escolherFerr(b.dataset.f); });
 function escolherFerr(f) { UI.ferr = f; [...$('#ferr').children].forEach(x => x.classList.toggle('on', x.dataset.f === f)); dicaFerr(); }
 function dicaFerr() {
   const d = { desenhar: 'Arraste na caixa para colocar o material escolhido.', apagar: 'Arraste para apagar.', aquecer: 'Segure em cima de algo para esquentar (até 6000 °C).', resfriar: 'Segure para esfriar (até −273 °C).', temp: 'Define a temperatura exata do que estiver no pincel (escolha o valor em "Temperatura ao colocar").',
-    faisca: 'Liga corrente em metais, grafite e soluções (eletrólise!) ou solta uma faísca para acender misturas.', ima: 'Atrai ferro, cobalto, níquel e magnetita em pó (só abaixo da temperatura de Curie).', martelo: 'Bate: materiais quebradiços viram pó; metais dúcteis só amassam.',
+    faisca: 'Solta faíscas que voam, caem e acendem o que tocam (gases, álcool, pó de metal, espuma de hidrogênio). Em metais, grafite e soluções liga a corrente: eletrólise, e fios finos como a palha de aço esquentam até pegar fogo. Segure para um borrifo contínuo.', ima: 'Atrai ferro, cobalto, níquel e magnetita em pó (só abaixo da temperatura de Curie).', martelo: 'Bate: materiais quebradiços viram pó; metais dúcteis só amassam.',
     ph: 'Toque numa solução para medir o pH.', inspecionar: 'Toque para ver tudo sobre aquela célula.', geiger: 'Conta a radioatividade perto do ponteiro.', coletar: 'Arraste para recolher uma amostra no copo. Depois aperte "🥤 Amostra" para analisar ou simular no organismo.' }[UI.ferr];
   statusExtra = d;
 }
@@ -206,6 +206,7 @@ function botaoMat(m) { const s = estadoDe(m, L.AMB); return `<button class="mt $
 const COLOCAVEIS = () => MATS.filter(m => m.id > 2 && (m.tipo === 'elemento' || m.tipo === 'composto') && m.chave !== 'Parede');
 function categoria(m) {
   const k = m.chave;
+  if (m.casa) return 'Produtos de casa';
   if (m.reagente) return 'Reagentes de laboratório';
   if (m.liga) return 'Ligas metálicas';
   if (m.vidro || m.inerte) return 'Recipientes';
@@ -232,12 +233,19 @@ function renderPaleta() {
     h += `<p class="muted" style="font-size:11.5px">Mude a temperatura ambiente lá em cima e veja os elementos trocarem de aba.</p>`;
   } else if (UI.aba === 'compostos') {
     const grupos = {}; for (const m of COLOCAVEIS().filter(m => m.tipo === 'composto' && !m.inerte && !m.vidro)) (grupos[categoria(m)] = grupos[categoria(m)] || []).push(m);
-    for (const g of ['Reagentes de laboratório', 'Óxidos', 'Sais', 'Hidróxidos (bases)', 'Ácidos concentrados', 'Gases', 'Ligas metálicas', 'Outros']) if (grupos[g]) h += `<div class="sec">${g} (${grupos[g].length})</div><div class="lista">${grupos[g].map(botaoMat).join('')}</div>`;
+    for (const g of ['Produtos de casa', 'Reagentes de laboratório', 'Óxidos', 'Sais', 'Hidróxidos (bases)', 'Ácidos concentrados', 'Gases', 'Ligas metálicas', 'Outros']) if (grupos[g]) h += `<div class="sec">${g} (${grupos[g].length})</div><div class="lista">${grupos[g].map(botaoMat).join('')}</div>`;
   } else if (UI.aba === 'solucoes') {
     const sol = [mat('H2O'), ...SOLUCOES_PRONTAS.map(i => MATS[i])];
     const ac = sol.filter(m => m.acido), ba = sol.filter(m => m.base), sa = sol.filter(m => !m.acido && !m.base);
     h = `<div class="sec">Ácidos (~0,1 mol/L)</div><div class="lista">${ac.map(botaoMat).join('')}</div><div class="sec">Bases</div><div class="lista">${ba.map(botaoMat).join('')}</div><div class="sec">Água e sais dissolvidos</div><div class="lista">${sa.map(botaoMat).join('')}</div>`;
     h += `<p class="muted" style="font-size:11.5px">Novas soluções aparecem sozinhas quando você dissolve sais ou faz reações.</p>`;
+  } else if (UI.aba === 'casa') {
+    const item = (m, nome) => { if (m == null || m < 0 || !MATS[m]) return ''; const M = MATS[m], st = estadoDe(M, L.AMB); return `<button class="mt ${m === UI.sel ? 'sel' : ''}" data-m="${m}" title="${esc(M.nome)}"><span class="sw" style="background:${cssRgb(M.rgb[st])}"></span><span><b>${esc(nome)}</b><small>${esc(fmt(M.formula).slice(0, 18))}</small></span></button>`; };
+    const sec = (t, l) => `<div class="sec">${t}</div><div class="lista">${l.map(([m, n]) => item(m, n)).join('')}</div>`;
+    h = sec('🧽 Limpeza', [[id('Detergente'), 'Detergente'], [id('Sabao'), 'Sabão'], [solucao('Na', 'ClO'), 'Água sanitária'], [id('AguaOxigenada'), 'Água oxigenada'], [solucao('NH4', 'OH'), 'Amoníaco'], [id('Etanol'), 'Álcool'], [id('Acetona'), 'Removedor de esmalte'], [id('NaOH'), 'Soda cáustica'], [id('PalhaAco'), 'Palha de aço']])
+      + sec('🍳 Cozinha', [[id('AguaTorneira'), 'Água da torneira'], [id('NaCl'), 'Sal de cozinha'], [id('Sacarose'), 'Açúcar'], [id('NaHCO3'), 'Bicarbonato'], [solucao('H', 'CH3COO'), 'Vinagre'], [solucao('H', 'C6H5O7'), 'Suco de limão'], [id('Oleo'), 'Óleo de cozinha'], [id('Leite'), 'Leite'], [id('Amido'), 'Polvilho (amido)'], [solucao('H', 'CO3'), 'Água com gás'], [id('RepolhoRoxo'), 'Suco de repolho roxo']])
+      + sec('🏠 Outros', [[id('Parafina'), 'Vela'], [id('CaCO3'), 'Giz / calcário'], [id('CaO'), 'Cal virgem'], [id('Mg(OH)2'), 'Leite de magnésia'], [id('CO2'), 'Gelo seco'], [id('Fe'), 'Prego (ferro)'], [id('Cu'), 'Fio de cobre'], [id('Al'), 'Papel alumínio'], [id('Glicerina'), 'Glicerina']]);
+    h += '<p class="muted" style="font-size:11.5px;line-height:1.5">⚠️ Misturas perigosas de verdade (água sanitária + vinagre ou amoníaco, água no óleo quente) estão aqui para você ver <b>por que</b> não se faz em casa.</p>';
   } else if (UI.aba === 'lab') {
     const l = MATS.filter(m => m.vidro || m.inerte || m.tipo === 'especial2'), rg = MATS.filter(m => m.reagente);
     h = `<div class="sec">Reagentes</div><div class="lista">${rg.map(botaoMat).join('')}</div><div class="sec">Vidraria e equipamentos</div><div class="lista">${l.map(botaoMat).join('')}</div><p class="muted" style="font-size:12px;line-height:1.5">O <b>vidro borossilicato</b> aguenta quase todos os ácidos, menos o fluorídrico. O <b>cadinho</b> aguenta mais de 2000 °C. A <b>placa aquecedora</b> fica sempre a 1200 °C, a <b>refrigerada</b> a −120 °C, e a <b>fonte de energia</b> manda corrente para o que encostar nela.</p>`;
@@ -437,7 +445,7 @@ function usarFerramenta(clique) {
     case 'aquecer': aquecer(x, y, r, 12 * L.vel); break;
     case 'resfriar': aquecer(x, y, r, -12 * L.vel); break;
     case 'temp': definirTemp(x, y, r, +$('#temp-v').value); if (clique) toast('Temperatura definida', $('#temp-v').value + ' °C (escolha o valor em "Temperatura ao colocar → Escolher…")'); break;
-    case 'faisca': { const n = faisca(x, y, Math.max(1, r)); if (clique) { som('faisca'); if (n) medida = `⚡ Corrente em ${n} células condutoras`; else medida = '⚡ Faísca no ar (1500 °C num ponto)'; } break; }
+    case 'faisca': { if (!clique && L.tick % 2) break; const n = faisca(x, y, Math.max(1, r)); if (!clique && rnd() < 0.15) som('faisca'); if (clique) { som('faisca'); if (n) medida = `⚡ Corrente em ${n} células condutoras`; else medida = '✨ Faíscas (~1500 °C): acendem gás, álcool, pó de metal e espuma de hidrogênio'; } break; }
     case 'ima': ima(x, y, 14 + r * 2); break;
     case 'martelo': if (clique) { marteloRes = martelo(x, y, Math.max(1, r)); som('martelo'); } break;
     case 'coletar': { const n = coletar(x, y, r, UI.amostra, 4000); if (n) atualizarBotaoAmostra(); break; }
@@ -548,7 +556,7 @@ avisar('iniciado');
 // ganchos para testes automáticos
 window.__lab = { L, MATS, id, regra, passo, pincel, celula, avaliarAmostra, solucao, limparTudo, EXPERIMENTOS, get grade() { return { mt, T, flg }; } };
 </script>
-<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.1.0</div>
-<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.1.0";</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.2.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.2.0";</script>
 </body>
 </html>

@@ -11,7 +11,8 @@
 registrar({ chave: 'AQUECEDOR', nome: 'Placa aquecedora', formula: '—', tipo: 'especial2', cores: ['#7a2a1a'], d: 8, cp: 0.5, lam: 60, inerte: true, fixo: 0, tempFixa: 1200 });
 registrar({ chave: 'RESFRIADOR', nome: 'Placa refrigerada', formula: '—', tipo: 'especial2', cores: ['#1a4a7a'], d: 8, cp: 0.5, lam: 60, inerte: true, fixo: 0, tempFixa: -120 });
 registrar({ chave: 'BATERIA', nome: 'Fonte de energia (eletrodo ligado)', formula: '—', tipo: 'especial2', cores: ['#d0a020'], d: 8, cp: 0.4, lam: 100, inerte: true, fixo: 0, condutor: true, bateria: true });
-const FOGO = id('FOGO'), FUMACA = id('FUMACA'), H2O = id('H2O'), PAREDE = id('Parede');
+registrar({ chave: 'FAISCA', nome: 'Faísca', formula: '—', tipo: 'especial', cores: [null, null, '#fff4b0'], d: 0.0003, cp: 1, lam: 0.1, fixo: 3 });
+const FOGO = id('FOGO'), FUMACA = id('FUMACA'), FAISCA = id('FAISCA'), H2O = id('H2O'), PAREDE = id('Parede');
 
 const L = { W: 0, H: 0, N: 0, AMB: 25, vel: 1, pausado: false, ventilacao: true, tick: 0, contagem: new Map(), explosoes: 0, ultimaReacao: null, eventos: [] };
 let mt, T, flg, vida, carga, varc, aux, capA, kA;
@@ -63,7 +64,10 @@ function atualizar(i, x, y, m) {
   const M = MATS[m];
   if (m === FOGO) return fogo(i, x, y);
   if (m === FUMACA) return fumaca(i, x, y);
+  if (m === FAISCA) return faiscaVoa(i, x, y);
   if (M.tempFixa !== undefined) T[i] = M.tempFixa;
+  // espuma: as bolhas estouram sozinhas
+  if (M.efemero && rnd() < M.efemero) { if (M.efemeroVira && rnd() < 0.2) { mt[i] = id(M.efemeroVira); flg[i] &= TK; } else limparCelula(i); return; }
   const t = T[i];
   // decomposição pelo calor
   if (M.decomp && t >= M.decomp[0] && rnd() < 0.02) return decompor(i, x, y, M);
@@ -115,6 +119,7 @@ function aplicar(r, i, j, x, y) {
   if (r.extra >= 0 && r.extra !== undefined) espalhar(i, x, y, r.extra, T[i]);
   if (r.gasB) { const g = id('OsO4'); if (g >= 0) espalhar(i, x, y, g, T[i]); }
   if (r.explosao) explosao(x, y, r);
+  if (r.faiscas && rnd() < 0.35) soltarFaisca(x + (rnd() < 0.5 ? -1 : 1), y - 1, (rnd() * 5 | 0) - 2, -2, 6 + rnd() * 14);
   const rc = canonico(r), n = (L.contagem.get(rc) || 0) + 1; L.contagem.set(rc, n); L.ultimaReacao = rc;
   if (n === 1) evento('Nova reação: ' + rc.nome, rc);
 }
@@ -158,6 +163,41 @@ function fogo(i, x, y) {
   const d = [0, 1, 2][(rnd() * 3) | 0], nx = x + DX[d], ny = y + DY[d];
   if (ny >= 0 && nx >= 0 && nx < L.W) { const j = ny * L.W + nx; if (mt[j] === 0) troca(i, j); }
 }
+// faísca: guarda a velocidade (−2…2 em x e y) em aux; a gravidade puxa para baixo
+function soltarFaisca(x, y, vx, vy, vida0) {
+  if (x < 0 || y < 0 || x >= L.W || y >= L.H) return false;
+  const i = y * L.W + x; if (mt[i] !== 0) return false;
+  vx = Math.max(-2, Math.min(2, vx | 0)); vy = Math.max(-2, Math.min(2, vy | 0));
+  mt[i] = FAISCA; vida[i] = Math.max(2, Math.min(40, vida0 | 0)); aux[i] = (vx + 2) * 5 + (vy + 2); T[i] = 1400; carga[i] = 0; flg[i] &= TK;
+  return true;
+}
+function emitirFaiscas(cx, cy, n, forca = 1) {
+  let k = 0;
+  for (let t = 0; t < n * 3 && k < n; t++) {
+    const ang = -Math.PI / 2 + (rnd() - 0.5) * Math.PI * 1.7, v = (0.8 + rnd() * 1.5) * forca;
+    if (soltarFaisca(cx + Math.round((rnd() - 0.5) * 3), cy + Math.round((rnd() - 0.5) * 3), Math.round(Math.cos(ang) * v * 1.3), Math.round(Math.sin(ang) * v * 1.3), 6 + rnd() * 18)) k++;
+  }
+  return k;
+}
+function faiscaVoa(i, x, y) {
+  if (vida[i] <= 1) { limparCelula(i); return; }
+  vida[i]--;
+  let vx = ((aux[i] / 5) | 0) - 2, vy = (aux[i] % 5) - 2;
+  if ((L.tick + i) % 3 === 0 && vy < 2) vy++; // gravidade
+  if (rnd() < 0.15) vx += rnd() < 0.5 ? -1 : 1; // tremida
+  vx = Math.max(-2, Math.min(2, vx)); aux[i] = (vx + 2) * 5 + (vy + 2);
+  const sx = vx && rnd() < Math.abs(vx) / 2 ? Math.sign(vx) : 0, sy = vy && rnd() < Math.abs(vy) / 2 ? Math.sign(vy) : 0;
+  if (!sx && !sy) return;
+  const nx = x + sx, ny = y + sy;
+  if (nx < 0 || ny < 0 || nx >= L.W || ny >= L.H) { limparCelula(i); return; }
+  const j = ny * L.W + nx, b = mt[j];
+  if (b === 0) { troca(i, j); return; }
+  if (b === FAISCA || b === FOGO || b === FUMACA) return;
+  // bateu em algo: esquenta aquele ponto (é isso que acende gás, álcool, pó de metal…)
+  const B = MATS[b];
+  if (!B.inerte && B.tempFixa === undefined) T[j] = Math.max(T[j], 650 + vida[i] * 45);
+  vida[i] = Math.min(vida[i], 2);
+}
 function fumaca(i, x, y) {
   if (vida[i] <= 1) { limparCelula(i); return; }
   vida[i]--;
@@ -196,10 +236,11 @@ function moverGas(i, x, y, M) {
 function explosao(x, y, r) {
   L.explosoes++;
   const R = 6;
+  for (let k = 0; k < 10; k++) { const a = rnd() * Math.PI * 2; soltarFaisca(x + Math.round(Math.cos(a) * (R + 1)), y + Math.round(Math.sin(a) * (R + 1)), Math.round(Math.cos(a) * 2), Math.round(Math.sin(a) * 2) - 1, 8 + rnd() * 14); }
   for (let dy = -R; dy <= R; dy++) for (let dx = -R; dx <= R; dx++) {
     const nx = x + dx, ny = y + dy; if (nx < 0 || ny < 0 || nx >= L.W || ny >= L.H) continue;
     const d = Math.hypot(dx, dy); if (d > R) continue; const j = ny * L.W + nx;
-    T[j] += (1 - d / R) * 400;
+    T[j] = Math.max(T[j], 300 + (1 - d / R) * 900); // a onda de calor não se acumula sem fim
     if (mt[j] === 0 && rnd() < 0.3 * (1 - d / R)) { mt[j] = FOGO; vida[j] = 8 + rnd() * 10; aux[j] = corFogo(r.fogo || '#ffd27a'); T[j] = 1500; }
     else if (mt[j] && (flg[j] & PO || est(j) > 0) && rnd() < 0.5) { const tx = nx + Math.sign(dx) * 2, ty = ny + Math.sign(dy) * 2; if (tx >= 0 && ty >= 0 && tx < L.W && ty < L.H) { const k = ty * L.W + tx; if (mt[k] === 0) troca(j, k); } }
   }
@@ -252,7 +293,7 @@ function eletricidade() {
       const j = ny * W + nx;
       if (carga[j] === 0 && conduz(j)) carga[j] = 5; // 5 = vai virar ativo no próximo passo (evita atravessar tudo de uma vez)
       else if (mt[j] && carga[j] === 0) { const M = MATS[mt[j]]; if (estadoDe(M, T[j]) === 2 || mt[j] === 0) carga[j] = 2; } // gás ao redor brilha (descarga)
-      else if (mt[j] === 0 && rnd() < 0.002) T[j] += 300; // faisquinha no ar
+      else if (mt[j] === 0 && MATS[mt[i]].condutor && MATS[mt[i]].tipo !== 'solucao' && rnd() < 0.004) soltarFaisca(nx, ny, (rnd() * 5 | 0) - 2, -1, 3 + rnd() * 5); // arco: faisquinha no ar
     }
     efeitoCorrente(i, x, y);
   }
@@ -276,7 +317,7 @@ function efeitoCorrente(i, x, y) {
     L.contagem.set(R_IGNEA, (L.contagem.get(R_IGNEA) || 0) + 1);
     return;
   }
-  if (M.condutor && !M.bateria) T[i] += 0.4; // efeito Joule
+  if (M.condutor && !M.bateria) T[i] += (flg[i] & PO) ? 9 : 0.4; // efeito Joule: fio fino (pó, palha de aço) tem resistência alta e esquenta muito mais
 }
 const R_ELETROLISE = { nome: 'Eletrólise', eq: '2 H₂O → 2 H₂↑ + O₂↑  (com cloreto: 2 Cl⁻ → Cl₂↑)', nota: 'A corrente quebra a água: hidrogênio num eletrodo e oxigênio (ou cloro) no outro. Água pura quase não conduz; precisa de íons dissolvidos.' };
 const R_IGNEA = { nome: 'Eletrólise ígnea (sal derretido)', eq: '2 NaCl(l) → 2 Na + Cl₂↑', nota: 'Sais derretidos conduzem eletricidade. É assim que a indústria produz sódio, magnésio e alumínio.' };
@@ -300,7 +341,9 @@ function definirTemp(cx, cy, r, t) { noRaio(cx, cy, r, i => { if (mt[i]) T[i] = 
 function faisca(cx, cy, r) {
   let eletr = 0;
   noRaio(cx, cy, r, i => { if (conduz(i)) { carga[i] = 4; eletr++; } });
-  if (!eletr) { const i = cy * L.W + cx; T[i] = Math.max(T[i], 1500); if (mt[i] === 0) { mt[i] = FOGO; vida[i] = 6; aux[i] = corFogo('#fff6c0'); } }
+  const i = cy * L.W + cx;
+  if (!eletr && mt[i] && !MATS[mt[i]].inerte && MATS[mt[i]].tempFixa === undefined && mt[i] !== FAISCA) T[i] = Math.max(T[i], 1500); // dentro de um gás ou líquido: o ponto da faísca esquenta
+  emitirFaiscas(cx, cy, eletr ? 2 : 5, eletr ? 0.7 : 1);
   return eletr;
 }
 function ima(cx, cy, r) {
@@ -326,7 +369,7 @@ function geiger(cx, cy, r) { let n = 0; noRaio(cx, cy, r, i => { const m = mt[i]
 function coletar(cx, cy, r, amostra, max) {
   let n = 0;
   noRaio(cx, cy, r, i => {
-    const m = mt[i]; if (!m || m === FOGO || m === FUMACA || MATS[m].inerte || MATS[m].tempFixa !== undefined) return;
+    const m = mt[i]; if (!m || m === FOGO || m === FUMACA || m === FAISCA || MATS[m].inerte || MATS[m].tempFixa !== undefined) return;
     if (amostra.total >= max) return;
     const a = amostra.mapa.get(m) || { id: m, celulas: 0, somaT: 0 }; a.celulas++; a.somaT += T[i]; amostra.mapa.set(m, a); amostra.total++; limparCelula(i); n++;
   });
@@ -358,6 +401,9 @@ function desenharGrade(ctx2) {
     } else if (m === FOGO) {
       const c = coresFogo[aux[i]] || [255, 140, 30], k = Math.min(1, vida[i] / 25) * (0.75 + rnd() * 0.25);
       r = FUNDO[0] + (c[0] - FUNDO[0]) * k; g = FUNDO[1] + (c[1] - FUNDO[1]) * k; b = FUNDO[2] + (c[2] - FUNDO[2]) * k;
+    } else if (m === FAISCA) {
+      const k = Math.min(1, vida[i] / 14), f = 0.85 + rnd() * 0.15;
+      r = 255 * f; g = (150 + 105 * k) * f; b = (40 + 190 * k * k) * f;
     } else if (m === FUMACA) {
       const k = Math.min(0.7, vida[i] / 120); r = FUNDO[0] + (90 - FUNDO[0]) * k; g = FUNDO[1] + (90 - FUNDO[1]) * k; b = FUNDO[2] + (96 - FUNDO[2]) * k;
     } else {
@@ -412,4 +458,10 @@ const EXPERIMENTOS = [
   { n: '🌈 Indicador de repolho roxo', d: 'O mesmo extrato em ácido clorídrico, vinagre, água destilada, bicarbonato… e soda cáustica: uma cor para cada pH.', f: (W, H) => { const sol = [solucao('H', 'Cl'), solucao('H', 'CH3COO'), id('H2O'), solucao('Na', 'CO3'), solucao('Na', 'OH')], lw = W / 5; sol.forEach((m, k) => { EXP.bequer(lw * k + 2 | 0, H * 0.5 | 0, lw - 5 | 0, H * 0.45 | 0); EXP.ret(lw * k + 3, H * 0.7, lw * (k + 1) - 4, H * 0.95 - 1, m); EXP.ret(lw * k + lw * 0.35, H * 0.2, lw * k + lw * 0.6, H * 0.3, 'RepolhoRoxo'); }); } },
   { n: '🩷 Titulação com fenolftaleína', d: 'Soda cáustica com fenolftaleína fica rosa. Ácido clorídrico caindo por cima neutraliza a base e a cor some.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.72, W * 0.7 - 1, H * 0.95 - 1, solucao('Na', 'OH')); EXP.ret(W * 0.4, H * 0.6, W * 0.6, H * 0.64, 'Fenolftaleina'); EXP.ret(W * 0.44, H * 0.08, W * 0.56, H * 0.3, solucao('H', 'Cl')); } },
   { n: '🔵 Teste do amido', d: 'Polvilho (amido) em água destilada; pingue lugol (iodo) e veja o azul-escuro aparecer.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.65, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.32, H * 0.86, W * 0.68, H * 0.95 - 1, 'Amido', { po: true }); EXP.ret(W * 0.45, H * 0.15, W * 0.55, H * 0.3, lugol()); } },
+  { n: '🐘 Pasta de dente de elefante', d: 'Peróxido 30% com detergente; o iodeto de potássio cai e quebra o peróxido. O oxigênio vira uma montanha de espuma quente.', f: (W, H) => { EXP.bequer(W * 0.36 | 0, H * 0.5 | 0, W * 0.28 | 0, H * 0.45 | 0); for (let y = H * 0.7 | 0; y < H * 0.95 - 1; y++) for (let x = W * 0.36 + 1 | 0; x < W * 0.64 - 1; x++) put(x, y, rnd() < 0.7 ? id('H2O2') : id('Detergente')); EXP.ret(W * 0.46, H * 0.3, W * 0.54, H * 0.36, solucao('K', 'I')); } },
+  { n: '🧼 Bolhas de hidrogênio', d: 'Zinco + ácido clorídrico no fundo; o hidrogênio sobe pela camada de detergente e vira espuma inflamável. Encoste a FAÍSCA na espuma.', f: (W, H) => { EXP.bequer(W * 0.35 | 0, H * 0.4 | 0, W * 0.3 | 0, H * 0.55 | 0); EXP.ret(W * 0.35 + 1, H * 0.9, W * 0.65 - 1, H * 0.95 - 1, 'Zn', { po: true }); EXP.ret(W * 0.35 + 1, H * 0.72, W * 0.65 - 1, H * 0.9 - 1, solucao('H', 'Cl')); EXP.ret(W * 0.35 + 1, H * 0.62, W * 0.65 - 1, H * 0.72 - 1, 'Detergente'); L.velReacao = 4; } },
+  { n: '🔥 Água no óleo quente (nunca faça)', d: 'Óleo a 260 °C numa panela e umas gotas de água caindo: a água vira vapor de uma vez e arremessa óleo em chamas.', f: (W, H) => { EXP.ret(0, H - 3, W - 1, H - 1, 'AQUECEDOR'); EXP.bequer(W * 0.3 | 0, H * 0.7 | 0, W * 0.4 | 0, (H * 0.3 | 0) - 4, 'Cadinho'); EXP.ret(W * 0.3 + 1, H * 0.82, W * 0.7 - 1, H - 5, 'Oleo', { temp: 260 }); EXP.ret(W * 0.48, H * 0.2, W * 0.52, H * 0.24, 'H2O'); } },
+  { n: '🧀 Leite + vinagre', d: 'O ácido do vinagre faz a caseína do leite coagular: flocos brancos (coalhada) e soro amarelado.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.62, W * 0.7 - 1, H * 0.95 - 1, 'Leite'); EXP.ret(W * 0.42, H * 0.15, W * 0.58, H * 0.32, solucao('H', 'CH3COO')); } },
+  { n: '🧽 Palha de aço + bateria', d: 'A corrente passa pelos fios finíssimos de aço, que esquentam até brilhar e pegar fogo, soltando faíscas.', f: (W, H) => { EXP.ret(W * 0.25, H - 4, W * 0.75, H - 1, 'Cadinho'); EXP.ret(W * 0.3, H - 14, W * 0.7, H - 5, 'PalhaAco', { po: true, chance: 0.75 }); EXP.ret(W * 0.27, H - 16, W * 0.3, H - 5, 'BATERIA'); EXP.ret(W * 0.7, H - 16, W * 0.73, H - 5, 'BATERIA'); } },
+  { n: '🫒 Detergente tirando gordura', d: 'Óleo boiando na água; o detergente cai por cima e quebra o óleo em gotinhas (emulsão).', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.75, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.3 + 1, H * 0.66, W * 0.7 - 1, H * 0.75 - 1, 'Oleo'); EXP.ret(W * 0.44, H * 0.2, W * 0.56, H * 0.32, 'Detergente'); } },
 ];

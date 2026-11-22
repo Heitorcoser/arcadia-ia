@@ -195,7 +195,7 @@ function corIndicador(tipo, ph) {
 const solChave = k => { const p = k.split(':'); return p[1] === 'Sacarose' ? solucaoAcucar() : solucao(p[1], p[2]); };
 // soluções prontas para a aba "Soluções"
 const SOLUCOES_PRONTAS = [['H', 'Cl'], ['H', 'SO4'], ['H', 'NO3'], ['H', 'F'], ['H', 'PO4'], ['H', 'CH3COO'], ['H', 'CO3'], ['Na', 'OH'], ['K', 'OH'], ['Ca', 'OH'], ['NH4', 'OH'], ['Na', 'Cl'], ['Cu', 'SO4'], ['Ag', 'NO3'], ['K', 'I'], ['Pb', 'NO3'], ['Ba', 'Cl'], ['Fe3', 'Cl'], ['Ni', 'Cl'], ['Co', 'Cl'], ['K', 'Br'], ['Na', 'CO3'], ['Na', 'SO4'], ['Na', 'ClO'], ['NH4', 'Cl'], ['Zn', 'SO4'], ['Mg', 'SO4'], ['Ca', 'Cl']].map(([c, a]) => solucao(c, a));
-SOLUCOES_PRONTAS.push(solucaoAcucar(), solucao('K', 'MnO4'), lugol(), id('AguaTorneira'));
+SOLUCOES_PRONTAS.push(solucaoAcucar(), solucao('K', 'MnO4'), lugol(), id('AguaTorneira'), solucao('H', 'C6H5O7'));
 // marca íons nos compostos da lista (ex.: NaCl → Na, Cl) e reconhece os óxidos/hidróxidos básicos
 for (const m of MATS) { if (m.tipo === 'composto' && OXIDO_CAT[m.chave] !== undefined) m.oxidoBasico = OXIDO_CAT[m.chave]; if (m.ions && m.ions[1] === 'OH') m.hidroxido = m.ions[0]; }
 
@@ -209,12 +209,12 @@ const ehAgua = m => m.chave === 'H2O' || !!m.comoAgua;
 const ehSolAq = m => m.tipo === 'solucao' || ehAgua(m);
 const serie = s => SERIE.indexOf(s);
 const acimaH = s => serie(s) >= 0 && serie(s) < serie('H');
-const TCHAMA = { H: 2100, C: 1200, S: 1100, P: 1000, Mg: 3100, Al: 3000, Fe: 1800, Zn: 1700, Ti: 2900, Zr: 3000, Na: 1000, K: 900, Li: 1100, Rb: 900, Cs: 900, Ca: 1800, Sr: 1800, Ba: 1600, Ce: 1700, U: 1600, Pu: 1600, B: 2100, CH4: 1950, Etanol: 1900, CO: 2100, Diamante: 1200, FosforoVermelho: 1000, Acetona: 1980, Glicerina: 1500 };
+const TCHAMA = { H: 2100, C: 1200, S: 1100, P: 1000, Mg: 3100, Al: 3000, Fe: 1800, Zn: 1700, Ti: 2900, Zr: 3000, Na: 1000, K: 900, Li: 1100, Rb: 900, Cs: 900, Ca: 1800, Sr: 1800, Ba: 1600, Ce: 1700, U: 1600, Pu: 1600, B: 2100, CH4: 1950, Etanol: 1900, CO: 2100, Diamante: 1200, FosforoVermelho: 1000, Acetona: 1980, Glicerina: 1500, Oleo: 1100, Parafina: 1400, PalhaAco: 1800, EspumaH2: 2100 };
 const IGN_BLOCO = { Ti: 1200, Zr: 1100, Ce: 400, U: 600, Pu: 500 };
 const OXIDA_QUENTE = { Cu: ['CuO', 300], Ni: ['NiO', 500], Co: ['CoO', 500], Sn: ['SnO2', 400], Pb: ['PbO', 450], Bi: ['Bi2O3', 400], Sb: ['Sb2O3', 450], As: ['As2O3', 200], Cr: ['Cr2O3', 900], W: ['WO3', 600], Mo: ['MoO3', 600], V: ['V2O5', 650], Ge: ['GeO2', 700], Se: ['SeO2', 300], Hg: ['HgO', 350], Si: ['SiO2', 900], Fe: ['Fe3O4', 600], Mn: ['Mn2O3', 500], Os: ['OsO4', 200] };
 const EQ_COMB = { H: '2 H₂ + O₂ → 2 H₂O', C: 'C + O₂ → CO₂', S: 'S + O₂ → SO₂', P: 'P₄ + 5 O₂ → P₄O₁₀', Mg: '2 Mg + O₂ → 2 MgO', Al: '4 Al + 3 O₂ → 2 Al₂O₃', Fe: '3 Fe + 2 O₂ → Fe₃O₄', Zn: '2 Zn + O₂ → 2 ZnO', Ti: 'Ti + O₂ → TiO₂', Zr: 'Zr + O₂ → ZrO₂',
   Li: '4 Li + O₂ → 2 Li₂O', Na: '2 Na + O₂ → Na₂O₂', K: 'K + O₂ → KO₂', Rb: 'Rb + O₂ → RbO₂', Cs: 'Cs + O₂ → CsO₂', Ca: '2 Ca + O₂ → 2 CaO', Sr: '2 Sr + O₂ → 2 SrO', Ba: '2 Ba + O₂ → 2 BaO', Ce: 'Ce + O₂ → CeO₂', U: '3 U + 4 O₂ → U₃O₈', Pu: 'Pu + O₂ → PuO₂', B: '4 B + 3 O₂ → 2 B₂O₃',
-  CH4: 'CH₄ + 2 O₂ → CO₂ + 2 H₂O', Etanol: 'C₂H₅OH + 3 O₂ → 2 CO₂ + 3 H₂O', CO: '2 CO + O₂ → 2 CO₂', Diamante: 'C (diamante) + O₂ → CO₂', FosforoVermelho: 'P₄ (vermelho) + 5 O₂ → P₄O₁₀', Acetona: 'C₃H₆O + 4 O₂ → 3 CO₂ + 3 H₂O', Glicerina: '2 C₃H₈O₃ + 7 O₂ → 6 CO₂ + 8 H₂O' };
+  CH4: 'CH₄ + 2 O₂ → CO₂ + 2 H₂O', Etanol: 'C₂H₅OH + 3 O₂ → 2 CO₂ + 3 H₂O', CO: '2 CO + O₂ → 2 CO₂', Diamante: 'C (diamante) + O₂ → CO₂', FosforoVermelho: 'P₄ (vermelho) + 5 O₂ → P₄O₁₀', Acetona: 'C₃H₆O + 4 O₂ → 3 CO₂ + 3 H₂O', Glicerina: '2 C₃H₈O₃ + 7 O₂ → 6 CO₂ + 8 H₂O', Oleo: 'C₅₇H₁₀₄O₆ + 80 O₂ → 57 CO₂ + 52 H₂O', Parafina: 'C₂₅H₅₂ + 38 O₂ → 25 CO₂ + 26 H₂O', PalhaAco: '3 Fe + 2 O₂ → Fe₃O₄', EspumaH2: '2 H₂ + O₂ → 2 H₂O' };
 
 let ATMOSFERA = 'ar'; // 'ar' | 'vacuo' | 'N2' | 'O2'
 const temO2 = () => ATMOSFERA === 'ar' || ATMOSFERA === 'O2';
@@ -279,7 +279,7 @@ function regraAr(A, puroO2) {
     const prodA = A.chave === 'H' ? AGUA : id(inf.prod);
     if (prodA < 0) return null;
     return R({ pa: prodA, pb: id('FOGO'), p: 0.25 * rapido, tmin: inf.ign, soPo: inf.soPo, ignBloco: IGN_BLOCO[A.simb], tA: tChama * 0.7, tB: tChama, fogo: A.chama || CHAMA[A.simb] || '#ff9a2a', extra: inf.prod2 ? id(inf.prod2) : -1,
-      nome: `Combustão: ${A.nome}`, eq: EQ_COMB[A.simb || A.chave] || `${fmt(A.formula)} + O₂ → ${fmt(MATS[prodA].formula)}`, dH: inf.dH, combustao: true,
+      faiscas: !!(A.metal || A.liga), nome: `Combustão: ${A.nome}`, eq: EQ_COMB[A.simb || A.chave] || `${fmt(A.formula)} + O₂ → ${fmt(MATS[prodA].formula)}`, dH: inf.dH, combustao: true,
       nota: `Precisa chegar a ~${inf.ign} °C${inf.soPo ? ' e estar em pó (em bloco o calor se espalha rápido demais)' : ''}. Chama de ~${tChama} °C.` });
   }
   // oxidação lenta de metais quentes (formam uma casca de óxido)
@@ -311,7 +311,7 @@ function regraAgua(A, W) {
   // compostos que reagem com água (óxidos, peróxidos, nitretos, gálio-alumínio...)
   if (A.agua) {
     const pa = A.agua.startsWith('aq:') ? solChave(A.agua) : id(A.agua); if (pa < 0) return null;
-    const pb = A.aguaGas ? id({ O2: 'O', H2: 'H', N2: 'N', Cl2: 'Cl' }[A.aguaGas] || A.aguaGas) : (A.agua.startsWith('aq:') ? pa : AGUA);
+    const pb = A.aguaGas ? id({ O2: 'O', H2: 'H', N2: 'N', Cl2: 'Cl' }[A.aguaGas] || A.aguaGas) : (A.agua.startsWith('aq:') ? pa : W.id);
     return R({ pa, pb, p: A.aguaLenta ? 0.003 : 0.08, dT: A.aguaCalor || 5, nome: `${A.nome} + água`, eq: `${fmt(A.formula)} + H₂O → ${fmt(MATS[pa].formula)}${A.aguaGas ? ' + ' + fmt(A.aguaGas) + '↑' : ''}`, nota: A.aguaCalor >= 40 ? 'Solta bastante calor.' : '' });
   }
   if (A.chave === 'H2SO4' || A.chave === 'HNO3') { const pa = solucao('H', A.chave === 'H2SO4' ? 'SO4' : 'NO3'); return R({ pa, pb: pa, p: 0.2, dT: A.diluiCalor, nome: `Diluindo ${minus(A.nome)}`, eq: `${fmt(A.formula)} + H₂O → ${fmt(MATS[pa].formula)}`, dH: A.chave === 'H2SO4' ? -96 : -33, nota: 'Diluir ácido concentrado solta muito calor: o certo é sempre colocar o ácido na água, devagar.' }); }
@@ -433,7 +433,7 @@ function regraEnxofre(A) {
 function regraReducao(A, B) {
   // termite e parentes: metal muito reativo em pó + óxido de metal menos reativo
   const ox = { Fe2O3: 'Fe', Fe3O4: 'Fe', CuO: 'Cu', Cr2O3: 'Cr', PbO: 'Pb', NiO: 'Ni', ZnO: 'Zn', SnO2: 'Sn' }[B.chave];
-  if (ox && A.simb === 'Al') return R({ pa: id('Al2O3'), pb: id(ox), p: 0.6, tmin: 1200, faisca: true, tA: 2400, tB: 2500, fogo: '#fff4d0', poA: true, nome: `Termite (alumínio + ${minus(B.nome)})`, eq: B.chave === 'Fe2O3' ? 'Fe₂O₃ + 2 Al → 2 Fe + Al₂O₃' : `${fmt(B.formula)} + Al → ${ox} + Al₂O₃`, dH: B.chave === 'Fe2O3' ? -852 : -1200, nota: 'O alumínio "rouba" o oxigênio do óxido. Chega a ~2500 °C: o ferro sai derretido. É usado para soldar trilhos de trem.' });
+  if (ox && A.simb === 'Al') return R({ pa: id('Al2O3'), pb: id(ox), p: 0.6, tmin: 1200, faisca: true, faiscas: true, tA: 2400, tB: 2500, fogo: '#fff4d0', poA: true, nome: `Termite (alumínio + ${minus(B.nome)})`, eq: B.chave === 'Fe2O3' ? 'Fe₂O₃ + 2 Al → 2 Fe + Al₂O₃' : `${fmt(B.formula)} + Al → ${ox} + Al₂O₃`, dH: B.chave === 'Fe2O3' ? -852 : -1200, nota: 'O alumínio "rouba" o oxigênio do óxido. Chega a ~2500 °C: o ferro sai derretido. É usado para soldar trilhos de trem.' });
   if (ox && A.simb === 'Mg') return R({ pa: id('MgO'), pb: id(ox), p: 0.6, tmin: 900, tA: 2200, tB: 2200, fogo: '#ffffff', poA: true, nome: `Magnésio reduzindo ${minus(B.nome)}`, eq: `${fmt(B.formula)} + Mg → ${ox} + MgO`, nota: 'O magnésio tem mais afinidade pelo oxigênio que quase todos os metais.' });
   // carbono reduz óxidos (alto-forno)
   const oxC = { Fe2O3: ['Fe', 900], Fe3O4: ['Fe', 900], CuO: ['Cu', 500], PbO: ['Pb', 600], ZnO: ['Zn', 1000], SnO2: ['Sn', 1000], NiO: ['Ni', 800] }[B.chave];
@@ -453,6 +453,17 @@ function regraLigas(A, B) {
 }
 function regraLab(A, B) {
   const O2 = id('O');
+  // gás atravessando água com detergente ou sabão: espuma
+  if (B.surfactante && A.tipo !== 'solucao' && !A.surfactante && A.tipo !== 'especial' && estadoDe(A, 25) === 2 && A.chave !== 'vazio') {
+    const h = A.simb === 'H';
+    return R({ pa: id(h ? 'EspumaH2' : 'Espuma'), pb: B.id, p: 0.5, poA: true, extra: id(h ? 'EspumaH2' : 'Espuma'), nome: h ? 'Bolhas de hidrogênio na espuma' : 'Gás + detergente: espuma', eq: 'gás + água com detergente → bolhas', nota: h ? 'Cada bolha guarda hidrogênio: com uma faísca a espuma vira uma bola de fogo.' : 'O detergente forma uma película em volta de cada bolha de gás, que demora para estourar.' });
+  }
+  if (A.chave === 'H2O' && B.surfactante) return R({ pa: id('Espuma'), pb: B.id, p: 0.5, tmin: 100, poA: true, extra: id('Espuma'), nome: 'Vapor + detergente: espuma', eq: 'vapor d’água + água com detergente → bolhas', nota: 'Água com detergente fervendo (ou vapor passando por ela) faz espuma: é por isso que a panela de macarrão com sabão transborda.' });
+  if (A.surfactante && B.chave === 'Oleo') return R({ pa: id('Emulsao'), pb: id('Emulsao'), p: 0.05, nome: 'Detergente + óleo: emulsão', eq: 'óleo + detergente → gotinhas de óleo soltas na água', nota: 'A ponta "apolar" do detergente gruda no óleo e a ponta "polar" na água: o óleo se quebra em gotinhas e sai com a água. É assim que se lava a louça.' });
+  if (ehAgua(A) && !A.surfactante && B.chave === 'Oleo') return R({ pa: AGUA, pb: B.id, p: 0.3, tmin: 150, tA: 400, explosao: true, fogo: '#ff8a1a', nome: '⚠️ Água em óleo quente', eq: 'H₂O(l) → H₂O(g) (expande ~1700 vezes)', nota: 'A água afunda no óleo quente, vira vapor de uma vez e arremessa o óleo. Se o óleo já estiver pegando fogo, vira uma bola de fogo. NUNCA jogue água em óleo quente: desligue o fogo e abafe com uma tampa.' });
+  if (A.chave === 'Oleo' && B.tipo === 'solucao' && B.base && ['Na', 'K'].includes(B.cat)) return R({ pa: id('Sabao'), pb: id('Glicerina'), p: 0.01, tmin: 40, dT: 2, nome: 'Saponificação: óleo + soda = sabão', eq: 'triglicerídeo + 3 NaOH → 3 R–COONa (sabão) + glicerina', nota: 'É assim que se faz sabão (inclusive o caseiro, com óleo usado): a base quebra a gordura em sabão e glicerina. Quente é bem mais rápido.' });
+  if (A.chave === 'Leite' && B.tipo === 'solucao' && B.acido) return R({ pa: id('Coalhada'), pb: id('SoroLeite'), poA: true, p: 0.1, nome: 'Leite + ácido: coalhou', eq: 'caseína (dissolvida) + H⁺ → caseína (sólida)', nota: 'Abaixo de pH ~4,6 a caseína, a principal proteína do leite, para de se dissolver e se junta em flocos. É assim que se faz ricota e queijo fresco.' });
+  if (A.chave === 'Sabao' && B.tipo === 'solucao' && B.acido) return R({ pa: id('Oleo'), pb: B.id, p: 0.01, nome: 'Sabão + ácido', eq: 'R–COO⁻ + H⁺ → R–COOH (ácido graxo)', nota: 'O ácido transforma o sabão de volta num ácido graxo oleoso, que não limpa mais.' });
   // peróxido de hidrogênio: catalisadores quebram em água + oxigênio
   if (A.peroxido) {
     const forte = A.peroxido >= 30, nomeP = minus(A.nome);
@@ -559,6 +570,7 @@ function avaliarAmostra(amostra, peso, via) {
     const ph = phDe(m);
     if (ph !== null && st === 1 && via === 'oral') {
       if (ph <= 1 || (ph <= 2 && vol > 5)) add(4, `⚗️ Ácido forte: ${rotulo}, pH ${String(ph).replace('.', ',')}`, 'Ácidos fortes causam necrose por coagulação: queimam a boca, o esôfago e principalmente o estômago, que pode perfurar.', ['boca', 'esofago', 'estomago'], 'StatPearls; Manual MSD (cáusticos)');
+      else if (ph <= 3 && ['CH3COO', 'C6H5O7'].includes(m.an)) add(vol > 200 ? 2 : vol > 30 ? 1 : 0, `🍋 Ácido fraco de alimento: ${rotulo}, pH ${String(ph).replace('.', ',')}`, 'Vinagre e limão são ácidos fracos: em pouca quantidade não fazem mal. Puros e em grande quantidade irritam o estômago e desgastam o esmalte dos dentes.', ['boca', 'estomago'], 'StatPearls (cáusticos)');
       else if (ph <= 3) add(2, `⚗️ Ácido: ${rotulo}, pH ${String(ph).replace('.', ',')}`, 'Irrita a boca e o estômago; o vinagre (pH ~2,4) em pouca quantidade é tolerado, mas puro e em grande quantidade agride o esôfago e os dentes.', ['boca', 'estomago'], 'StatPearls (cáusticos)');
       else if (ph >= 12) add(4, `🧪 Base forte: ${rotulo}, pH ${String(ph).replace('.', ',')}`, 'Bases fortes causam necrose por liquefação: "derretem" os tecidos e penetram fundo, principalmente no esôfago. Costumam ser ainda piores que os ácidos.', ['boca', 'esofago', 'estomago'], 'StatPearls (álcalis); Manual MSD');
       else if (ph >= 11) add(vol > 50 ? 3 : 2, `🧪 Base: ${rotulo}, pH ${String(ph).replace('.', ',')}`, 'Entre pH 11 e 12 irrita a boca, a garganta e o estômago (náusea, vômito). Pouca quantidade costuma causar só irritação (é o caso mais comum com água sanitária de casa); grandes volumes podem lesar o esôfago.', ['boca', 'esofago', 'estomago'], 'StatPearls (álcalis; hipoclorito)');

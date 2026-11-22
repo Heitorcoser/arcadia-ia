@@ -373,14 +373,14 @@ const CAPA_LAB = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.17.0";
+window.ARCADIA_VERSAO = "1.18.0";
 
 window.JOGOS = [
   {
     id: "laboratorio-dos-elementos",
-    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.2.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-22",
-    novidades: "Reagentes de laboratório: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona. Catalisadores, titulações, indicadores de pH e 5 experimentos novos.",
+    novidades: "Faísca nova: faíscas de verdade que voam, caem e acendem o que tocam, arco elétrico e fios que esquentam com corrente. Aba Casa com detergente, sabão, água sanitária, óleo, leite, limão, vela, palha de aço e mais. Espuma, emulsão, sabão caseiro, leite coalhando e 6 experimentos novos.",
     nome: "Laboratório dos Elementos",
     genero: "Simulação",
     subgenero: "Sandbox de química (educativo)",
@@ -409,8 +409,10 @@ window.JOGOS = [
       "Mais de 1.200 reações com equação, ΔH e condições",
       "Ferramentas: aquecer, resfriar, definir °C, faísca e corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra",
       "Atmosfera de ar, oxigênio puro, nitrogênio ou vácuo",
+      "Aba Casa: detergente, sabão, água sanitária, vinagre, limão, óleo, leite, vela, palha de aço e outros produtos do dia a dia",
+      "Faíscas que voam e acendem gases, álcool, pó de metal e espuma de hidrogênio; arco elétrico e aquecimento por corrente",
       "Reagentes de laboratório: peróxido de hidrogênio, permanganato, água destilada e da torneira, indicadores (fenolftaleína, repolho roxo), lugol e amido",
-      "23 experimentos prontos (sódio na água, termite, eletrólise, catalisador na água oxigenada, repolho roxo, titulação…)",
+      "29 experimentos prontos (sódio na água, termite, pasta de dente de elefante, palha de aço + bateria, repolho roxo, leite + vinagre…)",
       "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes"
     ],
     controles: [
