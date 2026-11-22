@@ -270,56 +270,63 @@ const CAPA_ROLETA = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.7.0";
+window.ARCADIA_VERSAO = "1.8.0";
 
 window.JOGOS = [
   {
     id: "roleta-de-chefoes",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-21",
-    novidades: "Lançamento: 12 chefões sorteados na roleta, 14 poderes e três dificuldades.",
+    novidades: "Superchefão final sorteado numa roleta dourada (6 superchefões de 3 fases), 16 chefões novos (28 no total), esquiva perfeita, especial, combo, 4 poderes novos e versão para celular com mira automática.",
     nome: "Roleta de Chefões",
     genero: "Ação",
     subgenero: "Boss Rush roguelite",
     corGenero: "#ff4d5e",
-    tags: ["Chefões", "Roguelite", "2D", "Bullet hell", "Single-player", "Rejogável", "Humor"],
+    tags: ["Chefões", "Roguelite", "2D", "Bullet hell", "Single-player", "Rejogável", "Humor", "Celular"],
     criadoEm: "2026-11-21",
     lancadoEm: "2026-11-21T21:00:09-03:00", // o selo "Novo" some 2 dias depois
     criadoPor: "Claude Opus 5.5 (Anthropic)",
-    duracao: "Runs de 6–12 min",
+    duracao: "Runs de 8–14 min",
     classificacao: "Livre",
     finais: 2,
     caminho: "jogos/roleta-de-chefoes/index.html",
     capa: CAPA_ROLETA,
     sinopse:
-      "Uma roleta gigante sorteia 6 chefões entre 12, do Noob Lendário ao Rei das Maldições. Derrote um por um, escolha um poder novo depois de cada luta e tente sair vivo.",
+      "Uma roleta gigante sorteia 6 chefões entre 28 e, no fim, uma roleta dourada sorteia o superchefão final: o Rei das Maldições em forma ancestral, o Boitatá, o Noob Supremo e outros. Escolha um poder depois de cada luta e tente sair vivo.",
     descricao: [
       "Roleta de Chefões é um boss rush: só tem luta contra chefões, uma atrás da outra. A cada rodada uma roleta gira e sorteia quem você vai enfrentar, então nenhuma partida é igual à outra.",
-      "São 12 chefões, cada um com ataques e falas próprias e uma segunda fase quando a vida cai pela metade: o Noob Lendário que acabou de criar a conta, o Rei das Maldições de quatro braços (com cortes invisíveis e expansão de domínio), a Vovó do Chinelo com chinelos teleguiados, a Galinha Colossal, o Mago Glitch, o Dragão Pixel, o Rei Slime, o Palhaço do Caos, o Ceifador Atrasado, o Professor de Matemática com prova surpresa, o Tubarão de Asfalto e o Robô Faxineiro.",
-      "Entre uma luta e outra você escolhe 1 de 3 poderes: tiro triplo, ricochete, bala de fogo, escudo, vampiro, satélite que apaga tiros e outros. Derrote os 6 para vencer a roleta e tente bater seu recorde de tempo."
+      "São 28 chefões, cada um com ataques e falas próprias e uma segunda fase: do Noob Lendário e da Vovó do Chinelo ao Polvo DJ, à Abelha Rainha, ao Saci Pererê (com redemoinhos que perseguem você), ao Boi-Bumbá, ao Kraken de Piscina (que apaga sua tela com tinta), à Coruja Hipnotizadora (que inverte seus controles), ao Astronauta Perdido (com poços de gravidade) e ao Caixa Eletrônico Possuído.",
+      "Depois do sexto chefão gira a roleta dourada e sai o superchefão final, com três fases: Rei das Maldições em Forma Ancestral (domínio com mil lâminas), Boitatá (serpente de fogo que deixa rastro em chamas), Noob Supremo (comandos de admin como /kill, /clone e /nuke), Sol de Meio-Dia de Janeiro, Máquina do Fim versão Ômega e a Bisavó do Chinelo de Ouro.",
+      "Esquive em cima de um ataque para fazer uma esquiva perfeita: o tempo desacelera e enche o especial, que limpa a tela e atordoa o chefe. Entre as lutas você escolhe 1 de 3 poderes entre 18, e no celular a mira e o tiro são automáticos."
     ],
     mecanicas: [
-      "12 chefões com padrões de ataque próprios e segunda fase",
-      "Roleta que sorteia 6 chefões por partida, sem repetir",
-      "Esquiva com invencibilidade, mira com o mouse e tiro contínuo",
-      "14 poderes em três raridades para montar sua build",
+      "28 chefões com padrões de ataque próprios e segunda fase",
+      "Roleta dourada no fim sorteia 1 de 6 superchefões com 3 fases",
+      "Esquiva perfeita: desvie em cima do ataque para desacelerar o tempo",
+      "Especial que limpa os tiros da tela e atordoa o chefe",
+      "Combo de acertos que aumenta o dano até +60%",
+      "Efeitos no chão e no jogador: mel, gelo, fogo, tornado, poço de gravidade, controles invertidos e escuridão",
+      "18 poderes em três raridades para montar sua build",
       "Ataques avisados: cortes e lasers piscam antes de machucar, áreas mostram onde vão cair",
-      "Galeria de chefões descobertos, recorde de chefões e de tempo",
+      "Galeria de chefões descobertos, recorde de chefões, tempo e combo",
       "Três dificuldades: Tranquilo, Normal e Pesadelo",
-      "Controles de toque no celular com dois joysticks"
+      "Celular: câmera que segue você, joystick, mira e tiro automáticos e botões de esquiva e especial"
     ],
     controles: [
       ["W A S D / setas", "Andar"],
       ["Mouse", "Mirar"],
       ["Clique (segurar)", "Atirar"],
       ["Espaço / Shift / botão direito", "Esquivar"],
-      ["Esc", "Pausar"]
+      ["Q", "Especial"],
+      ["Esc", "Pausar"],
+      ["Celular", "Dedo esquerdo anda, mira e tiro automáticos, botões de esquiva e especial"]
     ],
     avisos: "Muitos tiros e flashes na tela durante as lutas.",
     tecnologia: [
-      "Canvas 2D com arena, partículas, tremida de tela e câmera lenta ao levar dano",
+      "Canvas 2D com arena, partículas, tremida de tela e câmera lenta na esquiva perfeita",
       "Ataques dos chefões escritos como roteiros com funções geradoras do JavaScript",
-      "Música que acelera na segunda fase e efeitos sonoros gerados com Web Audio API"
+      "Câmera que segue o jogador e afasta na roleta para caber em telas pequenas",
+      "Música que acelera a cada fase e efeitos sonoros gerados com Web Audio API"
     ]
   },
   {

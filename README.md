@@ -13,12 +13,18 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Roube um Emoji** | Tycoon | Coleção e roubo | Sem fim (progresso salvo) |
 | **Sete Noites na Neve** | Sobrevivência | Sobrevivência no frio | 20–30 min |
 | **MADANG! Festival dos Jogos Coreanos** | Party Game | Party Royale (brincadeiras tradicionais coreanas) | Festivais de 6–8 min |
-| **Roleta de Chefões** | Ação | Boss Rush roguelite | Runs de 6–12 min |
+| **Roleta de Chefões** | Ação | Boss Rush roguelite | Runs de 8–14 min |
 
 ### Roleta de Chefões
-Uma roleta sorteia 6 chefões entre 12. Derrote um por um e escolha 1 de 3 poderes depois de cada luta. Os chefões são o Noob Lendário, o Rei das Maldições, a Vovó do Chinelo, a Galinha Colossal, o Mago Glitch, o Dragão Pixel, o Rei Slime, o Palhaço do Caos, o Ceifador Atrasado, o Professor de Matemática, o Tubarão de Asfalto e o Robô Faxineiro. Cada um tem ataques próprios e uma segunda fase.
+Uma roleta sorteia 6 chefões entre 28 e, no fim, uma **roleta dourada** sorteia o **superchefão final** (3 fases) entre 6: Rei das Maldições em Forma Ancestral, Boitatá, Noob Supremo, Sol de Meio-Dia de Janeiro, Máquina do Fim versão Ômega e Bisavó do Chinelo de Ouro. Depois de cada luta você escolhe 1 de 3 poderes (18 no total).
 
-**Controles:** `WASD` andar · `Mouse` mirar · `Clique` atirar · `Espaço`/`Shift` esquivar · `Esc` pausar
+- ✨ **Esquiva perfeita**: esquivar em cima de um ataque desacelera o tempo e enche o especial
+- 🌟 **Especial**: limpa os tiros da tela e atordoa o chefe
+- 🔥 **Combo**: acertos seguidos aumentam o dano até +60%
+- 🌀 **Efeitos**: mel, gelo, fogo, tornados, poços de gravidade, controles invertidos e tinta que apaga a tela
+- 📱 **Celular**: câmera que segue você, mira e tiro automáticos, botões de esquiva e especial
+
+**Controles:** `WASD` andar · `Mouse` mirar · `Clique` atirar · `Espaço`/`Shift` esquivar · `Q` especial · `Esc` pausar
 
 ### MADANG! Festival dos Jogos Coreanos
 Noite de festival no madang, o pátio da vila: até 50 jogadores (pessoas e bots) enfrentam 6 brincadeiras tradicionais coreanas, que existem de verdade. A cada uma, o tambor buk tira uma parte. Só um vence.
