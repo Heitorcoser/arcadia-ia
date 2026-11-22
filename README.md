@@ -26,6 +26,7 @@ Sandbox de química com a tabela periódica inteira, para estudar e testar.
 - 🔥 Cada célula tem **temperatura**: derrete, ferve e congela nos pontos reais; densidade e condução de calor também são reais
 - 🧪 **Mais de 1.200 reações** (reatividade dos metais, solubilidade, ácido + base, combustão, termite, eletrólise, ligas…) com equação, ΔH e condições, e um **combinador** para testar qualquer par
 - 🧫 Ferramentas: aquecer, resfriar, faísca/corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra
+- 🧴 **Reagentes de laboratório**: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona (catalisadores, titulação, indicadores de pH, teste do amido)
 - 🫀 **Simulação no organismo**: beba, coma ou inale a amostra e veja quais órgãos seriam afetados, com fontes (ATSDR/CDC, NIH, MSD). Educativo, não é orientação médica · Disque-Intoxicação 0800 722 6001
 
 **Controles:** arraste na caixa para usar a ferramenta · `Espaço` pausa · `Esc` fecha janelas

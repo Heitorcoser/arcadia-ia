@@ -135,7 +135,7 @@ const INFO = {
    decomp: [temperatura, produto1, produto2] quando se decompõe ao aquecer
    ========================================================================= */
 const COMPOSTOS = {
-  'H2O': { nome: 'Água', pf: 0, pe: 100, d: 0.997, dS: 0.917, cor: ['#cfe8ff', '#2f6fd0', '#e6eef8'], cp: 4.18, lam: 0.6, ph: 7, liquidoNome: 'Água', solidoNome: 'Gelo', gasNome: 'Vapor d’água', fonte: 'CRC' },
+  'H2O': { nome: 'Água destilada', pf: 0, pe: 100, d: 0.997, dS: 0.917, cor: ['#cfe8ff', '#2f6fd0', '#e6eef8'], cp: 4.18, lam: 0.6, ph: 7, liquidoNome: 'Água destilada', solidoNome: 'Gelo', gasNome: 'Vapor d’água', fonte: 'CRC', uso: 'Solvente de laboratório: sem sais nem cloro, não interfere nas reações.', curio: 'Água pura quase não conduz eletricidade: quem conduz são os íons dissolvidos. Por isso a água da torneira conduz um pouco e a destilada não.' },
   'CO2': { nome: 'Dióxido de carbono', pf: -78.5, pe: -78.5, sublima: true, d: 1.56, cor: ['#f4f8ff', null, '#f0f0f0'], tox: 'CO2', solidoNome: 'Gelo seco', uso: 'Refrigerantes, extintores, gelo seco.' },
   'CO': { nome: 'Monóxido de carbono', pf: -205, pe: -191.5, d: 0.79, cor: [null, null, '#f0f0f0'], tox: 'CO', inflam: { ign: 609, prod: 'CO2', dH: -283 } },
   'SO2': { nome: 'Dióxido de enxofre', pf: -72, pe: -10, d: 1.46, cor: [null, '#f0f0e8', '#f2f0e6'], tox: 'SO2', agua: 'H2SO3' },
@@ -259,6 +259,15 @@ const COMPOSTOS = {
   'NH4Cl': { nome: 'Cloreto de amônio', pf: 338, pe: 338, sublima: true, d: 1.53, cor: ['#ffffff', null, '#f4f4f4'], po: true, decompGas: ['NH3', 'HCl'], curio: 'Quando amônia e HCl se encontram no ar, formam uma fumaça branca: é ele.' },
   'H2SO4': { nome: 'Ácido sulfúrico concentrado', pf: 10, pe: 337, d: 1.83, cor: ['#f4f4ee', '#f0ece0', '#f4f4f0'], ph: -1, tox: 'acidoForte', diluiCalor: 70, curio: 'Misturar com água solta muito calor: sempre o ácido na água, nunca o contrário.' },
   'HNO3': { nome: 'Ácido nítrico concentrado', pf: -42, pe: 83, d: 1.51, cor: ['#f8f4e0', '#f6f0c8', '#f4f0e0'], ph: -1, tox: 'acidoForte', diluiCalor: 30 },
+  'H2O2': { formula: 'H2O2', nome: 'Peróxido de hidrogênio 30%', pf: -26, pe: 106, d: 1.11, cor: ['#eef6ff', '#cfe2f6', '#eef4fa'], cp: 3.6, lam: 0.55, ph: 4, peroxido: 30, reagente: true, decomp: [90, 'H2O', 'O2'], decompEq: '2 H₂O₂ → 2 H₂O + O₂↑', tox: 'H2O2', uso: 'Reagente oxidante de laboratório; alvejante de papel e tecido; esterilização.', curio: 'Concentrado (30%, "100 volumes"): um litro solta cerca de 100 litros de oxigênio ao se decompor. Queima a pele, deixando-a branca.' },
+  'AguaOxigenada': { formula: 'H2O2', nome: 'Água oxigenada 3% (10 volumes)', pf: -1, pe: 100, d: 1.0, cor: ['#eef6ff', '#4a86d8', '#eef4fa'], cp: 4.1, lam: 0.6, ph: 5, peroxido: 3, reagente: true, decomp: [95, 'H2O', 'O2'], decompEq: '2 H₂O₂ → 2 H₂O + O₂↑', tox: 'H2O2', uso: 'A de farmácia: limpeza de ferimentos (hoje pouco recomendada) e clareamento.', curio: '"10 volumes" quer dizer que 1 mL solta 10 mL de oxigênio. A espuma num machucado é a enzima catalase do sangue quebrando o peróxido.' },
+  'KMnO4': { nome: 'Permanganato de potássio', pf: null, pe: null, d: 2.70, cor: ['#4a1458', '#6a1a7a'], po: true, reagente: true, oxidanteForte: true, decomp: [240, 'MnO2', 'O2'], decompEq: '2 KMnO₄ → K₂MnO₄ + MnO₂ + O₂↑', uso: 'Oxidante de laboratório e titulações; tratamento de água; banhos antissépticos MUITO diluídos (1:10 000).', curio: 'Um grãozinho deixa um copo de água inteiro roxo. Quando reage, o roxo some: é assim que ele "avisa" o fim de uma titulação.' },
+  'Glicerina': { formula: 'C3H8O3', nome: 'Glicerina (glicerol)', pf: 17.8, pe: 290, d: 1.26, cor: ['#f4f4ea', '#eef0f4', '#f4f4f4'], cp: 2.4, lam: 0.29, viscoso: true, reagente: true, tox: 'Glicerina', inflam: { ign: 370, prod: 'CO2', prod2: 'H2O', dH: -1655 }, uso: 'Sabonetes, cosméticos, xaropes e alimentos (umectante).', curio: 'Grossa e adocicada. Em contato com permanganato de potássio em pó, pega fogo sozinha depois de alguns segundos.' },
+  'Acetona': { formula: 'C3H6O', nome: 'Acetona (propanona)', pf: -94.7, pe: 56.1, d: 0.785, cor: ['#f4f4fa', '#e8eef8', '#f4f4f8'], cp: 2.16, lam: 0.16, reagente: true, tox: 'Acetona', inflam: { ign: 465, prod: 'CO2', prod2: 'H2O', dH: -1790 }, uso: 'Solvente de laboratório e removedor de esmalte.', curio: 'Evapora muito rápido (ferve a 56 °C) e o vapor pega fogo fácil.' },
+  'Fenolftaleina': { formula: 'C20H14O4', nome: 'Fenolftaleína (indicador)', pf: -114, pe: 78, d: 0.80, cor: ['#f8f8f8', '#eef0f6', '#f4f4f8'], cp: 2.4, lam: 0.17, reagente: true, indicadorDe: 'fenol', tox: 'Fenolftaleina', uso: 'Indicador ácido-base (1% em álcool): incolor abaixo de pH 8,2 e rosa acima.', curio: 'É o indicador clássico das titulações: a primeira gota que deixa a solução rosa marca o fim.' },
+  'RepolhoRoxo': { formula: 'Antocianinas', nome: 'Extrato de repolho roxo (indicador)', pf: -1, pe: 100, d: 1.0, cor: ['#a080c0', '#6a3c8c', '#e8e0f0'], cp: 4.1, lam: 0.6, reagente: true, indicadorDe: 'repolho', tox: 'RepolhoRoxo', uso: 'Indicador de pH caseiro: vermelho no ácido, roxo no neutro, azul-esverdeado e amarelo na base.', curio: 'A cor vem das antocianinas, os mesmos pigmentos da uva, da amora e do açaí.' },
+  'Amido': { formula: 'C6H10O5', nome: 'Amido (polvilho)', pf: null, pe: null, d: 1.5, cor: ['#fbfbf8'], po: true, reagente: true, decomp: [260, 'Caramelo', 'H2O'], tox: 'Amido', uso: 'Reserva de energia das plantas (arroz, batata, mandioca). No laboratório, detecta iodo.', curio: 'Com iodo fica azul-escuro quase preto: o iodo entra no meio das espirais da molécula de amido.' },
+  'AmidoIodo': { formula: 'C6H10O5·I₃⁻', nome: 'Amido + iodo (complexo azul)', pf: null, pe: null, d: 1.5, cor: ['#1a1a5a'], po: true, tox: 'AmidoIodo', uso: 'Teste do amido e do iodo.', curio: 'A cor some se esquentar e volta ao esfriar.' },
   'H3PO4': { nome: 'Ácido fosfórico (85%)', pf: 42, pe: 158, d: 1.88, cor: ['#f8f8f8', '#f2f2ea'], ph: 1, tox: 'acidoForte', uso: 'Dá o sabor ácido dos refrigerantes de cola (bem diluído).' },
   'AguaRegia': { formula: 'HNO3 + 3 HCl', nome: 'Água régia', pf: -42, pe: 108, d: 1.21, cor: [null, '#f0a020', '#f4d080'], ph: -1, tox: 'acidoForte', curio: 'Mistura de ácidos nítrico e clorídrico que dissolve até o ouro e a platina.' },
   'Diamante': { formula: 'C', nome: 'Diamante', pf: 3550, pe: null, d: 3.51, mohs: 10, cor: ['#dff6ff'], lam: 2200, tox: 'C', inflam: { ign: 800, prod: 'CO2', dH: -395 }, curio: 'O material natural mais duro, mas queima no ar a uns 800 °C virando CO₂.' },
@@ -297,13 +306,14 @@ const ANIONS = {
   F: { nome: 'Fluoreto', carga: 1, acido: 'Ácido fluorídrico', phAcido: 2.1, bas: 1.1 }, NO3: { nome: 'Nitrato', carga: 1, poli: true, acido: 'Ácido nítrico', phAcido: 1.0, forte: true, oxidante: true },
   SO4: { nome: 'Sulfato', carga: 2, poli: true, acido: 'Ácido sulfúrico (diluído)', phAcido: 1.0, forte: true }, SO3: { nome: 'Sulfito', carga: 2, poli: true, acido: 'Ácido sulfuroso', phAcido: 1.5, bas: 2.8 },
   CO3: { nome: 'Carbonato', carga: 2, poli: true, acido: 'Ácido carbônico (água com gás)', phAcido: 3.9, bas: 4.6, gas: 'CO2' }, PO4: { nome: 'Fosfato', carga: 3, poli: true, acido: 'Ácido fosfórico', phAcido: 1.6, bas: 5.6 },
+  MnO4: { nome: 'Permanganato', carga: 1, poli: true, oxidante: true, cor: '#6a1a86' },
   CH3COO: { nome: 'Acetato', carga: 1, poli: true, acido: 'Vinagre (ácido acético)', phAcido: 2.4, bas: 1.9 }, BO3: { nome: 'Borato', carga: 3, poli: true, acido: 'Ácido bórico', phAcido: 5.1, bas: 4 },
 };
 const PH_BASE = { Na: 13, K: 13, Li: 13, Rb: 13, Cs: 13, Ba: 13.3, Sr: 13, Ca: 12.4, NH4: 11.1 };
 /* Regras de solubilidade em água (as clássicas dos livros de química) */
 function soluvel(c, a) {
   if (['Li', 'Na', 'K', 'Rb', 'Cs', 'NH4', 'H'].includes(c)) return true;
-  if (a === 'NO3' || a === 'CH3COO') return true;
+  if (a === 'NO3' || a === 'CH3COO' || a === 'MnO4') return true;
   if (a === 'Cl' || a === 'Br') return !['Ag', 'Pb'].includes(c);
   if (a === 'I') return !['Ag', 'Pb', 'Hg'].includes(c);
   if (a === 'F') return !['Ca', 'Mg', 'Sr', 'Ba', 'Pb'].includes(c);
@@ -414,6 +424,15 @@ const TOX = {
   'acidoForte': { nome: 'Ácido concentrado', g: 4, org: ['boca', 'esofago', 'estomago'], efe: 'Ácidos concentrados queimam por coagulação: destroem a boca, o esôfago e o estômago; o estômago pode perfurar.' },
   'Etanol': { nome: 'Etanol', g: 2, lim: [300, 1000, 3000], org: ['cerebro', 'figado'], efe: 'Álcool: tontura, falta de coordenação e, em grande quantidade, coma alcoólico. (O álcool 70% de limpeza não é para beber.)', fonte: 'NIAAA/NIH' },
   'Sacarose': { nome: 'Açúcar', g: 0, efe: 'Energia (4 kcal/g). Sem toxicidade aguda.' },
+  'H2O2': { nome: 'Peróxido de hidrogênio', efe: 'No corpo, a enzima catalase quebra o peróxido em água e oxigênio. A 3% costuma só irritar; concentrado queima as mucosas e o oxigênio liberado pode formar bolhas no sangue (embolia gasosa).', fonte: 'StatPearls (NBK585102); UKHSA; ATSDR' },
+  'MnO4-': { nome: 'permanganato', lim: [1, 10, 50], org: ['boca', 'esofago', 'estomago', 'sangue', 'figado', 'rins'], efe: 'Oxidante forte: queima a boca e o esôfago (pode inchar a laringe) e, absorvido, pode causar metemoglobinemia (o sangue carrega menos oxigênio) e lesão no fígado e nos rins.', fonte: 'Relatos de caso (PMC4413422, PMC4129898); faixas aproximadas' },
+  'Glicerina': { nome: 'Glicerina', g: 0, efe: 'Pouco tóxica: é usada em alimentos e xaropes. Em grande quantidade funciona como laxante.', fonte: 'PubChem (glicerol)' },
+  'Acetona': { nome: 'Acetona', g: 2, org: ['estomago', 'cerebro'], efe: 'Irrita a boca e o estômago; absorvida, dá sonolência e tontura, como uma bebida muito forte. Em grande quantidade pode levar ao coma. O vapor irrita olhos e nariz.', fonte: 'ATSDR ToxFAQs (acetona)' },
+  'Fenolftaleina': { nome: 'Fenolftaleína', g: 1, org: ['intestino'], efe: 'Já foi vendida como laxante, mas saiu do mercado nos EUA em 1999 por suspeita de causar câncer em testes com animais. A de laboratório vem dissolvida em álcool.', fonte: 'FDA (1999)' },
+  'RepolhoRoxo': { nome: 'Extrato de repolho roxo', g: 0, efe: 'É só suco de repolho: comestível.' },
+  'Amido': { nome: 'Amido', g: 0, efe: 'É o carboidrato do pão, do arroz e da batata (4 kcal/g). Sem toxicidade.' },
+  'AmidoIodo': { nome: 'Amido com iodo', g: 1, org: ['tireoide'], efe: 'Contém iodo: em pouca quantidade não faz mal; muito iodo de uma vez irrita o estômago e mexe com a tireoide.', fonte: 'NIH ODS (iodo)' },
+  'AguaTorneira': { nome: 'Água da torneira', g: 0, efe: 'Água potável: tem um pouco de cálcio, magnésio, cloro residual (desinfecção) e flúor (contra cáries).', fonte: 'Ministério da Saúde (potabilidade)' },
 };
 /* Nutrientes: limite superior tolerável de ingestão diária para adultos (NIH ODS / Academias Nacionais dos EUA), em mg */
 const UL = { Na: 2300, Ca: 2500, Mg: 350, Fe: 45, Zn: 40, Cu: 10, Mn: 11, Se: 0.4, I: 1.1, F: 10, Mo: 2, B: 20, Ni: 1, P: 4000 };
@@ -431,5 +450,10 @@ const FONTES = [
   ['NCBI Bookshelf — toxicidade do bário', 'https://www.ncbi.nlm.nih.gov/books/NBK598777'],
   ['Perfuração gástrica por nitrogênio líquido (relato de caso, PMC)', 'https://www.ncbi.nlm.nih.gov/pmc/articles/PMC12103062/'],
   ['NIH Office of Dietary Supplements — limites superiores (UL)', 'https://ods.od.nih.gov/'],
+  ['StatPearls (NIH) — toxicidade do peróxido de hidrogênio', 'https://www.ncbi.nlm.nih.gov/books/NBK585102/'],
+  ['UK Health Security Agency — peróxido de hidrogênio', 'https://www.gov.uk/government/publications/hydrogen-peroxide-properties-incident-management-and-toxicology/hydrogen-peroxide-toxicological-overview'],
+  ['ATSDR/CDC — peróxido de hidrogênio (Medical Management Guidelines)', 'https://wwwn.cdc.gov/TSP/ToxFAQs/ToxFAQsDetails.aspx?faqid=304&toxid=55'],
+  ['Ingestão de permanganato de potássio (relatos de caso, PMC)', 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4413422'],
+  ['ATSDR ToxFAQs — acetona', 'https://wwwn.cdc.gov/TSP/ToxFAQs/ToxFAQsDetails.aspx?faqid=4&toxid=1'],
   ['Anvisa — Disque-Intoxicação 0800 722 6001', 'https://www.gov.br/anvisa/'],
 ];

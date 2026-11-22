@@ -53,7 +53,8 @@ function registrar(m) {
   m.rgb = [m.rgb[0] || base, m.rgb[1] || misturaCor(base, [40, 40, 50], 0.15), m.rgb[2] || misturaCor(base, [240, 240, 250], 0.6)];
   return m.id;
 }
-const id = chave => POR_CHAVE.has(chave) ? POR_CHAVE.get(chave) : -1;
+const GAS_DIATOMICO = { O2: 'O', H2: 'H', N2: 'N', Cl2: 'Cl', F2: 'F', Br2: 'Br', I2: 'I' };
+const id = chave => POR_CHAVE.has(chave) ? POR_CHAVE.get(chave) : GAS_DIATOMICO[chave] && POR_CHAVE.has(GAS_DIATOMICO[chave]) ? POR_CHAVE.get(GAS_DIATOMICO[chave]) : -1;
 const mat = chave => MATS[id(chave)];
 
 // 0 = ar/vazio, depois as "coisas" especiais do simulador
@@ -153,8 +154,8 @@ function solucao(c, a) {
   else if (a === 'OH') { nome = c === 'NH4' ? 'Amônia (solução aquosa)' : `Hidróxido de ${C.nome} (solução)`; ph = PH_BASE[c] ?? 12; }
   else if (c === 'Na' && a === 'ClO') { nome = 'Água sanitária (hipoclorito de sódio)'; ph = 11.5; }
   else { nome = `${A.nome} de ${C.nome} (solução)`; ph = Math.max(1, Math.min(13, 7 + (A.bas || 0) - (C.ac || 0))); }
-  let cor = C.cor ? hexRgb(C.cor) : null; if (c === 'Ca' && a === 'OH') cor = [235, 240, 245];
-  const corLiq = cor ? misturaCor(cor, [60, 110, 200], 0.2) : [70, 120, 210];
+  let cor = A.cor ? hexRgb(A.cor) : C.cor ? hexRgb(C.cor) : null; if (c === 'Ca' && a === 'OH') cor = [235, 240, 245];
+  const corLiq = A.cor ? cor : cor ? misturaCor(cor, [60, 110, 200], 0.2) : [70, 120, 210];
   const f = (c === 'NH4' && a === 'OH') ? 'NH3' : formulaSal(c, a);
   const mm = massaMolar(f);
   return registrar({ chave: k, formula: f + '(aq)', soluto: f, nome, tipo: 'solucao', cat: c, an: a, ph: Math.round(ph * 10) / 10, M: 18.02, Msoluto: mm && mm.M, comp: mm && mm.comp,
@@ -165,10 +166,36 @@ function solucaoAcucar() {
   if (POR_CHAVE.has('aq:Sacarose')) return POR_CHAVE.get('aq:Sacarose');
   return registrar({ chave: 'aq:Sacarose', formula: 'C12H22O11(aq)', soluto: 'C12H22O11', nome: 'Água com açúcar', tipo: 'solucao', ph: 7, M: 18.02, Msoluto: 342.3, comp: massaMolar('C12H22O11').comp, pf: -1, pe: 101, d: 1.04, cp: 4, lam: 0.6, cores: ['#e8f0ff', '#4a80d8', '#e8eef8'], tox: 'Sacarose' });
 }
+const rgbHex = a => '#' + a.map(v => v.toString(16).padStart(2, '0')).join('');
+// água da torneira: água com um pouco de sais (conduz um pouco de eletricidade)
+registrar({ chave: 'AguaTorneira', formula: 'H2O', nome: 'Água da torneira', tipo: 'solucao', comoAgua: true, reagente: true, ph: 7.4, M: 18.02, pf: 0, pe: 100, d: 0.998, dS: 0.917, cp: 4.18, lam: 0.6,
+  cores: ['#d6ecff', '#3a78d4', '#e6eef8'], solidoNome: 'Gelo (de água da torneira)', gasNome: 'Vapor d’água', condutor: true, eletrolito: true, tox: 'AguaTorneira',
+  uso: 'Água potável: tem pouco cálcio, magnésio, cloro residual e flúor.', curio: 'Por causa desses íons ela conduz um pouco de eletricidade (a destilada quase não conduz).' });
+// lugol: iodo dissolvido em iodeto de potássio (marrom). Quimicamente se comporta como a solução de KI
+function lugol() {
+  if (POR_CHAVE.has('Lugol')) return POR_CHAVE.get('Lugol');
+  const b = MATS[solucao('K', 'I')];
+  return registrar(Object.assign({}, b, { chave: 'Lugol', nome: 'Lugol (iodo + iodeto de potássio)', formula: 'I2 + KI(aq)', lugol: true, reagente: true, cores: ['#d8a060', '#7a3a0a', '#e8e0d0'], rgb: undefined,
+    uso: 'Antisséptico e teste do amido (fica azul-escuro).', curio: 'O iodo sozinho quase não dissolve na água; o iodeto de potássio "segura" o iodo formando I₃⁻, marrom.' }));
+}
+// cópia "tingida" de uma solução (ou da água) com um indicador: mesma química, outra cor
+function tingida(B, cor, tag, nomeInd) {
+  const base = B.base0 != null ? MATS[B.base0] : B;
+  const k = 'ind:' + tag + ':' + base.chave + ':' + cor;
+  if (POR_CHAVE.has(k)) return POR_CHAVE.get(k);
+  const c = hexRgb(cor);
+  return registrar(Object.assign({}, base, { chave: k, nome: `${base.liquidoNome || base.nome} + ${nomeInd}`, base0: base.id, indicador: tag, rgb: undefined, liquidoNome: undefined, reagente: false,
+    comoAgua: base.chave === 'H2O' || !!base.comoAgua, cores: [rgbHex(misturaCor(c, [255, 255, 255], 0.45)), cor, (base.cores || [])[2] || '#e8eef8'] }));
+}
+// cor do indicador em cada pH (fenolftaleína: viragem 8,2–10; repolho roxo: antocianinas)
+function corIndicador(tipo, ph) {
+  if (tipo === 'fenol') return ph < 8.2 ? null : ph < 10 ? '#f06ab0' : '#e0208a';
+  return ph < 3 ? '#e0203c' : ph < 5 ? '#d8408a' : ph < 7.5 ? '#7a3c9c' : ph < 9 ? '#3a5ad0' : ph < 11 ? '#20a08a' : ph < 12.5 ? '#7ac030' : '#e8d020';
+}
 const solChave = k => { const p = k.split(':'); return p[1] === 'Sacarose' ? solucaoAcucar() : solucao(p[1], p[2]); };
 // soluções prontas para a aba "Soluções"
 const SOLUCOES_PRONTAS = [['H', 'Cl'], ['H', 'SO4'], ['H', 'NO3'], ['H', 'F'], ['H', 'PO4'], ['H', 'CH3COO'], ['H', 'CO3'], ['Na', 'OH'], ['K', 'OH'], ['Ca', 'OH'], ['NH4', 'OH'], ['Na', 'Cl'], ['Cu', 'SO4'], ['Ag', 'NO3'], ['K', 'I'], ['Pb', 'NO3'], ['Ba', 'Cl'], ['Fe3', 'Cl'], ['Ni', 'Cl'], ['Co', 'Cl'], ['K', 'Br'], ['Na', 'CO3'], ['Na', 'SO4'], ['Na', 'ClO'], ['NH4', 'Cl'], ['Zn', 'SO4'], ['Mg', 'SO4'], ['Ca', 'Cl']].map(([c, a]) => solucao(c, a));
-SOLUCOES_PRONTAS.push(solucaoAcucar());
+SOLUCOES_PRONTAS.push(solucaoAcucar(), solucao('K', 'MnO4'), lugol(), id('AguaTorneira'));
 // marca íons nos compostos da lista (ex.: NaCl → Na, Cl) e reconhece os óxidos/hidróxidos básicos
 for (const m of MATS) { if (m.tipo === 'composto' && OXIDO_CAT[m.chave] !== undefined) m.oxidoBasico = OXIDO_CAT[m.chave]; if (m.ions && m.ions[1] === 'OH') m.hidroxido = m.ions[0]; }
 
@@ -178,16 +205,16 @@ for (const m of MATS) { if (m.tipo === 'composto' && OXIDO_CAT[m.chave] !== unde
    A vira pa e B vira pb, com probabilidade p por passo e calor dT.
    ========================================================================= */
 const AGUA = id('H2O');
-const ehAgua = m => m.chave === 'H2O';
+const ehAgua = m => m.chave === 'H2O' || !!m.comoAgua;
 const ehSolAq = m => m.tipo === 'solucao' || ehAgua(m);
 const serie = s => SERIE.indexOf(s);
 const acimaH = s => serie(s) >= 0 && serie(s) < serie('H');
-const TCHAMA = { H: 2100, C: 1200, S: 1100, P: 1000, Mg: 3100, Al: 3000, Fe: 1800, Zn: 1700, Ti: 2900, Zr: 3000, Na: 1000, K: 900, Li: 1100, Rb: 900, Cs: 900, Ca: 1800, Sr: 1800, Ba: 1600, Ce: 1700, U: 1600, Pu: 1600, B: 2100, CH4: 1950, Etanol: 1900, CO: 2100, Diamante: 1200, FosforoVermelho: 1000 };
+const TCHAMA = { H: 2100, C: 1200, S: 1100, P: 1000, Mg: 3100, Al: 3000, Fe: 1800, Zn: 1700, Ti: 2900, Zr: 3000, Na: 1000, K: 900, Li: 1100, Rb: 900, Cs: 900, Ca: 1800, Sr: 1800, Ba: 1600, Ce: 1700, U: 1600, Pu: 1600, B: 2100, CH4: 1950, Etanol: 1900, CO: 2100, Diamante: 1200, FosforoVermelho: 1000, Acetona: 1980, Glicerina: 1500 };
 const IGN_BLOCO = { Ti: 1200, Zr: 1100, Ce: 400, U: 600, Pu: 500 };
 const OXIDA_QUENTE = { Cu: ['CuO', 300], Ni: ['NiO', 500], Co: ['CoO', 500], Sn: ['SnO2', 400], Pb: ['PbO', 450], Bi: ['Bi2O3', 400], Sb: ['Sb2O3', 450], As: ['As2O3', 200], Cr: ['Cr2O3', 900], W: ['WO3', 600], Mo: ['MoO3', 600], V: ['V2O5', 650], Ge: ['GeO2', 700], Se: ['SeO2', 300], Hg: ['HgO', 350], Si: ['SiO2', 900], Fe: ['Fe3O4', 600], Mn: ['Mn2O3', 500], Os: ['OsO4', 200] };
 const EQ_COMB = { H: '2 H₂ + O₂ → 2 H₂O', C: 'C + O₂ → CO₂', S: 'S + O₂ → SO₂', P: 'P₄ + 5 O₂ → P₄O₁₀', Mg: '2 Mg + O₂ → 2 MgO', Al: '4 Al + 3 O₂ → 2 Al₂O₃', Fe: '3 Fe + 2 O₂ → Fe₃O₄', Zn: '2 Zn + O₂ → 2 ZnO', Ti: 'Ti + O₂ → TiO₂', Zr: 'Zr + O₂ → ZrO₂',
   Li: '4 Li + O₂ → 2 Li₂O', Na: '2 Na + O₂ → Na₂O₂', K: 'K + O₂ → KO₂', Rb: 'Rb + O₂ → RbO₂', Cs: 'Cs + O₂ → CsO₂', Ca: '2 Ca + O₂ → 2 CaO', Sr: '2 Sr + O₂ → 2 SrO', Ba: '2 Ba + O₂ → 2 BaO', Ce: 'Ce + O₂ → CeO₂', U: '3 U + 4 O₂ → U₃O₈', Pu: 'Pu + O₂ → PuO₂', B: '4 B + 3 O₂ → 2 B₂O₃',
-  CH4: 'CH₄ + 2 O₂ → CO₂ + 2 H₂O', Etanol: 'C₂H₅OH + 3 O₂ → 2 CO₂ + 3 H₂O', CO: '2 CO + O₂ → 2 CO₂', Diamante: 'C (diamante) + O₂ → CO₂', FosforoVermelho: 'P₄ (vermelho) + 5 O₂ → P₄O₁₀' };
+  CH4: 'CH₄ + 2 O₂ → CO₂ + 2 H₂O', Etanol: 'C₂H₅OH + 3 O₂ → 2 CO₂ + 3 H₂O', CO: '2 CO + O₂ → 2 CO₂', Diamante: 'C (diamante) + O₂ → CO₂', FosforoVermelho: 'P₄ (vermelho) + 5 O₂ → P₄O₁₀', Acetona: 'C₃H₆O + 4 O₂ → 3 CO₂ + 3 H₂O', Glicerina: '2 C₃H₈O₃ + 7 O₂ → 6 CO₂ + 8 H₂O' };
 
 let ATMOSFERA = 'ar'; // 'ar' | 'vacuo' | 'N2' | 'O2'
 const temO2 = () => ATMOSFERA === 'ar' || ATMOSFERA === 'O2';
@@ -207,8 +234,11 @@ function criarRegra(A, B) {
   if (A.inerte || B.inerte || A.chave === 'vazio') return null;
   // ---------- 1. com o ar ----------
   if (B.chave === 'vazio') return regraAr(A);
+  if (A.simb === 'H' && B.simb === 'O') return R({ pa: AGUA, pb: id('FOGO'), p: 0.9, tmin: 500, faisca: true, tA: 2500, tB: 2500, explosao: true, fogo: CHAMA.H, nome: 'Explosão de hidrogênio e oxigênio', eq: '2 H₂ + O₂ → 2 H₂O', dH: -286, nota: 'A mistura só precisa de uma faísca ou de chama para explodir (foi o que destruiu o dirigível Hindenburg).' });
   if (B.chave === 'O' ) { const r = regraAr(A, true); if (r) return r; }
   if (A.tipo === 'especial' || B.tipo === 'especial') return null;
+  // ---------- reagentes de laboratório (peróxido, permanganato, indicadores, amido) ----------
+  { const r = regraLab(A, B); if (r !== undefined) return r; }
   // ---------- 2. com água (ou soluções, que também têm água) ----------
   if (ehAgua(B) || (B.tipo === 'solucao' && A.reat && A.reat.agua >= 2)) { const r = regraAgua(A, B); if (r) return r; }
   // ---------- 3. metais com ácidos ----------
@@ -421,6 +451,48 @@ function regraLigas(A, B) {
   for (const [x, y, liga] of ligas) if (A.chave === x && B.chave === y) return R({ pa: id(liga), pb: id(liga), p: 0.1, precisaLiquidoA: true, nome: `Liga: ${MATS[id(liga)].nome}`, eq: `${x} + ${y} → ${MATS[id(liga)].nome.split(' (')[0]}`, nota: `Derretidos juntos, formam uma liga mais dura que os metais puros. ${MATS[id(liga)].tracao ? 'Resistência à tração: ' + MATS[id(liga)].tracao + '.' : ''}` });
   return null;
 }
+function regraLab(A, B) {
+  const O2 = id('O');
+  // peróxido de hidrogênio: catalisadores quebram em água + oxigênio
+  if (A.peroxido) {
+    const forte = A.peroxido >= 30, nomeP = minus(A.nome);
+    const cat = B.chave === 'MnO2' ? ['dióxido de manganês', forte ? 0.35 : 0.15] : (B.chave === 'KI' || (B.cat === 'K' && B.an === 'I')) ? ['iodeto (I⁻)', forte ? 0.3 : 0.12] : B.simb === 'Pt' ? ['platina', 0.2] : B.simb === 'Ag' ? ['prata', 0.08] : B.cat === 'Fe3' ? ['ferro(III)', 0.05] : null;
+    if (cat) return R({ pa: AGUA, pb: B.id, p: cat[1], tA: forte ? 115 : null, dT: forte ? 0 : 6, extra: O2, nome: `Decomposição catalisada: ${nomeP} + ${cat[0]}`, eq: '2 H₂O₂ → 2 H₂O + O₂↑', dH: -98,
+      nota: `O ${cat[0]} é um catalisador: acelera a reação e sai inteiro no final. ${forte ? 'Concentrado, o calor ferve a água e sai uma nuvem de vapor com oxigênio.' : 'Sai espuma de oxigênio; o líquido mal esquenta.'} Uma brasa perto do gás volta a pegar fogo (teste do oxigênio).` });
+    if (B.an === 'ClO' && B.tipo === 'solucao') return R({ pa: AGUA, pb: solucao(B.cat, 'Cl'), p: 0.2, dT: forte ? 30 : 4, extra: O2, nome: 'Água oxigenada + água sanitária', eq: 'H₂O₂ + ClO⁻ → H₂O + Cl⁻ + O₂↑', nota: 'Um oxidante destrói o outro e sai oxigênio. (Não é para fazer em casa: em espaço fechado irrita os olhos e o nariz.)' });
+    if (B.an === 'MnO4' && B.tipo === 'solucao') return R({ pa: AGUA, pb: id('MnO2'), poB: true, p: 0.2, dT: forte ? 30 : 4, extra: O2, nome: 'Água oxigenada + permanganato', eq: '2 MnO₄⁻ + 3 H₂O₂ → 2 MnO₂↓ + 3 O₂↑ + 2 OH⁻ + 2 H₂O', nota: 'O roxo desaparece e se forma um pó marrom (MnO₂), que ainda acelera a decomposição do resto do peróxido. Em meio ácido o roxo some sem deixar pó: é uma titulação clássica.' });
+    if (B.cat === 'Fe' && B.tipo === 'solucao') return R({ pa: AGUA, pb: solucao('Fe3', B.an), p: 0.1, dT: 2, nome: 'Água oxigenada oxidando ferro(II)', eq: '2 Fe²⁺ + H₂O₂ + 2 H⁺ → 2 Fe³⁺ + 2 H₂O', nota: 'O ferro passa de verde-claro (Fe²⁺) para amarelo-alaranjado (Fe³⁺).' });
+    if (B.simb && ['Cu', 'Fe', 'Zn', 'Al'].includes(B.simb)) return R({ pa: A.id, p: 0, nome: `${A.nome} + ${minus(B.nome)}`, eq: '—', nota: 'Quase nada visível: o metal escurece devagar (o peróxido forma uma camada de óxido).' });
+    return undefined;
+  }
+  if (B.peroxido) return undefined; // a vizinha (o peróxido) é quem testa a regra
+  // permanganato de potássio
+  if (A.chave === 'KMnO4') {
+    if (B.chave === 'Glicerina') return R({ pa: id('Mn2O3'), pb: id('FOGO'), p: 0.012, tA: 700, tB: 1500, fogo: '#c890ff', extra: id('CO2'), poA: true, nome: 'Permanganato + glicerina: fogo sozinho', eq: '14 KMnO₄ + 4 C₃H₅(OH)₃ → 7 K₂CO₃ + 7 Mn₂O₃ + 5 CO₂ + 16 H₂O', dH: -1500, nota: 'Depois de alguns segundos a mistura esquenta sozinha e pega fogo, com chama lilás do potássio. É uma demonstração clássica de oxidante forte + combustível.' });
+    if (B.chave === 'H2SO4') return R({ pa: A.id, p: 0, nome: '⚠️ Permanganato + ácido sulfúrico concentrado', eq: '—', nota: 'Forma um óleo instável e explosivo (heptóxido de manganês). Por segurança não é simulado: nunca se mistura os dois.' });
+    if (B.tipo === 'solucao' && B.cat === 'H' && B.an === 'Cl') return R({ pa: solucao('Mn', 'Cl'), pb: id('Cl'), p: 0.03, dT: 4, nome: 'Permanganato + ácido clorídrico: cloro', eq: '2 KMnO₄ + 16 HCl → 2 KCl + 2 MnCl₂ + 5 Cl₂↑ + 8 H₂O', nota: 'Jeito clássico de produzir gás cloro no laboratório (sempre na capela: o cloro é tóxico).' });
+  }
+  // solução de permanganato (roxa) como oxidante
+  if (A.tipo === 'solucao' && A.an === 'MnO4') {
+    if (B.tipo === 'solucao' && B.cat === 'Fe') return R({ pa: solucao('Mn', B.an), pb: solucao('Fe3', B.an), p: 0.25, nome: 'Permanganato + ferro(II): titulação', eq: 'MnO₄⁻ + 5 Fe²⁺ + 8 H⁺ → Mn²⁺ + 5 Fe³⁺ + 4 H₂O', nota: 'O roxo some na hora enquanto ainda houver ferro(II). Quando o roxo fica, acabou o ferro: é assim que se mede quanto ferro tem numa amostra.' });
+    if (B.chave === 'Etanol' || B.chave === 'Glicerina' || B.chave === 'aq:Sacarose') return R({ pa: id('MnO2'), pb: B.id, poA: true, p: 0.004, nome: `Permanganato oxidando ${minus(B.nome)}`, eq: 'MnO₄⁻ + matéria orgânica → MnO₂↓ (marrom) + …', nota: 'Devagar, o roxo vira marrom: o permanganato oxida a matéria orgânica.' });
+  }
+  if (A.chave === 'SO2' && B.tipo === 'solucao' && B.an === 'MnO4') return R({ pa: solucao('Mn', 'SO4'), pb: solucao('Mn', 'SO4'), p: 0.2, nome: 'SO₂ descorando o permanganato', eq: '2 MnO₄⁻ + 5 SO₂ + 2 H₂O → 2 Mn²⁺ + 5 SO₄²⁻ + 4 H⁺', nota: 'Teste para detectar dióxido de enxofre: a solução roxa fica incolor.' });
+  // indicadores ácido-base
+  if (A.indicadorDe && (B.tipo === 'solucao' || ehAgua(B))) {
+    const ph = phDe(B) ?? 7, cor = corIndicador(A.indicadorDe, ph);
+    const nomeInd = A.indicadorDe === 'fenol' ? 'fenolftaleína' : 'repolho roxo';
+    if (!cor) return R({ pa: A.id, p: 0, nome: `Fenolftaleína em ${minus(B.nome)}`, eq: 'incolor (pH < 8,2)', nota: `O pH é ${String(ph).replace('.', ',')}: a fenolftaleína continua incolor. Ela só fica rosa acima de pH 8,2.` });
+    const t = tingida(B, cor, A.indicadorDe, nomeInd);
+    return R({ pa: t, pb: t, p: 0.3, nome: `Indicador: ${nomeInd} em pH ${String(ph).replace('.', ',')}`, eq: A.indicadorDe === 'fenol' ? 'HIn (incolor) ⇌ In²⁻ (rosa) + 2 H⁺' : 'antocianina: cor muda com o pH', nota: A.indicadorDe === 'fenol' ? 'Acima de pH 8,2 a fenolftaleína perde H⁺ e fica rosa. Se um ácido neutralizar a base, a cor some.' : 'Vermelho no ácido forte, rosa no ácido fraco, roxo no neutro, azul e verde na base e amarelo na base forte.' });
+  }
+  if (B.indicadorDe) return undefined;
+  // umas gotas de indicador colorem a solução inteira (o indicador se espalha por difusão)
+  if (A.base0 != null && A.indicador && B.id === A.base0) return R({ pa: A.id, pb: A.id, p: 0.04, nome: 'Indicador se espalhando pela solução', eq: '(difusão)', nota: 'Bastam poucas gotas: as moléculas do indicador se espalham sozinhas por toda a solução.' });
+  // teste do amido
+  if (A.chave === 'Amido' && (B.lugol || B.simb === 'I')) return R({ pa: id('AmidoIodo'), pb: B.lugol ? solucao('K', 'I') : B.id, p: B.lugol ? 0.25 : 0.03, poA: true, nome: 'Teste do amido: azul-escuro', eq: 'amido + I₃⁻ → complexo azul', nota: 'O iodo entra nas espirais da amilose e a cor fica azul-escura, quase preta. Serve para achar amido nos alimentos (ou iodo, ao contrário).' });
+  return undefined;
+}
 function regraEspecial(A, B) {
   if (A.chave === 'NH3' && B.chave === 'HCl') return R({ pa: id('NH4Cl'), pb: 0, p: 0.5, poA: true, nome: 'Amônia + cloreto de hidrogênio: fumaça branca', eq: 'NH₃ + HCl → NH₄Cl', nota: 'Os dois gases se encontram e formam um pó branco no ar.' });
   if (A.chave === 'Sacarose' && B.chave === 'H2SO4') return R({ pa: id('Caramelo'), pb: AGUA, p: 0.05, dT: 90, nome: 'Ácido sulfúrico desidratando o açúcar', eq: 'C₁₂H₂₂O₁₁ → 12 C + 11 H₂O', nota: 'O ácido arranca a água do açúcar: sobra uma "cobra" preta de carbono e vapor quente.' });
@@ -472,6 +544,17 @@ function avaliarAmostra(amostra, peso, via) {
       else if (s.temp <= -150) add(4, `🧊 Líquido criogênico a ${Math.round(s.temp)} °C`, 'Congela os tecidos na hora e, ao virar gás, expande centenas de vezes: há vários casos publicados de PERFURAÇÃO DO ESTÔMAGO por nitrogênio líquido.', ['boca', 'esofago', 'estomago'], 'Relatos de caso (PMC12103062, BMJ Case Rep 2013)');
       else if (s.temp <= -20) add(3, `🧊 ${rotulo} a ${Math.round(s.temp)} °C`, 'Muito gelado: queimadura por frio na boca e na língua.', ['boca'], 'StatPearls (lesões por frio)');
     }
+    // peróxido de hidrogênio: a catalase do corpo solta oxigênio
+    if (m.peroxido && st === 1 && via === 'oral') {
+      const o2 = Math.round(vol * m.peroxido * 3.3), forte = m.peroxido >= 10;
+      const n = m.peroxido >= 30 ? (vol >= 1 ? 4 : 3) : forte ? 3 : vol > 200 ? 3 : vol > 30 ? 2 : 1;
+      add(n, `🫧 ${rotulo}: ${o2} mL de oxigênio no estômago`, forte
+        ? `Concentrado é corrosivo (queima a boca, o esôfago e o estômago) e a catalase dos tecidos solta cerca de ${o2} mL de oxigênio. O gás pode passar para o sangue e formar bolhas que entopem vasos do cérebro e do coração (embolia gasosa) em poucos minutos.`
+        : `A enzima catalase quebra a água oxigenada em água e oxigênio (cerca de ${o2} mL de gás). Em pouca quantidade causa irritação, espuma na boca, barriga estufada e vômito, e raramente é grave; volumes grandes já causaram embolia gasosa.`,
+        forte ? ['boca', 'esofago', 'estomago', 'sangue', 'cerebro', 'coracao'] : ['boca', 'estomago'], 'StatPearls (NBK585102); UKHSA; ATSDR');
+    }
+    if (m.oxidanteForte && st === 0 && via === 'oral') add(3, `⚗️ ${rotulo} sólido`, 'Os cristais são um oxidante forte: queimam a boca e o esôfago e deixam manchas marrons. A laringe pode inchar e dificultar a respiração.', ['boca', 'esofago', 'estomago'], 'Relatos de caso (PMC4413422)');
+    if (m.tipo === 'solucao' && m.an === 'MnO4' && via === 'oral') add(2, `⚗️ ${rotulo}`, 'Nesta concentração (~1,6%) o permanganato já irrita e mancha as mucosas. Os banhos de assento usam uma solução cerca de 100 vezes mais fraca (1:10 000) e nunca é para beber.', ['boca', 'esofago', 'estomago'], 'Relatos de caso (PMC4129898)');
     // pH (corrosivos)
     const ph = phDe(m);
     if (ph !== null && st === 1 && via === 'oral') {
@@ -531,7 +614,7 @@ function avaliarToxicidade(m, g, s, peso, add) {
   if (t.radio) { add(t.g || 4, `☢️ ${rotulo}`, t.efe + (RADIO[m.simb] ? ` Meia-vida: ${RADIO[m.simb][0]}.` : ''), t.org, t.fonte); return; }
   if (t.g !== undefined) add(t.g, (t.g >= 3 ? '☠️ ' : t.g >= 2 ? '⚠️ ' : 'ℹ️ ') + rotulo, t.efe, t.org || [], t.fonte);
 }
-const IONTOX = { Na: 'Na+', K: 'K+', Li: 'Li+', Mg: 'Mg2+', Ca: 'Ca2+', Ba: 'Ba2+', Sr: 'Sr2+', Al: 'Al3+', Fe: 'Fe', Fe3: 'Fe', Cu: 'Cu2+', Zn: 'Zn2+', Ni: 'Ni2+', Co: 'Co2+', Mn: 'Mn2+', Cr: 'Cr3+', Sn: 'Sn2+', Pb: 'Pb2+', Ag: 'Ag+', Hg: 'Hg2+', Cd: 'Cd2+', NH4: 'NH4+', Au: 'Au3+', Pt: 'Pt4+', Tl: 'Tl+', F: 'F-', I: 'I-', Br: 'Br-', NO3: 'NO3-', SO4: 'SO4--', PO4: 'PO4---', CO3: 'CO3--', SO3: 'SO3--', CH3COO: 'CH3COO-', BO3: 'BO3---' };
+const IONTOX = { Na: 'Na+', K: 'K+', Li: 'Li+', Mg: 'Mg2+', Ca: 'Ca2+', Ba: 'Ba2+', Sr: 'Sr2+', Al: 'Al3+', Fe: 'Fe', Fe3: 'Fe', Cu: 'Cu2+', Zn: 'Zn2+', Ni: 'Ni2+', Co: 'Co2+', Mn: 'Mn2+', Cr: 'Cr3+', Sn: 'Sn2+', Pb: 'Pb2+', Ag: 'Ag+', Hg: 'Hg2+', Cd: 'Cd2+', NH4: 'NH4+', Au: 'Au3+', Pt: 'Pt4+', Tl: 'Tl+', F: 'F-', I: 'I-', Br: 'Br-', NO3: 'NO3-', SO4: 'SO4--', PO4: 'PO4---', CO3: 'CO3--', SO3: 'SO3--', CH3COO: 'CH3COO-', BO3: 'BO3---', MnO4: 'MnO4-' };
 function avaliarIons(c, a, mmolSal, Msal, peso, add, rotulo, bio) {
   if (c && c !== 'H' && IONTOX[c]) {
     const C = CATIONS[c], f = formulaSal(c, a || 'OH'), l = a ? mmc(C.carga, ANIONS[a].carga) / C.carga : 1;
@@ -541,7 +624,7 @@ function avaliarIons(c, a, mmolSal, Msal, peso, add, rotulo, bio) {
   }
   if (a && IONTOX[a]) {
     const A = ANIONS[a], l = c ? mmc(CATIONS[c].carga, A.carga) / A.carga : 1;
-    const mA = { F: 19, I: 126.9, Br: 79.9, NO3: 62, SO4: 96.06, PO4: 94.97, CO3: 60.01, SO3: 80.06, CH3COO: 59.04, BO3: 58.8 }[a];
+    const mA = { F: 19, I: 126.9, Br: 79.9, NO3: 62, SO4: 96.06, PO4: 94.97, CO3: 60.01, SO3: 80.06, CH3COO: 59.04, BO3: 58.8, MnO4: 118.94 }[a];
     doseAgente(TOX[IONTOX[a]], a, mmolSal * l * mA * bio, peso, add, rotulo);
   }
 }

@@ -373,14 +373,14 @@ const CAPA_LAB = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.16.0";
+window.ARCADIA_VERSAO = "1.17.0";
 
 window.JOGOS = [
   {
     id: "laboratorio-dos-elementos",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-22",
-    novidades: "Lançamento: sandbox de química com os 118 elementos, mais de 140 compostos, soluções, 18 experimentos prontos e simulação do que acontece no organismo.",
+    novidades: "Reagentes de laboratório: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona. Catalisadores, titulações, indicadores de pH e 5 experimentos novos.",
     nome: "Laboratório dos Elementos",
     genero: "Simulação",
     subgenero: "Sandbox de química (educativo)",
@@ -409,7 +409,8 @@ window.JOGOS = [
       "Mais de 1.200 reações com equação, ΔH e condições",
       "Ferramentas: aquecer, resfriar, definir °C, faísca e corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra",
       "Atmosfera de ar, oxigênio puro, nitrogênio ou vácuo",
-      "18 experimentos prontos (sódio na água, termite, eletrólise, árvore de prata, chuva dourada…)",
+      "Reagentes de laboratório: peróxido de hidrogênio, permanganato, água destilada e da torneira, indicadores (fenolftaleína, repolho roxo), lugol e amido",
+      "23 experimentos prontos (sódio na água, termite, eletrólise, catalisador na água oxigenada, repolho roxo, titulação…)",
       "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes"
     ],
     controles: [
