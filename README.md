@@ -14,6 +14,17 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Sete Noites na Neve** | Sobrevivência | Sobrevivência no frio | 20–30 min |
 | **MADANG! Festival dos Jogos Coreanos** | Party Game | Party Royale (brincadeiras tradicionais coreanas) | Festivais de 6–8 min |
 | **Roleta de Chefões** | Ação | Boss Rush roguelite | Runs de 8–14 min |
+| **Defesa da Feira** | Estratégia | Tower Defense | Mapas de 12–25 min |
+
+### Defesa da Feira
+Domingo de feira e os bichos querem o seu pastel. Um tower defense com 3 mapas (Feira da Rua, Praça da Matriz e Mercadão), estrelas e modo infinito.
+
+- 🥟 **7 barracas com 3 níveis**: Pastelaria, Caldo de Cana (deixa lento), Pipoqueiro (área), Estilingue (anti-voador), Ventilador (empurra de volta), Fogueteiro (explosão) e Caixa (rende moedas)
+- 🐜 **10 tipos de bicho**: formigas, baratas com casco, pombos e moscas voadores, ratos, baratas-mães que se dividem, caramujos que se curam e 3 chefes (Ratão do Esgoto, Pombo-Rei e Rei Barata)
+- 📢 **Habilidades**: Promoção Relâmpago (todos param) e Vassourada
+- 📱 **Celular**: em pé o mapa gira para caber; deitado a loja fica do lado
+
+**Controles:** clique/toque monta e escolhe · `1`–`7` loja · `Espaço` começa a onda · `U`/`S` melhora/vende · `Q`/`W` habilidades · `F` velocidade · `P` pausa
 
 ### Roleta de Chefões
 Uma roleta sorteia 6 chefões entre 28 e, no fim, uma **roleta dourada** sorteia o **superchefão final** (3 fases) entre 6: Rei das Maldições em Forma Ancestral, Boitatá, Noob Supremo, Sol de Meio-Dia de Janeiro, Máquina do Fim versão Ômega e Bisavó do Chinelo de Ouro. Depois de cada luta você escolhe 1 de 3 poderes (18 no total).

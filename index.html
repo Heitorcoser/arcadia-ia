@@ -320,7 +320,7 @@
 /* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
    Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
    estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
-const VERSAO_HTML = "1.10.0";
+const VERSAO_HTML = "1.11.0";
 (function () {
   const carregar = v => {
     const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;

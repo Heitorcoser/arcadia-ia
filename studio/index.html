@@ -23,7 +23,7 @@
 /* Versão e cache: o navegador e o app guardam esta página por um tempo (até ~10 min no GitHub Pages).
    Ao abrir, pergunta ao servidor (sem cache) a versão atual e, se esta página for velha, recarrega
    com ?v=versão para pegar os arquivos novos. Mantenha igual a "versao" em ../versao.json. */
-window.VERSAO_STUDIO = "1.10.0";
+window.VERSAO_STUDIO = "1.11.0";
 (function () {
   fetch("../versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
     const v = String(d.versao || ""); let tentou = "";
@@ -342,11 +342,11 @@ window.VERSAO_STUDIO = "1.10.0";
 <input type="file" id="in-importar" accept=".zip,.json,.arcadia" hidden>
 <input type="file" id="in-pasta" webkitdirectory hidden>
 
-<script src="nucleo.js?v=1.10.0"></script>
-<script src="avatar.js?v=1.10.0"></script>
-<script src="personagem.js?v=1.10.0"></script>
-<script src="studio.js?v=1.10.0"></script>
-<script src="paineis.js?v=1.10.0"></script>
-<script src="../conta.js?v=1.10.0"></script>
+<script src="nucleo.js?v=1.11.0"></script>
+<script src="avatar.js?v=1.11.0"></script>
+<script src="personagem.js?v=1.11.0"></script>
+<script src="studio.js?v=1.11.0"></script>
+<script src="paineis.js?v=1.11.0"></script>
+<script src="../conta.js?v=1.11.0"></script>
 </body>
 </html>

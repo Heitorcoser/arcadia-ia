@@ -268,11 +268,93 @@ const CAPA_ROLETA = `
   <text x="320" y="345" font-size="26" text-anchor="middle" fill="#ffd166" font-family="Arial Black,sans-serif" letter-spacing="3">ROLETA DE CHEFÕES</text>
 </svg>`;
 
+const CAPA_FEIRA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <pattern id="fx" width="40" height="40" patternUnits="userSpaceOnUse"><rect width="40" height="40" fill="#6b6f76"/><rect width="20" height="20" fill="#62666d"/><rect x="20" y="20" width="20" height="20" fill="#62666d"/></pattern>
+  </defs>
+  <rect width="640" height="360" fill="url(#fx)"/>
+  <path d="M-20 90 H200 V250 H420 V120 H660" fill="none" stroke="#8f7a55" stroke-width="62" stroke-linejoin="round"/>
+  <path d="M-20 90 H200 V250 H420 V120 H660" fill="none" stroke="#d9c7a0" stroke-width="52" stroke-linejoin="round"/>
+  <g font-family="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif" text-anchor="middle">
+    <text x="40" y="104" font-size="30">🐜</text><text x="90" y="100" font-size="30">🐜</text><text x="150" y="104" font-size="34">🪳</text>
+    <text x="200" y="170" font-size="36">🐀</text><text x="300" y="262" font-size="30">🐌</text><text x="380" y="150" font-size="32">🐦</text><text x="470" y="70" font-size="26">🪰</text>
+    <text x="540" y="100" font-size="44">🐦</text><text x="540" y="62" font-size="24">👑</text>
+  </g>
+  <g>
+    <rect x="98" y="150" width="64" height="40" rx="8" fill="#5b3a1c"/><rect x="94" y="128" width="72" height="24" rx="9" fill="#f59e0b"/>
+    <rect x="296" y="150" width="64" height="40" rx="8" fill="#5b3a1c"/><rect x="292" y="128" width="72" height="24" rx="9" fill="#ef4444"/>
+    <rect x="478" y="176" width="64" height="40" rx="8" fill="#5b3a1c"/><rect x="474" y="154" width="72" height="24" rx="9" fill="#38bdf8"/>
+    <g fill="rgba(255,255,255,.55)"><rect x="98" y="128" width="9" height="24"/><rect x="116" y="128" width="9" height="24"/><rect x="134" y="128" width="9" height="24"/><rect x="152" y="128" width="9" height="24"/>
+    <rect x="296" y="128" width="9" height="24"/><rect x="314" y="128" width="9" height="24"/><rect x="332" y="128" width="9" height="24"/><rect x="350" y="128" width="9" height="24"/>
+    <rect x="478" y="154" width="9" height="24"/><rect x="496" y="154" width="9" height="24"/><rect x="514" y="154" width="9" height="24"/><rect x="532" y="154" width="9" height="24"/></g>
+    <g font-family="Segoe UI Emoji,Apple Color Emoji,Noto Color Emoji,sans-serif" text-anchor="middle" font-size="30"><text x="130" y="186">🥟</text><text x="328" y="186">🎆</text><text x="510" y="212">🎯</text></g>
+    <circle cx="328" cy="170" r="110" fill="none" stroke="#fff" stroke-opacity=".35" stroke-width="3" stroke-dasharray="8 8"/>
+  </g>
+  <rect x="0" y="282" width="640" height="78" fill="rgba(29,20,12,.82)"/>
+  <rect x="0" y="282" width="640" height="12" fill="#ef4444"/>
+  <g fill="#fff7e8"><rect x="40" y="282" width="40" height="12"/><rect x="120" y="282" width="40" height="12"/><rect x="200" y="282" width="40" height="12"/><rect x="280" y="282" width="40" height="12"/><rect x="360" y="282" width="40" height="12"/><rect x="440" y="282" width="40" height="12"/><rect x="520" y="282" width="40" height="12"/><rect x="600" y="282" width="40" height="12"/></g>
+  <text x="320" y="340" font-size="38" text-anchor="middle" fill="#ffcc4d" stroke="#8a3b0d" stroke-width="2" font-family="Arial Black,sans-serif" letter-spacing="2">DEFESA DA FEIRA</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.10.0";
+window.ARCADIA_VERSAO = "1.11.0";
 
 window.JOGOS = [
+  {
+    id: "defesa-da-feira",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-21",
+    novidades: "Lançamento: 3 mapas, 7 barracas com 3 níveis, 10 tipos de bicho com chefes, habilidades e modo infinito.",
+    nome: "Defesa da Feira",
+    genero: "Estratégia",
+    subgenero: "Tower Defense",
+    corGenero: "#f59e0b",
+    tags: ["Tower defense", "Estratégia", "2D", "Single-player", "Rejogável", "Humor", "Celular", "Brasil"],
+    criadoEm: "2026-11-21",
+    lancadoEm: "2026-11-21T22:15:04-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Mapas de 12–25 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/defesa-da-feira/index.html",
+    capa: CAPA_FEIRA,
+    sinopse:
+      "Domingo de feira e os bichos querem o seu pastel. Monte barracas de pastel, caldo de cana, pipoca, estilingue, ventilador e rojão no caminho das formigas, baratas, pombos, ratos e caramujos, e não deixe nenhum chegar.",
+    descricao: [
+      "Defesa da Feira é um tower defense: os bichos andam por um caminho até a barraca de pastel e você monta barracas da feira em volta para derrubá-los antes que cheguem. Cada bicho que chega leva fregueses; sem fregueses, a feira fecha.",
+      "São 7 barracas, cada uma com 3 níveis: a Pastelaria atira pastéis, o Caldo de Cana deixa os bichos lentos, o Pipoqueiro estoura pipoca em volta, o Estilingue derruba voadores de longe, o Ventilador sopra os bichos de volta, o Fogueteiro solta rojões que explodem em área e o Caixa rende moedas a cada onda. Dá para escolher a mira de cada barraca (primeiro, último, mais forte ou mais perto).",
+      "Os bichos variam: formigas rápidas, baratas com casco, pombos e moscas que voam por cima do caminho, ratos fortes, baratas-mães que soltam filhotes e caramujos que se curam. A cada 5 ondas vem um chefe: o Ratão do Esgoto, o Pombo-Rei (que chama reforços) e, no fim, o Rei Barata.",
+      "São 3 mapas (Feira da Rua, Praça da Matriz e Mercadão), com estrelas pelos fregueses que sobraram e um modo infinito para ver até onde você aguenta. No aperto, use a Promoção Relâmpago (todos os bichos param) ou a Vassourada."
+    ],
+    mecanicas: [
+      "7 barracas com 3 níveis e mira configurável",
+      "10 tipos de bicho: rápidos, com casco, voadores, que se curam e que se dividem",
+      "Chefes a cada 5 ondas, que chamam reforços",
+      "Voadores cortam caminho por cima do mapa: nem toda barraca alcança",
+      "Habilidades: Promoção Relâmpago e Vassourada",
+      "Começar a onda mais cedo dá moedas de bônus",
+      "3 mapas com estrelas e modo infinito com recorde",
+      "Velocidade 1x, 2x e 3x",
+      "Celular: em pé o mapa gira para caber; deitado a loja fica do lado"
+    ],
+    controles: [
+      ["Clique / toque", "Montar e escolher barraca"],
+      ["1 a 7", "Escolher barraca da loja"],
+      ["Espaço", "Começar a onda"],
+      ["U / S", "Melhorar / vender a barraca escolhida"],
+      ["Q / W", "Promoção / Vassourada"],
+      ["F", "Velocidade"],
+      ["P ou Esc", "Pausar"]
+    ],
+    tecnologia: [
+      "Canvas 2D com mapa em grade, caminhos por pontos e tiros que perseguem o alvo",
+      "Ondas geradas por semente: a mesma onda é sempre igual",
+      "No celular em pé o mapa gira 90° e emojis e textos continuam em pé",
+      "Efeitos sonoros gerados com Web Audio API"
+    ]
+  },
   {
     id: "roleta-de-chefoes",
     versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
