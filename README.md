@@ -36,7 +36,7 @@ Noite de festival no madang, o pátio da vila: até 50 jogadores (pessoas e bots
 5. 🟥 **Ddakjichigi** (딱지치기): duelos para virar o ddakji do adversário
 6. 🌀 **Final: Batalha de Piões** (팽이치기): piões no gelo; o último girando vence
 
-**Controles:** `WASD` andar · `Espaço` ação da brincadeira · salas online com código de 4 letras (até 50 pessoas)
+**Controles:** `WASD` andar · `Espaço` ação da brincadeira · salas online com código de 4 letras ou sala pública sem código (até 50 pessoas)
 
 ### Sete Noites na Neve
 Seu avião caiu num vale congelado e o resgate só chega depois de sete noites. Um jogo de sobrevivência no frio em 3D:
@@ -60,7 +60,7 @@ Um tycoon 3D de coleção e roubo para até 8 bases (pessoas e bots). Os emojis 
 
 30 emojis em 6 raridades (Comum → Secreto), mutações de Ouro ×2, Diamante ×4 e Arco-íris ×8, e a Chuva de Sorte, quando os raros aparecem 4× mais. Junte $1 milhão para virar milionário. No modo com bots o progresso fica salvo no navegador.
 
-**Controles:** `WASD` andar · arrastar gira a câmera · `E` comprar/trancar · segurar `E` roubar/vender · `Espaço` ou clique tapa · salas online com código de 4 letras (até 8 bases)
+**Controles:** `WASD` andar · arrastar gira a câmera · `E` comprar/trancar · segurar `E` roubar/vender · `Espaço` ou clique tapa · salas online com código de 4 letras ou sala pública sem código (até 8 bases)
 
 ### Detetive
 Noite no Shopping Estrela, com até 30 pessoas ou bots. Cada um recebe um papel secreto:
@@ -71,7 +71,7 @@ Noite no Shopping Estrela, com até 30 pessoas ou bots. Cada um recebe um papel 
 
 **Os clones:** cada pessoa nasce com o próprio visual ou com o de outra pessoa (nome e rosto sempre juntos), e o mesmo visual pode estar em dois corpos. Na metade da partida, todo mundo troca de disfarce. De fora de uma loja não dá para ver quem está lá dentro: só quem está na loja ou quem olha as câmeras.
 
-**Controles:** `WASD` andar · segurar `Espaço` ação · `Q` habilidade · salas online com código de 4 letras (até 30 pessoas)
+**Controles:** `WASD` andar · segurar `Espaço` ação · `Q` habilidade · salas online com código de 4 letras ou sala pública sem código (até 30 pessoas)
 
 ## Contas
 Quem tem conta pode **publicar jogos do Studio para todo mundo** (aba Jogos de Players → 🌍 Online, com o selo ✓ de conta verificada), **curtir** jogos da comunidade e ter **projetos do Studio e notas salvos na nuvem**, abrindo em qualquer aparelho. Tudo fica no mesmo servidor do Apps Script (abas Conteudos, Curtidas, Nuvem e Blobs da planilha).
@@ -90,7 +90,7 @@ Um game show apresentado por um robô: até 50 competidores (pessoas e bots) pas
 5. 🧊 **Sumô no Gelo**: empurre os outros para fora de uma arena escorregadia que encolhe
 6. 🎨 **Final: Guerra de Tinta**: quem pintar mais chão com a sua cor vence o show
 
-**Controles:** `WASD` andar · `Espaço` ação da prova · salas online com código de 4 letras (até 50 pessoas)
+**Controles:** `WASD` andar · `Espaço` ação da prova · salas online com código de 4 letras ou sala pública sem código (até 50 pessoas)
 
 ### A Casa Que Lembra
 Vinte anos depois, você volta à casa onde sua irmã mais nova desapareceu. Para ir embora, precisa encontrar as cinco memórias dela, mas a casa não quer que você lembre.
@@ -109,7 +109,7 @@ Todo mundo nasce numa arena. A cada rodada, alguém vira o Gênio e escreve um p
 `vire borboleta`, `vire borboleta 10 segundos`, `ataque 5 tubarões`, `chova pizza`, `o chão é lava`, `Zé vire galinha`…
 
 - 27 palavras-marca, mais de 130 coisas, alvos, números, tempos e modificadores
-- Salas online com código de 4 letras (PeerJS/WebRTC) ou partida solo com bots
+- Salas online com código de 4 letras ou 🌍 sala pública sem código (PeerJS/WebRTC), ou partida solo com bots
 - 139 easter eggs escondidos (Undertale, animes, games, memes, filmes e TV brasileira)
 
 **Controles:** `WASD` andar · `Mouse` mirar · `Clique`/`Espaço` atacar · `Enter` escrever o pedido

@@ -270,7 +270,7 @@ const CAPA_ROLETA = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.8.0";
+window.ARCADIA_VERSAO = "1.9.0";
 
 window.JOGOS = [
   {
@@ -331,9 +331,9 @@ window.JOGOS = [
   },
   {
     id: "madang",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-21",
-    novidades: "Lançamento: 6 brincadeiras tradicionais coreanas, salas online até 50 e bots.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "MADANG! Festival dos Jogos Coreanos",
     genero: "Party Game",
     subgenero: "Party Royale (brincadeiras tradicionais coreanas)",
@@ -435,9 +435,9 @@ window.JOGOS = [
   },
   {
     id: "roube-um-emoji",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-21",
-    novidades: "Lançamento: desfile de emojis, bases com cofre e trava de laser, roubos, tapas, bots e salas online.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "Roube um Emoji",
     genero: "Tycoon",
     subgenero: "Coleção e roubo",
@@ -488,9 +488,9 @@ window.JOGOS = [
   },
   {
     id: "detetive",
-    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
+    versao: "1.3.0", // a mesma do arquivo do jogo (const VERSAO)
     atualizadoEm: "2026-11-21",
-    novidades: "Personagem visível no celular com a seta VOCÊ; câmeras, HUD e menu ajustados para tela deitada e tablet.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "Detetive",
     genero: "Dedução Social",
     subgenero: "Ladrões, detetives e clones",
@@ -538,9 +538,9 @@ window.JOGOS = [
   },
   {
     id: "gongo",
-    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
+    versao: "1.3.0", // a mesma do arquivo do jogo (const VERSAO)
     atualizadoEm: "2026-11-21",
-    novidades: "Quiz Corre-Corre legível no celular; banners, menu e Piso da Memória cabem na tela deitada.",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "GONGO! O Show das 6 Provas",
     genero: "Party Game",
     subgenero: "Party Royale (show de eliminação)",
@@ -587,9 +587,9 @@ window.JOGOS = [
   },
   {
     id: "arena-dos-desejos",
-    versao: "1.1.0", // a mesma do arquivo do jogo (const VERSAO)
+    versao: "1.2.0", // a mesma do arquivo do jogo (const VERSAO)
     atualizadoEm: "2026-11-21",
-    novidades: "Tela certa em celulares e tablets (antes ficava maior que a tela).",
+    novidades: "Salas públicas: o botão 🌍 Sala pública coloca você numa partida online sem precisar de código.",
     nome: "Arena dos Desejos",
     genero: "Party Game",
     subgenero: "Sandbox de Palavras",

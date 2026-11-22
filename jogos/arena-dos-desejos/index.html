@@ -157,6 +157,7 @@
       <button class="btn pri" id="b-solo">🤖 Jogar com bots</button>
       <button class="btn sec" id="b-criar">🌐 Criar sala online</button>
     </div>
+    <button class="btn sec" id="b-publica" style="width:100%;margin-top:10px">🌍 Sala pública (sem código)</button>
     <div class="linha">
       <input class="campo" id="codigo" maxlength="4" placeholder="CÓDIGO" autocomplete="off">
       <button class="btn" id="b-entrar">Entrar na sala</button>
@@ -214,6 +215,7 @@
 <div id="toast"></div>
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="../../salas-publicas.js?v=1"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -1362,9 +1364,11 @@ let peer = null, conns = new Map(), conn = null, codigoSala = null;
 function criarSalaOnline() {
   if (!window.Peer) { toast('Não deu para carregar o sistema de salas. Jogando offline com bots.'); return; }
   const tentar = (n = 0) => {
-    codigoSala = Array.from({ length: 4 }, () => pick('ABCDEFGHJKMNPQRSTUVWXYZ')).join('');
-    peer = new Peer(PREFIXO + codigoSala, { debug: 0 });
-    peer.on('open', () => { $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 Sala ' + codigoSala; toast(`Sala ${codigoSala} criada! Seus amigos entram com esse código.`, 6000); });
+    const pub = salaPub; salaPub = null;
+    codigoSala = pub ? pub.nome : Array.from({ length: 4 }, () => pick('ABCDEFGHJKMNPQRSTUVWXYZ')).join('');
+    peer = pub ? pub.peer : new Peer(PREFIXO + codigoSala, { debug: 0 });
+    const aberta = () => { if (pub) { $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌍 ' + codigoSala; toast(`Você abriu a sala pública ${pub.n}. Quem clicar em "Sala pública" entra aqui.`, 6000); return; } $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 Sala ' + codigoSala; toast(`Sala ${codigoSala} criada! Seus amigos entram com esse código.`, 6000); };
+    if (pub) aberta(); else peer.on('open', aberta);
     peer.on('connection', c => {
       c.on('data', d => dadosDoCliente(c, d));
       c.on('close', () => saiuCliente(c));
@@ -1404,24 +1408,24 @@ function saiuCliente(c) {
   if (p) evento({ k: 'msg', txt: `🚪 ${p.nome} saiu` });
   removerJogador(info.pid); ajustarBots();
 }
-function entrarSala(cod) {
-  cod = cod.toUpperCase().replace(/[^A-Z]/g, '');
-  if (cod.length !== 4) { erroMenu('O código tem 4 letras.'); return; }
+function entrarSala(cod, falhou) {
+  if (falhou) { const f = falhou; let foi = false; falhou = () => { if (!foi) { foi = true; try { peer.destroy(); } catch (e) {} f(); } }; } // sala pública: tenta a próxima
+  else { cod = cod.toUpperCase().replace(/[^A-Z]/g, ''); if (cod.length !== 4) { erroMenu('O código tem 4 letras.'); return; } }
   if (!window.Peer) { erroMenu('Não deu para carregar o sistema de salas (sem internet?).'); return; }
   erroMenu('Conectando…', true);
-  const limite = setTimeout(() => { erroMenu('Não consegui encontrar a sala. Confira o código.'); try { peer.destroy(); } catch (e) {} }, 15000);
+  const limite = setTimeout(() => { if (falhou) return falhou(); erroMenu('Não consegui encontrar a sala. Confira o código.'); try { peer.destroy(); } catch (e) {} }, falhou ? 8000 : 15000);
   peer = new Peer({ debug: 0 });
   peer.on('open', () => {
     conn = peer.connect(PREFIXO + cod, { reliable: true });
     conn.on('open', () => conn.send({ t: 'oi', nome: meuNome(), rosto: meuRosto }));
     conn.on('data', d => {
-      if (d.t === 'ola') { clearTimeout(limite); meuId = d.id; codigoSala = d.sala; modo = 'cliente'; entrarNoJogo(); $('#sala').style.display = 'inline-block'; $('#sala').textContent = '🌐 Sala ' + codigoSala; }
+      if (d.t === 'ola') { clearTimeout(limite); meuId = d.id; codigoSala = d.sala; modo = 'cliente'; entrarNoJogo(); $('#sala').style.display = 'inline-block'; $('#sala').textContent = (falhou ? '🌍 ' : '🌐 Sala ') + codigoSala; }
       else if (d.t === 's') { S = d; for (const e of d.ev || []) tratarEvento(e); }
-      else if (d.t === 'cheio') { clearTimeout(limite); erroMenu('Essa sala está cheia.'); }
+      else if (d.t === 'cheio') { clearTimeout(limite); if (falhou) return falhou(); erroMenu('Essa sala está cheia.'); }
     });
     conn.on('close', () => { if (modo === 'cliente') { toast('O anfitrião fechou a sala.', 5000); setTimeout(() => location.reload(), 2500); } });
   });
-  peer.on('error', e => { clearTimeout(limite); erroMenu(e.type === 'peer-unavailable' ? 'Sala não encontrada. Confira o código.' : 'Não foi possível conectar (' + e.type + ').'); });
+  peer.on('error', e => { clearTimeout(limite); if (falhou && modo !== 'cliente') return falhou(); erroMenu(e.type === 'peer-unavailable' ? 'Sala não encontrada. Confira o código.' : 'Não foi possível conectar (' + e.type + ').'); });
 }
 function enviarAoHost(msg) { if (conn && conn.open) conn.send(msg); }
 
@@ -1794,6 +1798,21 @@ $('#b-solo').addEventListener('click', () => iniciarComoHost(false));
 $('#b-criar').addEventListener('click', () => iniciarComoHost(true));
 $('#b-entrar').addEventListener('click', () => { iniciarAudio(); salvarPerfil(); entrarSala($('#codigo').value); });
 $('#codigo').addEventListener('keydown', e => { if (e.key === 'Enter') $('#b-entrar').click(); });
+// sala pública: abre a primeira sala livre ou entra numa que já existe (ver ../../salas-publicas.js)
+let salaPub = null;
+function salaPublica() {
+  iniciarAudio(); salvarPerfil();
+  if (!window.Peer || !window.ArcadiaPublica) { erroMenu('Não deu para carregar o sistema de salas (sem internet?).'); return; }
+  $('#b-publica').disabled = true;
+  ArcadiaPublica.procurar({
+    Peer, prefixo: PREFIXO,
+    aoStatus: t => erroMenu(t, true),
+    aoHospedar: (p, nome, n) => { salaPub = { peer: p, nome, n }; erroMenu(''); iniciarComoHost(true); },
+    aoEntrar: (cod, falhou) => entrarSala(cod, falhou),
+    aoErro: t => { $('#b-publica').disabled = false; erroMenu(t); },
+  });
+}
+$('#b-publica').addEventListener('click', salaPublica);
 $('#btn-sair').addEventListener('click', () => { if (window.parent !== window) avisar('sair'); else location.reload(); });
 
 // Dicionário
@@ -1864,7 +1883,7 @@ function loop(agora) {
 requestAnimationFrame(loop);
 
 </script>
-<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.1.0</div>
-<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.1.0";</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.2.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.2.0";</script>
 </body>
 </html>
