@@ -321,7 +321,7 @@
 /* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
    Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
    estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
-const VERSAO_HTML = "1.15.0";
+const VERSAO_HTML = "1.16.0";
 (function () {
   const carregar = v => {
     const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;
@@ -522,7 +522,7 @@ window.ARCADIA_INICIAR = () => {
                 <span>Versão</span><b>${esc(j.versao || "1.0.0")}${j.atualizadoEm && j.atualizadoEm !== j.criadoEm ? ` · atualizado em ${dataBR(j.atualizadoEm)}` : ""}</b>
                 ${j.novidades ? `<span>Novidades</span><b>${esc(j.novidades)}</b>` : ""}
                 <span>Duração</span><b>${esc(j.duracao)}</b>
-                <span>Finais</span><b>${j.finais || 1}</b>
+                <span>Finais</span><b>${j.finais === 0 ? "Sem final (sandbox)" : j.finais || 1}</b>
                 <span>Classificação</span><b>${esc(j.classificacao)}</b>
                 <span>Partidas</span><b>${s.jogadas}</b>
                 <span>Tempo jogado</span><b>${s.tempo ? tempoFmt(s.tempo) : "—"}</b>

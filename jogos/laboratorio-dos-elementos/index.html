@@ -1,0 +1,553 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Laboratório dos Elementos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0f16;--painel:#121925;--painel2:#18212f;--linha:#26324a;--txt:#e8eef8;--fraco:#93a3bd;--ac:#5eead4;--ac2:#60a5fa;--perigo:#f87171;--aviso:#fbbf24}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--txt);font-family:Inter,system-ui,sans-serif;font-size:14px;-webkit-tap-highlight-color:transparent}
+  button,input,select{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .titulo{font-family:"Space Grotesk",Inter,sans-serif}
+  #app{display:grid;grid-template-rows:auto minmax(0,1fr);grid-template-columns:minmax(0,1fr);height:100%}
+  header{display:flex;align-items:center;gap:6px;padding:6px 10px;background:#0f1520;border-bottom:1px solid var(--linha);flex-wrap:wrap;min-height:50px}
+  header h1{margin:0 8px 0 0;font-size:17px;white-space:nowrap}
+  header h1 span{color:var(--ac)}
+  .b{height:34px;border-radius:9px;border:1px solid var(--linha);background:var(--painel2);padding:0 10px;font-weight:600;font-size:13px;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+  .b:hover{border-color:#3b4b6b}
+  .b.on{border-color:var(--ac);color:var(--ac)}
+  .b.pri{background:linear-gradient(180deg,#14b8a6,#0d9488);border-color:#0f766e;color:#fff}
+  .b.perigo{border-color:#7f1d1d;color:#fca5a5}
+  select.b{padding:0 6px}
+  .grupo{display:flex;align-items:center;gap:6px;background:var(--painel);border:1px solid var(--linha);border-radius:10px;padding:2px 8px;height:34px}
+  .grupo label{font-size:12px;color:var(--fraco);white-space:nowrap}
+  .grupo input[type=range]{width:110px}
+  .esp{flex:1}
+  #corpo{display:grid;grid-template-columns:340px minmax(0,1fr);min-height:0;min-width:0}
+  /* lateral */
+  #lateral{min-width:0;background:var(--painel);border-right:1px solid var(--linha);display:flex;flex-direction:column;min-height:0}
+  #busca{margin:8px 8px 4px;height:34px;border-radius:9px;border:1px solid var(--linha);background:#0d131d;padding:0 10px}
+  #abas{display:flex;gap:3px;padding:0 8px 6px;flex-wrap:wrap}
+  #abas button{border:1px solid var(--linha);background:var(--painel2);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:600}
+  #abas button.on{background:#134e4a;border-color:var(--ac);color:#ccfbf1}
+  #paleta{flex:1;overflow:auto;padding:4px 8px 8px;min-height:0}
+  .sec{font-size:11px;font-weight:800;color:var(--fraco);text-transform:uppercase;letter-spacing:1px;margin:8px 2px 4px}
+  .lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:5px}
+  .mt{border:1px solid var(--linha);background:#0f1520;border-radius:9px;padding:4px 6px;text-align:left;display:flex;gap:6px;align-items:center;min-height:40px}
+  .mt:hover{border-color:#3b4b6b}
+  .mt.sel{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset}
+  .mt .sw{width:18px;height:18px;border-radius:5px;flex:0 0 auto;border:1px solid rgba(255,255,255,.2)}
+  .mt b{display:block;font-size:12px;line-height:1.1}
+  .mt small{display:block;font-size:10.5px;color:var(--fraco);line-height:1.15;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:62px}
+  .tabela{display:grid;grid-template-columns:repeat(18,1fr);gap:2px;font-size:9px}
+  .el{aspect-ratio:1;border-radius:3px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#0b0f16;font-weight:800;cursor:pointer;line-height:1;border:1px solid transparent;padding:0}
+  .el small{font-size:6.5px;font-weight:700;opacity:.75}
+  .el.sel{border-color:#fff;outline:2px solid var(--ac)}
+  .el.nao{opacity:.45}
+  .legenda{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px;font-size:10px}
+  .legenda span{display:inline-flex;align-items:center;gap:3px}
+  .legenda i{width:9px;height:9px;border-radius:2px;display:inline-block}
+  #pincel{border-top:1px solid var(--linha);padding:6px 8px;display:grid;grid-template-columns:1fr 1fr;gap:5px 8px;font-size:12px}
+  #pincel label{color:var(--fraco);font-size:11.5px;display:flex;flex-direction:column;gap:2px}
+  #pincel select,#pincel input[type=number]{height:28px;border-radius:7px;border:1px solid var(--linha);background:#0d131d;padding:0 6px}
+  #ficha-mini{border-top:1px solid var(--linha);padding:8px 10px;font-size:12.5px;max-height:32vh;overflow:auto}
+  #ficha-mini h3{margin:0 0 2px;font-size:15px}
+  #ficha-mini .tag{display:inline-block;border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;margin:2px 3px 2px 0}
+  #ficha-mini table{width:100%;border-collapse:collapse;margin-top:4px}
+  #ficha-mini td{padding:2px 0;border-bottom:1px solid #1c2638;vertical-align:top}
+  #ficha-mini td:first-child{color:var(--fraco);width:46%}
+  /* palco */
+  #palco{position:relative;min-height:0;min-width:0;display:flex;flex-direction:column}
+  #ferr{display:flex;gap:4px;padding:6px 8px;overflow-x:auto;border-bottom:1px solid var(--linha);background:#0f1520;flex:0 0 auto}
+  #ferr button{flex:0 0 auto;height:36px;border-radius:9px;border:1px solid var(--linha);background:var(--painel2);padding:0 9px;font-size:12.5px;font-weight:600;display:flex;align-items:center;gap:4px}
+  #ferr button.on{border-color:var(--ac);background:#134e4a;color:#ccfbf1}
+  #area{flex:1;position:relative;min-height:0;display:flex;align-items:center;justify-content:center;background:#080b10}
+  #cv{display:block;image-rendering:pixelated;touch-action:none;cursor:crosshair;border:1px solid #1e2a3e;border-radius:6px}
+  #status{position:absolute;left:8px;bottom:8px;right:8px;display:flex;gap:6px;flex-wrap:wrap;pointer-events:none}
+  #status span{background:rgba(8,12,18,.86);border:1px solid var(--linha);border-radius:8px;padding:3px 8px;font-size:12px}
+  #toasts{position:absolute;right:10px;top:10px;display:flex;flex-direction:column;gap:6px;max-width:min(380px,70%);z-index:5}
+  .toast{background:rgba(13,20,32,.95);border:1px solid #2b3d5c;border-left:4px solid var(--ac);border-radius:10px;padding:7px 10px;font-size:12.5px;cursor:pointer;animation:entra .25s}
+  .toast b{display:block}
+  .toast code{color:#a5f3fc;font-size:12px}
+  @keyframes entra{from{transform:translateX(30px);opacity:0}}
+  #btn-amostra{position:absolute;left:10px;top:10px;z-index:5;display:none}
+  /* janelas */
+  .modal{position:fixed;inset:0;background:rgba(3,6,10,.72);z-index:40;display:none;align-items:flex-start;justify-content:center;padding:18px;overflow:auto}
+  .modal.on{display:flex}
+  .jan{width:min(860px,100%);background:var(--painel);border:1px solid var(--linha);border-radius:16px;padding:16px 18px;margin:auto;position:relative}
+  .jan h2{margin:0 0 8px;font-size:20px}
+  .jan .x{position:absolute;right:10px;top:10px}
+  .jan table{width:100%;border-collapse:collapse}
+  .jan td,.jan th{padding:5px 6px;border-bottom:1px solid #1f2a3d;text-align:left;vertical-align:top;font-size:13px}
+  .jan th{color:var(--fraco);font-weight:600}
+  .grade2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .cartao{background:var(--painel2);border:1px solid var(--linha);border-radius:12px;padding:10px 12px}
+  .cartao h4{margin:0 0 6px;font-size:13px;color:var(--fraco);text-transform:uppercase;letter-spacing:.5px}
+  .bloco-el{width:110px;height:120px;border-radius:12px;display:flex;flex-direction:column;justify-content:space-between;padding:8px;color:#0b0f16;font-weight:800;flex:0 0 auto}
+  .bloco-el .s{font-size:44px;line-height:1;font-family:"Space Grotesk"}
+  .reacao{border-left:3px solid var(--ac);padding:4px 8px;margin:6px 0;background:#0f1520;border-radius:6px}
+  .reacao code{color:#a5f3fc}
+  .nivel{display:inline-block;border-radius:999px;padding:3px 12px;font-weight:800;color:#0b0f16}
+  .item-org{border:1px solid var(--linha);border-radius:10px;padding:8px 10px;margin:6px 0;background:#0f1520}
+  .item-org .fonte{font-size:11px;color:var(--fraco);margin-top:3px}
+  .aviso{background:#2a1a08;border:1px solid #7c4a0a;color:#fde68a;border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.5}
+  .exps{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px}
+  .exp{text-align:left;background:var(--painel2);border:1px solid var(--linha);border-radius:12px;padding:10px}
+  .exp:hover{border-color:var(--ac)}
+  .exp b{display:block;margin-bottom:3px}
+  .exp small{color:var(--fraco);line-height:1.35}
+  .comb{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:end}
+  .comb input{width:100%;height:38px;border-radius:9px;border:1px solid var(--linha);background:#0d131d;padding:0 10px}
+  .muted{color:var(--fraco)}
+  a{color:#7dd3fc}
+  @media (max-width:900px), (orientation:portrait){
+    #corpo{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,42vh)}
+    header{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;min-height:46px}
+    header .esp{display:none}
+    #ferr button span{display:none}
+    #ferr button{padding:0 10px;font-size:16px}
+    #lateral{order:2;border-right:0;border-top:1px solid var(--linha);min-height:0}
+    #pincel{grid-template-columns:1fr 1fr 1fr}
+    #palco{order:1}
+    header h1{font-size:15px}
+    .grupo input[type=range]{width:80px}
+    #lateral{overflow:auto}
+    #paleta{flex:none;overflow:visible}
+    #ficha-mini{max-height:none;overflow:visible}
+    .grade2{grid-template-columns:1fr}
+    .comb{grid-template-columns:1fr}
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 class="titulo">⚗️ Laboratório dos <span>Elementos</span></h1>
+    <button class="b" id="b-play" title="Pausar / continuar (espaço)">⏸ Pausar</button>
+    <select class="b" id="b-vel" title="Velocidade"><option value="1">1x</option><option value="2">2x</option><option value="4">4x</option><option value="0.5">0,5x</option></select>
+    <div class="grupo" title="Temperatura do ambiente (o ar volta para ela)"><label>🌡️ Ambiente</label><input type="range" id="amb" min="-200" max="300" value="25"><b id="amb-v">25 °C</b></div>
+    <select class="b" id="atm" title="O que tem no ar"><option value="ar">Ar (21% O₂)</option><option value="O2">Oxigênio puro</option><option value="N2">Nitrogênio puro</option><option value="vacuo">Vácuo</option></select>
+    <button class="b on" id="b-vent" title="Gases escapam pelo topo">🌬️ Ventilação</button>
+    <span class="esp"></span>
+    <button class="b pri" id="b-exp">🧪 Experimentos</button>
+    <button class="b" id="b-comb">🔀 Combinar</button>
+    <button class="b" id="b-reac">📜 Reações <b id="n-reac">0</b></button>
+    <button class="b" id="b-fontes">📚 Fontes</button>
+    <button class="b perigo" id="b-limpar">🧹 Limpar</button>
+    <button class="b" id="b-sair" title="Sair">✕</button>
+  </header>
+  <div id="corpo">
+    <aside id="lateral">
+      <input id="busca" placeholder="🔎 Buscar elemento, composto ou fórmula…" autocomplete="off">
+      <div id="abas"></div>
+      <div id="paleta"></div>
+      <div id="pincel">
+        <label>Tamanho do pincel<input type="range" id="tam" min="1" max="16" value="4"></label>
+        <label>Forma dos sólidos<select id="forma"><option value="auto">Automática</option><option value="bloco">Bloco</option><option value="po">Pó / grãos</option></select></label>
+        <label>Temperatura ao colocar<select id="temp-col"><option value="amb">Ambiente</option><option value="custom">Escolher…</option></select></label>
+        <label id="lb-temp" style="display:none">°C<input type="number" id="temp-v" value="25" step="10"></label>
+        <label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="subst"> Substituir o que já tem</label>
+      </div>
+      <div id="ficha-mini"></div>
+    </aside>
+    <section id="palco">
+      <div id="ferr"></div>
+      <div id="area">
+        <canvas id="cv"></canvas>
+        <button class="b pri" id="btn-amostra">🥤 Amostra</button>
+        <div id="toasts"></div>
+        <div id="status"></div>
+      </div>
+    </section>
+  </div>
+</div>
+<div class="modal" id="modal"><div class="jan" id="jan"></div></div>
+
+<script src="pubchem.js?v=1"></script>
+<script src="dados.js?v=1"></script>
+<script src="quimica.js?v=3"></script>
+<script src="motor.js?v=7"></script>
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const n1 = (v, d = 1) => v === null || v === undefined || Number.isNaN(v) ? '—' : (Math.round(v * 10 ** d) / 10 ** d).toLocaleString('pt-BR');
+const TOQUE = matchMedia('(pointer: coarse)').matches;
+const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: 'laboratorio-dos-elementos', evento, ...extra }, '*'); } catch (e) {} };
+
+/* ---------- estado da interface ---------- */
+const UI = { aba: 'tabela', sel: id('H2O'), ferr: 'desenhar', busca: '', amostra: { mapa: new Map(), total: 0 }, hover: null, pressionado: false, ultimoXY: null };
+const FERRAMENTAS = [
+  ['desenhar', '✏️', 'Colocar'], ['apagar', '🧽', 'Apagar'], ['aquecer', '🔥', 'Aquecer'], ['resfriar', '❄️', 'Resfriar'], ['temp', '🌡️', 'Definir °C'], ['faisca', '⚡', 'Faísca / corrente'],
+  ['ima', '🧲', 'Ímã'], ['martelo', '🔨', 'Martelo'], ['ph', '🧫', 'Fita de pH'], ['inspecionar', '🔍', 'Inspecionar'], ['geiger', '☢️', 'Geiger'], ['coletar', '🥤', 'Coletar amostra'],
+];
+const ABAS = [['tabela', 'Tabela'], ['gas', 'Gases'], ['liquido', 'Líquidos'], ['solido', 'Sólidos'], ['compostos', 'Compostos'], ['solucoes', 'Soluções'], ['lab', 'Laboratório']];
+$('#ferr').innerHTML = FERRAMENTAS.map(([k, ic, n]) => `<button data-f="${k}" class="${k === UI.ferr ? 'on' : ''}" title="${n}">${ic} <span>${n}</span></button>`).join('');
+$('#ferr').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; escolherFerr(b.dataset.f); });
+function escolherFerr(f) { UI.ferr = f; [...$('#ferr').children].forEach(x => x.classList.toggle('on', x.dataset.f === f)); dicaFerr(); }
+function dicaFerr() {
+  const d = { desenhar: 'Arraste na caixa para colocar o material escolhido.', apagar: 'Arraste para apagar.', aquecer: 'Segure em cima de algo para esquentar (até 6000 °C).', resfriar: 'Segure para esfriar (até −273 °C).', temp: 'Define a temperatura exata do que estiver no pincel (escolha o valor em "Temperatura ao colocar").',
+    faisca: 'Liga corrente em metais, grafite e soluções (eletrólise!) ou solta uma faísca para acender misturas.', ima: 'Atrai ferro, cobalto, níquel e magnetita em pó (só abaixo da temperatura de Curie).', martelo: 'Bate: materiais quebradiços viram pó; metais dúcteis só amassam.',
+    ph: 'Toque numa solução para medir o pH.', inspecionar: 'Toque para ver tudo sobre aquela célula.', geiger: 'Conta a radioatividade perto do ponteiro.', coletar: 'Arraste para recolher uma amostra no copo. Depois aperte "🥤 Amostra" para analisar ou simular no organismo.' }[UI.ferr];
+  statusExtra = d;
+}
+
+/* ---------- abas e paleta ---------- */
+$('#abas').innerHTML = ABAS.map(([k, n]) => `<button data-a="${k}" class="${k === UI.aba ? 'on' : ''}">${n}</button>`).join('');
+$('#abas').addEventListener('click', e => { const b = e.target.closest('[data-a]'); if (!b) return; UI.aba = b.dataset.a; UI.busca = ''; $('#busca').value = ''; [...$('#abas').children].forEach(x => x.classList.toggle('on', x === b)); renderPaleta(); });
+$('#busca').addEventListener('input', e => { UI.busca = e.target.value.trim().toLowerCase(); renderPaleta(); });
+const cssRgb = c => `rgb(${c[0]},${c[1]},${c[2]})`;
+function botaoMat(m) { const s = estadoDe(m, L.AMB); return `<button class="mt ${m.id === UI.sel ? 'sel' : ''}" data-m="${m.id}" title="${esc(m.nome)}"><span class="sw" style="background:${cssRgb(m.rgb[s])}"></span><span><b>${esc(m.simb || fmt(m.formula).slice(0, 14))}</b><small>${esc(nomeNoEstado(m, s))}</small></span></button>`; }
+const COLOCAVEIS = () => MATS.filter(m => m.id > 2 && (m.tipo === 'elemento' || m.tipo === 'composto') && m.chave !== 'Parede');
+function categoria(m) {
+  const k = m.chave;
+  if (m.liga) return 'Ligas metálicas';
+  if (m.vidro || m.inerte) return 'Recipientes';
+  if (/O\d*$|O2$/.test(m.formula) && !m.ions && m.formula !== 'H2O' && !/CO|SO|NO/.test(m.formula) || m.oxidoBasico) return 'Óxidos';
+  if (m.ions && m.ions[1] === 'OH') return 'Hidróxidos (bases)';
+  if (m.ions || m.estimado) return 'Sais';
+  if (['H2SO4', 'HNO3', 'H3PO4', 'AguaRegia'].includes(k)) return 'Ácidos concentrados';
+  if (estadoDe(m, 25) === 2) return 'Gases';
+  return 'Outros';
+}
+function renderPaleta() {
+  const P = $('#paleta'); let h = '';
+  const casa = m => !UI.busca || (m.nome + ' ' + (m.simb || '') + ' ' + m.formula + ' ' + (m.chave || '')).toLowerCase().includes(UI.busca);
+  if (UI.busca) {
+    const l = MATS.filter(m => m.id > 2 && m.tipo !== 'especial' && casa(m)).slice(0, 80);
+    h = `<div class="sec">Resultados (${l.length})</div><div class="lista">${l.map(botaoMat).join('') || '<span class="muted">Nada encontrado.</span>'}</div>`;
+  } else if (UI.aba === 'tabela') h = tabelaPeriodica();
+  else if (['gas', 'liquido', 'solido'].includes(UI.aba)) {
+    const alvo = { gas: 2, liquido: 1, solido: 0 }[UI.aba];
+    const els = COLOCAVEIS().filter(m => m.tipo === 'elemento' && estadoDe(m, L.AMB) === alvo).sort((a, b) => a.z - b.z);
+    const comps = COLOCAVEIS().filter(m => m.tipo === 'composto' && !m.inerte && estadoDe(m, L.AMB) === alvo);
+    h = `<div class="sec">Elementos ${['sólidos', 'líquidos', 'gasosos'][alvo]} a ${L.AMB} °C (${els.length})</div><div class="lista">${els.map(botaoMat).join('') || '<span class="muted">Nenhum nesta temperatura.</span>'}</div>`;
+    h += `<div class="sec">Compostos (${comps.length})</div><div class="lista">${comps.map(botaoMat).join('') || '<span class="muted">Nenhum.</span>'}</div>`;
+    h += `<p class="muted" style="font-size:11.5px">Mude a temperatura ambiente lá em cima e veja os elementos trocarem de aba.</p>`;
+  } else if (UI.aba === 'compostos') {
+    const grupos = {}; for (const m of COLOCAVEIS().filter(m => m.tipo === 'composto' && !m.inerte && !m.vidro)) (grupos[categoria(m)] = grupos[categoria(m)] || []).push(m);
+    for (const g of ['Óxidos', 'Sais', 'Hidróxidos (bases)', 'Ácidos concentrados', 'Gases', 'Ligas metálicas', 'Outros']) if (grupos[g]) h += `<div class="sec">${g} (${grupos[g].length})</div><div class="lista">${grupos[g].map(botaoMat).join('')}</div>`;
+  } else if (UI.aba === 'solucoes') {
+    const sol = [mat('H2O'), ...SOLUCOES_PRONTAS.map(i => MATS[i])];
+    const ac = sol.filter(m => m.acido), ba = sol.filter(m => m.base), sa = sol.filter(m => !m.acido && !m.base);
+    h = `<div class="sec">Ácidos (~0,1 mol/L)</div><div class="lista">${ac.map(botaoMat).join('')}</div><div class="sec">Bases</div><div class="lista">${ba.map(botaoMat).join('')}</div><div class="sec">Água e sais dissolvidos</div><div class="lista">${sa.map(botaoMat).join('')}</div>`;
+    h += `<p class="muted" style="font-size:11.5px">Novas soluções aparecem sozinhas quando você dissolve sais ou faz reações.</p>`;
+  } else if (UI.aba === 'lab') {
+    const l = MATS.filter(m => m.vidro || m.inerte || m.tipo === 'especial2');
+    h = `<div class="sec">Vidraria e equipamentos</div><div class="lista">${l.map(botaoMat).join('')}</div><p class="muted" style="font-size:12px;line-height:1.5">O <b>vidro borossilicato</b> aguenta quase todos os ácidos, menos o fluorídrico. O <b>cadinho</b> aguenta mais de 2000 °C. A <b>placa aquecedora</b> fica sempre a 1200 °C, a <b>refrigerada</b> a −120 °C, e a <b>fonte de energia</b> manda corrente para o que encostar nela.</p>`;
+  }
+  P.innerHTML = h;
+}
+$('#paleta').addEventListener('click', e => { const b = e.target.closest('[data-m],[data-z]'); if (!b) return; if (b.dataset.z) { const el = ELEM[b.dataset.z]; if (el.colocavel) selecionar(id(el.s)); else fichaElemento(el.s); return; } selecionar(+b.dataset.m); });
+function selecionar(mid) { UI.sel = mid; renderPaleta(); renderFichaMini(); if (!['desenhar'].includes(UI.ferr) && UI.ferr !== 'coletar') escolherFerr('desenhar'); }
+function posTabela(z) {
+  if (z === 1) return [1, 1]; if (z === 2) return [1, 18]; if (z <= 4) return [2, z - 2]; if (z <= 10) return [2, z + 8]; if (z <= 12) return [3, z - 10]; if (z <= 18) return [3, z];
+  if (z <= 36) return [4, z - 18]; if (z <= 54) return [5, z - 36]; if (z <= 56) return [6, z - 54]; if (z <= 71) return [9, z - 54]; if (z <= 86) return [6, z - 68]; if (z <= 88) return [7, z - 86]; if (z <= 103) return [10, z - 86]; return [7, z - 100];
+}
+function tabelaPeriodica() {
+  let h = '<div class="tabela">';
+  for (const s in ELEM) { const e = ELEM[s], [r, c] = posTabela(e.z), cor = COR_GRUPO[e.grupo] || '#ccc', ms = e.colocavel ? id(s) : -1; h += `<button class="el ${ms === UI.sel ? 'sel' : ''} ${e.colocavel ? '' : 'nao'}" data-z="${s}" style="grid-row:${r};grid-column:${c};background:${cor}" title="${e.z} · ${esc(e.nome)}${e.colocavel ? '' : ' (não existe em quantidade visível: só a ficha)'}"><small>${e.z}</small>${s}</button>`; }
+  h += '<div style="grid-row:8;grid-column:1/19;height:6px"></div></div>';
+  h += '<div class="legenda">' + Object.entries(COR_GRUPO).map(([g, c]) => `<span><i style="background:${c}"></i>${g}</span>`).join('') + '</div>';
+  h += '<p class="muted" style="font-size:11.5px;margin:6px 0 0">Toque num elemento para escolher e ver os dados. Os apagados só existem em poucos átomos (sem amostra visível): dá para ver a ficha.</p>';
+  return h;
+}
+function tagEstado(m) { const s = estadoDe(m, L.AMB); return `<span class="tag" style="background:${['#334155', '#1e3a8a', '#4c1d95'][s] || '#334155'}">${NOME_ESTADO[s]} a ${L.AMB} °C</span>`; }
+function linhaDados(m) {
+  const e = m.simb ? ELEM[m.simb] : null, ph = phDe(m);
+  const rows = [];
+  if (e) rows.push(['Número atômico', e.z], ['Massa atômica', n1(e.massa, 3) + ' u'], ['Grupo', e.grupo]);
+  else rows.push(['Fórmula', fmt(m.formula)]);
+  if (m.M && !e) rows.push(['Massa molar', n1(m.M, 2) + ' g/mol']);
+  rows.push(['Fusão', m.sublima ? 'sublima a ' + n1(m.pe, 1) + ' °C' : m.pf == null ? (m.decomp ? 'decompõe a ~' + m.decomp[0] + ' °C' : '—') : n1(m.pf, 1) + ' °C'], ['Ebulição', m.sublima ? '—' : m.pe == null ? '—' : n1(m.pe, 1) + ' °C']);
+  rows.push(['Densidade', m.dens[estadoDe(m, L.AMB)] < 0.01 ? n1(m.dens[2] * 1000, 3) + ' g/L (gás)' : n1(m.dens[estadoDe(m, L.AMB)], 3) + ' g/cm³']);
+  if (ph !== null) rows.push(['pH', n1(ph, 1) + (ph < 3 ? ' (ácido forte)' : ph < 7 ? ' (ácido)' : ph === 7 ? ' (neutro)' : ph > 11 ? ' (base forte)' : ' (básico)')]);
+  if (m.mohs !== undefined && m.mohs !== null) rows.push(['Dureza (Mohs)', n1(m.mohs, 2)]);
+  if (m.tracao) rows.push(['Resistência à tração', m.tracao]);
+  rows.push(['Conduz eletricidade', m.eletrolito ? 'sim (íons dissolvidos)' : m.condutor ? (m.semicondutor ? 'semicondutor (melhor quente)' : 'sim') : m.ionico ? 'só derretido ou dissolvido' : 'não']);
+  if (m.curie !== undefined) rows.push(['Magnético', `sim, abaixo de ${m.curie} °C (Curie)`]);
+  if (m.radio) rows.push(['Radioativo', RADIO[m.simb] ? RADIO[m.simb][0] : 'sim']);
+  if (m.cp) rows.push(['Calor específico', n1(m.cp, 3) + ' J/(g·K)']);
+  if (m.estimado) rows.push(['Dados', 'térmicos estimados (composto gerado pela simulação)']);
+  return rows;
+}
+function renderFichaMini() {
+  const m = MATS[UI.sel]; if (!m) return;
+  const t = TOX[m.tox] || TOX[m.simb] || null;
+  let h = `<h3>${esc(m.nome)} <span class="muted" style="font-weight:600">${m.simb ? m.simb : fmt(m.formula)}</span></h3>`;
+  h += tagEstado(m);
+  if (m.simb) h += `<span class="tag" style="background:${COR_GRUPO[m.grupo] || '#334155'};color:#0b0f16">${esc(m.grupo)}</span>`;
+  if (m.radio) h += '<span class="tag" style="background:#14532d">☢️ radioativo</span>';
+  if (t && (t.g >= 3 || t.inal === 'corrosivo' || t.inal === 'toxico')) h += '<span class="tag" style="background:#7f1d1d">☠️ tóxico</span>';
+  h += '<table>' + linhaDados(m).map(([a, b]) => `<tr><td>${a}</td><td>${esc(b)}</td></tr>`).join('') + '</table>';
+  h += `<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap"><button class="b" id="b-ficha">📄 Ficha completa</button><button class="b" id="b-combinar-sel">🔀 Combinar</button></div>`;
+  $('#ficha-mini').innerHTML = h;
+  $('#b-ficha').onclick = () => m.simb ? fichaElemento(m.simb) : fichaComposto(m);
+  $('#b-combinar-sel').onclick = () => abrirCombinador(m);
+}
+
+/* ---------- janelas ---------- */
+function abrir(html) { $('#jan').innerHTML = `<button class="b x" onclick="fechar()">✕</button>` + html; $('#modal').classList.add('on'); }
+function fechar() { $('#modal').classList.remove('on'); }
+$('#modal').addEventListener('click', e => { if (e.target.id === 'modal') fechar(); });
+addEventListener('keydown', e => { if (e.key === 'Escape') fechar(); if (e.code === 'Space' && !/INPUT|SELECT/.test(e.target.tagName)) { e.preventDefault(); alternarPausa(); } });
+const PARCEIROS = [['Água', () => AGUA], ['Ar (oxigênio)', () => 0], ['Ácido clorídrico', () => solucao('H', 'Cl')], ['Hidróxido de sódio', () => solucao('Na', 'OH')], ['Ácido nítrico', () => solucao('H', 'NO3')], ['Cloro', () => id('Cl')], ['Enxofre', () => id('S')], ['Mercúrio', () => id('Hg')]];
+function reacoesCom(mid) {
+  let h = '';
+  for (const [nome, f] of PARCEIROS) {
+    const b = f(); if (b === mid) continue;
+    const r = regra(mid, b) || (b ? regra(b, mid) : null);
+    if (!r || r.p <= 0) { if (r && r.nota) h += `<div class="reacao" style="border-color:#475569"><b>Com ${nome}:</b> ${esc(r.nome)} — <span class="muted">${esc(r.nota)}</span></div>`; continue; }
+    h += `<div class="reacao"><b>Com ${nome}:</b> ${esc(r.nome)}<br><code>${esc(r.eq || '')}</code>${condicoes(r)}${r.nota ? `<div class="muted" style="font-size:12px">${esc(r.nota)}</div>` : ''}</div>`;
+  }
+  return h || '<p class="muted">Não reage com água, ar, ácidos, bases, cloro, enxofre nem mercúrio nas condições do simulador.</p>';
+}
+function condicoes(r) { const c = []; if (r.tmin != null) c.push(`a partir de ${r.tmin} °C`); if (r.tmax != null) c.push(`até ${r.tmax} °C`); if (r.faisca) c.push('ou com faísca'); if (r.soPo) c.push('em pó' + (r.ignBloco ? ` (em bloco só acima de ${r.ignBloco} °C)` : '')); if (r.precisaLiquidoA) c.push('derretido'); if (r.dH) c.push(`ΔH ≈ ${r.dH} kJ/mol`); return c.length ? `<div style="font-size:12px;color:#fbbf24">Condições: ${c.join(' · ')}</div>` : ''; }
+function fichaElemento(s) {
+  const e = ELEM[s], cor = COR_GRUPO[e.grupo] || '#ccc', mid = e.colocavel ? id(s) : -1, m = mid >= 0 ? MATS[mid] : null;
+  const t = TOX[s] || (e.radio ? TOX.radioativo : null);
+  const dados = [['Número atômico', e.z], ['Massa atômica', n1(e.massa, 4) + ' u'], ['Grupo', e.grupo], ['Estado padrão (PubChem)', { Solid: 'sólido', Liquid: 'líquido', Gas: 'gás', 'Expected to be a Solid': 'previsto: sólido', 'Expected to be a Gas': 'previsto: gás' }[e.estado] || e.estado || '—'],
+    ['Ponto de fusão', e.pf == null ? '—' : n1(e.pf, 2) + ' °C'], ['Ponto de ebulição', e.pe == null ? '—' : n1(e.pe, 2) + ' °C'], ['Densidade', e.dens == null ? '—' : (e.dens < 0.01 ? n1(e.dens * 1000, 4) + ' g/L' : n1(e.dens, 3) + ' g/cm³')],
+    ['Configuração eletrônica', e.config], ['Eletronegatividade (Pauling)', e.eneg != null ? n1(e.eneg, 2) : '—'], ['Raio atômico', e.raio ? e.raio + ' pm' : '—'], ['1ª energia de ionização', e.ie ? n1(e.ie, 3) + ' eV' : '—'], ['Afinidade eletrônica', e.ea != null ? n1(e.ea, 3) + ' eV' : '—'],
+    ['Estados de oxidação', e.oxid || '—'], ['Dureza Mohs', e.mohs != null ? n1(e.mohs, 2) : '—'], ['Calor específico (25 °C)', e.cp ? n1(e.cp, 3) + ' J/(g·K)' : '—'], ['Condutividade térmica', LAMBDA[s] != null ? LAMBDA[s] + ' W/(m·K)' : '—'], ['Descoberto', e.ano === 'Ancient' ? 'Antiguidade' : e.ano || '—']];
+  if (e.radio) dados.push(['Meia-vida (isótopo mais estável)', e.radio[0]]);
+  if (CURIE[s] !== undefined) dados.push(['Temperatura de Curie', CURIE[s] + ' °C']);
+  let h = `<div style="display:flex;gap:14px;align-items:flex-start;flex-wrap:wrap"><div class="bloco-el" style="background:${cor}"><span>${e.z}</span><span class="s">${s}</span><span style="font-size:12px">${n1(e.massa, 3)}</span></div><div style="flex:1;min-width:220px"><h2 class="titulo" style="margin:0">${esc(e.nome)}</h2><div class="muted">${esc(e.grupo)} · ${e.colocavel ? 'dá para colocar na caixa' : 'não existe em quantidade visível (só alguns átomos)'}</div>`;
+  if (e.info) h += `<p style="line-height:1.5;margin:8px 0 0"><b>No corpo humano:</b> ${esc(e.info.corpo)}<br><b>Usos:</b> ${esc(e.info.uso)}<br><b>Curiosidade:</b> ${esc(e.info.curio)}</p>`;
+  else if (t) h += `<p style="line-height:1.5"><b>Saúde:</b> ${esc(t.efe)}</p>`;
+  h += '</div></div>';
+  h += `<div class="grade2" style="margin-top:12px"><div class="cartao"><h4>Dados (PubChem / NIH)</h4><table>${dados.map(([a, b]) => `<tr><td class="muted">${a}</td><td>${esc(b)}</td></tr>`).join('')}</table></div>`;
+  h += `<div class="cartao"><h4>O que acontece com…</h4>${m ? reacoesCom(mid) : '<p class="muted">Não dá para testar: nunca se juntou uma quantidade visível deste elemento.</p>'}${m && CHAMA[s] ? `<p>Cor no teste de chama: <span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${CHAMA[s]};vertical-align:middle"></span></p>` : ''}${m && DESCARGA[s] ? `<p>Brilho com eletricidade: <span style="display:inline-block;width:14px;height:14px;border-radius:4px;background:${DESCARGA[s]};vertical-align:middle"></span></p>` : ''}</div></div>`;
+  if (m) h += `<div style="margin-top:10px;display:flex;gap:8px"><button class="b pri" onclick="selecionar(${mid});fechar()">✏️ Usar na caixa</button><button class="b" onclick="abrirCombinador(MATS[${mid}])">🔀 Combinar com…</button></div>`;
+  abrir(h);
+}
+function fichaComposto(m) {
+  const t = TOX[m.tox] || null;
+  let h = `<h2 class="titulo">${esc(m.nome)} <span class="muted" style="font-weight:600">${fmt(m.formula)}</span></h2>${tagEstado(m)}`;
+  h += `<div class="grade2" style="margin-top:8px"><div class="cartao"><h4>Dados</h4><table>${linhaDados(m).map(([a, b]) => `<tr><td class="muted">${a}</td><td>${esc(b)}</td></tr>`).join('')}</table>${m.uso ? `<p><b>Usos:</b> ${esc(m.uso)}</p>` : ''}${m.curio ? `<p><b>Curiosidade:</b> ${esc(m.curio)}</p>` : ''}${t && t.efe ? `<p><b>Saúde:</b> ${esc(t.efe)}</p>` : ''}</div><div class="cartao"><h4>O que acontece com…</h4>${reacoesCom(m.id)}</div></div>`;
+  h += `<div style="margin-top:10px;display:flex;gap:8px"><button class="b pri" onclick="selecionar(${m.id});fechar()">✏️ Usar na caixa</button><button class="b" onclick="abrirCombinador(MATS[${m.id}])">🔀 Combinar com…</button></div>`;
+  abrir(h);
+}
+/* ---------- combinador ---------- */
+function nomesLista() { return MATS.filter(m => m.id > 2 && m.tipo !== 'especial' && m.tipo !== 'especial2' && m.chave !== 'Parede').map(m => `<option value="${esc(m.nome)}${m.simb ? ' (' + m.simb + ')' : ' — ' + esc(fmt(m.formula))}">`).join(''); }
+function acharMat(txt) { txt = (txt || '').trim().toLowerCase(); if (!txt) return null; return MATS.find(m => m.id > 2 && (m.nome + (m.simb ? ' (' + m.simb + ')' : ' — ' + fmt(m.formula))).toLowerCase() === txt) || MATS.find(m => m.id > 2 && (m.simb || '').toLowerCase() === txt) || MATS.find(m => m.id > 2 && (m.formula || '').toLowerCase() === txt) || MATS.find(m => m.id > 2 && m.nome.toLowerCase().startsWith(txt)) || null; }
+function abrirCombinador(a) {
+  const rot = m => m ? m.nome + (m.simb ? ' (' + m.simb + ')' : ' — ' + fmt(m.formula)) : '';
+  abrir(`<h2 class="titulo">🔀 Testar uma combinação</h2><p class="muted">Escolha duas substâncias e uma temperatura. A resposta usa as mesmas regras da caixa: série de reatividade, regras de solubilidade, ácido + base, combustão, óxidos com água e reações conhecidas.</p>
+    <datalist id="dl-mats">${nomesLista()}</datalist>
+    <div class="comb"><label>Substância A<input id="cb-a" list="dl-mats" value="${esc(rot(a))}"></label><b style="padding-bottom:10px">+</b><label>Substância B<input id="cb-b" list="dl-mats" placeholder="ex.: Água, Ácido clorídrico, Ar…"></label></div>
+    <div style="display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap"><label>Temperatura <input type="number" id="cb-t" value="${L.AMB}" style="width:90px;height:34px;border-radius:8px;border:1px solid var(--linha);background:#0d131d;padding:0 8px"> °C</label><button class="b pri" id="cb-ir">Combinar</button><button class="b" id="cb-ar">+ Ar</button><button class="b" id="cb-agua">+ Água</button></div>
+    <div id="cb-res" style="margin-top:12px"></div>`);
+  $('#cb-ir').onclick = combinar; $('#cb-ar').onclick = () => { $('#cb-b').value = 'Ar'; combinar(); }; $('#cb-agua').onclick = () => { $('#cb-b').value = rot(mat('H2O')); combinar(); };
+  for (const k of ['#cb-a', '#cb-b', '#cb-t']) $(k).addEventListener('keydown', e => { if (e.key === 'Enter') combinar(); });
+}
+function combinar() {
+  const A = acharMat($('#cb-a').value), bTxt = $('#cb-b').value.trim().toLowerCase(), B = bTxt === 'ar' ? MATS[0] : acharMat(bTxt), t = +$('#cb-t').value;
+  const out = $('#cb-res');
+  if (!A || !B) { out.innerHTML = '<p class="aviso">Não reconheci uma das substâncias. Escolha da lista.</p>'; return; }
+  let r = regra(A.id, B.id), inv = false; if (!r || r.p <= 0) { const r2 = B.id ? regra(B.id, A.id) : null; if (r2 && r2.p > 0) { r = r2; inv = true; } }
+  const sa = estadoDe(A, t), sb = B.id ? estadoDe(B, t) : 2;
+  let h = `<div class="cartao"><b>${esc(nomeNoEstado(A, sa))}</b> (${NOME_ESTADO[sa]}) + <b>${esc(B.id ? nomeNoEstado(B, sb) : 'Ar')}</b>${B.id ? ` (${NOME_ESTADO[sb]})` : ''} a ${t} °C</div>`;
+  if (r && r.p > 0) {
+    const ok = (r.tmin == null || t >= r.tmin) && (r.tmax == null || t <= r.tmax);
+    const p1 = MATS[inv ? r.pb : r.pa], p2 = MATS[inv ? r.pa : r.pb];
+    h += `<div class="reacao" style="border-color:${ok ? 'var(--ac)' : '#f59e0b'}"><b>${ok ? '✅' : '⏳'} ${esc(r.nome)}</b><br><code style="font-size:15px">${esc(r.eq || '')}</code>${condicoes(r)}<div style="margin-top:4px">Produtos na caixa: <b>${esc(p1 ? p1.nome : '—')}</b>${p2 && p2.id ? ' + <b>' + esc(p2.nome) + '</b>' : ''}</div>${r.nota ? `<p class="muted" style="margin:4px 0 0">${esc(r.nota)}</p>` : ''}${ok ? '' : `<p style="color:#fbbf24;margin:4px 0 0">Nesta temperatura ainda não acontece.</p>`}</div>`;
+  } else {
+    h += `<div class="reacao" style="border-color:#475569"><b>Nenhuma reação química conhecida nestas condições.</b>${r && r.nota ? `<p class="muted">${esc(r.nome)}: ${esc(r.nota)}</p>` : ''}`;
+    if (B.id) { const da = A.dens[sa], db = B.dens[sb]; h += `<p class="muted">Eles só se misturam ou se separam pela densidade: ${esc(A.nome)} ${n1(da, 3)} g/cm³ e ${esc(B.nome)} ${n1(db, 3)} g/cm³ — ${da > db ? A.nome : B.nome} fica embaixo.</p>`; }
+    if (A.metal && B.metal) h += '<p class="muted">Metais sólidos não reagem entre si. Alguns, derretidos juntos, formam ligas (ex.: cobre + estanho = bronze; ferro + carbono = aço).</p>';
+    if (A.tipo === 'elemento' && A.grupo === 'Gás nobre' || B.grupo === 'Gás nobre') h += '<p class="muted">Os gases nobres têm a última camada de elétrons completa e quase não reagem (só o xenônio e o criptônio, com flúor).</p>';
+    h += '</div>';
+  }
+  h += `<button class="b" id="cb-por" style="margin-top:8px">🧪 Montar na caixa</button>`;
+  out.innerHTML = h;
+  $('#cb-por').onclick = () => { fechar(); limparTudo(); const W = L.W, H = L.H; EXP.bequer(W * 0.2 | 0, H * 0.35 | 0, W * 0.6 | 0, H * 0.6 | 0, 'Vidro'); EXP.ret(W * 0.22, H * 0.7, W * 0.48, H * 0.95 - 1, A.id, { po: A.po || estadoDe(A, t) === 0, temp: t }); if (B.id) EXP.ret(W * 0.52, H * 0.7, W * 0.78, H * 0.95 - 1, B.id, { po: B.po || estadoDe(B, t) === 0, temp: t }); toast('Montado: ' + A.nome + (B.id ? ' + ' + B.nome : ' no ar'), 'Use 🔥 Aquecer ou ⚡ Faísca se a reação precisar.'); };
+}
+/* ---------- experimentos, reações, fontes ---------- */
+$('#b-exp').onclick = () => abrir(`<h2 class="titulo">🧪 Experimentos prontos</h2><p class="muted">Monta a cena na caixa. Depois é com você: aqueça, dê faísca, colete amostras…</p><div class="exps">${EXPERIMENTOS.map((e, k) => `<button class="exp" data-e="${k}"><b>${e.n}</b><small>${e.d}</small></button>`).join('')}</div>`) || document.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { fechar(); limparTudo(); L.velReacao = 1; EXPERIMENTOS[+b.dataset.e].f(L.W, L.H); toast(EXPERIMENTOS[+b.dataset.e].n, EXPERIMENTOS[+b.dataset.e].d, 7000); if (L.pausado) alternarPausa(); });
+$('#b-reac').onclick = abrirReacoes;
+function abrirReacoes() {
+  const l = [...L.contagem.entries()];
+  abrir(`<h2 class="titulo">📜 Reações que aconteceram na caixa (${l.length})</h2>${l.length ? l.map(([r, n]) => `<div class="reacao"><b>${esc(r.nome)}</b> <span class="muted">× ${n}</span><br><code>${esc(r.eq || '')}</code>${r.dH ? ` <span class="muted">ΔH ≈ ${r.dH} kJ/mol</span>` : ''}${r.nota ? `<div class="muted" style="font-size:12px">${esc(r.nota)}</div>` : ''}</div>`).join('') : '<p class="muted">Nenhuma ainda. Coloque substâncias encostadas e veja o que acontece.</p>'}`);
+}
+$('#b-fontes').onclick = () => abrir(`<h2 class="titulo">📚 De onde vêm os dados</h2>
+  <p>Os números dos 118 elementos (massa, configuração eletrônica, eletronegatividade, pontos de fusão e ebulição, densidade, estados de oxidação…) foram baixados da <b>PubChem</b>, do NIH (Institutos Nacionais de Saúde dos EUA). Dureza e calor específico vêm das tabelas de referência (Samsonov; CRC Handbook). Os compostos usam valores do CRC Handbook/PubChem.</p>
+  <p>A simulação no organismo usa resumos da <b>ATSDR/CDC</b>, do <b>NIH</b> (StatPearls e Office of Dietary Supplements), do <b>Manual MSD</b>, da <b>UK Health Security Agency</b> e de relatos de caso publicados.</p>
+  <ul>${FONTES.map(([n, u]) => `<li><a href="${u}" target="_blank" rel="noopener">${esc(n)}</a></li>`).join('')}</ul>
+  <div class="aviso"><b>Limites do simulador (para estudar com honestidade):</b> a caixa é 2D e cada célula vale 0,05 mL; as soluções têm concentração fixa de ~0,1 mol/L; a pressão não é simulada (por isso o CO₂ sólido sublima e o hélio nunca congela); as reações acontecem mais rápido que na vida real para dar para ver; produtos de sais "gerados" (que não estão na tabela) têm dados térmicos estimados; e as faixas de toxicidade servem para classificar gravidade, NÃO como orientação de dose. Nada aqui substitui um laboratório de verdade ou um médico.</div>`);
+$('#b-limpar').onclick = () => { limparTudo(); toast('Caixa limpa', ''); };
+$('#b-sair').onclick = () => { if (window.parent !== window) avisar('sair'); else location.reload(); };
+function alternarPausa() { L.pausado = !L.pausado; $('#b-play').textContent = L.pausado ? '▶ Continuar' : '⏸ Pausar'; }
+$('#b-play').onclick = alternarPausa;
+$('#b-vel').onchange = e => { L.vel = +e.target.value; };
+$('#amb').oninput = e => { L.AMB = +e.target.value; $('#amb-v').textContent = L.AMB + ' °C'; if (['gas', 'liquido', 'solido'].includes(UI.aba)) renderPaleta(); renderFichaMini(); };
+$('#atm').onchange = e => { ATMOSFERA = e.target.value; limparCacheRegras(); toast('Atmosfera: ' + e.target.selectedOptions[0].textContent, ATMOSFERA === 'vacuo' || ATMOSFERA === 'N2' ? 'Sem oxigênio: nada queima.' : ''); };
+$('#b-vent').onclick = () => { L.ventilacao = !L.ventilacao; $('#b-vent').classList.toggle('on', L.ventilacao); };
+$('#temp-col').onchange = e => { $('#lb-temp').style.display = e.target.value === 'custom' ? '' : 'none'; };
+
+/* ---------- avisos ---------- */
+function toast(titulo, txt, ms = 4500, r) {
+  const d = document.createElement('div'); d.className = 'toast'; d.innerHTML = `<b>${esc(titulo)}</b>${txt ? `<span>${txt}</span>` : ''}`;
+  if (r) d.onclick = () => abrir(`<h2 class="titulo">${esc(r.nome)}</h2><p><code style="font-size:16px">${esc(r.eq || '')}</code></p>${condicoes(r)}<p>${esc(r.nota || '')}</p>`);
+  $('#toasts').appendChild(d); while ($('#toasts').children.length > 4) $('#toasts').firstChild.remove();
+  setTimeout(() => d.remove(), ms);
+}
+let evVistos = 0;
+function verEventos() {
+  while (evVistos < L.eventos.length) { const e = L.eventos[evVistos++]; if (e.r) toast('🧪 ' + e.r.nome, `<code>${esc(e.r.eq || '')}</code>`, 6000, e.r); else toast('⚠️ ' + e.txt, ''); som('nova'); }
+  if (evVistos > L.eventos.length) evVistos = L.eventos.length;
+  $('#n-reac').textContent = L.contagem.size;
+}
+
+/* ---------- caixa: tamanho e interação ---------- */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let PX = 4;
+function montarCaixa() {
+  const a = $('#area').getBoundingClientRect();
+  const alvo = TOQUE ? 3 : 4;
+  const W = Math.max(80, Math.min(300, Math.floor((a.width - 12) / alvo))), H = Math.max(60, Math.min(190, Math.floor((a.height - 12) / alvo)));
+  criarGrade(W, H); ajustarCanvas();
+}
+function ajustarCanvas() {
+  const a = $('#area').getBoundingClientRect();
+  PX = Math.max(1, Math.min((a.width - 8) / L.W, (a.height - 8) / L.H));
+  cv.width = L.W; cv.height = L.H; cv.style.width = L.W * PX + 'px'; cv.style.height = L.H * PX + 'px';
+}
+addEventListener('resize', ajustarCanvas);
+function celulaDoEvento(e) { const r = cv.getBoundingClientRect(); return [Math.floor((e.clientX - r.left) / r.width * L.W), Math.floor((e.clientY - r.top) / r.height * L.H)]; }
+cv.addEventListener('pointerdown', e => { iniciarAudio(); cv.setPointerCapture(e.pointerId); UI.pressionado = true; UI.ultimoXY = celulaDoEvento(e); UI.hover = UI.ultimoXY; usarFerramenta(true); });
+cv.addEventListener('pointermove', e => { const p = celulaDoEvento(e); UI.hover = p; if (UI.pressionado) { tracar(UI.ultimoXY, p); UI.ultimoXY = p; } });
+addEventListener('pointerup', () => { UI.pressionado = false; if (UI.ferr === 'martelo' && marteloRes) mostrarMartelo(); });
+cv.addEventListener('pointerleave', () => { if (!UI.pressionado) UI.hover = null; });
+function tracar(a, b) { const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]))); for (let k = 1; k <= n; k++) { UI.ultimoXY = [Math.round(a[0] + (b[0] - a[0]) * k / n), Math.round(a[1] + (b[1] - a[1]) * k / n)]; if (['desenhar', 'apagar', 'coletar'].includes(UI.ferr)) usarFerramenta(false); } }
+let marteloRes = null, statusExtra = '', medida = '';
+function usarFerramenta(clique) {
+  if (!UI.ultimoXY) return;
+  const [x, y] = UI.ultimoXY, r = +$('#tam').value - 1;
+  const temp = $('#temp-col').value === 'custom' ? +$('#temp-v').value : undefined;
+  switch (UI.ferr) {
+    case 'desenhar': pincel(x, y, r, UI.sel, { forma: $('#forma').value, substituir: $('#subst').checked, temp }); break;
+    case 'apagar': apagar(x, y, r); break;
+    case 'aquecer': aquecer(x, y, r, 12 * L.vel); break;
+    case 'resfriar': aquecer(x, y, r, -12 * L.vel); break;
+    case 'temp': definirTemp(x, y, r, +$('#temp-v').value); if (clique) toast('Temperatura definida', $('#temp-v').value + ' °C (escolha o valor em "Temperatura ao colocar → Escolher…")'); break;
+    case 'faisca': { const n = faisca(x, y, Math.max(1, r)); if (clique) { som('faisca'); if (n) medida = `⚡ Corrente em ${n} células condutoras`; else medida = '⚡ Faísca no ar (1500 °C num ponto)'; } break; }
+    case 'ima': ima(x, y, 14 + r * 2); break;
+    case 'martelo': if (clique) { marteloRes = martelo(x, y, Math.max(1, r)); som('martelo'); } break;
+    case 'coletar': { const n = coletar(x, y, r, UI.amostra, 4000); if (n) atualizarBotaoAmostra(); break; }
+    case 'ph': case 'inspecionar': if (clique) inspecionar(x, y); break;
+  }
+}
+function mostrarMartelo() {
+  const r = marteloRes; marteloRes = null; if (!r) return;
+  const q = [...r.quebrou], s = [...r.resistiu];
+  if (q.length || s.length) toast('🔨 Martelada', `${q.length ? 'Quebrou (frágil): ' + q.join(', ') + '. ' : ''}${s.length ? 'Resistiu (dúctil ou duro): ' + s.join(', ') + '.' : ''}`, 6000);
+}
+function inspecionar(x, y) {
+  const c = celula(x, y); if (!c) return;
+  if (!c.m) { toast('🔍 Ar', `${n1(c.t, 1)} °C · atmosfera: ${$('#atm').selectedOptions[0].textContent}`); return; }
+  const M = MATS[c.m], s = estadoDe(M, c.t), ph = phDe(M);
+  if (UI.ferr === 'ph') { som('clique'); toast(ph === null ? '🧫 pH: não se aplica' : `🧫 pH ${n1(ph, 1)}`, ph === null ? `${esc(M.nome)} não é uma solução aquosa.` : `<span style="display:inline-block;width:100%;height:10px;border-radius:5px;background:${corPH(ph)}"></span> ${esc(nomeNoEstado(M, s))} — ${ph < 3 ? 'ácido forte' : ph < 6.5 ? 'ácido' : ph <= 7.5 ? 'neutro' : ph < 11 ? 'básico' : 'base forte'}`, 6000); return; }
+  if (M.simb) fichaElemento(M.simb); else if (M.tipo === 'composto' || M.tipo === 'solucao') fichaComposto(M);
+}
+function corPH(ph) { const cs = ['#d01c1c', '#e8461a', '#f07a1a', '#f6b21c', '#f2e21c', '#a8d81c', '#4cc41c', '#1caa5a', '#1c9ab0', '#1c6ad0', '#2c3ad0', '#4a2cc8', '#6a1cb8', '#7a1aa0', '#6a1480']; return cs[Math.max(0, Math.min(14, Math.round(ph)))]; }
+function statusHover() {
+  const st = $('#status'); let h = '';
+  if (UI.hover) {
+    const c = celula(UI.hover[0], UI.hover[1]);
+    if (c) {
+      if (!c.m) h += `<span>Ar · ${n1(c.t, 0)} °C</span>`;
+      else { const M = MATS[c.m], s = estadoDe(M, c.t), ph = phDe(M); h += `<span><b>${esc(nomeNoEstado(M, s))}</b> ${M.simb ? '' : '· ' + fmt(M.formula)}</span><span>${NOME_ESTADO[s]}${c.po && s === 0 ? ' (pó)' : ''}</span><span>${n1(c.t, 1)} °C</span>${ph !== null ? `<span>pH ${n1(ph, 1)}</span>` : ''}${c.carga ? '<span>⚡ corrente</span>' : ''}`; }
+      if (UI.ferr === 'geiger') { const g = geiger(UI.hover[0], UI.hover[1], 20); h += `<span>☢️ ${g ? g * 7 + ' contagens/s' : 'fundo natural'}</span>`; if (g && Math.random() < Math.min(0.9, g / 60)) som('geiger'); }
+    }
+  }
+  if (medida) h += `<span>${medida}</span>`;
+  if (statusExtra && !UI.hover) h += `<span class="muted">${esc(statusExtra)}</span>`;
+  st.innerHTML = h;
+}
+
+/* ---------- amostra e organismo ---------- */
+function atualizarBotaoAmostra() { const b = $('#btn-amostra'); b.style.display = UI.amostra.total ? '' : 'none'; b.textContent = `🥤 Amostra (${n1(UI.amostra.total * ML_CELULA, 1)} mL)`; }
+$('#btn-amostra').onclick = abrirAmostra;
+function listaAmostra() { return [...UI.amostra.mapa.values()].map(a => ({ id: a.id, celulas: a.celulas, temp: a.somaT / a.celulas })).sort((a, b) => b.celulas - a.celulas); }
+function abrirAmostra() {
+  const l = listaAmostra(); if (!l.length) return;
+  let vol = 0, massa = 0;
+  const linhas = l.map(a => { const M = MATS[a.id], s = estadoDe(M, a.temp), v = a.celulas * ML_CELULA, g = v * M.dens[s]; vol += v; massa += g; return `<tr><td><span style="display:inline-block;width:12px;height:12px;border-radius:3px;background:${cssRgb(M.rgb[s])}"></span> ${esc(nomeNoEstado(M, s))} <span class="muted">${fmt(M.formula)}</span></td><td>${NOME_ESTADO[s]}</td><td>${n1(v, 2)} mL</td><td>${g < 0.01 ? n1(g * 1000, 2) + ' mg' : n1(g, 2) + ' g'}</td><td>${n1(a.temp, 1)} °C</td><td>${phDe(M) !== null ? n1(phDe(M), 1) : '—'}</td></tr>`; }).join('');
+  abrir(`<h2 class="titulo">🥤 Amostra coletada</h2><table><tr><th>Substância</th><th>Estado</th><th>Volume</th><th>Massa</th><th>Temp.</th><th>pH</th></tr>${linhas}<tr><th>Total</th><th></th><th>${n1(vol, 2)} mL</th><th>${n1(massa, 2)} g</th><th></th><th></th></tr></table>
+    <div class="cartao" style="margin-top:12px"><h4>Simular no organismo humano</h4>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><label>Peso da pessoa <input type="range" id="org-peso" min="10" max="120" value="70"> <b id="org-peso-v">70 kg</b></label>
+    <select class="b" id="org-via"><option value="oral">🥤 Beber / comer</option><option value="inalar">😮‍💨 Inalar (gases)</option></select><button class="b pri" id="org-ir">Simular</button><button class="b" id="org-esv">Esvaziar copo</button></div>
+    <p class="muted" style="font-size:12px;margin:6px 0 0">Simulação educativa baseada em toxicologia publicada. Não é orientação médica.</p></div><div id="org-res"></div>`);
+  $('#org-peso').oninput = e => $('#org-peso-v').textContent = e.target.value + ' kg';
+  $('#org-ir').onclick = () => simularOrganismo(l);
+  $('#org-esv').onclick = () => { UI.amostra = { mapa: new Map(), total: 0 }; atualizarBotaoAmostra(); fechar(); };
+}
+function corpoSVG(orgaos) {
+  const c = k => orgaos[k] !== undefined ? COR_NIVEL[orgaos[k]] : '#2a3550';
+  return `<svg viewBox="0 0 200 360" style="width:100%;max-width:200px">
+    <g fill="none" stroke="${orgaos.pele !== undefined ? COR_NIVEL[orgaos.pele] : '#3b4b6b'}" stroke-width="3"><circle cx="100" cy="42" r="28"/><path d="M70 82 Q100 70 130 82 L150 180 L138 184 L124 120 L126 230 L132 340 L110 340 L100 240 L90 340 L68 340 L74 230 L76 120 L62 184 L50 180 Z"/></g>
+    <ellipse cx="100" cy="36" rx="20" ry="15" fill="${c('cerebro')}"/><ellipse cx="100" cy="58" rx="9" ry="4" fill="${c('boca')}"/><rect x="93" y="74" width="14" height="6" rx="3" fill="${c('tireoide')}"/>
+    <rect x="97" y="80" width="6" height="52" rx="3" fill="${c('esofago')}"/><ellipse cx="82" cy="112" rx="14" ry="24" fill="${c('pulmoes')}"/><ellipse cx="118" cy="112" rx="14" ry="24" fill="${c('pulmoes')}"/>
+    <path d="M100 108 q8 -10 14 0 q2 10 -14 22 q-16 -12 -14 -22 q6 -10 14 0z" fill="${c('coracao')}"/><ellipse cx="116" cy="146" rx="15" ry="11" fill="${c('estomago')}"/><ellipse cx="86" cy="146" rx="17" ry="10" fill="${c('figado')}"/>
+    <ellipse cx="82" cy="168" rx="6" ry="9" fill="${c('rins')}"/><ellipse cx="118" cy="168" rx="6" ry="9" fill="${c('rins')}"/><rect x="80" y="178" width="40" height="34" rx="12" fill="${c('intestino')}"/>
+    <line x1="92" y1="250" x2="86" y2="330" stroke="${c('ossos')}" stroke-width="5" stroke-linecap="round"/><line x1="108" y1="250" x2="114" y2="330" stroke="${c('ossos')}" stroke-width="5" stroke-linecap="round"/>
+    <circle cx="140" cy="200" r="6" fill="${c('sangue')}"/><line x1="64" y1="130" x2="58" y2="175" stroke="${c('musculos')}" stroke-width="5" stroke-linecap="round"/></svg>`;
+}
+function simularOrganismo(l) {
+  const peso = +$('#org-peso').value, via = $('#org-via').value, r = avaliarAmostra(l, peso, via);
+  const org = Object.entries(r.orgaos).sort((a, b) => b[1] - a[1]).map(([k, n]) => `<span class="nivel" style="background:${COR_NIVEL[n]};margin:2px;font-size:11.5px">${ORGAOS[k]}</span>`).join('');
+  $('#org-res').innerHTML = `<div class="grade2" style="margin-top:12px;grid-template-columns:200px 1fr"><div style="text-align:center">${corpoSVG(r.orgaos)}<div style="margin-top:6px">${org}</div></div>
+    <div><div style="margin-bottom:6px">Resultado geral: <span class="nivel" style="background:${COR_NIVEL[r.max]}">${NIVEL[r.max]}</span> <span class="muted">· ${via === 'oral' ? 'ingestão' : 'inalação'} de ${n1(r.volume, 1)} mL por uma pessoa de ${peso} kg</span></div>
+    ${r.itens.map(it => `<div class="item-org" style="border-left:4px solid ${COR_NIVEL[it.n]}"><b>${esc(it.titulo)}</b> <span class="nivel" style="background:${COR_NIVEL[it.n]};font-size:10.5px;padding:1px 8px">${NIVEL[it.n]}</span><div>${esc(it.texto)}</div>${it.fonte ? `<div class="fonte">Fonte: ${esc(it.fonte)}</div>` : ''}</div>`).join('')}</div></div>
+    <div class="aviso" style="margin-top:10px">⚠️ Isto é uma <b>simulação para estudo</b>. Na vida real, em caso de intoxicação: <b>não provoque vômito</b>, não tente "neutralizar" com outra substância, e ligue para o <b>Disque-Intoxicação 0800 722 6001</b> (Anvisa, 24 h, gratuito) ou para o <b>SAMU 192</b>.</div>`;
+  som(r.max >= 3 ? 'alerta' : 'clique');
+}
+
+/* ---------- som (bem discreto) ---------- */
+let AC = null;
+function iniciarAudio() { if (AC) return; try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} }
+function som(t) {
+  if (!AC) return; const a = AC.currentTime, o = AC.createOscillator(), g = AC.createGain(); o.connect(g).connect(AC.destination);
+  const p = { nova: [880, 1320, 0.08, 'sine', 0.05], faisca: [2400, 600, 0.12, 'square', 0.03], martelo: [180, 60, 0.15, 'triangle', 0.15], clique: [1200, 1200, 0.04, 'square', 0.03], alerta: [440, 220, 0.4, 'sawtooth', 0.05], geiger: [3000, 3000, 0.01, 'square', 0.04], boom: [90, 30, 0.6, 'sawtooth', 0.25] }[t]; if (!p) return;
+  o.type = p[3]; o.frequency.setValueAtTime(p[0], a); o.frequency.exponentialRampToValueAtTime(p[1], a + p[2]); g.gain.setValueAtTime(p[4], a); g.gain.exponentialRampToValueAtTime(0.0001, a + p[2]); o.start(a); o.stop(a + p[2] + 0.02);
+}
+
+/* ---------- laço ---------- */
+let ultimo = performance.now(), acc = 0, explosoesVistas = 0, tremor = 0;
+function quadro(agora) {
+  requestAnimationFrame(quadro);
+  const dt = Math.min(0.1, (agora - ultimo) / 1000); ultimo = agora;
+  if (!L.pausado) {
+    acc += dt * 60 * L.vel; let n = 0;
+    while (acc >= 1 && n < 6) { passo(); acc -= 1; n++; }
+    if (n >= 6) acc = 0;
+    if (UI.pressionado && ['aquecer', 'resfriar', 'ima', 'faisca', 'temp'].includes(UI.ferr)) usarFerramenta(false);
+  }
+  if (L.explosoes > explosoesVistas) { explosoesVistas = L.explosoes; tremor = 6; som('boom'); }
+  const g = desenharGrade(ctx);
+  ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+  if (tremor > 0) { cv.style.transform = `translate(${(Math.random() - 0.5) * tremor}px,${(Math.random() - 0.5) * tremor}px)`; tremor = Math.max(0, tremor - 0.5); if (!tremor) cv.style.transform = ''; }
+  ctx.drawImage(g, 0, 0);
+  // contorno do pincel
+  if (UI.hover) { const r = +$('#tam').value - 1; ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1 / Math.max(1, PX / 2); ctx.beginPath(); ctx.arc(UI.hover[0] + 0.5, UI.hover[1] + 0.5, UI.ferr === 'ima' ? 14 + r * 2 : UI.ferr === 'geiger' ? 20 : r + 0.5, 0, Math.PI * 2); ctx.stroke(); }
+  if (L.tick % 4 === 0) { statusHover(); verEventos(); }
+}
+montarCaixa(); renderPaleta(); renderFichaMini(); dicaFerr();
+// cena inicial: um béquer com água e um pouco de sódio ao lado, para convidar a experimentar
+EXPERIMENTOS[0].f(L.W, L.H);
+toast('Bem-vindo ao laboratório!', 'Escolha um elemento na tabela, arraste na caixa e veja o que acontece. 🧪 Experimentos traz cenas prontas.', 8000);
+requestAnimationFrame(quadro);
+avisar('iniciado');
+// ganchos para testes automáticos
+window.__lab = { L, MATS, id, regra, passo, pincel, celula, avaliarAmostra, solucao, limparTudo, EXPERIMENTOS, get grade() { return { mt, T, flg }; } };
+</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.0.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.0.0";</script>
+</body>
+</html>

@@ -17,6 +17,18 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Roleta de Chefões** | Ação | Boss Rush roguelite | Runs de 8–14 min |
 | **Defesa da Feira** | Estratégia | Tower Defense | Mapas de 12–25 min |
 | **Gol de Placa** | Esporte | Futebol arcade | Partidas de 2–6 min |
+| **Laboratório dos Elementos** | Simulação | Sandbox de química (educativo) | Livre |
+
+### Laboratório dos Elementos
+Sandbox de química com a tabela periódica inteira, para estudar e testar.
+
+- ⚗️ **118 elementos** com ficha completa (dados PubChem/NIH); 95 dá para colocar na caixa, nas abas Gases, Líquidos e Sólidos (que mudam com a temperatura)
+- 🔥 Cada célula tem **temperatura**: derrete, ferve e congela nos pontos reais; densidade e condução de calor também são reais
+- 🧪 **Mais de 1.200 reações** (reatividade dos metais, solubilidade, ácido + base, combustão, termite, eletrólise, ligas…) com equação, ΔH e condições, e um **combinador** para testar qualquer par
+- 🧫 Ferramentas: aquecer, resfriar, faísca/corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra
+- 🫀 **Simulação no organismo**: beba, coma ou inale a amostra e veja quais órgãos seriam afetados, com fontes (ATSDR/CDC, NIH, MSD). Educativo, não é orientação médica · Disque-Intoxicação 0800 722 6001
+
+**Controles:** arraste na caixa para usar a ferramenta · `Espaço` pausa · `Esc` fecha janelas
 
 ### Gol de Placa
 Futebol arcade 5 contra 5 visto de cima, com 8 times fictícios.

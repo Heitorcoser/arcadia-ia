@@ -346,11 +346,84 @@ const CAPA_GOL = `
   <text x="320" y="342" font-size="46" text-anchor="middle" fill="#fff" font-family="Impact,Arial Black,sans-serif" letter-spacing="3">GOL DE <tspan fill="#ffd23f">PLACA</tspan></text>
 </svg>`;
 
+const CAPA_LAB = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="lab-f" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0b1626"/><stop offset="1" stop-color="#05080f"/></linearGradient><linearGradient id="lab-ph"><stop offset="0" stop-color="#d01c1c"/><stop offset=".3" stop-color="#f2e21c"/><stop offset=".5" stop-color="#4cc41c"/><stop offset=".75" stop-color="#1c6ad0"/><stop offset="1" stop-color="#6a1480"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#lab-f)"/>
+  <g font-family="Arial,sans-serif" font-weight="800" text-anchor="middle">
+    <rect x="28" y="34" width="62" height="66" rx="8" fill="#fda4af"/><text x="59" y="58" font-size="12" fill="#1b1b1b">11</text><text x="59" y="88" font-size="28" fill="#1b1b1b">Na</text>
+    <rect x="98" y="34" width="62" height="66" rx="8" fill="#93c5fd"/><text x="129" y="58" font-size="12" fill="#1b1b1b">8</text><text x="129" y="88" font-size="28" fill="#1b1b1b">O</text>
+    <rect x="28" y="108" width="62" height="66" rx="8" fill="#fde68a"/><text x="59" y="132" font-size="12" fill="#1b1b1b">17</text><text x="59" y="162" font-size="28" fill="#1b1b1b">Cl</text>
+    <rect x="98" y="108" width="62" height="66" rx="8" fill="#fcd34d"/><text x="129" y="132" font-size="12" fill="#1b1b1b">79</text><text x="129" y="162" font-size="28" fill="#1b1b1b">Au</text>
+    <rect x="28" y="182" width="62" height="66" rx="8" fill="#c4b5fd"/><text x="59" y="206" font-size="12" fill="#1b1b1b">2</text><text x="59" y="236" font-size="28" fill="#1b1b1b">He</text>
+    <rect x="98" y="182" width="62" height="66" rx="8" fill="#86efac"/><text x="129" y="206" font-size="12" fill="#1b1b1b">26</text><text x="129" y="236" font-size="28" fill="#1b1b1b">Fe</text>
+  </g>
+  <g>
+    <path d="M300 60 h80 v14 h-8 v70 l72 150 q8 22 -16 22 h-176 q-24 0 -16 -22 l72 -150 v-70 h-8z" fill="#d8f0f0" fill-opacity=".12" stroke="#d8f0f0" stroke-width="5"/>
+    <path d="M292 228 h176 l20 42 q8 22 -16 22 h-184 q-24 0 -16 -22z" fill="#38bdf8" fill-opacity=".75"/>
+    <circle cx="350" cy="250" r="7" fill="#e0f2fe"/><circle cx="392" cy="214" r="5" fill="#e0f2fe"/><circle cx="410" cy="240" r="9" fill="#e0f2fe"/><circle cx="372" cy="190" r="4" fill="#e0f2fe"/><circle cx="364" cy="160" r="3" fill="#e0f2fe"/>
+    <circle cx="384" cy="232" r="10" fill="#fff7c2"/><path d="M384 222 q10 -30 -4 -50 q22 18 10 44z" fill="#fb923c"/>
+  </g>
+  <g font-family="Arial,sans-serif" font-weight="800" fill="#e8eef8" text-anchor="middle">
+    <text x="540" y="120" font-size="21">2 Na + 2 H₂O</text><text x="540" y="150" font-size="21" fill="#5eead4">→ 2 NaOH + H₂↑</text>
+    <rect x="484" y="186" width="112" height="16" rx="8" fill="url(#lab-ph)"/>
+    <text x="540" y="232" font-size="14" fill="#93a3bd">pH · °C · g/cm³</text>
+  </g>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.15.0";
+window.ARCADIA_VERSAO = "1.16.0";
 
 window.JOGOS = [
+  {
+    id: "laboratorio-dos-elementos",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-22",
+    novidades: "Lançamento: sandbox de química com os 118 elementos, mais de 140 compostos, soluções, 18 experimentos prontos e simulação do que acontece no organismo.",
+    nome: "Laboratório dos Elementos",
+    genero: "Simulação",
+    subgenero: "Sandbox de química (educativo)",
+    corGenero: "#14b8a6",
+    tags: ["Ciência", "Química", "Educativo", "Sandbox", "Simulação", "Celular"],
+    criadoEm: "2026-11-22",
+    lancadoEm: "2026-11-22T19:36:22-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Livre",
+    classificacao: "Livre",
+    finais: 0,
+    caminho: "jogos/laboratorio-dos-elementos/index.html",
+    capa: CAPA_LAB,
+    sinopse:
+      "Uma caixa de areia de química com a tabela periódica inteira. Coloque elementos, misture, aqueça, dê faísca e veja as reações com a equação certa, o calor e os produtos. Meça o pH, colete amostras e veja o que aconteceria no corpo humano. Dados da PubChem (NIH).",
+    descricao: [
+      "Laboratório dos Elementos é um sandbox de química para estudar brincando. A caixa simula cada grãozinho com temperatura própria: os materiais derretem, fervem e congelam nos pontos reais de fusão e ebulição, afundam ou boiam pela densidade e trocam calor conforme a condutividade térmica de verdade.",
+      "Os 118 elementos têm ficha completa (massa, configuração eletrônica, eletronegatividade, energia de ionização, estados de oxidação, dureza, calor específico e mais), baixada da PubChem. 95 deles dá para colocar na caixa; os outros só existem em poucos átomos e ficam só com a ficha.",
+      "As reações seguem as regras que se aprende na escola e na faculdade: série de reatividade dos metais, regras de solubilidade (com a equação iônica do precipitado), ácido + base, combustão com temperatura de ignição, óxidos com água, halogênios, termite, alto-forno, eletrólise, ligas e amálgamas. São mais de 1.200 combinações calculadas, e o combinador mostra a equação, o ΔH e as condições de qualquer par.",
+      "Com a ferramenta de coleta você enche um copo com o que está na caixa e simula beber, comer ou inalar: o laboratório estima a dose por quilo de peso e mostra quais órgãos seriam afetados e com que gravidade, citando a fonte (ATSDR/CDC, NIH, Manual MSD). É uma simulação educativa, não orientação médica, e não mostra doses letais."
+    ],
+    mecanicas: [
+      "Tabela periódica completa com fichas dos 118 elementos (dados PubChem/NIH)",
+      "Abas de gases, líquidos e sólidos que mudam com a temperatura ambiente",
+      "Mais de 140 compostos e soluções de 27 cátions com 13 ânions (pH calculado)",
+      "Mais de 1.200 reações com equação, ΔH e condições",
+      "Ferramentas: aquecer, resfriar, definir °C, faísca e corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra",
+      "Atmosfera de ar, oxigênio puro, nitrogênio ou vácuo",
+      "18 experimentos prontos (sódio na água, termite, eletrólise, árvore de prata, chuva dourada…)",
+      "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes"
+    ],
+    controles: [
+      ["Mouse / dedo", "Arrastar na caixa usa a ferramenta escolhida"],
+      ["Espaço", "Pausar e continuar"],
+      ["Esc", "Fechar janelas"]
+    ],
+    tecnologia: [
+      "Autômato celular em Canvas 2D com temperatura, estado físico e condução de calor por célula",
+      "Motor de regras químicas gerado a partir de tabelas (reatividade, solubilidade, ignição, redução)",
+      "Dados dos elementos da PubChem (NIH); toxicologia resumida de ATSDR/CDC, NIH e Manual MSD",
+      "Sons gerados com Web Audio API"
+    ]
+  },
   {
     id: "gol-de-placa",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
