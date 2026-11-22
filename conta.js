@@ -41,12 +41,18 @@
   async function api(acao, dados = {}) {
     const url = servidor();
     if (!url) throw new Error('O sistema de contas ainda não foi ligado. Volte daqui a pouco!');
-    let r;
+    let r, j;
+    // se o servidor não responder em 35 s, desiste e avisa (nada de "Carregando…" para sempre)
+    const ctl = typeof AbortController === 'function' ? new AbortController() : null, tempo = setTimeout(() => ctl && ctl.abort(), 35000);
     try {
       // text/plain evita a "pré-checagem" do navegador, que o Apps Script não responde
-      r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ acao, ...dados }), redirect: 'follow' });
-    } catch (e) { throw new Error('Sem conexão com o servidor de contas. Confira sua internet.'); }
-    let j; try { j = await r.json(); } catch (e) { throw new Error('O servidor de contas respondeu algo estranho. Tente de novo.'); }
+      r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify({ acao, ...dados }), redirect: 'follow', signal: ctl ? ctl.signal : undefined });
+      try { j = await r.json(); } catch (e) { if (e.name === 'AbortError') throw e; throw new Error('O servidor de contas respondeu algo estranho. Tente de novo.'); }
+    } catch (e) {
+      if (e.name === 'AbortError') throw new Error('O servidor demorou demais para responder. Tente de novo.');
+      if (e.message && e.message.startsWith('O servidor')) throw e;
+      throw new Error('Sem conexão com o servidor de contas. Confira sua internet.');
+    } finally { clearTimeout(tempo); }
     if (!j.ok) { const e = new Error(j.erro || 'Algo deu errado.'); if (j.sessao === false) { gravar(null); atualizarBotao(); } throw e; }
     return j;
   }
@@ -115,9 +121,35 @@
   .ct-amg .tx{flex:1;min-width:0} .ct-amg .tx b{display:block;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap} .ct-amg .tx small{color:var(--muted,#9696ab)}
   .ct-amg button{height:32px;border-radius:9px;border:1px solid var(--line2,#33334a);background:var(--surface2,#1a1a25);color:inherit;font:600 12.5px Inter,system-ui,sans-serif;cursor:pointer;padding:0 10px;flex-shrink:0}
   .ct-amg button.ok{background:#22c55e;border-color:transparent;color:#052e12} .ct-amg button:disabled{opacity:.55;cursor:default}
+  .ct-caixa.larga{width:min(600px,100%)}
+  .ct-fot{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;font-weight:800;font-size:17px;position:relative;flex-shrink:0;line-height:1;user-select:none}
+  .ct-fot.emo{font-size:22px} .ct-fot.g{width:64px;height:64px;font-size:26px} .ct-fot.g.emo{font-size:36px} .ct-fot.gg{width:84px;height:84px;font-size:34px} .ct-fot.gg.emo{font-size:48px}
+  .ct-fot i{position:absolute;right:1px;bottom:1px;width:13px;height:13px;border-radius:50%;background:#52525b;border:2.5px solid var(--surface,#13131b)} .ct-fot.g i{width:16px;height:16px;right:2px;bottom:2px} .ct-fot i.on{background:#22c55e}
+  .ct-btn .av.emo{border-radius:50%;font-size:17px}
+  .ct-amg .av.ct-fot{width:34px;height:34px;border-radius:50%;font-size:14px} .ct-amg .av.ct-fot.emo{font-size:19px}
+  .ct-fila{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px;margin:0 -2px 6px;scrollbar-width:thin;scroll-snap-type:x proximity}
+  .ct-it{flex:0 0 76px;display:flex;flex-direction:column;align-items:center;gap:5px;background:none;border:0;color:inherit;cursor:pointer;padding:0;font-family:inherit;scroll-snap-align:start;text-align:center}
+  .ct-it b{font-size:12.5px;max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block}
+  .ct-it small{font-size:11px;color:var(--muted,#9696ab);max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;margin-top:-3px} .ct-it small.on{color:#86efac}
+  .ct-it.sel .ct-fot{box-shadow:0 0 0 3px var(--surface,#13131b),0 0 0 5px #8b5cf6}
+  .ct-it .mais{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;border:2px dashed var(--line2,#44445e);font-size:30px;color:#c4b5fd;transition:.15s}
+  .ct-it:hover .mais{border-color:#8b5cf6;background:#8b5cf61a}
+  .ct-det{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+  .ct-det .tx{flex:1;min-width:150px} .ct-det .tx b{font-size:17px;display:block} .ct-det .tx small{color:var(--muted,#9696ab);font-size:13px;display:block;margin-top:2px}
+  .ct-busca{position:relative;margin-bottom:14px} .ct-busca input{width:100%;height:44px;border-radius:22px;border:1px solid var(--line2,#33334a);background:var(--bg,#0a0a0f);color:inherit;padding:0 16px 0 40px;font:15px Inter,system-ui,sans-serif;outline:none} .ct-busca input:focus{border-color:var(--accent,#8b5cf6)}
+  .ct-busca:before{content:"🔍";position:absolute;left:14px;top:12px;font-size:15px;opacity:.7}
+  .ct-perfis{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+  .ct-perfil{background:var(--surface2,#1a1a25);border:1px solid var(--line,#262634);border-radius:14px;padding:14px 10px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;min-width:0}
+  .ct-perfil b{font-size:14px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ct-perfil small{font-size:11.5px;color:var(--muted,#9696ab);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:-4px} .ct-perfil small.on{color:#86efac}
+  .ct-perfil button{width:100%;height:34px;border-radius:9px;border:1px solid var(--line2,#33334a);background:var(--surface,#13131b);color:inherit;font:700 13px Inter,system-ui,sans-serif;cursor:pointer;margin-top:2px}
+  .ct-perfil button.ok{background:#22c55e;border-color:transparent;color:#052e12} .ct-perfil button:disabled{opacity:.6;cursor:default}
+  .ct-escolha{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px;margin:10px 0}
+  .ct-escolha button{height:42px;border-radius:10px;border:1px solid var(--line,#262634);background:var(--bg,#0a0a0f);font-size:22px;cursor:pointer;padding:0} .ct-escolha button.sel{border-color:#8b5cf6;box-shadow:0 0 0 2px #8b5cf6}
+  .ct-cores{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px} .ct-cores button{width:30px;height:30px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0} .ct-cores button.sel{border-color:#fff;box-shadow:0 0 0 2px #8b5cf6}
   .ct-cod{font:700 19px "Space Grotesk",ui-monospace,monospace;letter-spacing:3px;color:#fcd34d}
   .ct-vazio{color:var(--muted,#9696ab);font-size:13px}
-  @media (max-width:520px){ .ct-btn span.nm{display:none} .ct-codigo input{width:40px;height:50px} }`;
+  @media (max-width:520px){ .ct-amg>div{flex-wrap:wrap} .ct-amg .tx{min-width:calc(100% - 50px)} .ct-amg>div>button{flex:1} .ct-perfis{grid-template-columns:repeat(2,1fr)} .ct-btn span.nm{display:none} .ct-codigo input{width:40px;height:50px} }`;
 
   function montar() {
     const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
@@ -140,7 +172,7 @@
   function presenca() { const c = ler(); if (!c || !servidor()) return; api('presenca', { token: c.token, jogo: jogoAtual }).then(j => { pedidosPend = j.pedidos || 0; atualizarBotao(); }).catch(() => {}); }
   function atualizarBotao() {
     const b = $('#ct-btn'); if (!b) return; const c = ler();
-    if (c && c.usuario) { b.classList.remove('sem'); b.innerHTML = `<span class="av">${esc((c.usuario.nome || '?')[0].toUpperCase())}</span><span class="nm">${esc(c.usuario.nome)}<span class="ct-verif" title="Conta verificada">✓</span></span>` + (pedidosPend > 0 ? `<span class="ct-badge" title="Pedidos de amizade">${pedidosPend}</span>` : ''); b.title = 'Minha conta (verificada)'; }
+    if (c && c.usuario) { b.classList.remove('sem'); const f = foto(c.usuario); b.innerHTML = `<span class="av${f.emoji ? ' emo' : ''}" style="${f.estilo}">${esc(f.txt)}</span><span class="nm">${esc(c.usuario.nome)}<span class="ct-verif" title="Conta verificada">✓</span></span>` + (pedidosPend > 0 ? `<span class="ct-badge" title="Pedidos de amizade">${pedidosPend}</span>` : ''); b.title = 'Minha conta (verificada)'; }
     else { b.classList.add('sem'); b.innerHTML = '<span class="av">👤</span><span class="nm">Entrar</span>'; b.title = 'Entrar ou criar conta'; }
     window.dispatchEvent(new CustomEvent('arcadia-conta', { detail: c && c.usuario }));
   }
@@ -162,6 +194,7 @@
 
   function render(tela, extra) {
     caixa().onclick = null; // cada tela liga os próprios cliques
+    caixa().classList.toggle('larga', tela === 'amigos' || tela === 'add-amigos');
     const c = caixa(), x = '<button class="ct-x" type="button" aria-label="Fechar">✕</button>';
     const semServidor = !servidor() ? `<div class="ct-bloco" style="border-color:#f59e0b55;color:#fcd34d;font-size:13.5px;line-height:1.5">⚙️ O sistema de contas ainda está sendo ligado. Você já pode jogar normalmente sem conta.</div>` : '';
 
@@ -234,7 +267,8 @@
     else if (tela === 'minha') {
       const conta = ler(); if (!conta) return render('entrar');
       const u = conta.usuario || {};
-      c.innerHTML = `${x}<h2>Minha conta</h2><p class="sub">${esc(u.nome)} · ${esc(u.email)}<br><span class="ct-selo">✓ Conta verificada${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span></p>
+      c.innerHTML = `${x}<div class="ct-det" style="margin-bottom:16px">${avatar(u, 'gg')}<div class="tx"><h2 style="margin:0">Minha conta</h2><small>${esc(u.nome)} · ${esc(u.email)}</small><span class="ct-selo">✓ Conta verificada${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span><br><button class="ct-link" id="ct-trocar-foto" style="margin-top:6px">🎨 Trocar foto de perfil</button></div></div>
+        <div class="ct-bloco" id="ct-blk-foto" style="display:none"><h4>Sua foto de perfil</h4><div class="ct-escolha" id="ct-emojis">${FOTOS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div><div class="ct-cores" id="ct-cores">${CORES.map(k => `<button type="button" data-cor="${k}" style="background:${k}" aria-label="Cor"></button>`).join('')}</div><div class="ct-linha"><span class="ct-linha" style="justify-content:flex-start"><span id="ct-previa"></span><small style="color:var(--muted,#9696ab)">É assim que seus amigos vão te ver.</small></span><button class="ct-sec" id="ct-salvar-foto" style="white-space:nowrap">Salvar foto</button></div></div>
         <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">👥 Amigos</b><br><small style="color:var(--muted,#9696ab)">${pedidosPend > 0 ? `<b style="color:#fca5a5">${pedidosPend} pedido${pedidosPend > 1 ? 's' : ''} esperando resposta</b>` : 'Adicione amigos e veja quem está on-line'}</small></span><button class="ct-sec" data-ir="amigos">Abrir</button></div></div>
         <div class="ct-bloco"><h4>🎮 Suas publicações</h4><div class="ct-pubs" id="ct-pubs"><span style="color:var(--muted,#9696ab);font-size:13px"><span class="ct-girando"></span>Carregando…</span></div>
           <div style="margin-top:8px;font-size:12.5px;color:var(--muted,#9696ab)" id="ct-nuvem"></div></div>
@@ -253,6 +287,14 @@
           + `<div style="color:var(--muted,#9696ab);margin-top:4px">${j.sessoesAbertas} aparelho${j.sessoesAbertas === 1 ? '' : 's'} com a conta aberta agora.</div>`;
       }).catch(e => { const l = $('#ct-acessos'); if (l) l.textContent = e.message; if (!ler()) render('entrar'); });
       carregarPublicacoes(conta);
+      { // escolher a foto de perfil
+        const atual = String(u.foto || '').split('|'); let emo = atual.length === 2 ? atual[0] : FOTOS[0], cor = atual.length === 2 ? atual[1] : CORES[0];
+        const marcar = () => { c.querySelectorAll('#ct-emojis button').forEach(b => b.classList.toggle('sel', b.dataset.emoji === emo)); c.querySelectorAll('#ct-cores button').forEach(b => b.classList.toggle('sel', b.dataset.cor === cor)); $('#ct-previa').innerHTML = avatar({ foto: emo + '|' + cor }); };
+        $('#ct-trocar-foto').onclick = () => { const bl = $('#ct-blk-foto'); bl.style.display = bl.style.display === 'none' ? '' : 'none'; marcar(); };
+        $('#ct-emojis').onclick = ev => { const b = ev.target.closest('[data-emoji]'); if (b) { emo = b.dataset.emoji; marcar(); } };
+        $('#ct-cores').onclick = ev => { const b = ev.target.closest('[data-cor]'); if (b) { cor = b.dataset.cor; marcar(); } };
+        $('#ct-salvar-foto').onclick = () => ocupado($('#ct-salvar-foto'), async () => { const j = await api('alterarFoto', { token: conta.token, foto: emo + '|' + cor }); conta.usuario = j.usuario; gravar(conta); atualizarBotao(); render('minha'); erroTela('Foto salva! 🎉', true); });
+      }
       let querLigar = !u.doisFatores;
       $('#ct-chave').onclick = () => { querLigar = !$('#ct-chave').classList.contains('on'); $('#ct-confirma').style.display = 'block'; $('#ct-salvar2f').textContent = querLigar ? 'Ligar verificação em duas etapas' : 'Desligar verificação em duas etapas'; ligarVerSenha(); $('#ct-senha').focus(); };
       $('#ct-salvar2f').onclick = () => ocupado($('#ct-salvar2f'), async () => {
@@ -265,33 +307,66 @@
     }
     else if (tela === 'amigos') {
       const conta = ler(); if (!conta) return render('entrar');
-      const carregando = '<span class="ct-vazio"><span class="ct-girando"></span>Carregando…</span>';
-      c.innerHTML = `${x}<h2>👥 Amigos</h2><p class="sub">Adicione pelo nome ou pelo código de amigo e veja quem está on-line e em qual jogo.</p>
-        <div class="ct-bloco"><div class="ct-linha"><span><small style="color:var(--muted,#9696ab)">Seu código de amigo</small><br><span class="ct-cod" id="ct-cod">········</span></span><button class="ct-sec" id="ct-copiar">Copiar</button></div></div>
-        <div class="ct-bloco"><h4>Adicionar amigo</h4><form id="ct-busca" class="ct-linha" style="gap:8px"><input id="ct-q" maxlength="24" placeholder="Nome ou código (ex.: A1B2C3D4)" autocomplete="off" style="flex:1;min-width:0;height:40px;border-radius:10px;border:1px solid var(--line2,#33334a);background:var(--bg,#0a0a0f);color:inherit;padding:0 12px;font:14px Inter,system-ui,sans-serif;outline:none"><button class="ct-sec" id="ct-buscar">Buscar</button></form><div class="ct-amg" id="ct-res" style="margin-top:8px"></div></div>
-        <div class="ct-bloco" id="ct-blk-rec" style="display:none"><h4>📨 Pedidos recebidos</h4><div class="ct-amg" id="ct-rec"></div></div>
-        <div class="ct-bloco"><h4 id="ct-tit-amg">Seus amigos</h4><div class="ct-amg" id="ct-amg">${carregando}</div></div>
-        <div class="ct-bloco" id="ct-blk-env" style="display:none"><h4>⏳ Pedidos enviados</h4><div class="ct-amg" id="ct-env"></div></div>
+      c.innerHTML = `${x}<h2 id="ct-tit-amg">Amigos</h2><p class="sub">Veja quem está on-line e em qual jogo.</p>
+        <div class="ct-fila" id="ct-fila">${itemAdicionar()}<span class="ct-vazio" style="align-self:center;padding-left:6px"><span class="ct-girando"></span>Carregando…</span></div>
+        <div class="ct-bloco" id="ct-det" style="display:none"></div>
+        <div class="ct-bloco" id="ct-blk-rec" style="display:none"><h4>📨 Pedidos de amizade</h4><div class="ct-amg" id="ct-rec"></div></div>
+        <div class="ct-bloco" id="ct-blk-env" style="display:none"><h4>⏳ Pedidos que você mandou</h4><div class="ct-amg" id="ct-env"></div></div>
+        <div class="ct-bloco"><div class="ct-linha"><span><small style="color:var(--muted,#9696ab)">Seu código de amigo</small><br><span class="ct-cod" id="ct-cod">········</span></span><button class="ct-sec" id="ct-copiar" disabled>Copiar</button></div></div>
         <div class="ct-erro" id="ct-erro"></div>
         <div class="ct-rodape"><button class="ct-link" data-ir="minha">← Minha conta</button><button class="ct-link" id="ct-atualizar">Atualizar</button></div>`;
-      let ultimaBusca = '';
-      const buscar = async () => { const q = $('#ct-q').value.trim(); if (!q) return; ultimaBusca = q; const el = $('#ct-res'); el.innerHTML = carregando; try { const j = await api('buscarAmigos', { token: conta.token, q }); el.innerHTML = j.contas.length ? j.contas.map(k => linhaAmigo(k, botaoBusca(k))).join('') : '<span class="ct-vazio">Ninguém encontrado com esse nome ou código.</span>'; } catch (e) { el.innerHTML = `<span class="ct-vazio">${esc(e.message)}</span>`; } };
-      $('#ct-busca').onsubmit = e => { e.preventDefault(); buscar(); };
-      $('#ct-atualizar').onclick = () => { erroTela(''); carregarAmigos(conta); if (ultimaBusca) buscar(); };
-      $('#ct-copiar').onclick = async () => { const cod = $('#ct-cod').textContent; try { await navigator.clipboard.writeText(cod); erroTela('Código copiado! Mande para seus amigos.', true); } catch (e) { erroTela('Seu código: ' + cod, true); } };
-      c.onclick = async ev => {
-        const b = ev.target.closest('[data-ac]'); if (!b || b.disabled) return;
-        const ac = b.dataset.ac, id = b.dataset.id, nome = b.dataset.nome || '';
-        if (ac === 'remover' && !confirm(`Desfazer a amizade com ${nome}?`)) return;
-        const acoes = { pedir: ['pedirAmizade', {}], aceitar: ['responderAmizade', { aceitar: true }], recusar: ['responderAmizade', { aceitar: false }], remover: ['removerAmizade', {}], cancelar: ['removerAmizade', {}] };
-        b.disabled = true;
-        try {
-          const j = await api(acoes[ac][0], { token: conta.token, id, ...acoes[ac][1] });
-          erroTela(ac === 'pedir' ? (j.estado === 'aceita' ? `Agora você e ${nome} são amigos! 🎉` : `Pedido enviado para ${nome}.`) : ac === 'aceitar' ? `Agora você e ${nome} são amigos! 🎉` : ac === 'recusar' ? 'Pedido recusado.' : ac === 'cancelar' ? 'Pedido cancelado.' : 'Amizade desfeita.', true);
-          await carregarAmigos(conta); if (ultimaBusca) buscar();
-        } catch (e) { erroTela(e.message); b.disabled = false; }
+      $('#ct-atualizar').onclick = () => { erroTela(''); carregarAmigos(conta); };
+      $('#ct-copiar').onclick = async () => { const cod = $('#ct-cod').dataset.cod; if (!cod) return; try { await navigator.clipboard.writeText(cod); erroTela('Código copiado! Mande para seus amigos.', true); } catch (e) { erroTela('Seu código: ' + cod, true); } };
+      c.onclick = ev => {
+        const it = ev.target.closest('[data-amigo]'); if (it) return mostrarAmigo(it.dataset.amigo);
+        acaoAmizade(ev, conta, () => carregarAmigos(conta));
       };
       carregarAmigos(conta);
+    }
+    else if (tela === 'add-amigos') {
+      const conta = ler(); if (!conta) return render('entrar');
+      c.innerHTML = `${x}<h2>Adicionar amigos</h2><p class="sub">Escolha alguém da lista ou pesquise pelo nome (ou código de amigo).</p>
+        <form class="ct-busca" id="ct-busca"><input id="ct-q" type="search" maxlength="24" placeholder="Pesquisar um nome" autocomplete="off" enterkeyhint="search"></form>
+        <h4 id="ct-tit-lista" style="margin:0 0 10px;font-size:13px;color:var(--muted,#9696ab);text-transform:uppercase;letter-spacing:.06em">Todos os perfis</h4>
+        <div class="ct-perfis" id="ct-lista"></div>
+        <div style="text-align:center;margin-top:12px"><button class="ct-sec" id="ct-mais" style="display:none">Mostrar mais</button></div>
+        <div class="ct-erro" id="ct-erro"></div>
+        <div class="ct-rodape"><button class="ct-link" data-ir="amigos">← Amigos</button></div>`;
+      let proximo = 0, pedido = 0, espera = 0;
+      const lista = $('#ct-lista'), tit = $('#ct-tit-lista'), mais = $('#ct-mais');
+      const carregando = '<span class="ct-vazio" style="grid-column:1/-1"><span class="ct-girando"></span>Carregando…</span>';
+      const vazio = t => `<span class="ct-vazio" style="grid-column:1/-1;padding:10px 0">${t}</span>`;
+      const todos = async (inicio = 0) => {
+        const n = ++pedido; if (!inicio) lista.innerHTML = carregando; mais.disabled = true;
+        try {
+          const j = await api('listarPerfis', { token: conta.token, inicio }); if (n !== pedido || !lista.isConnected) return;
+          tit.textContent = `Todos os perfis · ${j.total}`; proximo = j.proximo;
+          const html = j.contas.map(cartaoPerfil).join('');
+          if (inicio) lista.insertAdjacentHTML('beforeend', html); else lista.innerHTML = html || vazio('Ainda não tem mais ninguém com conta por aqui. Chame seus amigos!');
+          mais.style.display = proximo ? '' : 'none';
+        } catch (e) { if (n === pedido) lista.innerHTML = vazio(esc(e.message) + ' <button class="ct-link" data-recarregar>Tentar de novo</button>'); }
+        mais.disabled = false;
+      };
+      const buscar = async q => {
+        const n = ++pedido; lista.innerHTML = carregando; mais.style.display = 'none'; tit.textContent = `Resultados para “${q}”`;
+        try {
+          const j = await api('buscarAmigos', { token: conta.token, q }); if (n !== pedido || !lista.isConnected) return;
+          lista.innerHTML = j.contas.length ? j.contas.map(cartaoPerfil).join('') : vazio('Ninguém encontrado com esse nome ou código.');
+        } catch (e) { if (n === pedido) lista.innerHTML = vazio(esc(e.message)); }
+      };
+      const digitou = () => { clearTimeout(espera); const q = $('#ct-q').value.trim(); espera = setTimeout(() => q.length >= 2 ? buscar(q) : (q ? 0 : todos()), q ? 450 : 0); };
+      $('#ct-q').oninput = digitou;
+      $('#ct-busca').onsubmit = e => { e.preventDefault(); clearTimeout(espera); const q = $('#ct-q').value.trim(); if (q.length >= 2) buscar(q); else if (!q) todos(); else erroTela('Digite pelo menos 2 letras.'); };
+      mais.onclick = () => todos(proximo);
+      c.onclick = ev => {
+        if (ev.target.closest('[data-recarregar]')) return todos();
+        acaoAmizade(ev, conta, (b, j, ac) => { // atualiza só o cartão, sem recarregar a lista
+          b.className = ''; b.disabled = true;
+          b.textContent = ac === 'aceitar' || j.estado === 'aceita' ? 'Amigos ✓' : 'Pedido enviado';
+          presenca();
+        });
+      };
+      todos();
     }
     else if (tela === 'pronto') {
       const u = (ler() || {}).usuario || {};
@@ -317,25 +392,71 @@
   }
   function concluirLogin(j) { gravar({ token: j.token, usuario: j.usuario }); pendente = null; atualizarBotao(); render('pronto'); presenca(); }
   /* ---------------- amigos ---------------- */
+  // foto de perfil: um emoji sobre uma cor ("🦊|#8b5cf6"); sem foto, a inicial do nome
+  const FOTOS = ['🦊', '🐼', '🐸', '🐯', '🐵', '🐙', '🦄', '🐲', '🦖', '🐱', '🐶', '🐧', '🐨', '🐰', '🦉', '🐝', '🤖', '👾', '👻', '🎃', '🥷', '🧙', '🦸', '👽', '😎', '🤠', '🔥', '⚡', '🌈', '🍕', '⚽', '🎮', '🚀', '👑', '💎', '🌵'];
+  const CORES = ['#8b5cf6', '#6366f1', '#3b82f6', '#22d3ee', '#14b8a6', '#22c55e', '#84cc16', '#f59e0b', '#f97316', '#ef4444', '#ec4899', '#64748b'];
+  function foto(u) {
+    const f = String((u && u.foto) || '').split('|');
+    if (f.length === 2 && f[0] && /^#[0-9a-fA-F]{6}$/.test(f[1])) return { emoji: true, txt: f[0], estilo: `background:${f[1]}` };
+    return { emoji: false, txt: String((u && u.nome) || '?')[0].toUpperCase(), estilo: '' };
+  }
+  function avatar(u, tam = '', online) { const f = foto(u); return `<span class="ct-fot ${tam}${f.emoji ? ' emo' : ''}" style="${f.estilo}">${esc(f.txt)}${online === undefined ? '' : `<i class="${online ? 'on' : ''}"></i>`}</span>`; }
   function tempoAtras(t) { const s = (Date.now() - t) / 1000; if (s < 3600) return `há ${Math.max(1, Math.round(s / 60))} min`; if (s < 86400) return `há ${Math.round(s / 3600)} h`; const d = Math.round(s / 86400); return d === 1 ? 'ontem' : `há ${d} dias`; }
+  const statusCurto = k => k.online ? (k.jogo ? '🎮 ' + k.jogo : 'On-line') : k.vistoEm ? 'Visto ' + tempoAtras(k.vistoEm) : 'Off-line';
   function linhaAmigo(k, botoes) {
     const st = k.online ? (k.jogo ? `🟢 jogando <b style="color:#86efac;display:inline">${esc(k.jogo)}</b>` : '🟢 on-line agora') : k.vistoEm ? 'visto ' + tempoAtras(k.vistoEm) : 'ainda não apareceu por aqui';
-    return `<div><span class="av">${esc((k.nome || '?')[0].toUpperCase())}<i class="${k.online ? 'on' : ''}"></i></span><span class="tx"><b>${esc(k.nome)}</b><small>#${esc(k.codigo)} · ${st}</small></span>${botoes}</div>`;
+    return `<div>${avatar(k, 'av', k.online)}<span class="tx"><b>${esc(k.nome)}</b><small>#${esc(k.codigo)} · ${st}</small></span>${botoes}</div>`;
   }
   const bt = (ac, k, txt, cls = '') => `<button class="${cls}" data-ac="${ac}" data-id="${esc(k.id)}" data-nome="${esc(k.nome)}">${txt}</button>`;
   function botaoBusca(k) { return k.relacao === 'amigo' ? '<button disabled>Amigos ✓</button>' : k.relacao === 'enviado' ? '<button disabled>Pedido enviado</button>' : k.relacao === 'recebido' ? bt('aceitar', k, 'Aceitar', 'ok') : bt('pedir', k, '＋ Adicionar', 'ok'); }
+  const itemAdicionar = () => `<button class="ct-it" data-ir="add-amigos" title="Adicionar amigos"><span class="mais">＋</span><b>Adicionar</b><small>&nbsp;</small></button>`;
+  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}</div>`; }
+  let amigosCache = [];
+  function mostrarAmigo(id) {
+    const d = $('#ct-det'); if (!d) return;
+    const k = amigosCache.find(a => a.id === id), it = caixa().querySelector(`[data-amigo="${CSS.escape(id)}"]`), aberto = it && it.classList.contains('sel');
+    caixa().querySelectorAll('.ct-it.sel').forEach(e => e.classList.remove('sel'));
+    if (!k || aberto) { d.style.display = 'none'; return; }
+    it.classList.add('sel');
+    const st = k.online ? (k.jogo ? `🟢 Jogando <b style="color:#86efac">${esc(k.jogo)}</b>` : '🟢 On-line agora') : k.vistoEm ? 'Visto ' + tempoAtras(k.vistoEm) : 'Ainda não apareceu por aqui';
+    d.innerHTML = `<div class="ct-det">${avatar(k, 'g', k.online)}<div class="tx"><b>${esc(k.nome)}</b><small>${st}</small><small>#${esc(k.codigo)}${k.em ? ' · amigos desde ' + new Date(k.em).toLocaleDateString('pt-BR') : ''}</small></div>${bt('remover', k, 'Desfazer amizade', 'ct-sec')}</div>`;
+    d.style.display = '';
+  }
+  // clique em "Adicionar", "Aceitar", "Recusar", "Desfazer", "Cancelar"
+  async function acaoAmizade(ev, conta, depois) {
+    const b = ev.target.closest('[data-ac]'); if (!b || b.disabled) return;
+    const ac = b.dataset.ac, id = b.dataset.id, nome = b.dataset.nome || '';
+    if (ac === 'remover' && !confirm(`Desfazer a amizade com ${nome}?`)) return;
+    const acoes = { pedir: ['pedirAmizade', {}], aceitar: ['responderAmizade', { aceitar: true }], recusar: ['responderAmizade', { aceitar: false }], remover: ['removerAmizade', {}], cancelar: ['removerAmizade', {}] };
+    b.disabled = true; const txt = b.textContent; b.innerHTML = '<span class="ct-girando"></span>';
+    try {
+      const j = await api(acoes[ac][0], { token: conta.token, id, ...acoes[ac][1] });
+      erroTela(ac === 'pedir' ? (j.estado === 'aceita' ? `Agora você e ${nome} são amigos! 🎉` : `Pedido enviado para ${nome}.`) : ac === 'aceitar' ? `Agora você e ${nome} são amigos! 🎉` : ac === 'recusar' ? 'Pedido recusado.' : ac === 'cancelar' ? 'Pedido cancelado.' : 'Amizade desfeita.', true);
+      await depois(b, j, ac);
+    } catch (e) { erroTela(e.message); b.textContent = txt; b.disabled = false; }
+  }
   async function carregarAmigos(conta) {
+    const fila = $('#ct-fila');
     try {
       const j = await api('listarAmizades', { token: conta.token });
-      if (!$('#ct-amg')) return;
-      $('#ct-cod').textContent = j.meuCodigo;
+      if (!$('#ct-fila') || !$('#ct-fila').isConnected) return;
+      amigosCache = j.amigos;
+      const cod = $('#ct-cod'); cod.textContent = '#' + j.meuCodigo; cod.dataset.cod = j.meuCodigo; $('#ct-copiar').disabled = false;
       $('#ct-blk-rec').style.display = j.recebidos.length ? '' : 'none'; $('#ct-rec').innerHTML = j.recebidos.map(k => linhaAmigo(k, bt('aceitar', k, 'Aceitar', 'ok') + bt('recusar', k, 'Recusar'))).join('');
       $('#ct-blk-env').style.display = j.enviados.length ? '' : 'none'; $('#ct-env').innerHTML = j.enviados.map(k => linhaAmigo(k, bt('cancelar', k, 'Cancelar'))).join('');
       const on = j.amigos.filter(k => k.online).length;
-      $('#ct-tit-amg').textContent = `Seus amigos · ${j.amigos.length}${on ? ` · ${on} on-line` : ''}`;
-      $('#ct-amg').innerHTML = j.amigos.length ? j.amigos.map(k => linhaAmigo(k, bt('remover', k, 'Desfazer'))).join('') : '<span class="ct-vazio">Você ainda não tem amigos aqui. Busque pelo nome ou passe o seu código.</span>';
+      $('#ct-tit-amg').textContent = `Amigos (${j.amigos.length})`;
+      $('#ct-tit-amg').nextElementSibling.textContent = j.amigos.length ? (on ? `${on} on-line agora. Toque num amigo para ver mais.` : 'Ninguém on-line agora. Toque num amigo para ver mais.') : 'Você ainda não tem amigos aqui. Toque em ＋ para adicionar!';
+      $('#ct-fila').innerHTML = itemAdicionar() + j.amigos.map(k => `<button class="ct-it" data-amigo="${esc(k.id)}" title="${esc(k.nome)}">${avatar(k, 'g', k.online)}<b>${esc(k.nome)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small></button>`).join('');
+      $('#ct-fila').querySelectorAll('[data-ir]').forEach(b => b.onclick = () => render(b.dataset.ir));
+      $('#ct-det').style.display = 'none';
       pedidosPend = j.recebidos.length; atualizarBotao();
-    } catch (e) { const el = $('#ct-amg'); if (el) el.innerHTML = `<span class="ct-vazio">${esc(e.message)}</span>`; }
+    } catch (e) {
+      if (!fila || !fila.isConnected) return;
+      fila.innerHTML = itemAdicionar() + `<span class="ct-vazio" style="align-self:center;padding-left:6px">${esc(e.message)} <button class="ct-link" id="ct-tentar">Tentar de novo</button></span>`;
+      fila.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => render(b.dataset.ir));
+      $('#ct-tentar').onclick = () => { fila.innerHTML = itemAdicionar() + '<span class="ct-vazio" style="align-self:center;padding-left:6px"><span class="ct-girando"></span>Carregando…</span>'; fila.querySelectorAll('[data-ir]').forEach(b => b.onclick = () => render(b.dataset.ir)); carregarAmigos(conta); };
+    }
   }
 
   // usado pela plataforma, Studio e jogos: chama o servidor já com o token da conta (se houver)

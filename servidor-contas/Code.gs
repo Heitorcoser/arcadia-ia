@@ -47,7 +47,7 @@ function erro(msg, extra) { var e = new Error(msg); e.publico = true; if (extra)
 
 /* ---------------------------- planilha ---------------------------- */
 var TABELAS = {
-  Contas: ['id', 'email', 'nome', 'sal', 'hash', 'verificado', 'doisFatores', 'criadoEm', 'falhas', 'bloqueadoAte', 'ultimoAcesso'],
+  Contas: ['id', 'email', 'nome', 'sal', 'hash', 'verificado', 'doisFatores', 'criadoEm', 'falhas', 'bloqueadoAte', 'ultimoAcesso', 'foto'],
   Codigos: ['desafio', 'email', 'tipo', 'hashCodigo', 'expira', 'tentativas', 'usado', 'dados'],
   Sessoes: ['hashToken', 'email', 'criadoEm', 'expira', 'dispositivo', 'ativa'],
   Acessos: ['email', 'data', 'dispositivo', 'metodo', 'resultado'],
@@ -64,9 +64,15 @@ function aba(nome) {
     sh = ss.insertSheet(nome); sh.appendRow(TABELAS[nome]); sh.setFrozenRows(1);
     var padrao = ss.getSheetByName('Página1') || ss.getSheetByName('Sheet1');
     if (padrao && ss.getSheets().length > 1) ss.deleteSheet(padrao);
+  } else if (!abaConferida[nome]) {
+    var n = TABELAS[nome].length;
+    if (sh.getMaxColumns() < n) sh.insertColumnsAfter(sh.getMaxColumns(), n - sh.getMaxColumns());
+    if (sh.getRange(1, n).getValue() === '') sh.getRange(1, n).setValue(TABELAS[nome][n - 1]); // a tabela ganhou coluna nova
   }
+  abaConferida[nome] = true;
   return sh;
 }
+var abaConferida = {};
 function linhas(nome) {
   var sh = aba(nome), v = sh.getDataRange().getValues(), cab = TABELAS[nome], out = [];
   for (var i = 1; i < v.length; i++) { var o = { _linha: i + 1 }; for (var j = 0; j < cab.length; j++) o[cab[j]] = v[i][j]; out.push(o); }
@@ -139,7 +145,7 @@ function contaDoToken(token) {
   var c = achar('Contas', 'email', s.email); if (!c) throw erro('Conta não encontrada.', { sessao: false });
   return { conta: c, sessao: s };
 }
-function publico(c) { return { id: String(c.id), nome: c.nome, email: c.email, doisFatores: c.doisFatores === true || String(c.doisFatores) === 'TRUE', criadoEm: Number(c.criadoEm) }; }
+function publico(c) { return { id: String(c.id), nome: c.nome, email: c.email, doisFatores: c.doisFatores === true || String(c.doisFatores) === 'TRUE', criadoEm: Number(c.criadoEm), foto: String(c.foto || '') }; }
 function registrarAcesso(email, disp, metodo, resultado) {
   inserir('Acessos', { email: email, data: Date.now(), dispositivo: JSON.stringify(disp), metodo: metodo, resultado: resultado });
 }
@@ -390,7 +396,7 @@ function codigoAmigo(id) { return String(id).slice(0, 8).toUpperCase(); }
 function mapaPresenca() { var m = {}; linhas('Presenca').forEach(function (p) { m[String(p.id)] = p; }); return m; }
 function cartaoConta(c, pres) {
   var p = pres[cid(c.id)], on = !!(p && Date.now() - Number(p.quando) < ONLINE_MS);
-  return { id: String(c.id), nome: c.nome, codigo: codigoAmigo(c.id), desde: Number(c.criadoEm), online: on, vistoEm: p ? Number(p.quando) : 0, jogo: on ? String(p.jogo || '') : '' };
+  return { id: String(c.id), nome: c.nome, foto: String(c.foto || ''), codigo: codigoAmigo(c.id), desde: Number(c.criadoEm), online: on, vistoEm: p ? Number(p.quando) : 0, jogo: on ? String(p.jogo || '') : '' };
 }
 function amizadeEntre(a, b) {
   var l = linhas('Amizades'), A = cid(a), B = cid(b);
@@ -443,6 +449,21 @@ var ACOES_AMIGOS = {
     var eu = String(contaDoToken(r.token).conta.id), ex = amizadeEntre(eu, String(r.id || ''));
     if (ex) aba('Amizades').deleteRow(ex._linha);
     return {};
+  },
+  // todos os perfis (contas verificadas), quem está on-line primeiro; de 30 em 30
+  listarPerfis: function (r) {
+    var conta = contaDoToken(r.token).conta, pres = mapaPresenca(), rel = relacoesDe(conta.id), por = 30, ini = Math.max(0, Math.floor(Number(r.inicio) || 0));
+    var l = linhas('Contas').filter(function (c) { return sim(c.verificado) && String(c.id) !== String(conta.id); })
+      .map(function (c) { var k = cartaoConta(c, pres); k.relacao = rel[k.id] || ''; return k; })
+      .sort(function (a, b) { return (b.online - a.online) || (b.vistoEm - a.vistoEm) || (b.desde - a.desde); });
+    return { contas: l.slice(ini, ini + por), total: l.length, proximo: ini + por < l.length ? ini + por : 0 };
+  },
+  // foto de perfil: um emoji sobre uma cor (ex.: "🦊|#8b5cf6")
+  alterarFoto: function (r) {
+    var x = contaDoToken(r.token), f = String(r.foto || ''), m = f.split('|');
+    if (f && (m.length !== 2 || !m[0] || m[0].length > 12 || /[<>"'&\s]/.test(m[0]) || !/^#[0-9a-fA-F]{6}$/.test(m[1]))) throw erro('Foto inválida.');
+    atualizar('Contas', x.conta, { foto: f });
+    return { usuario: publico(x.conta) };
   },
   listarAmizades: function (r) {
     var conta = contaDoToken(r.token).conta, E = cid(conta.id), pres = mapaPresenca(), contas = {};
