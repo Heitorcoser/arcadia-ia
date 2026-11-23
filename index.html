@@ -321,7 +321,7 @@
 /* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
    Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
    estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
-const VERSAO_HTML = "1.20.0";
+const VERSAO_HTML = "1.21.0";
 (function () {
   const carregar = v => {
     const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;
@@ -667,7 +667,7 @@ window.ARCADIA_INICIAR = () => {
       <article class="card de-player" data-jogar-p="${esc(j.chave)}">
         <div class="card-cover">${j.capaUrl ? `<img src="${esc(j.capaUrl)}" alt="Capa de ${esc(j.nome)}" loading="lazy">` : `<span class="ph">${iconeGen(j.genero)}</span>`}
           <span class="badge g" style="background:#8b5cf6">${esc(j.genero || "Outro")}</span>
-          <span class="badge autor">por ${esc(j.autor || "Anônimo")}${j.verificado ? ' <span class="verif" title="Conta verificada">✓</span>' : ""}</span>
+          <span class="badge autor">por ${esc(j.autor || "Anônimo")}${j.autorSelo === 'criador' ? ' <span title="Criador da Arcádia">👑</span>' : j.autorSelo === 'verificado' ? ' <span class="verif" title="Verificado">☑️</span>' : ""}</span>
           ${j.fonte === "local" ? '<span class="badge local">Neste navegador</span>' : j.fonte === "online" ? '<span class="badge online">🌍 Online</span>' : ""}
           ${novoP(j) ? '<span class="badge new" style="top:auto;bottom:12px;right:12px">Novo</span>' : ""}
         </div>

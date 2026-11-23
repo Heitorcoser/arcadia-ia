@@ -104,6 +104,8 @@
   .ct-girando{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:ctGira .8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes ctGira{to{transform:rotate(360deg)}}
   .ct-verif{color:#22d3ee;font-weight:800;margin-left:3px}
+  .ct-s{display:inline-block;margin-left:4px;font-size:.92em;line-height:1}
+  .ct-perfil button.selo{height:26px;font-size:11.5px;margin-top:0;background:transparent;border-style:dashed}
   .ct-selo{display:inline-flex;align-items:center;gap:5px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#67e8f9;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
   .ct-vant{display:grid;gap:6px;font-size:13.5px;line-height:1.4} .ct-vant div{display:flex;gap:8px}
   .ct-pubs{display:grid;gap:6px;max-height:220px;overflow:auto}
@@ -172,7 +174,7 @@
   function presenca() { const c = ler(); if (!c || !servidor()) return; api('presenca', { token: c.token, jogo: jogoAtual }).then(j => { pedidosPend = j.pedidos || 0; atualizarBotao(); }).catch(() => {}); }
   function atualizarBotao() {
     const b = $('#ct-btn'); if (!b) return; const c = ler();
-    if (c && c.usuario) { b.classList.remove('sem'); const f = foto(c.usuario); b.innerHTML = `<span class="av${f.emoji ? ' emo' : ''}" style="${f.estilo}">${esc(f.txt)}</span><span class="nm">${esc(c.usuario.nome)}<span class="ct-verif" title="Conta verificada">✓</span></span>` + (pedidosPend > 0 ? `<span class="ct-badge" title="Pedidos de amizade">${pedidosPend}</span>` : ''); b.title = 'Minha conta (verificada)'; }
+    if (c && c.usuario) { b.classList.remove('sem'); const f = foto(c.usuario); b.innerHTML = `<span class="av${f.emoji ? ' emo' : ''}" style="${f.estilo}">${esc(f.txt)}</span><span class="nm">${esc(c.usuario.nome)}${seloIco(c.usuario.selo)}</span>` + (pedidosPend > 0 ? `<span class="ct-badge" title="Pedidos de amizade">${pedidosPend}</span>` : ''); b.title = 'Minha conta (verificada)'; }
     else { b.classList.add('sem'); b.innerHTML = '<span class="av">👤</span><span class="nm">Entrar</span>'; b.title = 'Entrar ou criar conta'; }
     window.dispatchEvent(new CustomEvent('arcadia-conta', { detail: c && c.usuario }));
   }
@@ -267,7 +269,8 @@
     else if (tela === 'minha') {
       const conta = ler(); if (!conta) return render('entrar');
       const u = conta.usuario || {};
-      c.innerHTML = `${x}<div class="ct-det" style="margin-bottom:16px">${avatar(u, 'gg')}<div class="tx"><h2 style="margin:0">Minha conta</h2><small>${esc(u.nome)} · ${esc(u.email)}</small><span class="ct-selo">✓ Conta verificada${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span><br><button class="ct-link" id="ct-trocar-foto" style="margin-top:6px">🎨 Trocar foto de perfil</button></div></div>
+      c.innerHTML = `${x}<div class="ct-det" style="margin-bottom:16px">${avatar(u, 'gg')}<div class="tx"><h2 style="margin:0">Minha conta</h2><small>${esc(u.nome)} · ${esc(u.email)}</small><span class="ct-selo">${u.selo === 'criador' ? '👑 Criador da Arcádia' : u.selo === 'verificado' ? '☑️ Verificado' : '✓ E-mail confirmado'}${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span><br><button class="ct-link" id="ct-trocar-foto" style="margin-top:6px">🎨 Trocar foto de perfil</button></div></div>
+        <div class="ct-bloco"><b style="font-size:14.5px">🎮 Publicar no Studio</b><br><small style="color:var(--muted,#9696ab)">${esc(u.limites || (u.selo ? 'publicações ilimitadas, até ~20 MB cada' : 'até 60 publicações de até ~2 MB'))}${u.selo === 'criador' ? '. Você pode dar o ☑️ para outras contas em 👥 Amigos → Adicionar.' : u.selo === 'verificado' ? (u.seloOrigem === 'curtidas' ? ' · selo ganho com um jogo de 1.000 curtidas' : ' · selo dado pelo criador') : '. Ganhe o ☑️ com um jogo de 1.000 curtidas, ou com a verificação do criador.'}</small></div>
         <div class="ct-bloco" id="ct-blk-foto" style="display:none"><h4>Sua foto de perfil</h4><div class="ct-escolha" id="ct-emojis">${FOTOS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div><div class="ct-cores" id="ct-cores">${CORES.map(k => `<button type="button" data-cor="${k}" style="background:${k}" aria-label="Cor"></button>`).join('')}</div><div class="ct-linha"><span class="ct-linha" style="justify-content:flex-start"><span id="ct-previa"></span><small style="color:var(--muted,#9696ab)">É assim que seus amigos vão te ver.</small></span><button class="ct-sec" id="ct-salvar-foto" style="white-space:nowrap">Salvar foto</button></div></div>
         <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">👥 Amigos</b><br><small style="color:var(--muted,#9696ab)">${pedidosPend > 0 ? `<b style="color:#fca5a5">${pedidosPend} pedido${pedidosPend > 1 ? 's' : ''} esperando resposta</b>` : 'Adicione amigos e veja quem está on-line'}</small></span><button class="ct-sec" data-ir="amigos">Abrir</button></div></div>
         <div class="ct-bloco"><h4>🎮 Suas publicações</h4><div class="ct-pubs" id="ct-pubs"><span style="color:var(--muted,#9696ab);font-size:13px"><span class="ct-girando"></span>Carregando…</span></div>
@@ -360,6 +363,8 @@
       mais.onclick = () => todos(proximo);
       c.onclick = ev => {
         if (ev.target.closest('[data-recarregar]')) return todos();
+        const bs = ev.target.closest('[data-selo]');
+        if (bs) { bs.disabled = true; api('darSelo', { token: conta.token, id: bs.dataset.selo, dar: bs.dataset.dar === '1' }).then(j => { erroTela(bs.dataset.dar === '1' ? `☑️ ${j.conta.nome} agora é verificado.` : `Selo tirado de ${j.conta.nome}.`, true); const q = $('#ct-q').value.trim(); if (q.length >= 2) buscar(q); else todos(); }).catch(e => { erroTela(e.message); bs.disabled = false; }); return; }
         acaoAmizade(ev, conta, (b, j, ac) => { // atualiza só o cartão, sem recarregar a lista
           b.className = ''; b.disabled = true;
           b.textContent = ac === 'aceitar' || j.estado === 'aceita' ? 'Amigos ✓' : 'Pedido enviado';
@@ -405,12 +410,14 @@
   const statusCurto = k => k.online ? (k.jogo ? '🎮 ' + k.jogo : 'On-line') : k.vistoEm ? 'Visto ' + tempoAtras(k.vistoEm) : 'Off-line';
   function linhaAmigo(k, botoes) {
     const st = k.online ? (k.jogo ? `🟢 jogando <b style="color:#86efac;display:inline">${esc(k.jogo)}</b>` : '🟢 on-line agora') : k.vistoEm ? 'visto ' + tempoAtras(k.vistoEm) : 'ainda não apareceu por aqui';
-    return `<div>${avatar(k, 'av', k.online)}<span class="tx"><b>${esc(k.nome)}</b><small>#${esc(k.codigo)} · ${st}</small></span>${botoes}</div>`;
+    return `<div>${avatar(k, 'av', k.online)}<span class="tx"><b>${esc(k.nome)}${seloIco(k.selo)}</b><small>#${esc(k.codigo)} · ${st}</small></span>${botoes}</div>`;
   }
   const bt = (ac, k, txt, cls = '') => `<button class="${cls}" data-ac="${ac}" data-id="${esc(k.id)}" data-nome="${esc(k.nome)}">${txt}</button>`;
   function botaoBusca(k) { return k.relacao === 'amigo' ? '<button disabled>Amigos ✓</button>' : k.relacao === 'enviado' ? '<button disabled>Pedido enviado</button>' : k.relacao === 'recebido' ? bt('aceitar', k, 'Aceitar', 'ok') : bt('pedir', k, '＋ Adicionar', 'ok'); }
   const itemAdicionar = () => `<button class="ct-it" data-ir="add-amigos" title="Adicionar amigos"><span class="mais">＋</span><b>Adicionar</b><small>&nbsp;</small></button>`;
-  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}</div>`; }
+  const seloIco = s => s === 'criador' ? '<span class="ct-s" title="Criador da Arcádia">👑</span>' : s === 'verificado' ? '<span class="ct-s" title="Verificado">☑️</span>' : '';
+  const souCriador = () => ((ler() || {}).usuario || {}).selo === 'criador';
+  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}${seloIco(k.selo)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}${souCriador() && k.selo !== 'criador' ? `<button class="selo" data-selo="${esc(k.id)}" data-dar="${k.selo ? 0 : 1}">${k.selo ? 'Tirar ☑️' : 'Dar ☑️'}</button>` : ''}</div>`; }
   let amigosCache = [];
   function mostrarAmigo(id) {
     const d = $('#ct-det'); if (!d) return;
@@ -419,7 +426,7 @@
     if (!k || aberto) { d.style.display = 'none'; return; }
     it.classList.add('sel');
     const st = k.online ? (k.jogo ? `🟢 Jogando <b style="color:#86efac">${esc(k.jogo)}</b>` : '🟢 On-line agora') : k.vistoEm ? 'Visto ' + tempoAtras(k.vistoEm) : 'Ainda não apareceu por aqui';
-    d.innerHTML = `<div class="ct-det">${avatar(k, 'g', k.online)}<div class="tx"><b>${esc(k.nome)}</b><small>${st}</small><small>#${esc(k.codigo)}${k.em ? ' · amigos desde ' + new Date(k.em).toLocaleDateString('pt-BR') : ''}</small></div>${bt('remover', k, 'Desfazer amizade', 'ct-sec')}</div>`;
+    d.innerHTML = `<div class="ct-det">${avatar(k, 'g', k.online)}<div class="tx"><b>${esc(k.nome)}${seloIco(k.selo)}</b><small>${st}</small><small>#${esc(k.codigo)}${k.em ? ' · amigos desde ' + new Date(k.em).toLocaleDateString('pt-BR') : ''}</small></div>${bt('remover', k, 'Desfazer amizade', 'ct-sec')}</div>`;
     d.style.display = '';
   }
   // clique em "Adicionar", "Aceitar", "Recusar", "Desfazer", "Cancelar"
@@ -447,7 +454,7 @@
       const on = j.amigos.filter(k => k.online).length;
       $('#ct-tit-amg').textContent = `Amigos (${j.amigos.length})`;
       $('#ct-tit-amg').nextElementSibling.textContent = j.amigos.length ? (on ? `${on} on-line agora. Toque num amigo para ver mais.` : 'Ninguém on-line agora. Toque num amigo para ver mais.') : 'Você ainda não tem amigos aqui. Toque em ＋ para adicionar!';
-      $('#ct-fila').innerHTML = itemAdicionar() + j.amigos.map(k => `<button class="ct-it" data-amigo="${esc(k.id)}" title="${esc(k.nome)}">${avatar(k, 'g', k.online)}<b>${esc(k.nome)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small></button>`).join('');
+      $('#ct-fila').innerHTML = itemAdicionar() + j.amigos.map(k => `<button class="ct-it" data-amigo="${esc(k.id)}" title="${esc(k.nome)}">${avatar(k, 'g', k.online)}<b>${esc(k.nome)}${seloIco(k.selo)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small></button>`).join('');
       $('#ct-fila').querySelectorAll('[data-ir]').forEach(b => b.onclick = () => render(b.dataset.ir));
       $('#ct-det').style.display = 'none';
       pedidosPend = j.recebidos.length; atualizarBotao();

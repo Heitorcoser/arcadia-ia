@@ -17,6 +17,10 @@ var CONFIG = {
   LOGIN_BLOQUEIO_MIN: 15,
   SESSAO_DIAS: 30,
   ACESSOS_GUARDADOS: 15,
+  // contas de criador da Arcádia: dão e tiram o selo de verificado; publicam sem limite
+  CRIADORES: ['hdcoser@gmail.com'],
+  SELO_CURTIDAS: 1000,               // um jogo com essa quantidade de curtidas dá o selo de verificado ao autor, sozinho
+  LIMITE_PUBLICACOES: 60,            // contas comuns (verificados e criadores: sem limite)
 };
 
 /* ---------------------------- entrada HTTP ---------------------------- */
@@ -47,7 +51,7 @@ function erro(msg, extra) { var e = new Error(msg); e.publico = true; if (extra)
 
 /* ---------------------------- planilha ---------------------------- */
 var TABELAS = {
-  Contas: ['id', 'email', 'nome', 'sal', 'hash', 'verificado', 'doisFatores', 'criadoEm', 'falhas', 'bloqueadoAte', 'ultimoAcesso', 'foto'],
+  Contas: ['id', 'email', 'nome', 'sal', 'hash', 'verificado', 'doisFatores', 'criadoEm', 'falhas', 'bloqueadoAte', 'ultimoAcesso', 'foto', 'selo'],
   Codigos: ['desafio', 'email', 'tipo', 'hashCodigo', 'expira', 'tentativas', 'usado', 'dados'],
   Sessoes: ['hashToken', 'email', 'criadoEm', 'expira', 'dispositivo', 'ativa'],
   Acessos: ['email', 'data', 'dispositivo', 'metodo', 'resultado'],
@@ -145,7 +149,16 @@ function contaDoToken(token) {
   var c = achar('Contas', 'email', s.email); if (!c) throw erro('Conta não encontrada.', { sessao: false });
   return { conta: c, sessao: s };
 }
-function publico(c) { return { id: String(c.id), nome: c.nome, email: c.email, doisFatores: c.doisFatores === true || String(c.doisFatores) === 'TRUE', criadoEm: Number(c.criadoEm), foto: String(c.foto || '') }; }
+function publico(c) { return { id: String(c.id), nome: c.nome, email: c.email, doisFatores: c.doisFatores === true || String(c.doisFatores) === 'TRUE', criadoEm: Number(c.criadoEm), foto: String(c.foto || ''), selo: seloDe(c), seloOrigem: origemSelo(c), limites: limitesTexto(c) }; }
+/* ---------------------------- selos ----------------------------
+   'criador': as contas da equipe (CONFIG.CRIADORES). 'verificado': dado pelo criador ou por um jogo com 1.000 curtidas.
+   Quem tem selo publica sem limite de quantidade e com até ~20 MB por jogo (contas comuns: 60 de até ~2 MB). */
+function ehCriador(c) { return !!c && CONFIG.CRIADORES.indexOf(String(c.email || '').trim().toLowerCase()) >= 0; }
+function seloDe(c) { if (ehCriador(c)) return 'criador'; return String(c && c.selo || '').indexOf('verificado') === 0 ? 'verificado' : ''; }
+function origemSelo(c) { if (ehCriador(c)) return 'criador'; var s = String(c && c.selo || ''); return s.indexOf('verificado:') === 0 ? s.split(':')[1] : ''; }
+function limitesDe(c) { return seloDe(c) ? { publicacoes: 0, blocos: MAX_BLOCOS_SELO } : { publicacoes: CONFIG.LIMITE_PUBLICACOES, blocos: MAX_BLOCOS }; }
+function limitesTexto(c) { var l = limitesDe(c); return l.publicacoes ? 'até ' + l.publicacoes + ' publicações de até ~2 MB' : 'publicações ilimitadas, até ~20 MB cada'; }
+function mapaSelos() { var m = {}; linhas('Contas').forEach(function (c) { var s = seloDe(c); if (s) m[String(c.email)] = s; }); return m; }
 function registrarAcesso(email, disp, metodo, resultado) {
   inserir('Acessos', { email: email, data: Date.now(), dispositivo: JSON.stringify(disp), metodo: metodo, resultado: resultado });
 }
@@ -260,7 +273,7 @@ var ACOES = {
 TABELAS.Conteudos = ['id', 'tipo', 'nome', 'descricao', 'genero', 'subgenero', 'autorId', 'autorNome', 'autorEmail', 'capa', 'criadoEm', 'atualizadoEm', 'jogadas', 'curtidas', 'tamanho', 'ativo'];
 TABELAS.Curtidas = ['id', 'email', 'data'];
 TABELAS.Nuvem = ['email', 'chave', 'atualizadoEm', 'tamanho'];
-var TIPOS = ['jogo', 'personagem', 'animacao', 'item'], LIMITE_CONTEUDOS = 60, BLOCO = 45000, MAX_BLOCOS = 44;
+var TIPOS = ['jogo', 'personagem', 'animacao', 'item'], BLOCO = 45000, MAX_BLOCOS = 44, MAX_BLOCOS_SELO = 450, POR_LINHA = 44;
 function sim(v) { return v === true || String(v) === 'TRUE'; }
 function abaBlobs() { var ss = planilha(), sh = ss.getSheetByName('Blobs'); if (!sh) { sh = ss.insertSheet('Blobs'); sh.appendRow(['chave', 'partes']); sh.setFrozenRows(1); } return sh; }
 function linhaBlob(sh, chave) {
@@ -269,29 +282,48 @@ function linhaBlob(sh, chave) {
   for (var i = 0; i < v.length; i++) if (String(v[i][0]) === chave) return i + 2;
   return -1;
 }
-function gravarBlob(chave, texto) {
-  texto = String(texto == null ? '' : texto);
+// dados grandes ficam em várias linhas: "chave" (com o total de pedaços) e "chave#2", "chave#3"... com até 44 pedaços cada
+function gravarBlob(chave, texto, maxBlocos) {
+  texto = String(texto == null ? '' : texto); maxBlocos = maxBlocos || MAX_BLOCOS;
   var partes = []; for (var i = 0; i < texto.length; i += BLOCO) partes.push('~' + texto.slice(i, i + BLOCO)); // o "~" impede a planilha de ler o texto como fórmula ou número
-  if (partes.length > MAX_BLOCOS) throw erro('Grande demais: o limite é de uns 2 MB.');
-  var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l < 0) l = linhaBlob(sh, ''); // reaproveita uma linha apagada
-  var valores = [chave, partes.length].concat(partes);
+  if (partes.length > maxBlocos) throw erro(maxBlocos > MAX_BLOCOS ? 'Grande demais: o limite do servidor é de uns 20 MB.' : 'Grande demais: o limite é de uns 2 MB. Contas verificadas (☑️) podem publicar até uns 20 MB.');
+  apagarBlob(chave);
+  var sh = abaBlobs();
+  for (var k = 0, n = 0; k === 0 || n < partes.length; k++) {
+    var pedaco = partes.slice(n, n + POR_LINHA); n += POR_LINHA;
+    gravarLinhaBlob(sh, k === 0 ? chave : chave + '#' + (k + 1), [k === 0 ? partes.length : pedaco.length].concat(pedaco));
+  }
+}
+function gravarLinhaBlob(sh, chave, resto) {
+  var valores = [chave].concat(resto), l = linhaBlob(sh, ''); // reaproveita uma linha apagada
   if (l < 0) { sh.appendRow(valores); return; }
   var larg = Math.max(sh.getLastColumn(), valores.length), linha = [];
-  // a aba nasce com 26 colunas: um dado que cresce (passa de ~1 MB) precisa de colunas novas antes de escrever
+  // a aba nasce com 26 colunas: uma linha mais larga precisa de colunas novas antes de escrever
   var max = sh.getMaxColumns(); if (larg > max) sh.insertColumnsAfter(max, larg - max);
   for (var k = 0; k < larg; k++) linha.push(k < valores.length ? valores[k] : '');
   sh.getRange(l, 1, 1, larg).setValues([linha]);
 }
 function lerBlob(chave) {
   var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l < 0) return null;
-  var n = Number(sh.getRange(l, 2, 1, 1).getValues()[0][0]) || 0; if (!n) return '';
-  return sh.getRange(l, 3, 1, n).getValues()[0].map(function (p) { return String(p).slice(1); }).join('');
+  var total = Number(sh.getRange(l, 2, 1, 1).getValues()[0][0]) || 0; if (!total) return '';
+  var nesta = Math.min(total, POR_LINHA), out = sh.getRange(l, 3, 1, nesta).getValues()[0].map(function (p) { return String(p).slice(1); });
+  for (var k = 2; out.length < total; k++) {
+    var lk = linhaBlob(sh, chave + '#' + k); if (lk < 0) break;
+    var n = Number(sh.getRange(lk, 2, 1, 1).getValues()[0][0]) || 0; if (!n) break;
+    out = out.concat(sh.getRange(lk, 3, 1, n).getValues()[0].map(function (p) { return String(p).slice(1); }));
+  }
+  return out.join('');
 }
-function apagarBlob(chave) { var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l > 0) sh.getRange(l, 1, 1, sh.getLastColumn()).clearContent(); }
+function apagarBlob(chave) {
+  var sh = abaBlobs(), l = linhaBlob(sh, chave); if (l < 0) return;
+  var total = Number(sh.getRange(l, 2, 1, 1).getValues()[0][0]) || 0;
+  sh.getRange(l, 1, 1, sh.getLastColumn()).clearContent();
+  for (var k = 2; (k - 1) * POR_LINHA < total; k++) { var lk = linhaBlob(sh, chave + '#' + k); if (lk > 0) sh.getRange(lk, 1, 1, sh.getLastColumn()).clearContent(); }
+}
 function limparTexto(t, max) { return String(t == null ? '' : t).replace(/[<>]/g, '').trim().slice(0, max); }
 function contaOpcional(token) { try { return token ? contaDoToken(token).conta : null; } catch (e) { return null; } }
-function metaConteudo(c, curtidos) {
-  return { id: String(c.id), tipo: c.tipo, nome: c.nome, descricao: c.descricao, genero: c.genero, subgenero: c.subgenero, autor: c.autorNome, autorId: String(c.autorId),
+function metaConteudo(c, curtidos, selos) {
+  return { autorSelo: selos ? selos[String(c.autorEmail)] || '' : '', id: String(c.id), tipo: c.tipo, nome: c.nome, descricao: c.descricao, genero: c.genero, subgenero: c.subgenero, autor: c.autorNome, autorId: String(c.autorId),
     capa: String(c.capa || '').replace(/^~/, ''), criadoEm: Number(c.criadoEm), atualizadoEm: Number(c.atualizadoEm), jogadas: Number(c.jogadas || 0), curtidas: Number(c.curtidas || 0),
     tamanho: Number(c.tamanho || 0), curti: !!(curtidos && curtidos[c.id]) };
 }
@@ -307,6 +339,8 @@ var ACOES_CONTEUDO = {
     var nome = limparTexto(r.nome, 60); if (nome.length < 2) throw erro('Dê um nome com pelo menos 2 letras.');
     var dados = String(r.dados || ''); if (!dados) throw erro('Nada para publicar.');
     try { JSON.parse(dados); } catch (e) { throw erro('O conteúdo está corrompido.'); }
+    // confere o tamanho ANTES de criar a entrada (senão ficava um "jogo fantasma" contando no limite)
+    var maxB = limitesDe(conta).blocos; if (Math.ceil(dados.length / BLOCO) > maxB) throw erro(maxB > MAX_BLOCOS ? 'Grande demais: o limite do servidor é de uns 20 MB.' : 'Grande demais: o limite é de uns 2 MB. Contas verificadas (☑️) podem publicar até uns 20 MB.');
     var capa = String(r.capa || ''); if (!/^data:image\/(jpeg|png|webp);base64,[\w+\/=]+$/.test(capa) || capa.length > 44000) capa = '';
     var agora = Date.now(), c = r.id ? achar('Conteudos', 'id', String(r.id)) : null;
     if (c && c.autorEmail !== conta.email) throw erro('Esse conteúdo é de outra pessoa.');
@@ -314,26 +348,28 @@ var ACOES_CONTEUDO = {
       autorId: String(conta.id), autorNome: conta.nome, autorEmail: conta.email, capa: capa ? '~' + capa : '', atualizadoEm: agora, tamanho: dados.length, ativo: true };
     if (c) atualizar('Conteudos', c, campos);
     else {
-      var meus = linhas('Conteudos').filter(function (x) { return x.autorEmail === conta.email && sim(x.ativo); }).length;
-      if (meus >= LIMITE_CONTEUDOS) throw erro('Você já tem ' + LIMITE_CONTEUDOS + ' publicações. Apague alguma para publicar outra.');
+      var lim = limitesDe(conta).publicacoes;
+      if (lim) { var meus = linhas('Conteudos').filter(function (x) { return x.autorEmail === conta.email && sim(x.ativo); }).length;
+        if (meus >= lim) throw erro('Você já tem ' + lim + ' publicações. Apague alguma para publicar outra (contas verificadas ☑️ não têm limite).'); }
       c = { id: aleatorio().slice(0, 12), criadoEm: agora, jogadas: 0, curtidas: 0 };
       for (var k in campos) c[k] = campos[k];
       inserir('Conteudos', c);
     }
-    gravarBlob('c:' + c.id, dados);
+    gravarBlob('c:' + c.id, dados, limitesDe(conta).blocos);
     return { conteudo: metaConteudo(c) };
   },
   listarConteudo: function (r) {
     var conta = contaOpcional(r.token), curt = curtidosPor(conta), tipo = r.tipo ? String(r.tipo) : '';
     var l = linhas('Conteudos').filter(function (c) { return sim(c.ativo) && (!tipo || c.tipo === tipo) && (!r.autorId || String(c.autorId) === String(r.autorId)); })
       .sort(function (a, b) { return Number(b.atualizadoEm) - Number(a.atualizadoEm); }).slice(0, 300);
-    return { conteudos: l.map(function (c) { return metaConteudo(c, curt); }) };
+    var selos = mapaSelos();
+    return { conteudos: l.map(function (c) { return metaConteudo(c, curt, selos); }) };
   },
   baixarConteudo: function (r) {
     var c = conteudoAtivo(r.id), dados = lerBlob('c:' + c.id);
     if (dados == null) throw erro('Esse conteúdo não existe mais.');
     if (r.contar) atualizar('Conteudos', c, { jogadas: Number(c.jogadas || 0) + 1 });
-    return { conteudo: metaConteudo(c, curtidosPor(contaOpcional(r.token))), dados: dados };
+    return { conteudo: metaConteudo(c, curtidosPor(contaOpcional(r.token)), mapaSelos()), dados: dados };
   },
   apagarConteudo: function (r) {
     var conta = contaDoToken(r.token).conta, c = conteudoAtivo(r.id);
@@ -346,6 +382,8 @@ var ACOES_CONTEUDO = {
     var ja = linhas('Curtidas').filter(function (x) { return x.id === String(c.id) && x.email === conta.email; })[0];
     if (ja) aba('Curtidas').deleteRow(ja._linha); else inserir('Curtidas', { id: String(c.id), email: conta.email, data: Date.now() });
     var n = Math.max(0, Number(c.curtidas || 0) + (ja ? -1 : 1)); atualizar('Conteudos', c, { curtidas: n });
+    // um jogo que chega a 1.000 curtidas dá o selo de verificado ao autor (e ele fica, mesmo se as curtidas caírem depois)
+    if (!ja && n >= CONFIG.SELO_CURTIDAS) { var autor = achar('Contas', 'email', c.autorEmail); if (autor && !seloDe(autor)) atualizar('Contas', autor, { selo: 'verificado:curtidas:' + Date.now() }); }
     return { curti: !ja, curtidas: n };
   },
   meusConteudos: function (r) {
@@ -355,13 +393,13 @@ var ACOES_CONTEUDO = {
   perfil: function (r) {
     var c = achar('Contas', 'id', String(r.autorId || '')); if (!c || !sim(c.verificado)) throw erro('Perfil não encontrado.');
     var l = linhas('Conteudos').filter(function (x) { return String(x.autorId) === String(c.id) && sim(x.ativo); });
-    return { perfil: { id: String(c.id), nome: c.nome, membroDesde: Number(c.criadoEm), publicacoes: l.length, jogadas: l.reduce(function (a, x) { return a + Number(x.jogadas || 0); }, 0), curtidas: l.reduce(function (a, x) { return a + Number(x.curtidas || 0); }, 0) },
+    return { perfil: { id: String(c.id), nome: c.nome, selo: seloDe(c), membroDesde: Number(c.criadoEm), publicacoes: l.length, jogadas: l.reduce(function (a, x) { return a + Number(x.jogadas || 0); }, 0), curtidas: l.reduce(function (a, x) { return a + Number(x.curtidas || 0); }, 0) },
       conteudos: l.map(function (x) { return metaConteudo(x); }) };
   },
   // nuvem: cada conta guarda seus dados (projetos do Studio, notas, progresso dos jogos)
   salvarNuvem: function (r) {
     var conta = contaDoToken(r.token).conta, ch = chaveNuvem(r.chave), valor = String(r.valor == null ? '' : r.valor), agora = Date.now();
-    gravarBlob('n:' + conta.id + ':' + ch, valor);
+    gravarBlob('n:' + conta.id + ':' + ch, valor, limitesDe(conta).blocos);
     var ex = linhas('Nuvem').filter(function (x) { return x.email === conta.email && x.chave === ch; })[0];
     if (ex) atualizar('Nuvem', ex, { atualizadoEm: agora, tamanho: valor.length }); else inserir('Nuvem', { email: conta.email, chave: ch, atualizadoEm: agora, tamanho: valor.length });
     return { atualizadoEm: agora };
@@ -396,7 +434,7 @@ function codigoAmigo(id) { return String(id).slice(0, 8).toUpperCase(); }
 function mapaPresenca() { var m = {}; linhas('Presenca').forEach(function (p) { m[String(p.id)] = p; }); return m; }
 function cartaoConta(c, pres) {
   var p = pres[cid(c.id)], on = !!(p && Date.now() - Number(p.quando) < ONLINE_MS);
-  return { id: String(c.id), nome: c.nome, foto: String(c.foto || ''), codigo: codigoAmigo(c.id), desde: Number(c.criadoEm), online: on, vistoEm: p ? Number(p.quando) : 0, jogo: on ? String(p.jogo || '') : '' };
+  return { id: String(c.id), nome: c.nome, foto: String(c.foto || ''), selo: seloDe(c), codigo: codigoAmigo(c.id), desde: Number(c.criadoEm), online: on, vistoEm: p ? Number(p.quando) : 0, jogo: on ? String(p.jogo || '') : '' };
 }
 function amizadeEntre(a, b) {
   var l = linhas('Amizades'), A = cid(a), B = cid(b);
@@ -486,6 +524,17 @@ var ACOES_AMIGOS = {
   },
 };
 for (var acaoAmigo in ACOES_AMIGOS) ACOES[acaoAmigo] = ACOES_AMIGOS[acaoAmigo];
+
+/* ---------------------------- só para o criador ---------------------------- */
+ACOES.darSelo = function (r) {
+  var eu = contaDoToken(r.token).conta;
+  if (!ehCriador(eu)) throw erro('Só o criador da Arcádia pode dar o selo de verificado.');
+  var alvo = achar('Contas', 'id', String(r.id || ''));
+  if (!alvo || !sim(alvo.verificado)) throw erro('Conta não encontrada.');
+  if (ehCriador(alvo)) throw erro('Essa já é uma conta de criador.');
+  atualizar('Contas', alvo, { selo: r.dar ? 'verificado:criador:' + Date.now() : '' });
+  return { conta: cartaoConta(alvo, mapaPresenca()) };
+};
 
 function encerrarSessoes(email, exceto) {
   var n = 0; linhas('Sessoes').forEach(function (s) { if (s.email === email && s.hashToken !== exceto && (s.ativa === true || String(s.ativa) === 'TRUE')) { atualizar('Sessoes', s, { ativa: false }); n++; } });

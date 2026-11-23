@@ -976,7 +976,7 @@
       for await (const [nome, item] of h.entries()) {
         if (IGNORAR.test(nome)) continue; const c = base ? base + '/' + nome : nome;
         if (item.kind === 'directory') { pastas.push(c); await ler(item, c); }
-        else { const f = await item.getFile(); total += f.size; if (total > 40e6) throw new Error('Pasta grande demais (máx. 40 MB)'); arquivos[c] = await lerArquivoLocal(f); }
+        else { const f = await item.getFile(); total += f.size; if (total > 40e6 && !(typeof Conta === 'function' && Conta() && Conta().usuario() && Conta().usuario().selo)) throw new Error('Pasta grande demais (máx. 40 MB; contas verificadas ☑️ não têm limite)'); arquivos[c] = await lerArquivoLocal(f); }
       }
     }
     try { await ler(dir, ''); } catch (e) { saida('error', e.message); toast(e.message); return; }
