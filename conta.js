@@ -104,7 +104,8 @@
   .ct-girando{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;animation:ctGira .8s linear infinite;vertical-align:-2px;margin-right:6px}
   @keyframes ctGira{to{transform:rotate(360deg)}}
   .ct-verif{color:#22d3ee;font-weight:800;margin-left:3px}
-  .ct-s{display:inline-block;margin-left:4px;font-size:.92em;line-height:1}
+  .ct-s{display:inline-block;margin-left:4px;vertical-align:-2px;flex-shrink:0;filter:drop-shadow(0 1px 2px rgba(0,0,0,.35))}
+  .ct-selo svg.ct-s{margin:0 2px 0 0;vertical-align:-3px}
   .ct-perfil button.selo{height:26px;font-size:11.5px;margin-top:0;background:transparent;border-style:dashed}
   .ct-selo{display:inline-flex;align-items:center;gap:5px;background:rgba(34,211,238,.12);border:1px solid rgba(34,211,238,.35);color:#67e8f9;border-radius:999px;padding:2px 10px;font-size:12px;font-weight:700}
   .ct-vant{display:grid;gap:6px;font-size:13.5px;line-height:1.4} .ct-vant div{display:flex;gap:8px}
@@ -269,8 +270,8 @@
     else if (tela === 'minha') {
       const conta = ler(); if (!conta) return render('entrar');
       const u = conta.usuario || {};
-      c.innerHTML = `${x}<div class="ct-det" style="margin-bottom:16px">${avatar(u, 'gg')}<div class="tx"><h2 style="margin:0">Minha conta</h2><small>${esc(u.nome)} · ${esc(u.email)}</small><span class="ct-selo">${u.selo === 'criador' ? '👑 Criador da Arcádia' : u.selo === 'verificado' ? '☑️ Verificado' : '✓ E-mail confirmado'}${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span><br><button class="ct-link" id="ct-trocar-foto" style="margin-top:6px">🎨 Trocar foto de perfil</button></div></div>
-        <div class="ct-bloco"><b style="font-size:14.5px">🎮 Publicar no Studio</b><br><small style="color:var(--muted,#9696ab)">${esc(u.limites || (u.selo ? 'publicações ilimitadas, até ~20 MB cada' : 'até 60 publicações de até ~2 MB'))}${u.selo === 'criador' ? '. Você pode dar o ☑️ para outras contas em 👥 Amigos → Adicionar.' : u.selo === 'verificado' ? (u.seloOrigem === 'curtidas' ? ' · selo ganho com um jogo de 1.000 curtidas' : ' · selo dado pelo criador') : '. Ganhe o ☑️ com um jogo de 1.000 curtidas, ou com a verificação do criador.'}</small></div>
+      c.innerHTML = `${x}<div class="ct-det" style="margin-bottom:16px">${avatar(u, 'gg')}<div class="tx"><h2 style="margin:0">Minha conta</h2><small>${esc(u.nome)} · ${esc(u.email)}</small><span class="ct-selo"${u.selo === 'criador' ? ' style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fcd34d"' : ''}>${u.selo === 'criador' ? seloSvg('criador', 16) + ' Criador da Arcádia' : u.selo === 'verificado' ? seloSvg('verificado', 16) + ' Verificado' : '✓ E-mail confirmado'}${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span><br><button class="ct-link" id="ct-trocar-foto" style="margin-top:6px">🎨 Trocar foto de perfil</button></div></div>
+        <div class="ct-bloco"><b style="font-size:14.5px">🎮 Publicar no Studio</b><br><small style="color:var(--muted,#9696ab)">${esc(u.limites || (u.selo ? 'publicações ilimitadas, até ~20 MB cada' : 'até 60 publicações de até ~2 MB'))}${u.selo === 'criador' ? '. Você pode dar o selo de verificado para outras contas em 👥 Amigos → Adicionar.' : u.selo === 'verificado' ? (u.seloOrigem === 'curtidas' ? ' · selo ganho com um jogo de 1.000 curtidas' : ' · selo dado pelo criador') : '. Ganhe o selo de verificado com um jogo de 1.000 curtidas, ou com a verificação do criador.'}</small></div>
         <div class="ct-bloco" id="ct-blk-foto" style="display:none"><h4>Sua foto de perfil</h4><div class="ct-escolha" id="ct-emojis">${FOTOS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div><div class="ct-cores" id="ct-cores">${CORES.map(k => `<button type="button" data-cor="${k}" style="background:${k}" aria-label="Cor"></button>`).join('')}</div><div class="ct-linha"><span class="ct-linha" style="justify-content:flex-start"><span id="ct-previa"></span><small style="color:var(--muted,#9696ab)">É assim que seus amigos vão te ver.</small></span><button class="ct-sec" id="ct-salvar-foto" style="white-space:nowrap">Salvar foto</button></div></div>
         <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">👥 Amigos</b><br><small style="color:var(--muted,#9696ab)">${pedidosPend > 0 ? `<b style="color:#fca5a5">${pedidosPend} pedido${pedidosPend > 1 ? 's' : ''} esperando resposta</b>` : 'Adicione amigos e veja quem está on-line'}</small></span><button class="ct-sec" data-ir="amigos">Abrir</button></div></div>
         <div class="ct-bloco"><h4>🎮 Suas publicações</h4><div class="ct-pubs" id="ct-pubs"><span style="color:var(--muted,#9696ab);font-size:13px"><span class="ct-girando"></span>Carregando…</span></div>
@@ -364,7 +365,7 @@
       c.onclick = ev => {
         if (ev.target.closest('[data-recarregar]')) return todos();
         const bs = ev.target.closest('[data-selo]');
-        if (bs) { bs.disabled = true; api('darSelo', { token: conta.token, id: bs.dataset.selo, dar: bs.dataset.dar === '1' }).then(j => { erroTela(bs.dataset.dar === '1' ? `☑️ ${j.conta.nome} agora é verificado.` : `Selo tirado de ${j.conta.nome}.`, true); const q = $('#ct-q').value.trim(); if (q.length >= 2) buscar(q); else todos(); }).catch(e => { erroTela(e.message); bs.disabled = false; }); return; }
+        if (bs) { bs.disabled = true; api('darSelo', { token: conta.token, id: bs.dataset.selo, dar: bs.dataset.dar === '1' }).then(j => { erroTela(bs.dataset.dar === '1' ? `${j.conta.nome} agora é verificado (e recebeu um e-mail de parabéns).` : `Selo tirado de ${j.conta.nome}.`, true); const q = $('#ct-q').value.trim(); if (q.length >= 2) buscar(q); else todos(); }).catch(e => { erroTela(e.message); bs.disabled = false; }); return; }
         acaoAmizade(ev, conta, (b, j, ac) => { // atualiza só o cartão, sem recarregar a lista
           b.className = ''; b.disabled = true;
           b.textContent = ac === 'aceitar' || j.estado === 'aceita' ? 'Amigos ✓' : 'Pedido enviado';
@@ -396,6 +397,19 @@
     } catch (e) { const el = $('#ct-pubs'); if (el) el.textContent = e.message; }
   }
   function concluirLogin(j) { gravar({ token: j.token, usuario: j.usuario }); pendente = null; atualizarBotao(); render('pronto'); presenca(); }
+  /* ---------------- selos (desenhados em SVG) ---------------- */
+  const ROSETA = (() => { const p = []; for (let k = 0; k < 24; k++) { const a = Math.PI * k / 12 - Math.PI / 2, rr = k % 2 ? 9.6 : 11.2; p.push((12 + Math.cos(a) * rr).toFixed(2) + ',' + (12 + Math.sin(a) * rr).toFixed(2)); } return p.join(' '); })();
+  function corpoSelo(tipo) {
+    const g = tipo === 'criador' ? 'arcSeloC' : 'arcSeloV';
+    const base = `<polygon points="${ROSETA}" fill="url(#${g})" stroke="url(#${g})" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="12" r="8.6" fill="url(#arcSeloBrilho)"/>`;
+    if (tipo === 'criador') return base + '<path d="M6.7 15.2 5.9 9.3l3.4 2.3L12 7.4l2.7 4.2 3.4-2.3-.8 5.9z" fill="#fff" stroke="#fff" stroke-width=".7" stroke-linejoin="round"/><rect x="6.8" y="16" width="10.4" height="1.7" rx=".85" fill="#fff"/><circle cx="12" cy="12.4" r=".95" fill="#f59e0b"/>';
+    return base + '<path d="M7.6 12.4l2.9 2.9 5.9-6.3" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  function seloSvg(tipo, px = 15) {
+    if (tipo !== 'criador' && tipo !== 'verificado') return '';
+    if (!document.getElementById('arc-selo-defs')) document.body.insertAdjacentHTML('beforeend', '<svg id="arc-selo-defs" width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="arcSeloV" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3ee6ff"/><stop offset=".55" stop-color="#7c5cff"/><stop offset="1" stop-color="#c94dff"/></linearGradient> <linearGradient id="arcSeloC" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff1b8"/><stop offset=".45" stop-color="#fbbf24"/><stop offset="1" stop-color="#d97706"/></linearGradient> <radialGradient id="arcSeloBrilho" cx=".35" cy=".25" r=".6"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs></svg>');
+    return `<svg class="ct-s" width="${px}" height="${px}" viewBox="0 0 24 24" role="img" aria-label="${tipo === 'criador' ? 'Criador da Arcádia' : 'Verificado'}"><title>${tipo === 'criador' ? 'Criador da Arcádia' : 'Verificado'}</title>${corpoSelo(tipo)}</svg>`;
+  }
   /* ---------------- amigos ---------------- */
   // foto de perfil: um emoji sobre uma cor ("🦊|#8b5cf6"); sem foto, a inicial do nome
   const FOTOS = ['🦊', '🐼', '🐸', '🐯', '🐵', '🐙', '🦄', '🐲', '🦖', '🐱', '🐶', '🐧', '🐨', '🐰', '🦉', '🐝', '🤖', '👾', '👻', '🎃', '🥷', '🧙', '🦸', '👽', '😎', '🤠', '🔥', '⚡', '🌈', '🍕', '⚽', '🎮', '🚀', '👑', '💎', '🌵'];
@@ -415,9 +429,9 @@
   const bt = (ac, k, txt, cls = '') => `<button class="${cls}" data-ac="${ac}" data-id="${esc(k.id)}" data-nome="${esc(k.nome)}">${txt}</button>`;
   function botaoBusca(k) { return k.relacao === 'amigo' ? '<button disabled>Amigos ✓</button>' : k.relacao === 'enviado' ? '<button disabled>Pedido enviado</button>' : k.relacao === 'recebido' ? bt('aceitar', k, 'Aceitar', 'ok') : bt('pedir', k, '＋ Adicionar', 'ok'); }
   const itemAdicionar = () => `<button class="ct-it" data-ir="add-amigos" title="Adicionar amigos"><span class="mais">＋</span><b>Adicionar</b><small>&nbsp;</small></button>`;
-  const seloIco = s => s === 'criador' ? '<span class="ct-s" title="Criador da Arcádia">👑</span>' : s === 'verificado' ? '<span class="ct-s" title="Verificado">☑️</span>' : '';
+  const seloIco = (s, px = 15) => seloSvg(s, px);
   const souCriador = () => ((ler() || {}).usuario || {}).selo === 'criador';
-  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}${seloIco(k.selo)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}${souCriador() && k.selo !== 'criador' ? `<button class="selo" data-selo="${esc(k.id)}" data-dar="${k.selo ? 0 : 1}">${k.selo ? 'Tirar ☑️' : 'Dar ☑️'}</button>` : ''}</div>`; }
+  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}${seloIco(k.selo)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}${souCriador() && k.selo !== 'criador' ? `<button class="selo" data-selo="${esc(k.id)}" data-dar="${k.selo ? 0 : 1}">${k.selo ? 'Tirar selo' : seloSvg('verificado', 13) + ' Dar selo'}</button>` : ''}</div>`; }
   let amigosCache = [];
   function mostrarAmigo(id) {
     const d = $('#ct-det'); if (!d) return;
@@ -468,6 +482,6 @@
 
   // usado pela plataforma, Studio e jogos: chama o servidor já com o token da conta (se houver)
   const apiConta = (acao, dados = {}) => { const c = ler(); return api(acao, c ? { token: c.token, ...dados } : dados); };
-  window.ArcadiaConta = { usuario: () => (ler() || {}).usuario || null, logado: () => !!ler(), abrir, dispositivo, api: apiConta, servidorLigado: () => !!servidor(), jogando: nome => { jogoAtual = String(nome || '').slice(0, 60); presenca(); } };
+  window.ArcadiaConta = { selo: seloSvg, usuario: () => (ler() || {}).usuario || null, logado: () => !!ler(), abrir, dispositivo, api: apiConta, servidorLigado: () => !!servidor(), jogando: nome => { jogoAtual = String(nome || '').slice(0, 60); presenca(); } };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', montar); else montar();
 })();

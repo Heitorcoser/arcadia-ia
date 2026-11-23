@@ -286,7 +286,7 @@ function linhaBlob(sh, chave) {
 function gravarBlob(chave, texto, maxBlocos) {
   texto = String(texto == null ? '' : texto); maxBlocos = maxBlocos || MAX_BLOCOS;
   var partes = []; for (var i = 0; i < texto.length; i += BLOCO) partes.push('~' + texto.slice(i, i + BLOCO)); // o "~" impede a planilha de ler o texto como fórmula ou número
-  if (partes.length > maxBlocos) throw erro(maxBlocos > MAX_BLOCOS ? 'Grande demais: o limite do servidor é de uns 20 MB.' : 'Grande demais: o limite é de uns 2 MB. Contas verificadas (☑️) podem publicar até uns 20 MB.');
+  if (partes.length > maxBlocos) throw erro(maxBlocos > MAX_BLOCOS ? 'Grande demais: o limite do servidor é de uns 20 MB.' : 'Grande demais: o limite é de uns 2 MB. Contas verificadas podem publicar até uns 20 MB.');
   apagarBlob(chave);
   var sh = abaBlobs();
   for (var k = 0, n = 0; k === 0 || n < partes.length; k++) {
@@ -340,7 +340,7 @@ var ACOES_CONTEUDO = {
     var dados = String(r.dados || ''); if (!dados) throw erro('Nada para publicar.');
     try { JSON.parse(dados); } catch (e) { throw erro('O conteúdo está corrompido.'); }
     // confere o tamanho ANTES de criar a entrada (senão ficava um "jogo fantasma" contando no limite)
-    var maxB = limitesDe(conta).blocos; if (Math.ceil(dados.length / BLOCO) > maxB) throw erro(maxB > MAX_BLOCOS ? 'Grande demais: o limite do servidor é de uns 20 MB.' : 'Grande demais: o limite é de uns 2 MB. Contas verificadas (☑️) podem publicar até uns 20 MB.');
+    var maxB = limitesDe(conta).blocos; if (Math.ceil(dados.length / BLOCO) > maxB) throw erro(maxB > MAX_BLOCOS ? 'Grande demais: o limite do servidor é de uns 20 MB.' : 'Grande demais: o limite é de uns 2 MB. Contas verificadas podem publicar até uns 20 MB.');
     var capa = String(r.capa || ''); if (!/^data:image\/(jpeg|png|webp);base64,[\w+\/=]+$/.test(capa) || capa.length > 44000) capa = '';
     var agora = Date.now(), c = r.id ? achar('Conteudos', 'id', String(r.id)) : null;
     if (c && c.autorEmail !== conta.email) throw erro('Esse conteúdo é de outra pessoa.');
@@ -350,7 +350,7 @@ var ACOES_CONTEUDO = {
     else {
       var lim = limitesDe(conta).publicacoes;
       if (lim) { var meus = linhas('Conteudos').filter(function (x) { return x.autorEmail === conta.email && sim(x.ativo); }).length;
-        if (meus >= lim) throw erro('Você já tem ' + lim + ' publicações. Apague alguma para publicar outra (contas verificadas ☑️ não têm limite).'); }
+        if (meus >= lim) throw erro('Você já tem ' + lim + ' publicações. Apague alguma para publicar outra (contas verificadas não têm limite).'); }
       c = { id: aleatorio().slice(0, 12), criadoEm: agora, jogadas: 0, curtidas: 0 };
       for (var k in campos) c[k] = campos[k];
       inserir('Conteudos', c);
@@ -383,7 +383,7 @@ var ACOES_CONTEUDO = {
     if (ja) aba('Curtidas').deleteRow(ja._linha); else inserir('Curtidas', { id: String(c.id), email: conta.email, data: Date.now() });
     var n = Math.max(0, Number(c.curtidas || 0) + (ja ? -1 : 1)); atualizar('Conteudos', c, { curtidas: n });
     // um jogo que chega a 1.000 curtidas dá o selo de verificado ao autor (e ele fica, mesmo se as curtidas caírem depois)
-    if (!ja && n >= CONFIG.SELO_CURTIDAS) { var autor = achar('Contas', 'email', c.autorEmail); if (autor && !seloDe(autor)) atualizar('Contas', autor, { selo: 'verificado:curtidas:' + Date.now() }); }
+    if (!ja && n >= CONFIG.SELO_CURTIDAS) { var autor = achar('Contas', 'email', c.autorEmail); if (autor && !seloDe(autor)) { atualizar('Contas', autor, { selo: 'verificado:curtidas:' + Date.now() }); try { enviarParabensSelo(autor, 'curtidas', c); } catch (e) { console.error(e); } } }
     return { curti: !ja, curtidas: n };
   },
   meusConteudos: function (r) {
@@ -532,7 +532,9 @@ ACOES.darSelo = function (r) {
   var alvo = achar('Contas', 'id', String(r.id || ''));
   if (!alvo || !sim(alvo.verificado)) throw erro('Conta não encontrada.');
   if (ehCriador(alvo)) throw erro('Essa já é uma conta de criador.');
+  var jaTinha = !!seloDe(alvo);
   atualizar('Contas', alvo, { selo: r.dar ? 'verificado:criador:' + Date.now() : '' });
+  if (r.dar && !jaTinha) { try { enviarParabensSelo(alvo, 'criador'); } catch (e) { console.error(e); } }
   return { conta: cartaoConta(alvo, mapaPresenca()) };
 };
 
@@ -578,6 +580,37 @@ function avisarAcesso(c, d, metodo) {
 }
 function avisarBloqueio(c, d) {
   enviarAviso(c, '🚫 Tentativas de acesso bloqueadas', '<p>Alguém errou a senha da sua conta ' + CONFIG.LOGIN_TENTATIVAS + ' vezes seguidas. Por segurança, bloqueamos novos acessos por ' + CONFIG.LOGIN_BLOQUEIO_MIN + ' minutos.</p>' + tabelaDispositivo(d, 'senha errada') + '<p>Se não foi você, sua senha continua segura, mas recomendamos ligar a verificação em duas etapas.</p>');
+}
+// parabéns pelo selo de verificado: diz por que ganhou (jogo com 1.000 curtidas ou escolha do criador) e o que muda
+function enviarParabensSelo(c, origem, jogo) {
+  var porCurtidas = origem === 'curtidas', nf = function (n) { return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); };
+  var img = function (nome, px, alt) { return '<img src="' + CONFIG.SITE + 'img/selos/' + nome + '.png" width="' + px + '" height="' + px + '" alt="' + alt + '" style="display:block;border:0;outline:none;width:' + px + 'px;height:' + px + 'px">'; };
+  var rotulo = function (t) { return '<div style="color:#9f93c0;font-size:12px;text-transform:uppercase;letter-spacing:1.2px;font-weight:700;margin:0 0 6px">' + t + '</div>'; };
+  // selo grande no centro, com o nome embaixo
+  var selo = '<table role="presentation" width="100%" style="border-collapse:collapse;margin:4px 0 20px"><tr><td align="center">' +
+    '<div style="width:120px;margin:0 auto">' + img('verificado-grande', 120, 'Selo de verificado') + '</div>' +
+    '<div style="margin-top:12px"><span style="display:inline-block;background:#120922;border:1px solid #45297c;border-radius:999px;padding:8px 16px;font-weight:800;color:#fff;font-size:15px">' + c.nome +
+    ' &nbsp;<span style="color:#67e8f9">Verificado</span></span></div></td></tr></table>';
+  var motivo = '<table role="presentation" width="100%" style="border-collapse:separate;background:#120922;border:1px solid #45297c;border-radius:14px;margin:0 0 18px"><tr>' +
+    '<td width="52" style="padding:14px 0 14px 14px;vertical-align:top">' + (porCurtidas ? img('icone-coracao', 40, '') : img('criador', 40, '')) + '</td>' +
+    '<td style="padding:14px 16px 14px 12px;vertical-align:top">' + rotulo('Por que você ganhou') +
+    (porCurtidas
+      ? '<div style="font-size:16px;color:#fff">Seu jogo <b style="color:#ffd166">' + (jogo && jogo.nome || 'publicado') + '</b> passou de <b>' + nf(CONFIG.SELO_CURTIDAS) + ' curtidas</b>!</div><div style="color:#c9bfe6;font-size:14px;margin-top:6px">Mil pessoas diferentes jogaram e gostaram do que você criou. Esse selo é delas para você.</div>'
+      : '<div style="font-size:16px;color:#fff">O <b style="color:#ffd166">criador da ' + CONFIG.NOME + '</b> escolheu você pessoalmente.</div><div style="color:#c9bfe6;font-size:14px;margin-top:6px">Ele viu o que você anda fazendo por aqui e quis reconhecer. Não é todo dia que isso acontece!</div>') +
+    '</td></tr></table>';
+  var item = function (ic, t, d) { return '<tr><td width="52" style="padding:8px 0;vertical-align:top">' + img(ic, 40, '') + '</td><td style="padding:8px 0 8px 10px;vertical-align:top"><b style="color:#fff;font-size:15px">' + t + '</b><div style="color:#c9bfe6;font-size:14px;line-height:1.5">' + d + '</div></td></tr>'; };
+  var ganhos = rotulo('O que você ganha') + '<table role="presentation" width="100%" style="border-collapse:collapse">' +
+    item('icone-selo', 'Selo ao lado do seu nome', 'Aparece no seu perfil, na lista de amigos e em todos os jogos que você publicar.') +
+    item('icone-infinito', 'Publicações ilimitadas', 'Publique quantos jogos, personagens, animações e itens quiser (contas comuns: até 60).') +
+    item('icone-caixa', 'Jogos até 10 vezes maiores', 'Cada jogo pode ter até ~20 MB (antes eram ~2 MB): mais fases, mais modelos, mais código em three.js, Phaser e 2D.') +
+    item('icone-nuvem', 'Nuvem maior no Studio', 'Seus projetos salvos na nuvem também podem ter até ~20 MB.') +
+    item('icone-pasta', 'Importar pastas sem limite', 'Traga projetos inteiros do seu computador para o Studio, sem o limite de 40 MB.') + '</table>';
+  var botao = '<table role="presentation" width="100%" style="border-collapse:collapse;margin:24px 0 6px"><tr><td align="center">' +
+    '<a href="' + CONFIG.SITE + 'studio/index.html" style="display:inline-block;background:#8b5cf6;background-image:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;text-decoration:none;font-weight:800;font-size:16px;padding:14px 28px;border-radius:12px">Criar no Studio agora &rarr;</a>' +
+    '</td></tr></table><p style="text-align:center;color:#9f93c0;font-size:13px;margin:10px 0 0">Continue criando: a gente mal pode esperar pelo seu próximo jogo.<br>Equipe ' + CONFIG.NOME + '</p>';
+  enviar(c.email, 'Parabéns, ' + c.nome + '! Sua conta agora é verificada · ' + CONFIG.NOME,
+    moldura('Parabéns, ' + c.nome + '! Agora você é verificado.', selo + '<p style="margin:0 0 14px">Oi, <b>' + c.nome + '</b>! Temos uma notícia incrível para você:</p>' + motivo + ganhos + botao),
+    'Parabéns, ' + c.nome + '! Sua conta na ' + CONFIG.NOME + ' agora é verificada (' + (porCurtidas ? 'seu jogo passou de ' + CONFIG.SELO_CURTIDAS + ' curtidas' : 'escolha do criador') + '). Você ganhou publicações ilimitadas, jogos de até ~20 MB e o selo de verificado ao lado do nome.');
 }
 function enviarAviso(c, assunto, corpo) { enviar(c.email, assunto + ' · ' + CONFIG.NOME, moldura(assunto, '<p>Oi, <b>' + c.nome + '</b>!</p>' + corpo)); }
 function avisarEmpresaNovaConta(c, d) {
