@@ -74,6 +74,7 @@ function cenaDe(x, y) {
   const M = MATS[m], s = estadoDe(M, T[i]);
   if (bfl[i] & 1) return { ...base, tipo: 'bolha', M, gas: GAS_INFO[m], gv: gv[i], grudada: !!(bfl[i] & 2), liq: liqViz && liqViz.M, disViz: liqViz ? dis[liqViz.j] : 0 };
   if (M.espuma) return { ...base, tipo: 'espuma', M };
+  if (M.nutri && (M.tipo === 'alimento' || M.cozinha) && s < 2) return { ...base, tipo: 'alimento', M };
   if (m === FOGO || m === FAISCA) return { ...base, tipo: 'fogo', M };
   if (s === 2 || m === FUMACA) return { ...base, tipo: 'gas', M };
   if (s === 1) return { ...base, tipo: 'liquido', M, dis: dis[i], gas: GAS_INFO[disG[i]] };
@@ -119,6 +120,7 @@ function popular(cena, w, h) {
     if (cena.surf) add(16, k => ({ surf: true, naBorda: k / 16 * Math.PI * 2, x: 0, y: 0, vx: 0, vy: 0, ang: 0, va: 0 }));
     return { P, geral };
   }
+  if (cena.tipo === 'alimento') { geral.alimento = cena.M; return { P, geral }; }
   if (cena.tipo === 'espuma') { geral.espuma = true; add(12, k => ({ surf: true, naRede: k, x: 0, y: 0, vx: 0, vy: 0, ang: 0, va: 0 })); return { P, geral }; }
   // sólido
   const M = cena.M; geral.solido = M;
@@ -145,6 +147,7 @@ function desenharMicro(cv2, cena) {
   const fundo = !cena ? '#0b0e14' : cena.tipo === 'liquido' || cena.tipo === 'bolha' ? '#0c1a2e' : cena.tipo === 'solido' ? '#16141a' : '#0b0e14';
   c.fillStyle = fundo; c.fillRect(0, 0, w, h);
   if (!MICRO.cena) return;
+  if (MICRO.cena.geral.alimento) { texturaAlimento(c, w, h, MICRO.cena.geral.alimento, cena.t); return; }
   const { P, geral } = MICRO.cena, temp = cena.t, agit = Math.max(0.2, Math.min(3, (temp + 273) / 298));
   // superfície encostada (parede, grão...)
   if (geral.parede) {
@@ -232,6 +235,7 @@ function explicarMicro(cena) {
       if (cena.surf) h += '<br>🧼 As moléculas de detergente se enfileiram na parede da bolha, com a cauda para dentro do gás. Na superfície, ela não estoura: vira espuma.';
       return h;
     }
+    case 'alimento': return explicarAlimento(cena.M, t);
     case 'espuma': return '<b>Espuma</b>: bolhas separadas por películas finíssimas de água, cada uma "ensanduichada" entre duas camadas de detergente. O líquido escorre das películas pela gravidade (drenagem); quando uma afina demais, estoura.';
     case 'solido': {
       const M = cena.M, b = cena.objeto && cena.objeto.info;

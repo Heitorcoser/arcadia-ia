@@ -136,16 +136,39 @@ function dissolverExtra(i, x, y, extra) {
 }
 
 /* ---------- um passo da física fina ---------- */
+// calor latente de vaporização: o líquido no ponto de ebulição só vira vapor depois de receber essa energia toda
+// (água: 2 257 J/g, mais de 5 vezes o que se gasta para levar de 0 a 100 °C). Outros líquidos: regra de Trouton (~88 J/mol·K × Teb)
+const B_LIQ = 4;
+function latente(M) { if (M.latEq === undefined) { const Lv = M.Lvap || (M.M ? 88 * (M.pe + 273.15) / M.M : 300); M.latEq = Math.min(700, Lv / Math.max(0.5, M.cpv || 2)); } return M.latEq; }
+function ebulicao(i, M) {
+  const s = estadoDe(M, T[i]);
+  if (s === 1) { bfl[i] |= B_LIQ; return; }
+  if (!(bfl[i] & B_LIQ)) return;
+  if (s !== 2 || T[i] > M.pe + 400) { bfl[i] &= ~B_LIQ; aux[i] = 0; return; }
+  const acc = aux[i] / 10 + (T[i] - M.pe), lat = latente(M);
+  if (acc >= lat) { bfl[i] &= ~B_LIQ; aux[i] = 0; T[i] = M.pe + 0.5; return; } // agora sim: vira vapor
+  aux[i] = Math.round(acc * 10); T[i] = M.pe - 0.01; // ainda é líquido fervendo: a energia vai para a mudança de fase
+}
 function fisica() {
   FIS.pressao = pressaoAr();
   const N = L.N;
   for (let i = 0; i < N; i++) {
     if (!mt[i]) continue;
+    { const M0 = MATS[mt[i]]; if (M0.pe != null && M0.pf != null && M0.tipo !== 'alimento' && M0.fixo === undefined && !M0.sublima && !(bfl[i] & B_BOLHA)) ebulicao(i, M0); }
     if (bfl[i] & B_BOLHA) bolha(i);
-    else if (dis[i] > 0) liquidoComGas(i);
+    else if (dis[i] > 0 || gv[i] > 0) liquidoComGas(i);
     else if (MATS[mt[i]].pipoca && T[i] >= MATS[mt[i]].pipoca) estourarPipoca(i);
     else if (((i + L.tick) & 7) === 0) liquidoSemGas(i);
-    if ((((i * 7) + L.tick) & 3) === 0 && mt[i] && !(bfl[i] & B_BOLHA) && !corpo[i]) { const x = i % L.W, y = (i / L.W) | 0; if (ehLiq(i)) misturar(i, x, y, agitadoPerto(i)); }
+    // convecção com o ar do ambiente: o que encosta no ar troca calor com ele (o ar se renova; é o que faz um forno assar e um metal quente esfriar)
+    if (((i + L.tick) & 3) === 0 && Math.abs(T[i] - L.AMB) > 1 && MATS[mt[i]].tempFixa === undefined && estadoDe(MATS[mt[i]], T[i]) < 2) {
+      const W = L.W, x = i % W; let n = 0; for (const v of [i - W, x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i + W]) if (v >= 0 && v < L.N && mt[v] === 0) n++;
+      if (n) T[i] += (L.AMB - T[i]) * 0.02 * n;
+    }
+    if (L.agitador && mt[i] && !corpo[i] && !(bfl[i] & B_BOLHA) && rnd() < 0.6 && ehLiq(i)) { // agitador: o redemoinho joga o líquido para longe (vence a separação pela densidade)
+      const x = i % L.W, y = (i / L.W) | 0, nx = x + ((rnd() * 5) | 0) - 2, ny = y + ((rnd() * 5) | 0) - 2;
+      if (nx >= 0 && ny >= 0 && nx < L.W && ny < L.H) { const j = ny * L.W + nx; if (j !== i && ehLiq(j)) troca(i, j); }
+    }
+    if ((((i * 7) + L.tick) & 3) === 0 && mt[i] && !(bfl[i] & B_BOLHA) && !corpo[i]) { const x = i % L.W, y = (i / L.W) | 0; if (ehLiq(i)) { misturar(i, x, y, agitadoPerto(i)); conveccao(i, y); } }
   }
   corpos();
   if (FIS.estouros.length > 80) FIS.estouros.splice(0, FIS.estouros.length - 80);
@@ -154,6 +177,7 @@ function fisica() {
 function liquidoComGas(i) {
   const W = L.W, m = mt[i], M = MATS[m], t = T[i];
   const G = GAS_INFO[disG[i]];
+  if (corpo[i] || estadoDe(M, t) !== 1) { gv[i] = 0; } else if (gv[i] > 0) { if (microbolhas(i, M, t, G)) return; }
   if (!G) { dis[i] = 0; return; }
   if (corpo[i] || estadoDe(M, t) !== 1) { // congelou, ferveu ou reagiu: o gás escapa
     if (dis[i] > 0.5) { const x = i % W, y = (i / W) | 0; const j = vizinhoVazio(i, x, y, true); if (j >= 0) { mt[j] = disG[i]; T[j] = t; } }
@@ -184,7 +208,7 @@ function liquidoComGas(i) {
   let p = rug > 0 ? 0.0007 * rug * fS * (site >= 0 ? (MATS[mt[site]].nucleos || 1) : 1) : 0;
   // no meio do líquido: um líquido real tem impurezas e microbolhas que viram núcleo a partir de ~8× (o refrigerante, ~4×, só faz bolha em superfícies)
   if (S > 8) p += 0.004 * Math.min(6, (S - 8) / 8);
-  if (rnd() < p) nascerBolha(i, disG[i], site >= 0 && rug > 0);
+  if (rnd() < p) { if (site >= 0 && (MATS[mt[site]].nucleos || 1) >= 10) { gv[i] += 0.03; fenomeno('micro', 'Nuvem de microbolhas', 'milhares de núcleos ao mesmo tempo', 'Uma superfície cheia de poros (como a do Mentos) faz nascer milhares de bolhas microscópicas ao mesmo tempo. Juntas, elas têm uma área enorme e puxam o gás dissolvido muito depressa. O líquido cheio de microbolhas fica mais leve e sobe, e cada bolha serve de núcleo para outras: é uma reação em cadeia.'); } else nascerBolha(i, disG[i], site >= 0 && rug > 0); }
 }
 
 // gás solto encostado num líquido que ainda não está saturado se dissolve (lei de Henry: CO₂ do ar na água, gelo seco...)
@@ -205,11 +229,43 @@ function liquidoSemGas(i) { // líquido limpo também absorve gás que encosta n
    Bolhas passando agitam o líquido e misturam muito mais rápido (convecção). Óleo e água não se misturam. */
 const POLARES = new Set(['H2O', 'AguaTorneira', 'AguaOxigenada', 'H2O2', 'Etanol', 'Glicerina', 'Acetona', 'Leite', 'RepolhoRoxo', 'Fenolftaleina', 'Refrigerante', 'Detergente', 'AguaSabao']);
 const miscivel = M => M.tipo === 'solucao' || M.comoAgua || M.lugol || POLARES.has(M.chave);
+// convecção: líquido mais quente (menos denso) sobe e o frio desce. É assim que a panela esquenta por inteiro
+function conveccao(i, y) {
+  if (y === 0) return; const j = i - L.W;
+  if (T[i] > T[j] + 1.5 && ehLiq(j) && (mt[j] === mt[i] || (miscivel(MATS[mt[i]]) && miscivel(MATS[mt[j]]))) && rnd() < Math.min(0.8, (T[i] - T[j]) * 0.05)) troca(i, j);
+}
 function misturar(i, x, y, agitado) {
   const W = L.W, d = (rnd() * 4) | 0, j = d === 0 ? (x > 0 ? i - 1 : -1) : d === 1 ? (x < W - 1 ? i + 1 : -1) : d === 2 ? i - W : i + W;
   if (j < 0 || j >= L.N || mt[j] === mt[i] || !ehLiq(j)) return;
+  if (L.agitador) { if (rnd() < 0.4) troca(i, j); return; } // agitador magnético: mistura até o que não se mistura sozinho (emulsão enquanto gira)
   if (!miscivel(MATS[mt[i]]) || !miscivel(MATS[mt[j]])) return;
   if (rnd() < (agitado ? 0.5 : 0.08)) troca(i, j);
+}
+
+/* ---------- microbolhas: gás em bolhinhas pequenas demais para ver uma a uma, misturadas no líquido ----------
+   gv[i] de uma célula de líquido = fração do volume que é gás. Elas crescem com o gás dissolvido (área enorme),
+   semeiam o líquido em volta, deixam o líquido mais leve (ele sobe) e, quando passam de ~75%, viram bolhas grandes. */
+function microbolhas(i, M, t, G) {
+  const W = L.W, x = i % W, y = (i / W) | 0;
+  if (G) {
+    const cs = solubilidade(G, M, t), ex = dis[i] - cs;
+    if (ex > 0) { const q = Math.min(dis[i] - cs, ex * 0.08 * Math.min(1, gv[i] * 8 + 0.15)); dis[i] -= q; gv[i] += q; }
+    else { const q = Math.min(gv[i], gv[i] * 0.01); gv[i] -= q; dis[i] += q; }
+    // semeia: as microbolhas levadas pelo líquido viram núcleo em volta
+    if (gv[i] > 0.1 && rnd() < 0.25) { const d = (rnd() * 4) | 0, j = d === 0 ? (x > 0 ? i - 1 : -1) : d === 1 ? (x < W - 1 ? i + 1 : -1) : d === 2 ? i - W : i + W; if (j >= 0 && j < L.N && ehLiq(j) && gv[j] < 0.02 && disG[j] === disG[i] && dis[j] > solubilidade(G, MATS[mt[j]], T[j]) * 1.3) gv[j] += 0.02; }
+  } else { gv[i] *= 0.99; }
+  // na superfície: o gás sai (com detergente, vira espuma)
+  if (y > 0 && abertaAoAr(i - W)) {
+    if (gv[i] > 0.35 && tensoativo(x, y)) { const v = gv[i]; gv[i] = 0; const k = i - W; mt[k] = id('Espuma'); T[k] = t; flg[k] = (flg[k] & TK) | PO; vida[k] = 120; if (v > 1.5) empilharEspuma(k, Math.round(v) - 1, mt[k], 120, t); }
+    else { if (gv[i] > 0.2 && rnd() < 0.3) FIS.estouros.push({ x, y, t: performance.now(), r: 0.5 }); gv[i] *= 0.7; }
+  }
+  // gás demais para a célula: vira uma bolha grande, que empurra o líquido (e o líquido sai pela boca do frasco)
+  if (gv[i] > 0.75 && G) {
+    const g = disG[i];
+    for (const k of [i - W, x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1]) if (k >= 0 && ehLiq(k) && abrirEspaco(k)) { limparCelula(k); mt[k] = g; T[k] = t; bfl[k] = B_BOLHA; gv[k] = gv[i] - 0.35; gv[i] = 0.35; break; }
+  }
+  if (gv[i] < 0.002) gv[i] = 0;
+  return false;
 }
 
 /* ---------- vida de uma bolha ---------- */
