@@ -252,6 +252,7 @@
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="../../salas-publicas.js?v=1"></script>
+<script src="../../foto.js?v=1"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -800,7 +801,7 @@ function dadosDoCliente(c, d) {
     if (G.jog.filter(p => !p.bot).length >= MAX_TOTAL) { c.send({ t: 'cheio' }); return; }
     let nome = String(d.nome || 'Jogador').replace(/[<>]/g, '').trim().slice(0, 14) || 'Jogador';
     while (G.jog.some(p => p.nome === nome)) nome = nome.slice(0, 12) + Math.floor(Math.random() * 90 + 10);
-    const p = novoJogador({ nome, rosto: ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false });
+    const p = novoJogador({ nome, rosto: (ROSTOS.includes(d.rosto) || ArcadiaFoto.eh(d.rosto)) ? d.rosto : pick(ROSTOS), bot: false });
     if (G.fase === 'lobby') { const [x, y] = posLivre('lobby'); Object.assign(p, { x, y }); }
     else { p.st = 'plateia'; const bot = G.jog.find(o => o.bot && o.st === 'fora'); if (bot) removerJogador(bot.id); }
     conns.set(c.peer, { c, pid: p.id });
@@ -920,7 +921,7 @@ function redim() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH
 addEventListener('resize', redim); addEventListener('orientationchange', () => setTimeout(redim, 250)); redim();
 const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
 const spr = new Map();
-function sprite(e) { let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
+function sprite(e) { if (ArcadiaFoto.ehFoto(e)) return ArcadiaFoto.sprite(e, 72); let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
 const cam = { x: 0, y: 0, z: 1, tremor: 0 };
 let particulas = [], textos = [], flechas = [], flechasNoChao = [], noJarro = 0, flash = 0, espiado = null, euMorto = 0, euMortoMostrado = false, beatFlash = 0;
 const plateia = {};
@@ -1307,7 +1308,7 @@ function atualizarHUD(V, dt) {
 }
 function mostrarFim(V) {
   const pod = V.pod, top = pod.slice(0, 3), ord = [top[1], top[0], top[2]], cls = ['p2', 'p1', 'p3'], pos = ['2º', '1º', '3º'];
-  $('#podio').innerHTML = ord.map((r, i) => r ? `<div class="${cls[i]}"><span class="pos">${pos[i]}</span><span class="av" style="background:${COR[r[0]]}">${infoJog(r[0]).rosto}</span>${esc(infoJog(r[0]).nome)}<small>${r[1] >= 0 ? `ainda girando` : PROVAS[-1 - r[1]] ? PROVAS[-1 - r[1]].icone + ' ' + PROVAS[-1 - r[1]].nome : ''}</small></div>` : '<div></div>').join('');
+  $('#podio').innerHTML = ord.map((r, i) => r ? `<div class="${cls[i]}"><span class="pos">${pos[i]}</span><span class="av" style="background:${COR[r[0]]}">${ArcadiaFoto.txt(infoJog(r[0]).rosto)}</span>${esc(infoJog(r[0]).nome)}<small>${r[1] >= 0 ? `ainda girando` : PROVAS[-1 - r[1]] ? PROVAS[-1 - r[1]].icone + ' ' + PROVAS[-1 - r[1]].nome : ''}</small></div>` : '<div></div>').join('');
   const meu = pod.findIndex(r => r[0] === meuId), venceu = meu === 0;
   $('#fim-eu').innerHTML = meu < 0 ? '🍿 Você assistiu a este festival. No próximo você joga!' : venceu ? '🏆 VOCÊ VENCEU O FESTIVAL! O Dokkaebi se curva para você.' : `Você ficou em <span style="color:var(--ouro)">${meu + 1}º lugar</span> de ${pod.length}.`;
   $('#ranking').innerHTML = pod.slice(3, 50).map((r, i) => `<div class="${r[0] === meuId ? 'eu' : ''}">${i + 4}º <span style="color:${COR[r[0]]}">●</span> ${esc(infoJog(r[0]).nome)} <span style="color:var(--muted)">${r[1] >= 0 ? 'finalista' : (PROVAS[-1 - r[1]] || {}).icone || ''}</span></div>`).join('');
@@ -1376,13 +1377,14 @@ function enviarAoHost() { if (conn && conn.open) try { conn.send({ t: 'i', ...le
    MENU
    ===================================================================== */
 let meuRosto = ROSTOS[0];
-try { meuRosto = localStorage.getItem('madang.rosto') || pick(ROSTOS); } catch (e) {}
+try { meuRosto = localStorage.getItem('madang.rosto') || ArcadiaFoto.minha() || pick(ROSTOS); } catch (e) {}
 function meuNome() { return ($('#nome').value.trim() || 'Você').slice(0, 14); }
 try { $('#nome').value = localStorage.getItem('madang.nome') || (((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || '').slice(0, 14); $('#total').value = localStorage.getItem('madang.total') || '30'; } catch (e) {}
 $('#provas-mini').innerHTML = PROVAS.map(p => `<div class="${p.final ? 'fin' : ''}"><span>${p.icone}</span>${p.final ? 'Final: ' : ''}${p.nome}<small>${p.ko}</small></div>`).join('');
-function renderRostos() { $('#rostos').innerHTML = ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
+if (ArcadiaFoto.eh(meuRosto) && ArcadiaFoto.minha()) meuRosto = ArcadiaFoto.minha();
+function renderRostos() { $('#rostos').innerHTML = (ArcadiaFoto.minha() ? `<button class="${ArcadiaFoto.eh(meuRosto) ? 'sel' : ''}" data-r="__foto" title="Sua foto da conta">${ArcadiaFoto.txt(ArcadiaFoto.minha(), 1.45)}</button>` : '') + ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
 renderRostos();
-$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r; try { localStorage.setItem('madang.rosto', meuRosto); } catch (er) {} renderRostos(); });
+$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r === '__foto' ? ArcadiaFoto.minha() : b.dataset.r; try { localStorage.setItem('madang.rosto', meuRosto); } catch (er) {} renderRostos(); });
 function erroMenu(t, neutro) { $('#erro').textContent = t; $('#erro').style.color = neutro ? 'var(--muted)' : ''; }
 function salvarPrefs() { try { localStorage.setItem('madang.nome', $('#nome').value.trim()); localStorage.setItem('madang.total', $('#total').value); } catch (e) {} }
 function entrarNoJogo() {

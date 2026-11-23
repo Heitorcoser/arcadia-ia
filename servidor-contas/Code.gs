@@ -499,7 +499,9 @@ var ACOES_AMIGOS = {
   // foto de perfil: um emoji sobre uma cor (ex.: "🦊|#8b5cf6")
   alterarFoto: function (r) {
     var x = contaDoToken(r.token), f = String(r.foto || ''), m = f.split('|');
-    if (f && (m.length !== 2 || !m[0] || m[0].length > 12 || /[<>"'&\s]/.test(m[0]) || !/^#[0-9a-fA-F]{6}$/.test(m[1]))) throw erro('Foto inválida.');
+    var ehImagem = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+\/=]+$/.test(f);
+    if (ehImagem && f.length > 24000) throw erro('Foto grande demais. Tente outra imagem.');
+    if (f && !ehImagem && (m.length !== 2 || !m[0] || m[0].length > 12 || /[<>"'&\s]/.test(m[0]) || !/^#[0-9a-fA-F]{6}$/.test(m[1]))) throw erro('Foto inválida.');
     atualizar('Contas', x.conta, { foto: f });
     return { usuario: publico(x.conta) };
   },
@@ -526,6 +528,14 @@ var ACOES_AMIGOS = {
 for (var acaoAmigo in ACOES_AMIGOS) ACOES[acaoAmigo] = ACOES_AMIGOS[acaoAmigo];
 
 /* ---------------------------- só para o criador ---------------------------- */
+// o criador pode tirar uma foto imprópria (a conta volta a mostrar a inicial do nome)
+ACOES.apagarFoto = function (r) {
+  var eu = contaDoToken(r.token).conta;
+  if (!ehCriador(eu)) throw erro('Só o criador da Arcádia pode tirar a foto de outra conta.');
+  var alvo = achar('Contas', 'id', String(r.id || '')); if (!alvo) throw erro('Conta não encontrada.');
+  atualizar('Contas', alvo, { foto: '' });
+  return {};
+};
 ACOES.darSelo = function (r) {
   var eu = contaDoToken(r.token).conta;
   if (!ehCriador(eu)) throw erro('Só o criador da Arcádia pode dar o selo de verificado.');

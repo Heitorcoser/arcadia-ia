@@ -188,6 +188,7 @@
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="../../salas-publicas.js?v=1"></script>
+<script src="../../foto.js?v=1"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -714,7 +715,7 @@ function dadosDoCliente(c, d) {
     if (G.jog.filter(p => !p.bot).length >= MAX) { c.send({ t: 'cheio' }); return; }
     let nome = String(d.nome || 'Jogador').replace(/[<>]/g, '').trim().slice(0, 14) || 'Jogador';
     while (G.jog.some(p => p.nome === nome)) nome = nome.slice(0, 12) + Math.floor(Math.random() * 90 + 10);
-    const p = novoJogador({ nome, rosto: ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false });
+    const p = novoJogador({ nome, rosto: (ROSTOS.includes(d.rosto) || ArcadiaFoto.eh(d.rosto)) ? d.rosto : pick(ROSTOS), bot: false });
     if (G.fase === 'lobby') { p.dis = p.id; p.h = p.id; p.x = 1200 + rnd(-200, 200); p.y = 750 + rnd(-100, 100); } else p.st = 'plateia';
     conns.set(c.peer, { c, pid: p.id });
     c.send({ t: 'ola', id: p.id, sala: codigoSala, rol: roster() });
@@ -816,7 +817,7 @@ function redim() { DPR = Math.min(2, devicePixelRatio || 1); VW = innerWidth; VH
 addEventListener('resize', redim); addEventListener('orientationchange', () => setTimeout(redim, 250)); redim();
 const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji",sans-serif';
 const spr = new Map();
-function sprite(e) { let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
+function sprite(e) { if (ArcadiaFoto.ehFoto(e)) return ArcadiaFoto.sprite(e, 72); let c = spr.get(e); if (c) return c; c = document.createElement('canvas'); c.width = c.height = 72; const g = c.getContext('2d'); g.font = `56px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 36, 40); spr.set(e, c); return c; }
 // chão pré-desenhado
 const chao = document.createElement('canvas'); chao.width = W / 2; chao.height = H / 2;
 (function () {
@@ -1033,8 +1034,8 @@ function tratarEvento(e) {
     case 'alarme': SOM.alarme(); alarmeT = 2.5; addFeed(`🚨 Roubaram ${e.e} da <b>${esc(SALAS[e.loja].nome)}</b>!`); for (let i = 0; i < 16; i++) particulas.push({ x: e.x, y: e.y, vx: rnd(-160, 160), vy: rnd(-160, 160), vida: 0.6, max: 0.6, cor: pick(['#ef4444', '#fff', '#cfe8ff']), tam: rnd(2, 4) }); break;
     case 'preso': {
       const dis = infoId(e.dis);
-      if (e.certo) { SOM.preso(); const real = infoId(e.real); addFeed(`🚔 <b style="color:#4ade80">Ladrão preso!</b> Era ${esc(real.nome)} ${real.rosto}`); banner(`<div class="cartao"><div class="ic">🚔</div><h2 class="maq" style="color:#4ade80">LADRÃO PRESO!</h2><p>Disfarçado de <b>${esc(dis.nome)} ${dis.rosto}</b>, o ladrão era <b>${esc(real.nome)} ${real.rosto}</b>.</p></div>`, 3500); }
-      else { SOM.errado(); addFeed(`❌ Prenderam <b>${esc(dis.nome)} ${dis.rosto}</b>, que era inocente!`); }
+      if (e.certo) { SOM.preso(); const real = infoId(e.real); addFeed(`🚔 <b style="color:#4ade80">Ladrão preso!</b> Era ${esc(real.nome)} ${ArcadiaFoto.txt(real.rosto)}`); banner(`<div class="cartao"><div class="ic">🚔</div><h2 class="maq" style="color:#4ade80">LADRÃO PRESO!</h2><p>Disfarçado de <b>${esc(dis.nome)} ${ArcadiaFoto.txt(dis.rosto)}</b>, o ladrão era <b>${esc(real.nome)} ${ArcadiaFoto.txt(real.rosto)}</b>.</p></div>`, 3500); }
+      else { SOM.errado(); addFeed(`❌ Prenderam <b>${esc(dis.nome)} ${ArcadiaFoto.txt(dis.rosto)}</b>, que era inocente!`); }
       break;
     }
     case 'solto': addFeed('🔓 Um inocente foi solto da delegacia.'); break;
@@ -1066,7 +1067,7 @@ function atualizarHUD(V, dt) {
     const dis = infoId(pv.dis);
     $('#papel').style.display = 'block'; $('#papel').style.borderColor = P.cor + '88';
     $('#papel').innerHTML = `<div class="t"><span>${P.ic}</span>${P.nome}${pv.pr ? ' · preso' : ''}</div><div class="desc" style="color:var(--muted)">${P.obj.replace('{meta}', V.me)}</div>
-      <div class="dis">Seu disfarce: ${dis.rosto} ${esc(dis.nome)}</div>${pv.pl === 'detetive' ? `<div class="ins" title="Distintivos">${'⭐'.repeat(pv.ins)}${'·'.repeat(2 - pv.ins)}</div>` : ''}
+      <div class="dis">Seu disfarce: ${ArcadiaFoto.txt(dis.rosto)} ${esc(dis.nome)}</div>${pv.pl === 'detetive' ? `<div class="ins" title="Distintivos">${'⭐'.repeat(pv.ins)}${'·'.repeat(2 - pv.ins)}</div>` : ''}
       ${pv.pl === 'ladrao' && (pv.socios || []).length ? `<div style="margin-top:4px;color:#fca5a5">Seus parceiros têm contorno vermelho 🦹</div>` : ''}
       ${pv.pl === 'ladrao' ? `<div style="margin-top:4px">📷 Burlar câmera: ${pv.ch2 > 0 ? `<span style="color:var(--muted)">(${Math.ceil(pv.ch2)}s)</span>` : '✅'}${(pv.hk || []).length ? ` · em loop: ${pv.hk.map(i => SALAS[i].ic).join(' ')}` : ''}</div>` : ''}
       ${P.q ? `<div style="margin-top:4px">Q: ${P.q} ${pv.cq > 0 ? `<span style="color:var(--muted)">(${Math.ceil(pv.cq)}s)</span>` : '✅'}</div>` : ''}`;
@@ -1076,7 +1077,7 @@ function atualizarHUD(V, dt) {
   if (V.f === 'papel' && P && !cartaoMostrado) {
     cartaoMostrado = true; const dis = infoId(pv.dis), real = infoId(meuId), clone = pv.dis !== meuId;
     banner(`<div class="cartao" style="border-color:${P.cor}"><div class="ic">${P.ic}</div><h2 class="maq" style="color:${P.cor}">Você é ${pv.pl === 'ajudante' ? 'AJUDANTE' : pv.pl === 'ladrao' ? 'o LADRÃO' : 'o DETETIVE'}</h2><p>${P.obj.replace('{meta}', V.me)}</p>
-      <p style="margin-top:10px">Seu disfarce: <b>${dis.rosto} ${esc(dis.nome)}</b>${clone ? ` <span style="color:#fca5a5">(você está parecendo outra pessoa!)</span>` : ' (você mesmo)'}</p>
+      <p style="margin-top:10px">Seu disfarce: <b>${ArcadiaFoto.txt(dis.rosto)} ${esc(dis.nome)}</b>${clone ? ` <span style="color:#fca5a5">(você está parecendo outra pessoa!)</span>` : ' (você mesmo)'}</p>
       ${pv.pl === 'ladrao' ? '<p>Quem está fora da loja não te vê lá dentro, mas as <b>câmeras</b> veem. Segure <b>Espaço</b> na câmera 📷 da loja para colocá-la em loop, depois segure <b>Espaço</b> num objeto para roubar. <b>Q</b> faz um apagão.</p>' : pv.pl === 'detetive' ? '<p>Pegadas laranja são de quem roubou há pouco (aparecem com uns segundos de atraso). <b>Q</b> fareja. Dentro das lojas só se vê quem está lá ou pelas câmeras da Sala de Segurança 📹. Segure <b>Espaço</b> perto de alguém para prender.</p>' : '<p>Segure <b>Espaço</b> nas tarefas, nas câmeras da Sala de Segurança 📹, nas vitrines quebradas 🚨, nas câmeras em loop 📷 e no quadro de luz ⚡.</p>'}</div>`, 7500);
     void real;
   }
@@ -1125,7 +1126,7 @@ function mostrarFim(V) {
   const ordem = { ladrao: 0, detetive: 1, ajudante: 2 };
   $('#revela').innerHTML = pv.rev.slice().sort((a, b) => ordem[a[1]] - ordem[b[1]]).map(([id, papel, dis, preso]) => {
     const r = infoId(id), d = infoId(dis), P = PAPEL[papel];
-    return `<div class="${papel === 'ladrao' ? 'lad' : papel === 'detetive' ? 'det' : ''} ${id === meuId ? 'eu' : ''}"><span class="av" style="background:${COR[id % 64]}">${r.rosto}</span><span><b>${esc(r.nome)}</b> · ${P.ic} ${P.nome}${preso && papel === 'ladrao' ? ' (preso)' : ''}<small>${dis === id ? 'estava com o próprio visual' : `disfarçado de ${d.rosto} ${esc(d.nome)}`}</small></span></div>`;
+    return `<div class="${papel === 'ladrao' ? 'lad' : papel === 'detetive' ? 'det' : ''} ${id === meuId ? 'eu' : ''}"><span class="av" style="background:${COR[id % 64]}">${ArcadiaFoto.txt(r.rosto)}</span><span><b>${esc(r.nome)}</b> · ${P.ic} ${P.nome}${preso && papel === 'ladrao' ? ' (preso)' : ''}<small>${dis === id ? 'estava com o próprio visual' : `disfarçado de ${ArcadiaFoto.txt(d.rosto)} ${esc(d.nome)}`}</small></span></div>`;
   }).join('');
   const host = modo === 'host';
   $('#fim-botoes').innerHTML = host ? `<button class="btn pri" id="fim-nova">🔍 ${solo ? 'Jogar de novo' : 'Voltar para a sala'}</button><button class="btn" id="fim-sair">Sair</button>` : `<button class="btn" id="fim-fechar">Ver o shopping</button><button class="btn" id="fim-sair">Sair</button>`;
@@ -1175,14 +1176,15 @@ function enviarAoHost() { if (conn && conn.open) try { conn.send({ t: 'i', ...le
 /* =====================================================================
    MENU
    ===================================================================== */
-let meuRosto = localStorage.getItem('detetive.rosto') || pick(ROSTOS);
+let meuRosto = localStorage.getItem('detetive.rosto') || ArcadiaFoto.minha() || pick(ROSTOS);
 const nomeConta = () => { try { return ((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || ''; } catch (e) { return ''; } };
 $('#nome').value = localStorage.getItem('detetive.nome') || nomeConta().slice(0, 14);
 $('#total').value = localStorage.getItem('detetive.total') || '16';
 function meuNome() { return ($('#nome').value.trim() || 'Você').slice(0, 14); }
-function renderRostos() { $('#rostos').innerHTML = ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
+if (ArcadiaFoto.eh(meuRosto) && ArcadiaFoto.minha()) meuRosto = ArcadiaFoto.minha();
+function renderRostos() { $('#rostos').innerHTML = (ArcadiaFoto.minha() ? `<button class="${ArcadiaFoto.eh(meuRosto) ? 'sel' : ''}" data-r="__foto" title="Sua foto da conta">${ArcadiaFoto.txt(ArcadiaFoto.minha(), 1.45)}</button>` : '') + ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
 renderRostos();
-$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r; localStorage.setItem('detetive.rosto', meuRosto); renderRostos(); });
+$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r === '__foto' ? ArcadiaFoto.minha() : b.dataset.r; localStorage.setItem('detetive.rosto', meuRosto); renderRostos(); });
 function erroMenu(t, neutro) { $('#erro').textContent = t; $('#erro').style.color = neutro ? 'var(--muted)' : ''; }
 function salvarPrefs() { try { localStorage.setItem('detetive.nome', $('#nome').value.trim()); localStorage.setItem('detetive.total', $('#total').value); } catch (e) {} }
 function entrarNoJogo() { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); $('#menu').classList.remove('on'); $('#hud').classList.add('on'); if (TOQUE) $('#toque').classList.add('on'); avisar('iniciado'); }

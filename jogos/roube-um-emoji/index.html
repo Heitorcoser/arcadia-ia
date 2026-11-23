@@ -184,6 +184,7 @@
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="../../salas-publicas.js?v=1"></script>
+<script src="../../foto.js?v=1"></script>
 <script>
   // se o módulo 3D não carregar (sem internet), avisa em vez de ficar parado
   setTimeout(() => { const c = document.getElementById('carregando'); if (c && c.style.display !== 'none') c.textContent = 'Não deu para carregar o 3D. Confira a internet e recarregue a página.'; }, 12000);
@@ -623,7 +624,7 @@ function dadosDoCliente(c, d) {
     if (b < 0) { const bot = G.jog.find(p => p.bot); if (!bot) { c.send({ t: 'cheio' }); return; } b = bot.base; removerJogador(bot); }
     let nome = String(d.nome || 'Jogador').replace(/[<>]/g, '').trim().slice(0, 14) || 'Jogador';
     while (G.jog.some(p => p.nome === nome)) nome = nome.slice(0, 12) + Math.floor(Math.random() * 90 + 10);
-    const p = novoJogador({ nome, rosto: ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false, base: b });
+    const p = novoJogador({ nome, rosto: (ROSTOS.includes(d.rosto) || ArcadiaFoto.eh(d.rosto)) ? d.rosto : pick(ROSTOS), bot: false, base: b });
     conns.set(c.peer, { c, pid: p.id });
     c.send({ t: 'ola', id: p.id, sala: codigoSala, rol: roster() });
     ev({ k: 'msg', t: `👋 ${p.nome} entrou no desfile` });
@@ -822,6 +823,7 @@ const nuvens = [];
 const texEmo = new Map();
 function texDoEmoji(e) {
   let t = texEmo.get(e); if (t) return t;
+  if (ArcadiaFoto.ehFoto(e)) { const c = ArcadiaFoto.sprite(e, 256, () => { t.needsUpdate = true; }); t = new THREE.CanvasTexture(c); if ('colorSpace' in t) t.colorSpace = THREE.SRGBColorSpace; texEmo.set(e, t); return t; }
   t = texCanvas(256, 256, (g) => { g.font = `200px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 128, 140); });
   texEmo.set(e, t); return t;
 }
@@ -1179,7 +1181,7 @@ function atualizarHUD(V, dt) {
   for (const s of V.p.values()) { const i = infoId(s.id); if (i) lin.push({ id: s.id, i, r: V.b[i.base] ? V.b[i.base][4] : 0 }); }
   lin.sort((a, b) => b.r - a.r);
   const max = innerWidth < 700 ? 5 : 8;
-  $('#rank').innerHTML = '<h4>🏆 Mais ricos</h4>' + lin.slice(0, max).map((l, k) => `<div class="${l.id === meuId ? 'eu' : ''}"><i style="background:${l.i.cor}"></i>${k + 1}. ${l.i.rosto}<b>${esc(l.i.nome)}</b><small>${fmt(l.r)}/s</small></div>`).join('');
+  $('#rank').innerHTML = '<h4>🏆 Mais ricos</h4>' + lin.slice(0, max).map((l, k) => `<div class="${l.id === meuId ? 'eu' : ''}"><i style="background:${l.i.cor}"></i>${k + 1}. ${ArcadiaFoto.txt(l.i.rosto)}<b>${esc(l.i.nome)}</b><small>${fmt(l.r)}/s</small></div>`).join('');
   // trava
   if (B) $('#trava').innerHTML = B[1] > 0 ? `🔒 Base trancada · <b>${B[1]}s</b>` : `🔓 Base aberta · tranque no botão vermelho`;
   $('#trava').style.borderColor = B && B[1] > 0 ? '#4ade8088' : '#ff5a5a66';
@@ -1263,13 +1265,14 @@ function enviarAoHost() { if (conn && conn.open) try { conn.send({ t: 'i', ...le
    MENU
    ===================================================================== */
 let meuRosto = ROSTOS[0];
-try { meuRosto = localStorage.getItem('roube-emoji.rosto') || pick(ROSTOS); } catch (e) {}
+try { meuRosto = localStorage.getItem('roube-emoji.rosto') || ArcadiaFoto.minha() || pick(ROSTOS); } catch (e) {}
 const nomeConta = () => { try { return ((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || ''; } catch (e) { return ''; } };
 try { $('#nome').value = localStorage.getItem('roube-emoji.nome') || nomeConta().slice(0, 14); $('#bots').value = localStorage.getItem('roube-emoji.bots') || '5'; } catch (e) {}
 function meuNome() { return ($('#nome').value.trim() || 'Você').slice(0, 14); }
-function renderRostos() { $('#rostos').innerHTML = ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
+if (ArcadiaFoto.eh(meuRosto) && ArcadiaFoto.minha()) meuRosto = ArcadiaFoto.minha();
+function renderRostos() { $('#rostos').innerHTML = (ArcadiaFoto.minha() ? `<button class="${ArcadiaFoto.eh(meuRosto) ? 'sel' : ''}" data-r="__foto" title="Sua foto da conta">${ArcadiaFoto.txt(ArcadiaFoto.minha(), 1.45)}</button>` : '') + ROSTOS.map(r => `<button class="${r === meuRosto ? 'sel' : ''}" data-r="${r}">${r}</button>`).join(''); }
 renderRostos();
-$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r; try { localStorage.setItem('roube-emoji.rosto', meuRosto); } catch (er) {} renderRostos(); });
+$('#rostos').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; meuRosto = b.dataset.r === '__foto' ? ArcadiaFoto.minha() : b.dataset.r; try { localStorage.setItem('roube-emoji.rosto', meuRosto); } catch (er) {} renderRostos(); });
 $('#raridades').innerHTML = RAR.map((r, i) => `<span style="background:${i === 5 ? 'linear-gradient(90deg,#ff5a5a,#ffc53d,#4ade80,#4dabf7,#c084fc)' : r.cor};${i >= 1 && i !== 0 ? 'color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.45)' : ''}">${r.n}</span>`).join('') + MUT.slice(1).map(m => `<span style="background:#0f2036;color:${m.cor};border:1px solid ${m.cor}">${m.n} ×${m.x}</span>`).join('');
 function erroMenu(t, neutro) { $('#erro').textContent = t; $('#erro').style.color = neutro ? 'var(--muted)' : ''; }
 function salvarPrefs() { try { localStorage.setItem('roube-emoji.nome', $('#nome').value.trim()); localStorage.setItem('roube-emoji.bots', $('#bots').value); } catch (e) {} }
