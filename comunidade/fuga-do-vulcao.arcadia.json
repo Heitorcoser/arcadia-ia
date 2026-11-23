@@ -1,0 +1,1836 @@
+{
+ "formato": "arcadia-studio",
+ "versao": 1,
+ "id": "proj-1vq7wkd",
+ "nome": "Fuga do Vulcão",
+ "tipo": "cena",
+ "criado": 1795398988086,
+ "atualizado": 1795399006476,
+ "descricao": "O chão virou lava! Pule pelas pedras flutuantes, encare plataformas que se movem, uma barra giratória e plataformas que somem, pegue as moedas e use o trampolim para chegar ao topo do vulcão. O cronômetro conta o seu tempo. Feito inteiro por IA através do MCP do Arcádia Studio.",
+ "cena": {
+  "id": "raiz",
+  "ClassName": "DataModel",
+  "Name": "Jogo",
+  "props": {},
+  "children": [
+   {
+    "id": "1vq0ft7",
+    "ClassName": "Workspace",
+    "Name": "Workspace",
+    "props": {
+     "Gravity": 196.2,
+     "FallenPartsDestroyHeight": -100
+    },
+    "children": [
+     {
+      "id": "1vq8758",
+      "ClassName": "Part",
+      "Name": "MarDeLava",
+      "props": {
+       "Position": [
+        0,
+        -0.5,
+        110
+       ],
+       "Size": [
+        420,
+        1,
+        520
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#ff4d00",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vqq367",
+        "ClassName": "Script",
+        "Name": "Mata",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- lava: quem encostar perde toda a vida\nscript.Parent.Touched:Connect(function(hit)\n  local h = hit.Parent:FindFirstChild(\"Humanoid\")\n  if h then h.Health = 0 end\nend)"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vq96k1",
+      "ClassName": "Part",
+      "Name": "IlhaInicial",
+      "props": {
+       "Position": [
+        0,
+        2,
+        0
+       ],
+       "Size": [
+        22,
+        4,
+        22
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#3b3734",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqajxv",
+      "ClassName": "SpawnLocation",
+      "Name": "Inicio",
+      "props": {
+       "Position": [
+        0,
+        4.5,
+        -4
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#9ca3af",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqbezb",
+      "ClassName": "Part",
+      "Name": "VulcaoBase",
+      "props": {
+       "Position": [
+        0,
+        8,
+        238
+       ],
+       "Size": [
+        90,
+        16,
+        70
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#2a2522",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqcpcv",
+      "ClassName": "Part",
+      "Name": "VulcaoMeio",
+      "props": {
+       "Position": [
+        0,
+        24,
+        236
+       ],
+       "Size": [
+        64,
+        16,
+        52
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#332c28",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqdtbv",
+      "ClassName": "Part",
+      "Name": "VulcaoTopo",
+      "props": {
+       "Position": [
+        0,
+        36,
+        230
+       ],
+       "Size": [
+        40,
+        8,
+        36
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#3b3330",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqezrc",
+      "ClassName": "Part",
+      "Name": "Cratera",
+      "props": {
+       "Position": [
+        0,
+        40.2,
+        236
+       ],
+       "Size": [
+        16,
+        0.6,
+        14
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#ff7a00",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vqrzgv",
+        "ClassName": "Script",
+        "Name": "Mata",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- lava: quem encostar perde toda a vida\nscript.Parent.Touched:Connect(function(hit)\n  local h = hit.Parent:FindFirstChild(\"Humanoid\")\n  if h then h.Health = 0 end\nend)"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vqf981",
+      "ClassName": "Part",
+      "Name": "Cume",
+      "props": {
+       "Position": [
+        0,
+        41,
+        206
+       ],
+       "Size": [
+        26,
+        2,
+        22
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a403a",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqg4gb",
+      "ClassName": "Part",
+      "Name": "Pedra1",
+      "props": {
+       "Position": [
+        -4,
+        4,
+        18
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqhqtr",
+      "ClassName": "Part",
+      "Name": "Pedra2",
+      "props": {
+       "Position": [
+        4,
+        5.5,
+        27
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#57504a",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqi60a",
+      "ClassName": "Part",
+      "Name": "Pedra3",
+      "props": {
+       "Position": [
+        -4,
+        7,
+        36
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqj4wz",
+      "ClassName": "Part",
+      "Name": "Pedra4",
+      "props": {
+       "Position": [
+        4,
+        8.5,
+        45
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#57504a",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqk33k",
+      "ClassName": "Part",
+      "Name": "Pedra5",
+      "props": {
+       "Position": [
+        -4,
+        10,
+        54
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqloty",
+      "ClassName": "Part",
+      "Name": "Pedra6",
+      "props": {
+       "Position": [
+        4,
+        11.5,
+        63
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#57504a",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqmk06",
+      "ClassName": "Part",
+      "Name": "Pedra7",
+      "props": {
+       "Position": [
+        -4,
+        13,
+        72
+       ],
+       "Size": [
+        6,
+        1.4,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqn2to",
+      "ClassName": "Part",
+      "Name": "Descanso1",
+      "props": {
+       "Position": [
+        0,
+        14,
+        86
+       ],
+       "Size": [
+        14,
+        1.4,
+        14
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqoa5x",
+      "ClassName": "Part",
+      "Name": "Descanso2",
+      "props": {
+       "Position": [
+        0,
+        17,
+        130
+       ],
+       "Size": [
+        12,
+        1.4,
+        12
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqpmdz",
+      "ClassName": "Part",
+      "Name": "Descanso3",
+      "props": {
+       "Position": [
+        0,
+        22.5,
+        188
+       ],
+       "Size": [
+        14,
+        1.4,
+        14
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#4a4440",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vqsl2x",
+      "ClassName": "Part",
+      "Name": "Moeda",
+      "props": {
+       "Position": [
+        4,
+        8.9,
+        27
+       ],
+       "Size": [
+        0.4,
+        2.4,
+        2.4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#f5c518",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": false,
+       "CanTouch": true,
+       "Shape": "Cylinder",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vqtkgf",
+        "ClassName": "Script",
+        "Name": "Moeda",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- moeda: soma 1 em leaderstats.Moedas e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = moeda:FindFirstChild(\"Som\")\n  if som then som:Play() end\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+        },
+        "children": []
+       },
+       {
+        "id": "1vqumsh",
+        "ClassName": "Sound",
+        "Name": "Som",
+        "props": {
+         "SoundId": "coin",
+         "Volume": 0.5,
+         "Looped": false,
+         "Playing": false,
+         "PlaybackSpeed": 1
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vqv6zk",
+      "ClassName": "Part",
+      "Name": "Moeda",
+      "props": {
+       "Position": [
+        4,
+        11.9,
+        45
+       ],
+       "Size": [
+        0.4,
+        2.4,
+        2.4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#f5c518",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": false,
+       "CanTouch": true,
+       "Shape": "Cylinder",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vqwtm1",
+        "ClassName": "Script",
+        "Name": "Moeda",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- moeda: soma 1 em leaderstats.Moedas e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = moeda:FindFirstChild(\"Som\")\n  if som then som:Play() end\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+        },
+        "children": []
+       },
+       {
+        "id": "1vqxrii",
+        "ClassName": "Sound",
+        "Name": "Som",
+        "props": {
+         "SoundId": "coin",
+         "Volume": 0.5,
+         "Looped": false,
+         "Playing": false,
+         "PlaybackSpeed": 1
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vqy5n4",
+      "ClassName": "Part",
+      "Name": "Moeda",
+      "props": {
+       "Position": [
+        4,
+        14.9,
+        63
+       ],
+       "Size": [
+        0.4,
+        2.4,
+        2.4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#f5c518",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": false,
+       "CanTouch": true,
+       "Shape": "Cylinder",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vqz34a",
+        "ClassName": "Script",
+        "Name": "Moeda",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- moeda: soma 1 em leaderstats.Moedas e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = moeda:FindFirstChild(\"Som\")\n  if som then som:Play() end\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+        },
+        "children": []
+       },
+       {
+        "id": "1vr0ths",
+        "ClassName": "Sound",
+        "Name": "Som",
+        "props": {
+         "SoundId": "coin",
+         "Volume": 0.5,
+         "Looped": false,
+         "Playing": false,
+         "PlaybackSpeed": 1
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vr1xoy",
+      "ClassName": "SpawnLocation",
+      "Name": "Checkpoint",
+      "props": {
+       "Position": [
+        0,
+        15.3,
+        86
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#9ca3af",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vr22ch",
+        "ClassName": "Script",
+        "Name": "Checkpoint",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- salva o ponto de renascimento\nlocal cp = script.Parent\ncp.Touched:Connect(function(hit)\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if jogador and jogador.RespawnLocation ~= cp then\n    jogador.RespawnLocation = cp\n    cp.Color = Color3.fromRGB(80, 220, 120)\n    print(jogador.Name .. \" salvou o checkpoint \" .. cp.Name)\n  end\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vr3ta6",
+      "ClassName": "Part",
+      "Name": "PlataformaMovel",
+      "props": {
+       "Position": [
+        -8,
+        15.5,
+        100
+       ],
+       "Size": [
+        8,
+        1,
+        8
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#3b82f6",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vr4w3y",
+        "ClassName": "Script",
+        "Name": "Mover",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- vai e volta para sempre\nlocal TweenService = game:GetService(\"TweenService\")\nlocal p = script.Parent\nlocal info = TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)\nTweenService:Create(p, info, { Position = p.Position + Vector3.new(16, 0, 0) }):Play()\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vr5yvg",
+      "ClassName": "Part",
+      "Name": "PlataformaMovel",
+      "props": {
+       "Position": [
+        -8,
+        16.5,
+        115
+       ],
+       "Size": [
+        8,
+        1,
+        8
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#3b82f6",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vr6xn7",
+        "ClassName": "Script",
+        "Name": "Mover",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- vai e volta para sempre\nlocal TweenService = game:GetService(\"TweenService\")\nlocal p = script.Parent\nlocal info = TweenInfo.new(3, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true)\nTweenService:Create(p, info, { Position = p.Position + Vector3.new(16, 0, 0) }):Play()\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vr7b7x",
+      "ClassName": "Part",
+      "Name": "Moeda",
+      "props": {
+       "Position": [
+        0,
+        20.7,
+        130
+       ],
+       "Size": [
+        0.4,
+        2.4,
+        2.4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#f5c518",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": false,
+       "CanTouch": true,
+       "Shape": "Cylinder",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vr86vd",
+        "ClassName": "Script",
+        "Name": "Moeda",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- moeda: soma 1 em leaderstats.Moedas e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = moeda:FindFirstChild(\"Som\")\n  if som then som:Play() end\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+        },
+        "children": []
+       },
+       {
+        "id": "1vr9f20",
+        "ClassName": "Sound",
+        "Name": "Som",
+        "props": {
+         "SoundId": "coin",
+         "Volume": 0.5,
+         "Looped": false,
+         "Playing": false,
+         "PlaybackSpeed": 1
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrabzj",
+      "ClassName": "Part",
+      "Name": "Giratoria",
+      "props": {
+       "Position": [
+        0,
+        19.1,
+        130
+       ],
+       "Size": [
+        10,
+        1,
+        2
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#22d3ee",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrb9f9",
+        "ClassName": "Script",
+        "Name": "Girar",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- gira a parte sem parar\nlocal parte = script.Parent\nwhile parte.Parent do\n  parte.Orientation = parte.Orientation + Vector3.new(0, 3, 0)\n  wait()\nend\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrcrm8",
+      "ClassName": "Part",
+      "Name": "PlataformaFantasma",
+      "props": {
+       "Position": [
+        -3,
+        18.5,
+        143
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#a78bfa",
+       "Material": "Glass",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrdse5",
+        "ClassName": "Script",
+        "Name": "Some",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- some quando alguém pisa e volta depois\nlocal p = script.Parent\nlocal ocupado = false\np.Touched:Connect(function(hit)\n  if ocupado or not hit.Parent:FindFirstChild(\"Humanoid\") then return end\n  ocupado = true\n  for i = 1, 10 do\n    p.Transparency = i / 10\n    wait(0.06)\n  end\n  p.CanCollide = false\n  wait(3)\n  p.CanCollide = true\n  p.Transparency = 0\n  ocupado = false\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrekvj",
+      "ClassName": "Part",
+      "Name": "PlataformaFantasma",
+      "props": {
+       "Position": [
+        3,
+        19.7,
+        153
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#a78bfa",
+       "Material": "Glass",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrf3t3",
+        "ClassName": "Script",
+        "Name": "Some",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- some quando alguém pisa e volta depois\nlocal p = script.Parent\nlocal ocupado = false\np.Touched:Connect(function(hit)\n  if ocupado or not hit.Parent:FindFirstChild(\"Humanoid\") then return end\n  ocupado = true\n  for i = 1, 10 do\n    p.Transparency = i / 10\n    wait(0.06)\n  end\n  p.CanCollide = false\n  wait(3)\n  p.CanCollide = true\n  p.Transparency = 0\n  ocupado = false\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrgy8d",
+      "ClassName": "Part",
+      "Name": "PlataformaFantasma",
+      "props": {
+       "Position": [
+        -3,
+        20.9,
+        163
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#a78bfa",
+       "Material": "Glass",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrhpxq",
+        "ClassName": "Script",
+        "Name": "Some",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- some quando alguém pisa e volta depois\nlocal p = script.Parent\nlocal ocupado = false\np.Touched:Connect(function(hit)\n  if ocupado or not hit.Parent:FindFirstChild(\"Humanoid\") then return end\n  ocupado = true\n  for i = 1, 10 do\n    p.Transparency = i / 10\n    wait(0.06)\n  end\n  p.CanCollide = false\n  wait(3)\n  p.CanCollide = true\n  p.Transparency = 0\n  ocupado = false\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vri614",
+      "ClassName": "Part",
+      "Name": "PlataformaFantasma",
+      "props": {
+       "Position": [
+        3,
+        22.1,
+        173
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#a78bfa",
+       "Material": "Glass",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrjjf9",
+        "ClassName": "Script",
+        "Name": "Some",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- some quando alguém pisa e volta depois\nlocal p = script.Parent\nlocal ocupado = false\np.Touched:Connect(function(hit)\n  if ocupado or not hit.Parent:FindFirstChild(\"Humanoid\") then return end\n  ocupado = true\n  for i = 1, 10 do\n    p.Transparency = i / 10\n    wait(0.06)\n  end\n  p.CanCollide = false\n  wait(3)\n  p.CanCollide = true\n  p.Transparency = 0\n  ocupado = false\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrkd5t",
+      "ClassName": "Part",
+      "Name": "Moeda",
+      "props": {
+       "Position": [
+        0,
+        26.2,
+        188
+       ],
+       "Size": [
+        0.4,
+        2.4,
+        2.4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#f5c518",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": false,
+       "CanTouch": true,
+       "Shape": "Cylinder",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrliyn",
+        "ClassName": "Script",
+        "Name": "Moeda",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- moeda: soma 1 em leaderstats.Moedas e some\nlocal moeda = script.Parent\nlocal pega = false\nmoeda.Touched:Connect(function(hit)\n  if pega then return end\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador then return end\n  pega = true\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  if stats and stats:FindFirstChild(\"Moedas\") then\n    stats.Moedas.Value = stats.Moedas.Value + 1\n  end\n  local som = moeda:FindFirstChild(\"Som\")\n  if som then som:Play() end\n  moeda:Destroy()\nend)\nwhile moeda.Parent do\n  moeda.Orientation = moeda.Orientation + Vector3.new(0, 4, 0)\n  wait()\nend\n"
+        },
+        "children": []
+       },
+       {
+        "id": "1vrmhpd",
+        "ClassName": "Sound",
+        "Name": "Som",
+        "props": {
+         "SoundId": "coin",
+         "Volume": 0.5,
+         "Looped": false,
+         "Playing": false,
+         "PlaybackSpeed": 1
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrn3uj",
+      "ClassName": "SpawnLocation",
+      "Name": "Checkpoint",
+      "props": {
+       "Position": [
+        -4,
+        23.8,
+        188
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#9ca3af",
+       "Material": "Plastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vro6mp",
+        "ClassName": "Script",
+        "Name": "Checkpoint",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- salva o ponto de renascimento\nlocal cp = script.Parent\ncp.Touched:Connect(function(hit)\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if jogador and jogador.RespawnLocation ~= cp then\n    jogador.RespawnLocation = cp\n    cp.Color = Color3.fromRGB(80, 220, 120)\n    print(jogador.Name .. \" salvou o checkpoint \" .. cp.Name)\n  end\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrp519",
+      "ClassName": "Part",
+      "Name": "Trampolim",
+      "props": {
+       "Position": [
+        4,
+        23.8,
+        192
+       ],
+       "Size": [
+        6,
+        1,
+        6
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#ec4899",
+       "Material": "SmoothPlastic",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vrqwng",
+        "ClassName": "Script",
+        "Name": "Pulo",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- joga o jogador para cima\nlocal debounce = false\nscript.Parent.Touched:Connect(function(hit)\n  local raiz = hit.Parent:FindFirstChild(\"HumanoidRootPart\")\n  if raiz and not debounce then\n    debounce = true\n    raiz.Velocity = Vector3.new(0, 140, 0)\n    wait(0.3)\n    debounce = false\n  end\nend)\n"
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vrv126",
+      "ClassName": "Part",
+      "Name": "Pedra",
+      "props": {
+       "Position": [
+        -14,
+        2.75,
+        30
+       ],
+       "Size": [
+        5,
+        3.5,
+        4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#78716c",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Ball",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vrwv7h",
+      "ClassName": "Part",
+      "Name": "Pedra",
+      "props": {
+       "Position": [
+        14,
+        2.75,
+        60
+       ],
+       "Size": [
+        5,
+        3.5,
+        4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#78716c",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Ball",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vrxmmz",
+      "ClassName": "Part",
+      "Name": "Pedra",
+      "props": {
+       "Position": [
+        -14,
+        2.75,
+        110
+       ],
+       "Size": [
+        5,
+        3.5,
+        4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#78716c",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Ball",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vryes3",
+      "ClassName": "Part",
+      "Name": "Pedra",
+      "props": {
+       "Position": [
+        14,
+        2.75,
+        160
+       ],
+       "Size": [
+        5,
+        3.5,
+        4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#78716c",
+       "Material": "Slate",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Ball",
+       "CastShadow": true
+      },
+      "children": []
+     },
+     {
+      "id": "1vs2yze",
+      "ClassName": "Model",
+      "Name": "Poste",
+      "props": {},
+      "children": [
+       {
+        "id": "1vrz8yo",
+        "ClassName": "Part",
+        "Name": "Haste",
+        "props": {
+         "Position": [
+          8,
+          9,
+          6
+         ],
+         "Size": [
+          0.6,
+          10,
+          0.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#3f3f46",
+         "Material": "Metal",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Block",
+         "CastShadow": true
+        },
+        "children": []
+       },
+       {
+        "id": "1vs0hey",
+        "ClassName": "Part",
+        "Name": "Lampada",
+        "props": {
+         "Position": [
+          8,
+          14.5,
+          6
+         ],
+         "Size": [
+          1.6,
+          1.6,
+          1.6
+         ],
+         "Orientation": [
+          0,
+          0,
+          0
+         ],
+         "Color": "#fff3c4",
+         "Material": "Neon",
+         "Transparency": 0,
+         "Reflectance": 0,
+         "Anchored": true,
+         "CanCollide": true,
+         "CanTouch": true,
+         "Shape": "Ball",
+         "CastShadow": true
+        },
+        "children": [
+         {
+          "id": "1vs1l58",
+          "ClassName": "PointLight",
+          "Name": "Luz",
+          "props": {
+           "Color": "#fff1d6",
+           "Brightness": 3,
+           "Range": 28,
+           "Enabled": true
+          },
+          "children": []
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "id": "1vs3n0r",
+      "ClassName": "Part",
+      "Name": "Placa",
+      "props": {
+       "Position": [
+        -7,
+        5.5,
+        6
+       ],
+       "Size": [
+        6,
+        3,
+        0.4
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#7c5c46",
+       "Material": "Wood",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vs4ivc",
+        "ClassName": "BillboardText",
+        "Name": "Texto",
+        "props": {
+         "Text": "Bem-vindo!",
+         "TextColor3": "#ffffff",
+         "TextSize": 28,
+         "BackgroundTransparency": 1,
+         "BackgroundColor3": "#000000",
+         "StudsOffset": [
+          0,
+          3,
+          0
+         ],
+         "Enabled": true
+        },
+        "children": []
+       }
+      ]
+     },
+     {
+      "id": "1vs5dk6",
+      "ClassName": "Part",
+      "Name": "Vitoria",
+      "props": {
+       "Position": [
+        0,
+        42.6,
+        210
+       ],
+       "Size": [
+        8,
+        1,
+        8
+       ],
+       "Orientation": [
+        0,
+        0,
+        0
+       ],
+       "Color": "#facc15",
+       "Material": "Neon",
+       "Transparency": 0,
+       "Reflectance": 0,
+       "Anchored": true,
+       "CanCollide": true,
+       "CanTouch": true,
+       "Shape": "Block",
+       "CastShadow": true
+      },
+      "children": [
+       {
+        "id": "1vs6smn",
+        "ClassName": "BillboardText",
+        "Name": "Placa",
+        "props": {
+         "Text": "🏆 TOPO DO VULCÃO",
+         "TextColor3": "#ffffff",
+         "TextSize": 28,
+         "BackgroundTransparency": 1,
+         "BackgroundColor3": "#000000",
+         "StudsOffset": [
+          0,
+          3,
+          0
+         ],
+         "Enabled": true
+        },
+        "children": []
+       },
+       {
+        "id": "1vs7bhx",
+        "ClassName": "Script",
+        "Name": "Vitoria",
+        "props": {
+         "Language": "Lua",
+         "Enabled": true,
+         "Source": "-- chegou ao topo: para o cronômetro e mostra o tempo\nscript.Parent.Touched:Connect(function(hit)\n  local jogador = game.Players:GetPlayerFromCharacter(hit.Parent)\n  if not jogador or jogador:FindFirstChild(\"Escapou\") then return end\n  local marca = Instance.new(\"BoolValue\")\n  marca.Name = \"Escapou\"\n  marca.Parent = jogador\n  local stats = jogador:FindFirstChild(\"leaderstats\")\n  local s = stats and stats:FindFirstChild(\"Segundos\")\n  local m = stats and stats:FindFirstChild(\"Moedas\")\n  local tela = Instance.new(\"ScreenGui\")\n  tela.Parent = jogador:FindFirstChild(\"PlayerGui\")\n  local txt = Instance.new(\"TextLabel\")\n  txt.Size = UDim2.new(0, 520, 0, 110)\n  txt.Position = UDim2.new(0.5, 0, 0.38, 0)\n  txt.AnchorPoint = Vector2.new(0.5, 0.5)\n  txt.Text = \"🌋 Você escapou do vulcão!\\n⏱️ \" .. (s and s.Value or 0) .. \" s  ·  🪙 \" .. (m and m.Value or 0) .. \" moedas\"\n  txt.TextSize = 34\n  txt.TextColor3 = Color3.fromRGB(255, 220, 140)\n  txt.BackgroundColor3 = Color3.fromRGB(45, 14, 8)\n  txt.CornerRadius = 16\n  txt.Parent = tela\n  local som = Instance.new(\"Sound\")\n  som.SoundId = \"win\"\n  som.Parent = script.Parent\n  som:Play()\n  print(jogador.Name .. \" escapou em \" .. (s and s.Value or 0) .. \" segundos\")\nend)"
+        },
+        "children": []
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "1vq137s",
+    "ClassName": "Players",
+    "Name": "Players",
+    "props": {
+     "RespawnTime": 3,
+     "CharacterWalkSpeed": 16,
+     "CharacterJumpPower": 50,
+     "Multiplayer": false,
+     "MaxPlayers": 10
+    },
+    "children": []
+   },
+   {
+    "id": "1vq24k5",
+    "ClassName": "Lighting",
+    "Name": "Lighting",
+    "props": {
+     "ClockTime": 18.3,
+     "Brightness": 1.7,
+     "Ambient": "#6b3b2b",
+     "SkyColor": "#ff9d66",
+     "FogColor": "#5c2c1c",
+     "FogEnd": 460,
+     "GlobalShadows": true
+    },
+    "children": []
+   },
+   {
+    "id": "1vq3x52",
+    "ClassName": "ReplicatedStorage",
+    "Name": "ReplicatedStorage",
+    "props": {},
+    "children": []
+   },
+   {
+    "id": "1vq4w95",
+    "ClassName": "ServerScriptService",
+    "Name": "ServerScriptService",
+    "props": {},
+    "children": [
+     {
+      "id": "1vrroom",
+      "ClassName": "Script",
+      "Name": "Placar",
+      "props": {
+       "Language": "Lua",
+       "Enabled": true,
+       "Source": "-- cria o placar (leaderstats) de cada jogador\ngame.Players.PlayerAdded:Connect(function(jogador)\n  local stats = Instance.new(\"Folder\")\n  stats.Name = \"leaderstats\"\n  stats.Parent = jogador\n\n  local moedas = Instance.new(\"IntValue\")\n  moedas.Name = \"Moedas\"\n  moedas.Parent = stats\nend)\n"
+      },
+      "children": []
+     },
+     {
+      "id": "1vs8n7z",
+      "ClassName": "Script",
+      "Name": "Cronometro",
+      "props": {
+       "Language": "Lua",
+       "Enabled": true,
+       "Source": "-- cronômetro: conta os segundos de cada jogador até chegar ao topo (aparece no placar)\nlocal RunService = game:GetService(\"RunService\")\ngame.Players.PlayerAdded:Connect(function(jogador)\n  local stats = jogador:WaitForChild(\"leaderstats\")\n  local seg = Instance.new(\"IntValue\")\n  seg.Name = \"Segundos\"\n  seg.Parent = stats\n  local acumulado = 0\n  RunService.Heartbeat:Connect(function(dt)\n    if jogador:FindFirstChild(\"Escapou\") then return end\n    acumulado = acumulado + dt\n    if acumulado >= 1 then\n      acumulado = acumulado - 1\n      seg.Value = seg.Value + 1\n    end\n  end)\nend)"
+      },
+      "children": []
+     },
+     {
+      "id": "1vs92fj",
+      "ClassName": "Script",
+      "Name": "Boas-vindas",
+      "props": {
+       "Language": "Lua",
+       "Enabled": true,
+       "Source": "print(\"🌋 Fuga do Vulcão: chegue ao topo sem tocar na lava!\")"
+      },
+      "children": []
+     }
+    ]
+   },
+   {
+    "id": "1vq59q4",
+    "ClassName": "StarterGui",
+    "Name": "StarterGui",
+    "props": {},
+    "children": [
+     {
+      "id": "1vrsgz2",
+      "ClassName": "ScreenGui",
+      "Name": "TelaMoedas",
+      "props": {
+       "Enabled": true,
+       "ResetOnSpawn": true
+      },
+      "children": [
+       {
+        "id": "1vrt3ze",
+        "ClassName": "TextLabel",
+        "Name": "Moedas",
+        "props": {
+         "Position": [
+          0,
+          16,
+          0,
+          16
+         ],
+         "Size": [
+          0,
+          160,
+          0,
+          46
+         ],
+         "AnchorPoint": [
+          0,
+          0
+         ],
+         "BackgroundColor3": "#1e1e2e",
+         "BackgroundTransparency": 0.35,
+         "Visible": true,
+         "ZIndex": 1,
+         "CornerRadius": 8,
+         "Text": "🪙 0",
+         "TextColor3": "#ffffff",
+         "TextSize": 26,
+         "TextTransparency": 0,
+         "Font": "Padrão",
+         "TextXAlignment": "Center"
+        },
+        "children": [
+         {
+          "id": "1vrutmy",
+          "ClassName": "Script",
+          "Name": "Atualiza",
+          "props": {
+           "Language": "Lua",
+           "Enabled": true,
+           "Source": "-- mostra as moedas do jogador\nlocal jogador = game.Players.LocalPlayer\nlocal moedas = jogador:WaitForChild(\"leaderstats\"):WaitForChild(\"Moedas\")\nlocal texto = script.Parent\ntexto.Text = \"🪙 \" .. moedas.Value\nmoedas.Changed:Connect(function(v)\n  texto.Text = \"🪙 \" .. v\nend)\n"
+          },
+          "children": []
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": "1vq6iwt",
+    "ClassName": "SoundService",
+    "Name": "SoundService",
+    "props": {
+     "Volume": 0.6
+    },
+    "children": []
+   }
+  ]
+ },
+ "genero": "Obby / Parkour",
+ "subgenero": "Obby sobre lava",
+ "autor": "Claude (via MCP)"
+}
