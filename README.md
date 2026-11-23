@@ -30,6 +30,9 @@ Sandbox de química com a tabela periódica inteira, para estudar e testar.
 - ✨ **Faíscas** que voam e acendem o que tocam, arco elétrico e fios que esquentam com a corrente
 - 🧴 **Reagentes de laboratório**: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona (catalisadores, titulação, indicadores de pH, teste do amido)
 - 🫧 **Física de verdade, sem efeitos prontos**: gás dissolvido pela lei de Henry, bolhas que nascem em superfícies ásperas, grudam, crescem e estouram; detergente vira espuma; objetos boiam ou afundam por Arquimedes e giram pelo torque das bolhas (**milho dançante**, Mentos, rolha, gelo, pipoca que estoura a 180 °C)
+- 🍞 **Alimentos de verdade**: comida é mistura de componentes reais; o amido gelatiniza, a proteína coagula, a levedura fermenta, o açúcar carameliza e a casca doura (Maillard) nas temperaturas reais. Pão, tapioca, caramelo, ovo cozido, claras em neve, maionese… são reconhecidos pelo que viraram, com calorias
+- 🌱 **Dos elementos à comida**: Haber-Bosch (amônia do ar), algas fazendo fotossíntese, açúcar pela formose e gordura por esterificação
+- 🧪 **Mais ácidos e reagentes**: fórmico, oxálico, lático, tartárico, málico, cítrico, vitamina C, benzoico, salicílico, perclórico; Benedict, biureto, Sudan III, alaranjado de metila, azul de bromotimol, tornassol, dicromato (bafômetro), tiossulfato (reação do relógio)
 - 🔬 **Microscópio**: mostra as moléculas de qualquer ponto (formas pela fórmula, cores CPK) e explica o fenômeno com os números da simulação
 - 🫀 **Simulação no organismo**: beba, coma ou inale a amostra e veja quais órgãos seriam afetados, com fontes (ATSDR/CDC, NIH, MSD). Educativo, não é orientação médica · Disque-Intoxicação 0800 722 6001
 

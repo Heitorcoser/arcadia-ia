@@ -29,7 +29,8 @@ function criarGrade(W, H) {
 }
 const rnd = Math.random;
 const est = i => estadoDe(MATS[mt[i]], T[i]);
-function densidade(i) { const m = mt[i]; if (m === 0) return AR_D; const M = MATS[m], s = estadoDe(M, T[i]); return s >= 3 ? 0.0004 : M.dens[s]; }
+// líquido com microbolhas (gv = fração de gás) fica mais leve: é o que faz a espuma de refrigerante subir
+function densidade(i) { const m = mt[i]; if (m === 0) return AR_D; const M = MATS[m], s = estadoDe(M, T[i]); const d = s >= 3 ? 0.0004 : M.dens[s]; return s === 1 && gv[i] > 0 && !(bfl[i] & 1) ? d * (1 - Math.min(0.85, gv[i])) : d; }
 function troca(i, j) {
   let a = mt[i]; mt[i] = mt[j]; mt[j] = a;
   let t = T[i]; T[i] = T[j]; T[j] = t;
@@ -430,7 +431,7 @@ function desenharGrade(ctx2) {
         const a = (varc[i] & 3) === 0 ? 0.75 : 0.4;
         r = FUNDO[0] + (r - FUNDO[0]) * a; g = FUNDO[1] + (g - FUNDO[1]) * a; b = FUNDO[2] + (b - FUNDO[2]) * a;
         if (carga[i] && M.descarga) { const d = hexRgb(M.descarga); r = d[0]; g = d[1]; b = d[2]; }
-      } else if (s === 1) { const o = ((i + L.tick) % 7 === 0) ? 10 : 0; r += o; g += o; b += o; }
+      } else if (s === 1) { const o = ((i + L.tick) % 7 === 0) ? 10 : 0; r += o; g += o; b += o; if (gv[i] > 0.01 && !(bfl[i] & 1)) { const k = Math.min(0.75, gv[i] * 1.2) * (0.8 + (varc[i] & 7) / 30); r += (240 - r) * k; g += (238 - g) * k; b += (230 - b) * k; } }
       if (flg[i] & PO && s === 0) { const o = (varc[i] & 1) ? -14 : 6; r += o; g += o; b += o; }
       if (t > 500 && s < 2) { const k = Math.min(0.9, (t - 500) / 1300), c2 = corpoNegro(t); r += (c2[0] - r) * k; g += (c2[1] - g) * k; b += (c2[2] - b) * k; }
       if (t < -60 && s < 2) { r += (190 - r) * 0.18; g += (225 - g) * 0.18; b += (255 - b) * 0.18; }

@@ -135,7 +135,7 @@ const INFO = {
    decomp: [temperatura, produto1, produto2] quando se decompõe ao aquecer
    ========================================================================= */
 const COMPOSTOS = {
-  'H2O': { nome: 'Água destilada', pf: 0, pe: 100, d: 0.997, dS: 0.917, cor: ['#cfe8ff', '#2f6fd0', '#e6eef8'], cp: 4.18, lam: 0.6, ph: 7, liquidoNome: 'Água destilada', solidoNome: 'Gelo', gasNome: 'Vapor d’água', fonte: 'CRC', uso: 'Solvente de laboratório: sem sais nem cloro, não interfere nas reações.', curio: 'Água pura quase não conduz eletricidade: quem conduz são os íons dissolvidos. Por isso a água da torneira conduz um pouco e a destilada não.' },
+  'H2O': { Lvap: 2257, nome: 'Água destilada', pf: 0, pe: 100, d: 0.997, dS: 0.917, cor: ['#cfe8ff', '#2f6fd0', '#e6eef8'], cp: 4.18, lam: 0.6, ph: 7, liquidoNome: 'Água destilada', solidoNome: 'Gelo', gasNome: 'Vapor d’água', fonte: 'CRC', uso: 'Solvente de laboratório: sem sais nem cloro, não interfere nas reações.', curio: 'Água pura quase não conduz eletricidade: quem conduz são os íons dissolvidos. Por isso a água da torneira conduz um pouco e a destilada não.' },
   'CO2': { nome: 'Dióxido de carbono', pf: -78.5, pe: -78.5, sublima: true, d: 1.56, cor: ['#f4f8ff', null, '#f0f0f0'], tox: 'CO2', solidoNome: 'Gelo seco', uso: 'Refrigerantes, extintores, gelo seco.' },
   'CO': { nome: 'Monóxido de carbono', pf: -205, pe: -191.5, d: 0.79, cor: [null, null, '#f0f0f0'], tox: 'CO', inflam: { ign: 609, prod: 'CO2', dH: -283 } },
   'SO2': { nome: 'Dióxido de enxofre', pf: -72, pe: -10, d: 1.46, cor: [null, '#f0f0e8', '#f2f0e6'], tox: 'SO2', agua: 'H2SO3' },
@@ -274,6 +274,25 @@ const COMPOSTOS = {
   'Espuma': { formula: 'bolhas', nome: 'Espuma (bolhas de gás)', pf: null, pe: null, d: 0.05, cor: ['#f4f8ff'], cp: 4, lam: 0.05, po: true, efemero: 0.004, efemeroVira: 'H2O', tox: 'Detergente', curio: 'As bolhas estouram sozinhas com o tempo e deixam umas gotinhas de água.' },
   'EspumaH2': { formula: 'bolhas de H2', nome: 'Espuma com hidrogênio', pf: null, pe: null, d: 0.04, cor: ['#eef6ff'], cp: 4, lam: 0.05, po: true, efemero: 0.004, efemeroVira: 'H', tox: 'Detergente', inflam: { ign: 500, prod: 'H2O', dH: -286 }, curio: 'Bolhas cheias de hidrogênio: uma faísca e elas viram uma bola de fogo (só água de produto).' },
   'Emulsao': { formula: 'óleo + detergente', nome: 'Emulsão (óleo com detergente)', pf: -2, pe: 100, d: 0.98, cor: ['#f6f2dc', '#ece2b8', '#f4f4f0'], cp: 3, lam: 0.4, viscoso: true, tox: 'Detergente', curio: 'O detergente quebra o óleo em gotinhas minúsculas que ficam soltas na água: é por isso que ele tira gordura.' },
+  // ácidos puros (CRC) e reagentes de laboratório
+  'HCOOH': { nome: 'Ácido fórmico', pf: 8.4, pe: 100.8, d: 1.22, cor: ['#f6f6f2', '#eef0f4', '#f4f4f4'], cp: 2.2, lam: 0.27, reagente: true, ph: 1.8, tox: 'acidoForte', uso: 'Curtume, conservante de silagem, removedor de calcário.', curio: 'O nome vem de formiga (formica, em latim): é o que arde na picada. A urtiga também tem.' },
+  'H2C2O4': { nome: 'Ácido oxálico', pf: 189.5, pe: null, d: 1.90, cor: ['#fafaf8'], po: true, reagente: true, tox: 'acidoForte', uso: 'Tira ferrugem e manchas de madeira; padrão para titular permanganato.', curio: 'Está no espinafre e na carambola. Com cálcio forma oxalato de cálcio, insolúvel: é do que são feitas a maioria das pedras nos rins.' },
+  'C3H6O3': { nome: 'Ácido lático', pf: 18, pe: 122, d: 1.21, cor: ['#f6f4ea', '#f2eedc', '#f4f4f0'], cp: 2.3, lam: 0.25, reagente: true, tox: 'acidoForte', curio: 'As bactérias do iogurte transformam a lactose nele; é ele que azeda e engrossa o leite.' },
+  'C4H6O6': { nome: 'Ácido tartárico', pf: 171, pe: null, d: 1.79, cor: ['#fafaf8'], po: true, reagente: true, tox: 'Sacarose', curio: 'É o ácido da uva. Os cristais de "cremor tártaro" no fundo do vinho são um sal dele.' },
+  'C4H6O5': { nome: 'Ácido málico', pf: 130, pe: null, d: 1.61, cor: ['#fafaf8'], po: true, reagente: true, tox: 'Sacarose', curio: 'É o azedinho da maçã verde.' },
+  'C6H8O6': { nome: 'Ácido ascórbico (vitamina C)', pf: 190, pe: null, d: 1.65, cor: ['#fbfaf2'], po: true, reagente: true, tox: 'Sacarose', uso: 'Vitamina e antioxidante (conservante E300).', curio: 'É um redutor: descora o iodo (lugol). Assim se mede a vitamina C de um suco.' },
+  'C7H6O2': { nome: 'Ácido benzoico', pf: 122, pe: 249, d: 1.27, cor: ['#fbfbf8', '#f2f0e8', '#f4f4f4'], po: true, reagente: true, tox: 'Sacarose', uso: 'O benzoato de sódio (E211) conserva refrigerantes e molhos.' },
+  'C7H6O3': { nome: 'Ácido salicílico', pf: 159, pe: 211, d: 1.44, cor: ['#fbfbf8', '#f0eee4', '#f4f4f4'], po: true, reagente: true, tox: 'acidoForte', uso: 'Remédio para acne e verrugas; com anidrido acético vira aspirina.', curio: 'Com ferro(III) fica violeta: é o teste que mostra se uma aspirina velha se decompôs.' },
+  'C6H8O7': { nome: 'Ácido cítrico', pf: 153, pe: null, d: 1.66, cor: ['#fbfbf8'], po: true, reagente: true, tox: 'Sacarose', soluvel: 'aq:H:C6H5O7', curio: 'É o azedo do limão e da laranja.' },
+  'HClO4': { nome: 'Ácido perclórico concentrado', pf: -17, pe: 203, d: 1.67, cor: ['#f6f6f2', '#f0f0ea', '#f4f4f4'], cp: 1.6, lam: 0.3, reagente: true, ph: -1.5, tox: 'acidoForte', curio: 'Um dos ácidos mais fortes. Quente e concentrado, é um oxidante perigoso.' },
+  'K2Cr2O7': { nome: 'Dicromato de potássio', pf: 398, pe: null, d: 2.68, cor: ['#e8681a'], po: true, reagente: true, tox: 'ions', curio: 'Laranja; com álcool vira crômio(III), verde. Era assim que funcionavam os bafômetros antigos.' },
+  'Na2S2O3': { nome: 'Tiossulfato de sódio', pf: 48, pe: null, d: 1.67, cor: ['#f8f8f6'], po: true, reagente: true, tox: 'ions', curio: 'Fixador de fotografia. Com ácido solta enxofre aos pouquinhos e a solução fica turva: a "reação do relógio".' },
+  'Benedict': { formula: 'CuSO4 + citrato + Na2CO3', nome: 'Reagente de Benedict', pf: -2, pe: 101, d: 1.05, cor: ['#a0c8f0', '#3a7ad8', '#e8eef8'], cp: 4, lam: 0.6, reagente: true, tox: 'ions', uso: 'Detecta açúcares redutores (glicose, frutose, lactose): aquecido, fica vermelho-tijolo.', curio: 'O açúcar redutor transforma o Cu²⁺ (azul) em Cu₂O (vermelho). A sacarose não reage: não é redutora.' },
+  'Biureto': { formula: 'CuSO4 + NaOH', nome: 'Reagente de biureto', pf: -2, pe: 101, d: 1.05, cor: ['#b8d8f8', '#6aa8e8', '#e8eef8'], cp: 4, lam: 0.6, reagente: true, ph: 13, tox: 'ions', uso: 'Detecta proteínas: fica violeta.', curio: 'O cobre se liga às ligações peptídicas entre os aminoácidos.' },
+  'SudanIII': { formula: 'C22H16N4O', nome: 'Sudan III (corante de gordura)', pf: -114, pe: 78, d: 0.80, cor: ['#e04020', '#d8301a', '#f0d0c8'], cp: 2.4, lam: 0.17, reagente: true, tox: 'Etanol', uso: 'Detecta gorduras: se dissolve nelas e as deixa vermelhas.' },
+  'AlaranjadoMetila': { formula: 'C14H14N3NaO3S', nome: 'Alaranjado de metila (indicador)', pf: -1, pe: 100, d: 1.0, cor: ['#f8c080', '#f09030', '#f4f0e8'], cp: 4.1, lam: 0.6, reagente: true, indicadorDe: 'metil', tox: 'Fenolftaleina', uso: 'Vermelho abaixo de pH 3,1, amarelo acima de 4,4.' },
+  'AzulBromotimol': { formula: 'C27H28Br2O5S', nome: 'Azul de bromotimol (indicador)', pf: -1, pe: 100, d: 1.0, cor: ['#a0c890', '#3a9a5a', '#e8f0e8'], cp: 4.1, lam: 0.6, reagente: true, indicadorDe: 'bromo', tox: 'Fenolftaleina', uso: 'Amarelo no ácido, verde no neutro, azul na base. Mostra até o CO₂ que a gente sopra.' },
+  'Tornassol': { formula: 'Tornassol', nome: 'Tornassol (indicador de líquen)', pf: -1, pe: 100, d: 1.0, cor: ['#c0a0d8', '#7a4aa8', '#ece4f4'], cp: 4.1, lam: 0.6, reagente: true, indicadorDe: 'tornassol', tox: 'Fenolftaleina', uso: 'Vermelho no ácido, azul na base. É o do papel de tornassol.' },
   'Oleo': { formula: 'C57H104O6', nome: 'Óleo de cozinha (soja)', pf: -16, pe: 360, d: 0.92, cor: ['#f0d870', '#e6c23a', '#f4ecd0'], cp: 2.0, lam: 0.17, viscoso: true, casa: true, tox: 'Oleo', inflam: { ign: 400, prod: 'CO2', prod2: 'H2O' }, uso: 'Cozinhar e fritar. Não se mistura com água e boia por cima.', curio: 'NUNCA jogue água em óleo pegando fogo: a água afunda, vira vapor na hora e espirra o óleo em chamas para todo lado. Abafe com uma tampa.' },
   // objetos para a física fina (densidade de partícula medida; aspereza e quanto repelem água estimadas)
   'Milho': { formula: 'grão: amido 72% + água 14% + proteína 10%', nome: 'Milho de pipoca (grão)', pf: null, pe: null, d: 1.25, cor: ['#f0b020'], cp: 1.7, lam: 0.17, objeto: true, rug: 0.85, hidrofobico: 0.8, pipoca: 180, expande: 6, casa: true, micro: 'milho', tox: 'Amido', uso: 'Pipoca. A casca dura (pericarpo) é o que faz ele estourar.', curio: 'No "milho dançante", as bolhas de gás grudam na casca áspera, levantam o grão e estouram na superfície: ele sobe e desce sozinho.' },
@@ -329,11 +348,28 @@ const ANIONS = {
   MnO4: { nome: 'Permanganato', carga: 1, poli: true, oxidante: true, cor: '#6a1a86' },
   CH3COO: { nome: 'Acetato', carga: 1, poli: true, acido: 'Vinagre (ácido acético)', phAcido: 2.4, bas: 1.9 }, BO3: { nome: 'Borato', carga: 3, poli: true, acido: 'Ácido bórico', phAcido: 5.1, bas: 4 },
 };
+// ácidos orgânicos e outros (pH de uma solução ~0,1 mol/L pelo pKa; fAcido = fórmula do ácido puro)
+Object.assign(ANIONS, {
+  HCOO: { nome: 'Formiato', carga: 1, poli: true, acido: 'Ácido fórmico', phAcido: 2.4, bas: 1.5, fAcido: 'HCOOH' },
+  C2O4: { nome: 'Oxalato', carga: 2, poli: true, acido: 'Ácido oxálico', phAcido: 1.3, bas: 2, fAcido: 'H2C2O4', redutor: true },
+  C3H5O3: { nome: 'Lactato', carga: 1, poli: true, acido: 'Ácido lático', phAcido: 2.4, bas: 1.5, fAcido: 'C3H6O3' },
+  C4H4O6: { nome: 'Tartarato', carga: 2, poli: true, acido: 'Ácido tartárico', phAcido: 2.0, bas: 1.8, fAcido: 'C4H6O6' },
+  C4H4O5: { nome: 'Malato', carga: 2, poli: true, acido: 'Ácido málico', phAcido: 2.2, bas: 1.8, fAcido: 'C4H6O5' },
+  C6H7O6: { nome: 'Ascorbato', carga: 1, poli: true, acido: 'Ácido ascórbico (vitamina C)', phAcido: 3.0, bas: 1.5, fAcido: 'C6H8O6', redutor: true },
+  C7H5O2: { nome: 'Benzoato', carga: 1, poli: true, acido: 'Ácido benzoico', phAcido: 2.9, bas: 1.6, fAcido: 'C7H6O2' },
+  C7H5O3: { nome: 'Salicilato', carga: 1, poli: true, acido: 'Ácido salicílico', phAcido: 2.1, bas: 1.4, fAcido: 'C7H6O3' },
+  ClO4: { nome: 'Perclorato', carga: 1, poli: true, acido: 'Ácido perclórico', phAcido: 1.0, forte: true, oxidante: true, fAcido: 'HClO4' },
+  S: { nome: 'Sulfeto', carga: 2, acido: 'Ácido sulfídrico', phAcido: 4.1, bas: 5.5, fAcido: 'H2S' },
+  S2O3: { nome: 'Tiossulfato', carga: 2, poli: true },
+  Cr2O7: { nome: 'Dicromato', carga: 2, poli: true, oxidante: true, cor: '#e0701a' },
+});
 const PH_BASE = { Na: 13, K: 13, Li: 13, Rb: 13, Cs: 13, Ba: 13.3, Sr: 13, Ca: 12.4, NH4: 11.1 };
 /* Regras de solubilidade em água (as clássicas dos livros de química) */
 function soluvel(c, a) {
   if (['Li', 'Na', 'K', 'Rb', 'Cs', 'NH4', 'H'].includes(c)) return true;
   if (a === 'NO3' || a === 'CH3COO' || a === 'MnO4') return true;
+  if (['HCOO', 'C3H5O3', 'C4H4O5', 'C6H7O6', 'C7H5O2', 'C7H5O3', 'ClO4'].includes(a)) return true; // formiatos, lactatos, malatos... quase todos solúveis
+  if (a === 'C4H4O6' || a === 'S2O3' || a === 'Cr2O7') return !['Ca', 'Ag', 'Pb', 'Ba', 'Sr'].includes(c);
   if (a === 'Cl' || a === 'Br') return !['Ag', 'Pb'].includes(c);
   if (a === 'I') return !['Ag', 'Pb', 'Hg'].includes(c);
   if (a === 'F') return !['Ca', 'Mg', 'Sr', 'Ba', 'Pb'].includes(c);
@@ -342,11 +378,13 @@ function soluvel(c, a) {
   return false; // carbonatos, fosfatos, sulfitos, boratos: insolúveis fora alcalinos e amônio
 }
 /* Cor dos precipitados (o que aparece quando duas soluções formam um sólido) */
+const COR_PRECIPITADO_NOVOS = { 'Ca:C2O4': '#fafaf6', 'Ba:C2O4': '#f6f6f2', 'Pb:C2O4': '#f2f2ee', 'Cu:S': '#16140f', 'Pb:S': '#121214', 'Ag:S': '#0f0f10', 'Fe:S': '#1a1a18', 'Zn:S': '#f2f2ec', 'Ni:S': '#141414', 'Co:S': '#121212', 'Hg:S': '#b01a10', 'Ag:Cr2O7': '#9a2010', 'Pb:Cr2O7': '#f2c418', 'Ba:Cr2O7': '#f0e040', 'Ca:C4H4O6': '#f6f6f2', 'Ag:S2O3': '#f0f0f0' };
 const COR_PRECIPITADO = {
   'Ag:Cl': '#f4f4f0', 'Ag:Br': '#f2eac8', 'Ag:I': '#f5e663', 'Pb:I': '#ffd700', 'Hg:I': '#e8331a', 'Pb:Cl': '#f6f6f6', 'Ba:SO4': '#f8f8f8', 'Pb:SO4': '#f6f6f6', 'Ca:SO4': '#f6f6f2', 'Sr:SO4': '#f6f6f6',
   'Ca:CO3': '#f4f2ea', 'Ba:CO3': '#f6f6f6', 'Cu:CO3': '#2f9a6a', 'Fe:CO3': '#a8b898', 'Ag:CO3': '#f2f0c0', 'Ag:PO4': '#f6dc3c', 'Ca:PO4': '#f6f4ee', 'Ag:OH': '#4a3a2a',
   'Cu:OH': '#3b7bd9', 'Fe3:OH': '#a0522d', 'Fe:OH': '#6b8f5a', 'Ni:OH': '#6fbf4a', 'Co:OH': '#d97fa0', 'Mn:OH': '#e8d8c8', 'Cr:OH': '#4a7a5a', 'Hg:OH': '#e0a020', 'Ca:F': '#f6f6f6',
 };
+Object.assign(COR_PRECIPITADO, COR_PRECIPITADO_NOVOS);
 
 /* =========================================================================
    TOXICOLOGIA (para a simulação no organismo)

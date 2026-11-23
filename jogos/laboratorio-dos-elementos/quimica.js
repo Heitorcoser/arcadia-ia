@@ -102,6 +102,7 @@ function formulaSal(c, a) {
   const C = CATIONS[c], A = ANIONS[a], l = mmc(C.carga, A.carga), nc = l / C.carga, na = l / A.carga;
   const p = (s, n, poli) => n === 1 ? s : poli ? `(${s})${n}` : s + n;
   if (c === 'H' && a === 'CH3COO') return 'CH3COOH';
+  if (c === 'H' && A.fAcido) return A.fAcido;
   return p(simbCat(c), nc, C.poli) + p(a, na, A.poli);
 }
 // índice fórmula → [cátion, ânion] (para reconhecer os compostos da lista)
@@ -190,12 +191,17 @@ function tingida(B, cor, tag, nomeInd) {
 // cor do indicador em cada pH (fenolftaleína: viragem 8,2–10; repolho roxo: antocianinas)
 function corIndicador(tipo, ph) {
   if (tipo === 'fenol') return ph < 8.2 ? null : ph < 10 ? '#f06ab0' : '#e0208a';
+  if (tipo === 'metil') return ph < 3.1 ? '#d82020' : ph < 4.4 ? '#f06a20' : '#f0c020';
+  if (tipo === 'bromo') return ph < 6.0 ? '#e8d020' : ph < 7.6 ? '#4aa84a' : '#2a50c8';
+  if (tipo === 'tornassol') return ph < 4.5 ? '#d02840' : ph < 8.3 ? '#8a4ab0' : '#2a48c0';
   return ph < 3 ? '#e0203c' : ph < 5 ? '#d8408a' : ph < 7.5 ? '#7a3c9c' : ph < 9 ? '#3a5ad0' : ph < 11 ? '#20a08a' : ph < 12.5 ? '#7ac030' : '#e8d020';
 }
 const solChave = k => { const p = k.split(':'); return p[1] === 'Sacarose' ? solucaoAcucar() : solucao(p[1], p[2]); };
 // soluções prontas para a aba "Soluções"
 const SOLUCOES_PRONTAS = [['H', 'Cl'], ['H', 'SO4'], ['H', 'NO3'], ['H', 'F'], ['H', 'PO4'], ['H', 'CH3COO'], ['H', 'CO3'], ['Na', 'OH'], ['K', 'OH'], ['Ca', 'OH'], ['NH4', 'OH'], ['Na', 'Cl'], ['Cu', 'SO4'], ['Ag', 'NO3'], ['K', 'I'], ['Pb', 'NO3'], ['Ba', 'Cl'], ['Fe3', 'Cl'], ['Ni', 'Cl'], ['Co', 'Cl'], ['K', 'Br'], ['Na', 'CO3'], ['Na', 'SO4'], ['Na', 'ClO'], ['NH4', 'Cl'], ['Zn', 'SO4'], ['Mg', 'SO4'], ['Ca', 'Cl']].map(([c, a]) => solucao(c, a));
 SOLUCOES_PRONTAS.push(solucaoAcucar(), solucao('K', 'MnO4'), lugol(), id('AguaTorneira'), solucao('H', 'C6H5O7'));
+for (const a of ['HCOO', 'C2O4', 'C3H5O3', 'C4H4O6', 'C4H4O5', 'C6H7O6', 'C7H5O2', 'C7H5O3', 'ClO4', 'S']) SOLUCOES_PRONTAS.push(solucao('H', a));
+SOLUCOES_PRONTAS.push(solucao('K', 'Cr2O7'), solucao('Na', 'S2O3'), solucao('Na', 'S'), solucao('Na', 'C7H5O2'));
 // marca íons nos compostos da lista (ex.: NaCl → Na, Cl) e reconhece os óxidos/hidróxidos básicos
 for (const m of MATS) { if (m.tipo === 'composto' && OXIDO_CAT[m.chave] !== undefined) m.oxidoBasico = OXIDO_CAT[m.chave]; if (m.ions && m.ions[1] === 'OH') m.hidroxido = m.ions[0]; }
 
@@ -220,7 +226,7 @@ let ATMOSFERA = 'ar'; // 'ar' | 'vacuo' | 'N2' | 'O2'
 const temO2 = () => ATMOSFERA === 'ar' || ATMOSFERA === 'O2';
 const cache = new Map();
 function regra(a, b) {
-  const key = a * 4096 + b; if (cache.has(key)) return cache.get(key);
+  const key = a * 65536 + b; if (cache.has(key)) return cache.get(key);
   let r = null; try { r = criarRegra(MATS[a], MATS[b]); } catch (e) { console.error(e); r = null; }
   if (r) { r.pa = r.pa === undefined ? a : r.pa; r.pb = r.pb === undefined ? b : r.pb; r.p = r.p ?? 0.1; }
   cache.set(key, r); return r;
@@ -495,7 +501,7 @@ function regraLab(A, B) {
   // indicadores ácido-base
   if (A.indicadorDe && (B.tipo === 'solucao' || ehAgua(B))) {
     const ph = phDe(B) ?? 7, cor = corIndicador(A.indicadorDe, ph);
-    const nomeInd = A.indicadorDe === 'fenol' ? 'fenolftaleína' : 'repolho roxo';
+    const nomeInd = { fenol: 'fenolftaleína', repolho: 'repolho roxo', metil: 'alaranjado de metila', bromo: 'azul de bromotimol', tornassol: 'tornassol' }[A.indicadorDe];
     if (!cor) return R({ pa: A.id, p: 0, nome: `Fenolftaleína em ${minus(B.nome)}`, eq: 'incolor (pH < 8,2)', nota: `O pH é ${String(ph).replace('.', ',')}: a fenolftaleína continua incolor. Ela só fica rosa acima de pH 8,2.` });
     const t = tingida(B, cor, A.indicadorDe, nomeInd);
     return R({ pa: t, pb: t, p: 0.3, nome: `Indicador: ${nomeInd} em pH ${String(ph).replace('.', ',')}`, eq: A.indicadorDe === 'fenol' ? 'HIn (incolor) ⇌ In²⁻ (rosa) + 2 H⁺' : 'antocianina: cor muda com o pH', nota: A.indicadorDe === 'fenol' ? 'Acima de pH 8,2 a fenolftaleína perde H⁺ e fica rosa. Se um ácido neutralizar a base, a cor some.' : 'Vermelho no ácido forte, rosa no ácido fraco, roxo no neutro, azul e verde na base e amarelo na base forte.' });

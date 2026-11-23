@@ -133,6 +133,8 @@
     <div class="grupo" title="Temperatura do ambiente (o ar volta para ela)"><label>🌡️ Ambiente</label><input type="range" id="amb" min="-200" max="300" value="25"><b id="amb-v">25 °C</b></div>
     <select class="b" id="atm" title="O que tem no ar"><option value="ar">Ar (21% O₂)</option><option value="O2">Oxigênio puro</option><option value="N2">Nitrogênio puro</option><option value="vacuo">Vácuo</option></select>
     <button class="b on" id="b-vent" title="Gases escapam pelo topo">🌬️ Ventilação</button>
+    <button class="b on" id="b-luz" title="Luz para a fotossíntese das algas">💡 Luz</button>
+    <button class="b" id="b-agit" title="Agitador magnético: mistura os líquidos">🌀 Agitador</button>
     <span class="esp"></span>
     <button class="b pri" id="b-exp">🧪 Experimentos</button>
     <button class="b" id="b-comb">🔀 Combinar</button>
@@ -169,11 +171,12 @@
 <div class="modal" id="modal"><div class="jan" id="jan"></div></div>
 
 <script src="pubchem.js?v=1"></script>
-<script src="dados.js?v=4"></script>
-<script src="quimica.js?v=10"></script>
-<script src="motor.js?v=11"></script>
-<script src="fisica.js?v=1"></script>
-<script src="microscopio.js?v=1"></script>
+<script src="dados.js?v=5"></script>
+<script src="quimica.js?v=11"></script>
+<script src="motor.js?v=13"></script>
+<script src="fisica.js?v=3"></script>
+<script src="microscopio.js?v=3"></script>
+<script src="alimentos.js?v=2"></script>
 <script>
 'use strict';
 const $ = s => document.querySelector(s);
@@ -186,15 +189,16 @@ const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arca
 const UI = { aba: 'tabela', sel: id('H2O'), ferr: 'desenhar', busca: '', amostra: { mapa: new Map(), total: 0 }, hover: null, pressionado: false, ultimoXY: null };
 const FERRAMENTAS = [
   ['desenhar', '✏️', 'Colocar'], ['apagar', '🧽', 'Apagar'], ['aquecer', '🔥', 'Aquecer'], ['resfriar', '❄️', 'Resfriar'], ['temp', '🌡️', 'Definir °C'], ['faisca', '⚡', 'Faísca / corrente'],
-  ['ima', '🧲', 'Ímã'], ['martelo', '🔨', 'Martelo'], ['ph', '🧫', 'Fita de pH'], ['inspecionar', '🔍', 'Inspecionar'], ['micro', '🔬', 'Microscópio'], ['geiger', '☢️', 'Geiger'], ['coletar', '🥤', 'Coletar amostra'],
+  ['ima', '🧲', 'Ímã'], ['martelo', '🔨', 'Martelo'], ['ph', '🧫', 'Fita de pH'], ['inspecionar', '🔍', 'Inspecionar'], ['micro', '🔬', 'Microscópio'], ['mexer', '🥄', 'Mexer / sovar'], ['geiger', '☢️', 'Geiger'], ['coletar', '🥤', 'Coletar amostra'],
 ];
-const ABAS = [['tabela', 'Tabela'], ['gas', 'Gases'], ['liquido', 'Líquidos'], ['solido', 'Sólidos'], ['compostos', 'Compostos'], ['solucoes', 'Soluções'], ['casa', 'Casa'], ['lab', 'Laboratório']];
+const ABAS = [['tabela', 'Tabela'], ['gas', 'Gases'], ['liquido', 'Líquidos'], ['solido', 'Sólidos'], ['compostos', 'Compostos'], ['solucoes', 'Soluções'], ['casa', 'Casa'], ['alimentos', 'Alimentos'], ['lab', 'Laboratório']];
 $('#ferr').innerHTML = FERRAMENTAS.map(([k, ic, n]) => `<button data-f="${k}" class="${k === UI.ferr ? 'on' : ''}" title="${n}">${ic} <span>${n}</span></button>`).join('');
 $('#ferr').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; escolherFerr(b.dataset.f); });
 function escolherFerr(f) { UI.ferr = f; [...$('#ferr').children].forEach(x => x.classList.toggle('on', x.dataset.f === f)); dicaFerr(); }
 function dicaFerr() {
   const d = { desenhar: 'Arraste na caixa para colocar o material escolhido.', apagar: 'Arraste para apagar.', aquecer: 'Segure em cima de algo para esquentar (até 6000 °C).', resfriar: 'Segure para esfriar (até −273 °C).', temp: 'Define a temperatura exata do que estiver no pincel (escolha o valor em "Temperatura ao colocar").',
     faisca: 'Solta faíscas que voam, caem e acendem o que tocam (gases, álcool, pó de metal, espuma de hidrogênio). Em metais, grafite e soluções liga a corrente: eletrólise, e fios finos como a palha de aço esquentam até pegar fogo. Segure para um borrifo contínuo.', ima: 'Atrai ferro, cobalto, níquel e magnetita em pó (só abaixo da temperatura de Curie).', martelo: 'Bate: materiais quebradiços viram pó; metais dúcteis só amassam.',
+    mexer: 'Arraste sobre ingredientes para misturar, sovar (forma o glúten) ou bater (claras em neve). Óleo e água só se misturam com um emulsificante, como a gema.',
     micro: 'Passe o microscópio (ou toque) em qualquer ponto: mostra as moléculas e explica o que está acontecendo ali, com os números da simulação.',
     ph: 'Toque numa solução para medir o pH.', inspecionar: 'Toque para ver tudo sobre aquela célula.', geiger: 'Conta a radioatividade perto do ponteiro.', coletar: 'Arraste para recolher uma amostra no copo. Depois aperte "🥤 Amostra" para analisar ou simular no organismo.' }[UI.ferr];
   statusExtra = d;
@@ -250,6 +254,14 @@ function renderPaleta() {
       + sec('🫧 Bolhas, boiar e afundar', [[id('Refrigerante'), 'Refrigerante'], [solucao('H', 'CO3'), 'Água com gás'], [id('Milho'), 'Milho de pipoca'], [id('UvaPassa'), 'Uva-passa'], [id('Mentos'), 'Bala Mentos'], [id('Rolha'), 'Rolha de cortiça'], [id('Pipoca'), 'Pipoca']])
       + sec('🏠 Outros', [[id('Parafina'), 'Vela'], [id('CaCO3'), 'Giz / calcário'], [id('CaO'), 'Cal virgem'], [id('Mg(OH)2'), 'Leite de magnésia'], [id('CO2'), 'Gelo seco'], [id('Fe'), 'Prego (ferro)'], [id('Cu'), 'Fio de cobre'], [id('Al'), 'Papel alumínio'], [id('Glicerina'), 'Glicerina']]);
     h += '<p class="muted" style="font-size:11.5px;line-height:1.5">⚠️ Misturas perigosas de verdade (água sanitária + vinagre ou amoníaco, água no óleo quente) estão aqui para você ver <b>por que</b> não se faz em casa.</p>';
+  } else if (UI.aba === 'alimentos') {
+    const item = (m, nome) => { if (m == null || m < 0 || !MATS[m]) return ''; const M = MATS[m], st = estadoDe(M, L.AMB); return `<button class="mt ${m === UI.sel ? 'sel' : ''}" data-m="${m}" title="${esc(M.nome)}"><span class="sw" style="background:${cssRgb(M.rgb[st])}"></span><span><b>${esc(nome)}</b></span></button>`; };
+    const sec = (t, l) => `<div class="sec">${t}</div><div class="lista">${l.map(([m, n]) => item(m, n)).join('')}</div>`;
+    h = sec('🍳 Ingredientes', [[id('H2O'), 'Água'], [id('FarinhaTrigo'), 'Farinha de trigo'], [id('Amido'), 'Polvilho'], [id('Sacarose'), 'Açúcar'], [id('Glicose'), 'Glicose'], [id('NaCl'), 'Sal'], [id('Oleo'), 'Óleo'], [id('Manteiga'), 'Manteiga'], [id('Ovo'), 'Ovo'], [id('Clara'), 'Clara'], [id('Gema'), 'Gema'], [id('Leite'), 'Leite'], [id('Levedura'), 'Fermento biológico'], [id('NaHCO3'), 'Fermento químico'], [solucao('H', 'CH3COO'), 'Vinagre'], [solucao('H', 'C6H5O7'), 'Limão'], [id('Milho'), 'Milho de pipoca']])
+      + sec('🌱 Vida e luz', [[id('Alga'), 'Alga verde'], [solucao('H', 'CO3'), 'Água com gás'], [solucao('NH4', 'OH'), 'Amônia (nitrogênio)'], [id('CO2'), 'Gás carbônico']])
+      + sec('⚗️ Dos elementos à comida', [[id('C'), 'Carvão'], [id('H'), 'Hidrogênio'], [id('N'), 'Nitrogênio'], [id('O'), 'Oxigênio'], [id('CO'), 'Monóxido de carbono'], [id('Fe'), 'Ferro (catalisador)'], [id('Ni'), 'Níquel'], [id('Cu'), 'Cobre'], [id('Co'), 'Cobalto'], [id('Ag'), 'Prata'], [id('MnO2'), 'Dióxido de manganês'], [id('Metanol'), 'Metanol'], [id('Formaldeido'), 'Formaldeído'], [solucao('Ca', 'OH'), 'Água de cal'], [id('Parafina'), 'Parafina'], [id('AcidoGraxo'), 'Ácido graxo'], [id('Glicerina'), 'Glicerina'], [id('H2SO4'), 'Ácido sulfúrico']])
+      + sec('🔥 Fogão e reator', [[id('CHAPA'), 'Chapa 220 °C'], [id('FORNO450'), 'Reator 450 °C'], [id('Cadinho'), 'Panela / cadinho'], [id('Vidro'), 'Vidro']]);
+    h += '<p class="muted" style="font-size:11.5px;line-height:1.5">Coloque os ingredientes, use <b>🥄 Mexer</b> para misturar e sovar, aqueça (ou mude a temperatura ambiente, que vira forno) e veja o que a comida vira. O 🔍 mostra calorias e composição; o 🔬 mostra amido, proteína, gordura e levedura por dentro.</p>';
   } else if (UI.aba === 'lab') {
     const l = MATS.filter(m => m.vidro || m.inerte || m.tipo === 'especial2'), rg = MATS.filter(m => m.reagente);
     h = `<div class="sec">Reagentes</div><div class="lista">${rg.map(botaoMat).join('')}</div><div class="sec">Vidraria e equipamentos</div><div class="lista">${l.map(botaoMat).join('')}</div><p class="muted" style="font-size:12px;line-height:1.5">O <b>vidro borossilicato</b> aguenta quase todos os ácidos, menos o fluorídrico. O <b>cadinho</b> aguenta mais de 2000 °C. A <b>placa aquecedora</b> fica sempre a 1200 °C, a <b>refrigerada</b> a −120 °C, e a <b>fonte de energia</b> manda corrente para o que encostar nela.</p>`;
@@ -400,6 +412,8 @@ $('#b-play').onclick = alternarPausa;
 $('#b-vel').onchange = e => { L.vel = +e.target.value; };
 $('#amb').oninput = e => { L.AMB = +e.target.value; $('#amb-v').textContent = L.AMB + ' °C'; if (['gas', 'liquido', 'solido'].includes(UI.aba)) renderPaleta(); renderFichaMini(); };
 $('#atm').onchange = e => { ATMOSFERA = e.target.value; limparCacheRegras(); toast('Atmosfera: ' + e.target.selectedOptions[0].textContent, ATMOSFERA === 'vacuo' || ATMOSFERA === 'N2' ? 'Sem oxigênio: nada queima.' : ''); };
+$('#b-luz').onclick = () => { L.luz = !L.luz; $('#b-luz').classList.toggle('on', L.luz); toast(L.luz ? '💡 Luz acesa' : '🌑 Luz apagada', L.luz ? 'As algas fazem fotossíntese.' : 'Sem luz as algas só respiram.'); };
+$('#b-agit').onclick = () => { L.agitador = !L.agitador; $('#b-agit').classList.toggle('on', L.agitador); toast(L.agitador ? '🌀 Agitador ligado' : 'Agitador desligado', L.agitador ? 'Mistura os líquidos, até os que não se misturam sozinhos (enquanto gira).' : ''); };
 $('#b-vent').onclick = () => { L.ventilacao = !L.ventilacao; $('#b-vent').classList.toggle('on', L.ventilacao); };
 $('#temp-col').onchange = e => { $('#lb-temp').style.display = e.target.value === 'custom' ? '' : 'none'; };
 
@@ -437,7 +451,7 @@ cv.addEventListener('pointerdown', e => { iniciarAudio(); cv.setPointerCapture(e
 cv.addEventListener('pointermove', e => { const p = celulaDoEvento(e); UI.hover = p; if (UI.pressionado) { tracar(UI.ultimoXY, p); UI.ultimoXY = p; } });
 addEventListener('pointerup', () => { UI.pressionado = false; if (UI.ferr === 'martelo' && marteloRes) mostrarMartelo(); });
 cv.addEventListener('pointerleave', () => { if (!UI.pressionado) UI.hover = null; });
-function tracar(a, b) { const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]))); for (let k = 1; k <= n; k++) { UI.ultimoXY = [Math.round(a[0] + (b[0] - a[0]) * k / n), Math.round(a[1] + (b[1] - a[1]) * k / n)]; if (['desenhar', 'apagar', 'coletar'].includes(UI.ferr)) usarFerramenta(false); } }
+function tracar(a, b) { const n = Math.max(1, Math.ceil(Math.hypot(b[0] - a[0], b[1] - a[1]))); for (let k = 1; k <= n; k++) { UI.ultimoXY = [Math.round(a[0] + (b[0] - a[0]) * k / n), Math.round(a[1] + (b[1] - a[1]) * k / n)]; if (['desenhar', 'apagar', 'coletar', 'mexer'].includes(UI.ferr)) usarFerramenta(false); } }
 let marteloRes = null, statusExtra = '', medida = '';
 function usarFerramenta(clique) {
   if (!UI.ultimoXY) return;
@@ -453,6 +467,7 @@ function usarFerramenta(clique) {
     case 'ima': ima(x, y, 14 + r * 2); break;
     case 'martelo': if (clique) { marteloRes = martelo(x, y, Math.max(1, r)); som('martelo'); } break;
     case 'coletar': { const n = coletar(x, y, r, UI.amostra, 4000); if (n) atualizarBotaoAmostra(); break; }
+    case 'mexer': mexer(x, y, Math.max(2, r)); break;
     case 'ph': case 'inspecionar': if (clique) inspecionar(x, y); break;
   }
 }
@@ -466,6 +481,7 @@ function inspecionar(x, y) {
   if (!c.m) { toast('🔍 Ar', `${n1(c.t, 1)} °C · atmosfera: ${$('#atm').selectedOptions[0].textContent}`); return; }
   const M = MATS[c.m], s = estadoDe(M, c.t), ph = phDe(M);
   if (UI.ferr === 'ph') { som('clique'); toast(ph === null ? '🧫 pH: não se aplica' : `🧫 pH ${n1(ph, 1)}`, ph === null ? `${esc(M.nome)} não é uma solução aquosa.` : `<span style="display:inline-block;width:100%;height:10px;border-radius:5px;background:${corPH(ph)}"></span> ${esc(nomeNoEstado(M, s))} — ${ph < 3 ? 'ácido forte' : ph < 6.5 ? 'ácido' : ph <= 7.5 ? 'neutro' : ph < 11 ? 'básico' : 'base forte'}`, 6000); return; }
+  if (M.nutri && (M.tipo === 'alimento' || M.cozinha) && UI.ferr === 'inspecionar') return abrir(fichaAlimento(M, c.t));
   if (M.simb) fichaElemento(M.simb); else if (M.tipo === 'composto' || M.tipo === 'solucao') fichaComposto(M);
 }
 function corPH(ph) { const cs = ['#d01c1c', '#e8461a', '#f07a1a', '#f6b21c', '#f2e21c', '#a8d81c', '#4cc41c', '#1caa5a', '#1c9ab0', '#1c6ad0', '#2c3ad0', '#4a2cc8', '#6a1cb8', '#7a1aa0', '#6a1480']; return cs[Math.max(0, Math.min(14, Math.round(ph)))]; }
@@ -568,7 +584,7 @@ function quadro(agora) {
   if (UI.ferr === 'micro') atualizarMicro(); else if (micro.style.display !== 'none') micro.style.display = 'none';
   // contorno do pincel
   if (UI.hover) { const r = +$('#tam').value - 1; ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1 / Math.max(1, PX / 2); ctx.beginPath(); ctx.arc(UI.hover[0] + 0.5, UI.hover[1] + 0.5, UI.ferr === 'ima' ? 14 + r * 2 : UI.ferr === 'geiger' ? 20 : r + 0.5, 0, Math.PI * 2); ctx.stroke(); }
-  if (L.tick % 4 === 0) { statusHover(); verEventos(); }
+  if (L.tick % 4 === 0) { statusHover(); verEventos(); $('#b-agit').classList.toggle('on', !!L.agitador); if (+$('#amb').value !== Math.round(L.AMB)) { $('#amb').value = L.AMB; $('#amb-v').textContent = Math.round(L.AMB) + ' °C'; } }
 }
 montarCaixa(); renderPaleta(); renderFichaMini(); dicaFerr();
 // cena inicial: um béquer com água e um pouco de sódio ao lado, para convidar a experimentar
@@ -580,7 +596,7 @@ avisar('iniciado');
 window.__lab = { L, MATS, id, regra, passo, pincel, celula, avaliarAmostra, solucao, limparTudo, EXPERIMENTOS, CORPOS, FIS, cenaDe, explicarMicro, get grade() { return { mt, T, flg, dis, disG, gv, bfl, corpo }; } };
 </script>
 <style>#micro{position:fixed;right:12px;bottom:12px;z-index:40;width:324px;max-width:calc(100vw - 24px);background:rgba(14,18,26,.96);border:1px solid #2a3550;border-radius:14px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.5);font:13px/1.45 Inter,system-ui,sans-serif;color:#e6ebf5}#micro .mc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}#micro .mc-top .muted{font-size:11px;color:#8a93a8}#micro canvas{width:100%;height:auto;border-radius:9px;display:block;background:#0b0e14}#micro .mc-txt{margin-top:7px;max-height:170px;overflow:auto;font-size:12.5px}@media (max-width:700px){#micro{left:8px;right:8px;bottom:8px;width:auto}#micro canvas{max-height:140px}#micro .mc-txt{max-height:110px}}</style>
-<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.3.0</div>
-<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.3.0";</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.4.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.4.0";</script>
 </body>
 </html>

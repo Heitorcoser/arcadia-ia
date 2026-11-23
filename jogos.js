@@ -373,14 +373,14 @@ const CAPA_LAB = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.19.0";
+window.ARCADIA_VERSAO = "1.20.0";
 
 window.JOGOS = [
   {
     id: "laboratorio-dos-elementos",
-    versao: "1.3.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.4.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-23",
-    novidades: "Física de verdade: gás dissolvido pela lei de Henry, bolhas que nascem em superfícies ásperas, grudam, crescem e estouram, espuma pelo detergente, objetos que boiam ou afundam por Arquimedes e giram pelo torque das bolhas (milho dançante), pipoca estourando e um microscópio que mostra as moléculas e explica cada fenômeno.",
+    novidades: "Alimentos de verdade: comida feita de componentes reais (amido, proteína, glúten, gordura, açúcares...) que gelatinizam, coagulam, fermentam, caramelizam e douram (Maillard) nas temperaturas reais; pão, tapioca, caramelo, ovo cozido e mais, reconhecidos pelo que viraram. Dos elementos à comida: Haber-Bosch, fotossíntese de algas, açúcar e gordura sem planta. Gêiser do Mentos com microbolhas, calor latente, convecção, agitador e novos ácidos (fórmico, oxálico, lático, cítrico, vitamina C...) e reagentes (Benedict, biureto, Sudan III, indicadores).",
     nome: "Laboratório dos Elementos",
     genero: "Simulação",
     subgenero: "Sandbox de química (educativo)",
@@ -416,11 +416,16 @@ window.JOGOS = [
       "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes",
       "Física fina sem efeitos prontos: gás dissolvido (lei de Henry), nucleação em superfícies ásperas, bolhas que grudam e se soltam pela tensão superficial, espuma com detergente",
       "Objetos soltos que boiam ou afundam pelo empuxo e giram pelo torque das bolhas: milho dançante, Mentos, rolha, gelo, pipoca que estoura a 180 °C",
-      "Microscópio: as moléculas de cada ponto montadas pela fórmula, com a explicação do fenômeno e os números da simulação"
+      "Microscópio: as moléculas de cada ponto montadas pela fórmula, com a explicação do fenômeno e os números da simulação",
+      "Alimentos por composição: misture, sove e asse; o amido gelatiniza, a proteína coagula, a levedura fermenta, o açúcar carameliza e a casca doura (Maillard), cada um na temperatura real. Ficha com calorias",
+      "Dos elementos à comida: Haber-Bosch, fotossíntese de algas (luz, CO₂ e nitrogênio), formose (açúcar sem planta) e gordura por esterificação",
+      "Ácidos orgânicos (fórmico, oxálico, lático, tartárico, málico, cítrico, ascórbico, benzoico, salicílico) e testes de alimentos (Benedict, biureto, Sudan III, lugol)",
+      "Calor latente de vaporização, convecção nos líquidos e no ar, agitador magnético e luz"
     ],
     controles: [
       ["Mouse / dedo", "Arrastar na caixa usa a ferramenta escolhida"],
       ["🔬 Microscópio", "Passar ou tocar num ponto para ver as moléculas"],
+      ["🥄 Mexer / sovar", "Misturar ingredientes, sovar a massa, bater claras"],
       ["Espaço", "Pausar e continuar"],
       ["Esc", "Fechar janelas"]
     ],
