@@ -272,7 +272,7 @@
       const u = conta.usuario || {};
       c.innerHTML = `${x}<div class="ct-det" style="margin-bottom:16px">${avatar(u, 'gg')}<div class="tx"><h2 style="margin:0">Minha conta</h2><small>${esc(u.nome)} · ${esc(u.email)}</small><span class="ct-selo"${u.selo === 'criador' ? ' style="background:rgba(251,191,36,.12);border-color:rgba(251,191,36,.4);color:#fcd34d"' : ''}>${u.selo === 'criador' ? seloSvg('criador', 16) + ' Criador da Arcádia' : u.selo === 'verificado' ? seloSvg('verificado', 16) + ' Verificado' : '✓ E-mail confirmado'}${u.criadoEm ? ' · desde ' + new Date(u.criadoEm).toLocaleDateString('pt-BR') : ''}</span><br><button class="ct-link" id="ct-trocar-foto" style="margin-top:6px">🎨 Trocar foto de perfil</button></div></div>
         <div class="ct-bloco"><b style="font-size:14.5px">🎮 Publicar no Studio</b><br><small style="color:var(--muted,#9696ab)">${esc(u.limites || (u.selo ? 'publicações ilimitadas, até ~20 MB cada' : 'até 60 publicações de até ~2 MB'))}${u.selo === 'criador' ? '. Você pode dar o selo de verificado para outras contas em 👥 Amigos → Adicionar.' : u.selo === 'verificado' ? (u.seloOrigem === 'curtidas' ? ' · selo ganho com um jogo de 1.000 curtidas' : ' · selo dado pelo criador') : '. Ganhe o selo de verificado com um jogo de 1.000 curtidas, ou com a verificação do criador.'}</small></div>
-        <div class="ct-bloco" id="ct-blk-foto" style="display:none"><h4>Sua foto de perfil</h4><div class="ct-escolha" id="ct-emojis">${FOTOS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div><div class="ct-cores" id="ct-cores">${CORES.map(k => `<button type="button" data-cor="${k}" style="background:${k}" aria-label="Cor"></button>`).join('')}</div><div class="ct-linha"><span class="ct-linha" style="justify-content:flex-start"><span id="ct-previa"></span><small style="color:var(--muted,#9696ab)">É assim que seus amigos vão te ver.</small></span><button class="ct-sec" id="ct-salvar-foto" style="white-space:nowrap">Salvar foto</button></div></div>
+        <div class="ct-bloco" id="ct-blk-foto" style="display:none"><h4>Sua foto de perfil</h4><div class="ct-linha" style="justify-content:flex-start;gap:8px;margin-bottom:6px"><label class="ct-sec" style="display:inline-flex;align-items:center;cursor:pointer">📷 Enviar uma foto<input type="file" id="ct-arquivo-foto" accept="image/*" style="display:none"></label><small style="color:var(--muted,#9696ab)">ou escolha um desenho:</small></div><div class="ct-escolha" id="ct-emojis">${FOTOS.map(e => `<button type="button" data-emoji="${e}">${e}</button>`).join('')}</div><div class="ct-cores" id="ct-cores">${CORES.map(k => `<button type="button" data-cor="${k}" style="background:${k}" aria-label="Cor"></button>`).join('')}</div><div class="ct-linha"><span class="ct-linha" style="justify-content:flex-start"><span id="ct-previa"></span><small style="color:var(--muted,#9696ab)">É assim que seus amigos (e os outros jogadores) vão te ver.</small></span><button class="ct-sec" id="ct-salvar-foto" style="white-space:nowrap">Salvar foto</button></div></div>
         <div class="ct-bloco"><div class="ct-linha"><span><b style="font-size:14.5px">👥 Amigos</b><br><small style="color:var(--muted,#9696ab)">${pedidosPend > 0 ? `<b style="color:#fca5a5">${pedidosPend} pedido${pedidosPend > 1 ? 's' : ''} esperando resposta</b>` : 'Adicione amigos e veja quem está on-line'}</small></span><button class="ct-sec" data-ir="amigos">Abrir</button></div></div>
         <div class="ct-bloco"><h4>🎮 Suas publicações</h4><div class="ct-pubs" id="ct-pubs"><span style="color:var(--muted,#9696ab);font-size:13px"><span class="ct-girando"></span>Carregando…</span></div>
           <div style="margin-top:8px;font-size:12.5px;color:var(--muted,#9696ab)" id="ct-nuvem"></div></div>
@@ -292,12 +292,24 @@
       }).catch(e => { const l = $('#ct-acessos'); if (l) l.textContent = e.message; if (!ler()) render('entrar'); });
       carregarPublicacoes(conta);
       { // escolher a foto de perfil
-        const atual = String(u.foto || '').split('|'); let emo = atual.length === 2 ? atual[0] : FOTOS[0], cor = atual.length === 2 ? atual[1] : CORES[0];
-        const marcar = () => { c.querySelectorAll('#ct-emojis button').forEach(b => b.classList.toggle('sel', b.dataset.emoji === emo)); c.querySelectorAll('#ct-cores button').forEach(b => b.classList.toggle('sel', b.dataset.cor === cor)); $('#ct-previa').innerHTML = avatar({ foto: emo + '|' + cor }); };
+        const atual = String(u.foto || '').split('|'); let emo = atual.length === 2 ? atual[0] : FOTOS[0], cor = atual.length === 2 ? atual[1] : CORES[0], imagem = FOTO_IMG.test(u.foto || '') ? u.foto : null;
+        const escolhida = () => imagem || emo + '|' + cor;
+        const marcar = () => { c.querySelectorAll('#ct-emojis button').forEach(b => b.classList.toggle('sel', !imagem && b.dataset.emoji === emo)); c.querySelectorAll('#ct-cores button').forEach(b => b.classList.toggle('sel', !imagem && b.dataset.cor === cor)); $('#ct-previa').innerHTML = avatar({ foto: escolhida() }); };
+        // foto de verdade: recorta um quadrado no meio, reduz para 128 px e vira JPEG leve (~8 KB), para ir rápido pela rede nos jogos
+        $('#ct-arquivo-foto').onchange = ev => {
+          const arq = ev.target.files && ev.target.files[0]; if (!arq) return;
+          if (!/^image\//.test(arq.type)) return erroTela('Escolha um arquivo de imagem.');
+          const im = new Image(), url = URL.createObjectURL(arq);
+          im.onload = () => { const s = Math.min(im.width, im.height), cv = document.createElement('canvas'); cv.width = cv.height = 128; const g = cv.getContext('2d'); g.fillStyle = '#ffffff'; g.fillRect(0, 0, 128, 128); g.imageSmoothingQuality = 'high'; g.drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, 128, 128); URL.revokeObjectURL(url);
+            let d = ''; for (const q of [0.85, 0.75, 0.6, 0.45]) { d = cv.toDataURL('image/jpeg', q); if (d.length <= 20000) break; }
+            imagem = d; marcar(); erroTela('Ficou assim? Aperte "Salvar foto".', true); };
+          im.onerror = () => { URL.revokeObjectURL(url); erroTela('Não consegui abrir essa imagem.'); };
+          im.src = url;
+        };
         $('#ct-trocar-foto').onclick = () => { const bl = $('#ct-blk-foto'); bl.style.display = bl.style.display === 'none' ? '' : 'none'; marcar(); };
-        $('#ct-emojis').onclick = ev => { const b = ev.target.closest('[data-emoji]'); if (b) { emo = b.dataset.emoji; marcar(); } };
-        $('#ct-cores').onclick = ev => { const b = ev.target.closest('[data-cor]'); if (b) { cor = b.dataset.cor; marcar(); } };
-        $('#ct-salvar-foto').onclick = () => ocupado($('#ct-salvar-foto'), async () => { const j = await api('alterarFoto', { token: conta.token, foto: emo + '|' + cor }); conta.usuario = j.usuario; gravar(conta); atualizarBotao(); render('minha'); erroTela('Foto salva! 🎉', true); });
+        $('#ct-emojis').onclick = ev => { const b = ev.target.closest('[data-emoji]'); if (b) { emo = b.dataset.emoji; imagem = null; marcar(); } };
+        $('#ct-cores').onclick = ev => { const b = ev.target.closest('[data-cor]'); if (b) { cor = b.dataset.cor; imagem = null; marcar(); } };
+        $('#ct-salvar-foto').onclick = () => ocupado($('#ct-salvar-foto'), async () => { const j = await api('alterarFoto', { token: conta.token, foto: escolhida() }); conta.usuario = j.usuario; gravar(conta); atualizarBotao(); render('minha'); erroTela('Foto salva! 🎉', true); });
       }
       let querLigar = !u.doisFatores;
       $('#ct-chave').onclick = () => { querLigar = !$('#ct-chave').classList.contains('on'); $('#ct-confirma').style.display = 'block'; $('#ct-salvar2f').textContent = querLigar ? 'Ligar verificação em duas etapas' : 'Desligar verificação em duas etapas'; ligarVerSenha(); $('#ct-senha').focus(); };
@@ -364,6 +376,8 @@
       mais.onclick = () => todos(proximo);
       c.onclick = ev => {
         if (ev.target.closest('[data-recarregar]')) return todos();
+        const bf = ev.target.closest('[data-tirar-foto]');
+        if (bf) { if (!confirm('Tirar a foto desta conta? Ela volta para a inicial do nome.')) return; bf.disabled = true; api('apagarFoto', { token: conta.token, id: bf.dataset.tirarFoto }).then(() => { erroTela('Foto removida.', true); const q = $('#ct-q').value.trim(); if (q.length >= 2) buscar(q); else todos(); }).catch(e => { erroTela(e.message); bf.disabled = false; }); return; }
         const bs = ev.target.closest('[data-selo]');
         if (bs) { bs.disabled = true; api('darSelo', { token: conta.token, id: bs.dataset.selo, dar: bs.dataset.dar === '1' }).then(j => { erroTela(bs.dataset.dar === '1' ? `${j.conta.nome} agora é verificado (e recebeu um e-mail de parabéns).` : `Selo tirado de ${j.conta.nome}.`, true); const q = $('#ct-q').value.trim(); if (q.length >= 2) buscar(q); else todos(); }).catch(e => { erroTela(e.message); bs.disabled = false; }); return; }
         acaoAmizade(ev, conta, (b, j, ac) => { // atualiza só o cartão, sem recarregar a lista
@@ -414,8 +428,10 @@
   // foto de perfil: um emoji sobre uma cor ("🦊|#8b5cf6"); sem foto, a inicial do nome
   const FOTOS = ['🦊', '🐼', '🐸', '🐯', '🐵', '🐙', '🦄', '🐲', '🦖', '🐱', '🐶', '🐧', '🐨', '🐰', '🦉', '🐝', '🤖', '👾', '👻', '🎃', '🥷', '🧙', '🦸', '👽', '😎', '🤠', '🔥', '⚡', '🌈', '🍕', '⚽', '🎮', '🚀', '👑', '💎', '🌵'];
   const CORES = ['#8b5cf6', '#6366f1', '#3b82f6', '#22d3ee', '#14b8a6', '#22c55e', '#84cc16', '#f59e0b', '#f97316', '#ef4444', '#ec4899', '#64748b'];
+  const FOTO_IMG = /^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
   function foto(u) {
     const f = String((u && u.foto) || '').split('|');
+    if (FOTO_IMG.test(String((u && u.foto) || ''))) return { emoji: false, txt: '', estilo: `background:#221c33 url(${u.foto}) center/cover` }; // foto de verdade
     if (f.length === 2 && f[0] && /^#[0-9a-fA-F]{6}$/.test(f[1])) return { emoji: true, txt: f[0], estilo: `background:${f[1]}` };
     return { emoji: false, txt: String((u && u.nome) || '?')[0].toUpperCase(), estilo: '' };
   }
@@ -431,7 +447,7 @@
   const itemAdicionar = () => `<button class="ct-it" data-ir="add-amigos" title="Adicionar amigos"><span class="mais">＋</span><b>Adicionar</b><small>&nbsp;</small></button>`;
   const seloIco = (s, px = 15) => seloSvg(s, px);
   const souCriador = () => ((ler() || {}).usuario || {}).selo === 'criador';
-  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}${seloIco(k.selo)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}${souCriador() && k.selo !== 'criador' ? `<button class="selo" data-selo="${esc(k.id)}" data-dar="${k.selo ? 0 : 1}">${k.selo ? 'Tirar selo' : seloSvg('verificado', 13) + ' Dar selo'}</button>` : ''}</div>`; }
+  function cartaoPerfil(k) { return `<div class="ct-perfil">${avatar(k, 'g', k.online)}<b title="${esc(k.nome)}">${esc(k.nome)}${seloIco(k.selo)}</b><small class="${k.online ? 'on' : ''}">${esc(statusCurto(k))}</small>${botaoBusca(k)}${souCriador() && FOTO_IMG.test(k.foto || '') ? `<button class="selo" data-tirar-foto="${esc(k.id)}">Tirar foto</button>` : ''}${souCriador() && k.selo !== 'criador' ? `<button class="selo" data-selo="${esc(k.id)}" data-dar="${k.selo ? 0 : 1}">${k.selo ? 'Tirar selo' : seloSvg('verificado', 13) + ' Dar selo'}</button>` : ''}</div>`; }
   let amigosCache = [];
   function mostrarAmigo(id) {
     const d = $('#ct-det'); if (!d) return;

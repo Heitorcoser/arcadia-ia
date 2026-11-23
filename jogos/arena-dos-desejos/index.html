@@ -216,6 +216,7 @@
 
 <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
 <script src="../../salas-publicas.js?v=1"></script>
+<script src="../../foto.js?v=1"></script>
 <script>
 "use strict";
 /* =====================================================================
@@ -1352,6 +1353,7 @@ function montarSnap(comEventos) {
     v: { f: V.fase, q: V.quem, n: V.nome, tx: V.fase === 'digitando' ? V.texto : '', r: V.fase === 'digitando' ? Math.max(0, V.ate - T) : 0, tot: V.quem && jogadores.find(p => p.id === V.quem)?.bot ? 12 : 16 },
     fim: Math.max(0, (G.fim || 0) - T), re: estado === 'fim' ? Math.max(0, G.reinicio - T) : 0, pod: estado === 'fim' ? G.podio : null,
   };
+  if (ArcadiaFoto.versao && (++fotoSnap % 30 === 1)) s.fo = ArcadiaFoto.todos(); // as fotos de verdade vão de vez em quando; nos quadros, só a ficha
   if (comEventos) { s.ev = evRede; evRede = []; }
   return s;
 }
@@ -1388,7 +1390,7 @@ function dadosDoCliente(c, d) {
     if (jogadores.filter(p => !p.bot).length >= 8) { c.send({ t: 'cheio' }); return; }
     let nome = String(d.nome || 'Jogador').replace(/[<>]/g, '').trim().slice(0, 14) || 'Jogador';
     while (jogadores.some(p => p.nome === nome)) nome += '2';
-    const p = adicionarJogador({ nome, rosto: ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false });
+    const p = adicionarJogador({ nome, rosto: ArcadiaFoto.eh(d.rosto) ? ArcadiaFoto.token(d.rosto) : ROSTOS.includes(d.rosto) ? d.rosto : pick(ROSTOS), bot: false });
     conns.set(c.peer, { c, pid: p.id });
     c.send({ t: 'ola', id: p.id, sala: codigoSala });
     ajustarBots();
@@ -1420,7 +1422,7 @@ function entrarSala(cod, falhou) {
     conn.on('open', () => conn.send({ t: 'oi', nome: meuNome(), rosto: meuRosto }));
     conn.on('data', d => {
       if (d.t === 'ola') { clearTimeout(limite); meuId = d.id; codigoSala = d.sala; modo = 'cliente'; entrarNoJogo(); $('#sala').style.display = 'inline-block'; $('#sala').textContent = (falhou ? '🌍 ' : '🌐 Sala ') + codigoSala; }
-      else if (d.t === 's') { S = d; for (const e of d.ev || []) tratarEvento(e); }
+      else if (d.t === 's') { if (d.fo) ArcadiaFoto.registrar(d.fo); S = d; for (const e of d.ev || []) tratarEvento(e); }
       else if (d.t === 'cheio') { clearTimeout(limite); if (falhou) return falhou(); erroMenu('Essa sala está cheia.'); }
     });
     conn.on('close', () => { if (modo === 'cliente') { toast('O anfitrião fechou a sala.', 5000); setTimeout(() => location.reload(), 2500); } });
@@ -1480,7 +1482,9 @@ function redimensionar() { DPR = Math.min(window.devicePixelRatio || 1, 2); cv.w
 addEventListener('resize', redimensionar); addEventListener('orientationchange', () => setTimeout(redimensionar, 250)); redimensionar();
 const SPR = new Map();
 const FONTE_EMOJI = '"Segoe UI Emoji","Apple Color Emoji","Noto Color Emoji","Twemoji Mozilla",sans-serif';
+let fotoSnap = 0;
 function spr(e) {
+  if (ArcadiaFoto.ehFoto(e)) return ArcadiaFoto.sprite(e, 128);
   let c = SPR.get(e); if (c) return c;
   c = document.createElement('canvas'); c.width = c.height = 128;
   const g = c.getContext('2d'); g.font = `96px ${FONTE_EMOJI}`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(e, 64, 70);
@@ -1646,7 +1650,7 @@ function desenharJogador(p, v, z, tt, ehEu) {
    ===================================================================== */
 let bannerAte = 0, ultimoPlacar = 0, pedidoAberto = false;
 function feed(html) {
-  const el = document.createElement('div'); el.innerHTML = html; $('#feed').prepend(el);
+  const el = document.createElement('div'); el.innerHTML = ArcadiaFoto.html(html); $('#feed').prepend(el);
   while ($('#feed').children.length > 5) $('#feed').lastChild.remove();
   setTimeout(() => el.remove(), 7000);
 }
@@ -1667,7 +1671,7 @@ function atualizarHUD() {
   if (agora - ultimoPlacar > 250) {
     ultimoPlacar = agora;
     const ord = [...S.j].sort((a, b) => b[10] - a[10]);
-    $('#placar').innerHTML = ord.map(p => `<div class="${p[0] === meuId ? 'eu' : ''} ${p[9] & SM.MORTO ? 'morto' : ''}"><span>${p[3]}</span><span>${esc(p[1])}${p[9] & SM.BOT ? ' 🤖' : ''}</span><b>${p[10]}</b></div>`).join('');
+    $('#placar').innerHTML = ord.map(p => `<div class="${p[0] === meuId ? 'eu' : ''} ${p[9] & SM.MORTO ? 'morto' : ''}"><span>${ArcadiaFoto.txt(p[3])}</span><span>${esc(p[1])}${p[9] & SM.BOT ? ' 🤖' : ''}</span><b>${p[10]}</b></div>`).join('');
   }
   const b = $('#banner');
   if (agora > bannerAte) {
@@ -1687,7 +1691,7 @@ function atualizarHUD() {
     if (!fim.classList.contains('on')) {
       fim.classList.add('on');
       const ordem = [1, 0, 2].filter(i => S.pod[i]);
-      $('#podio').innerHTML = ordem.map(i => `<div class="p${i + 1}"><span class="e">${S.pod[i][1]}</span>${esc(S.pod[i][0])}<br>${S.pod[i][2]} pts</div>`).join('');
+      $('#podio').innerHTML = ordem.map(i => `<div class="p${i + 1}"><span class="e">${ArcadiaFoto.txt(S.pod[i][1], 1)}</span>${esc(S.pod[i][0])}<br>${S.pod[i][2]} pts</div>`).join('');
       if (!primeiraPartidaFim) { primeiraPartidaFim = true; avisar('concluido', { final: S.pod[0] && S.pod[0][3] === meuId ? 'vitoria' : 'partida' }); }
       fecharPedido();
     }
@@ -1774,10 +1778,11 @@ function lerInput() {
    MENU
    ===================================================================== */
 let meuRosto = ROSTOS[0];
-try { meuRosto = localStorage.getItem('desejos.rosto') || ROSTOS[Math.floor(Math.random() * ROSTOS.length)]; $('#nome').value = localStorage.getItem('desejos.nome') || (((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || '').slice(0, 14); } catch (e) {}
+try { meuRosto = localStorage.getItem('desejos.rosto') || ArcadiaFoto.minha() || ROSTOS[Math.floor(Math.random() * ROSTOS.length)]; $('#nome').value = localStorage.getItem('desejos.nome') || (((JSON.parse(localStorage.getItem('arcadia.conta')) || {}).usuario || {}).nome || '').slice(0, 14); } catch (e) {}
 const meuNome = () => ($('#nome').value.replace(/[<>]/g, '').trim() || 'Você').slice(0, 14);
-$('#rostos').innerHTML = ROSTOS.map(r => `<button type="button" class="${r === meuRosto ? 'sel' : ''}">${r}</button>`).join('');
-$('#rostos').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; meuRosto = b.textContent; [...$('#rostos').children].forEach(x => x.classList.toggle('sel', x === b)); });
+if (ArcadiaFoto.eh(meuRosto) && ArcadiaFoto.minha()) meuRosto = ArcadiaFoto.minha();
+$('#rostos').innerHTML = (ArcadiaFoto.minha() ? `<button type="button" data-r="__foto" title="Sua foto da conta" class="${ArcadiaFoto.eh(meuRosto) ? 'sel' : ''}">${ArcadiaFoto.txt(ArcadiaFoto.minha(), 1.45)}</button>` : '') + ROSTOS.map(r => `<button type="button" data-r="${r}" class="${r === meuRosto ? 'sel' : ''}">${r}</button>`).join('');
+$('#rostos').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; meuRosto = b.dataset.r === '__foto' ? ArcadiaFoto.minha() : b.dataset.r; [...$('#rostos').children].forEach(x => x.classList.toggle('sel', x === b)); try { salvarPerfil(); } catch (er) {} });
 function salvarPerfil() { try { localStorage.setItem('desejos.nome', meuNome()); localStorage.setItem('desejos.rosto', meuRosto); } catch (e) {} }
 function erroMenu(msg, neutro) { const e = $('#erro'); e.textContent = msg; e.style.color = neutro ? 'var(--muted)' : ''; }
 function entrarNoJogo() {
@@ -1789,7 +1794,7 @@ function iniciarComoHost(online) {
   iniciarAudio(); salvarPerfil();
   modo = 'host'; botsDesejados = +$('#nbots').value;
   T = 0; jogadores = [];
-  const eu = adicionarJogador({ nome: meuNome(), rosto: meuRosto, bot: false }); meuId = eu.id;
+  const eu = adicionarJogador({ nome: meuNome(), rosto: ArcadiaFoto.token(meuRosto), bot: false }); meuId = eu.id;
   ajustarBots(); reiniciarPartida();
   entrarNoJogo();
   if (online) criarSalaOnline();

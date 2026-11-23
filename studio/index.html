@@ -23,7 +23,7 @@
 /* Versão e cache: o navegador e o app guardam esta página por um tempo (até ~10 min no GitHub Pages).
    Ao abrir, pergunta ao servidor (sem cache) a versão atual e, se esta página for velha, recarrega
    com ?v=versão para pegar os arquivos novos. Mantenha igual a "versao" em ../versao.json. */
-window.VERSAO_STUDIO = "1.21.0";
+window.VERSAO_STUDIO = "1.22.0";
 (function () {
   fetch("../versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
     const v = String(d.versao || ""); let tentou = "";
@@ -251,6 +251,7 @@ window.VERSAO_STUDIO = "1.21.0";
   body.movel .mk-grade{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
   /* celular em pé: o topo quebra em duas linhas (abas em cima; nome, conta e Publicar embaixo) */
   @media (max-width:600px){
+    .pb-grade{grid-template-columns:1fr !important}
     body.movel #topo{flex-wrap:wrap;height:auto;row-gap:0;overflow:visible;padding-bottom:4px}
     body.movel .aba-r{height:36px;padding:0 8px}
     body.movel #nome-proj{flex:1 1 120px;text-align:left;margin-left:0}
@@ -342,11 +343,12 @@ window.VERSAO_STUDIO = "1.21.0";
 <input type="file" id="in-importar" accept=".zip,.json,.arcadia" hidden>
 <input type="file" id="in-pasta" webkitdirectory hidden>
 
-<script src="nucleo.js?v=1.21.0"></script>
-<script src="avatar.js?v=1.21.0"></script>
-<script src="personagem.js?v=1.21.0"></script>
-<script src="studio.js?v=1.21.0"></script>
-<script src="paineis.js?v=1.21.0"></script>
-<script src="../conta.js?v=1.21.0"></script>
+<script src="nucleo.js?v=1.22.0"></script>
+<script src="avatar.js?v=1.22.0"></script>
+<script src="personagem.js?v=1.22.0"></script>
+<script src="studio.js?v=1.22.0"></script>
+<script src="tutorial.js?v=1.22.0"></script>
+<script src="paineis.js?v=1.22.0"></script>
+<script src="../conta.js?v=1.22.0"></script>
 </body>
 </html>

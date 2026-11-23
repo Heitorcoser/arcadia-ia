@@ -180,7 +180,7 @@
       ],
       modelo: [['Novo a partir de modelo', Object.entries(MODELOS_ARQ).map(([k, m]) => B('modeloArq:' + k, m.i, m.t))]],
       testar: [['Prévia', [B('executar', '▶', 'Executar', { c: 'play' }), B('pararPrevia', '■', 'Parar', { c: 'stop' }), B('janela', '🪟', 'Abrir em janela')]], ['Saída', [B('limparSaida', '🧹', 'Limpar saída')]]],
-      exibir: [['Painéis', [B('pEsq', '🧰', 'Caixa'), B('pDir', '🌳', 'Explorer'), B('pBaixo', '📟', 'Saída')]], ['Ajuda', [B('docs', '📘', 'Documentação'), B('atalhos', '⌨️', 'Atalhos')]]],
+      exibir: [['Painéis', [B('pEsq', '🧰', 'Caixa'), B('pDir', '🌳', 'Explorer'), B('pBaixo', '📟', 'Saída')]], ['Ajuda', [B('tutorial', '🎓', 'Tutorial'), B('docs', '📘', 'Documentação'), B('atalhos', '⌨️', 'Atalhos')]]],
     };
     return {
       arquivo: arq,
@@ -201,7 +201,7 @@
         ['Encaixe na grade', [{ html: `<div class="mini-col"><label>Mover <input type="number" id="snap-mover" step="0.25" min="0" value="${snap.mover}"></label><label>Girar° <input type="number" id="snap-girar" step="5" min="0" value="${snap.girar}"></label></div>` }]],
       ],
       testar: [['Simulação', [B('jogar', '▶', 'Jogar', { c: 'play' }), B('parar', '■', 'Parar', { c: 'stop' })]], ['Captura', [B('captura', '📸', 'Foto da cena')]], ['Saída', [B('limparSaida', '🧹', 'Limpar saída')]]],
-      exibir: [['Painéis', [B('pEsq', '🧰', 'Caixa'), B('pDir', '🌳', 'Explorer'), B('pBaixo', '📟', 'Saída')]], ['Câmera', [B('focar', '🎯', 'Focar (F)'), B('camInicio', '🏠', 'Câmera inicial')]], ['Grade', [B('grade', '#️⃣', 'Mostrar grade', { on: !grade || grade.visible })]], ['Ajuda', [B('docs', '📘', 'Documentação'), B('atalhos', '⌨️', 'Atalhos')]]],
+      exibir: [['Painéis', [B('pEsq', '🧰', 'Caixa'), B('pDir', '🌳', 'Explorer'), B('pBaixo', '📟', 'Saída')]], ['Câmera', [B('focar', '🎯', 'Focar (F)'), B('camInicio', '🏠', 'Câmera inicial')]], ['Grade', [B('grade', '#️⃣', 'Mostrar grade', { on: !grade || grade.visible })]], ['Ajuda', [B('tutorial', '🎓', 'Tutorial'), B('docs', '📘', 'Documentação'), B('atalhos', '⌨️', 'Atalhos')]]],
     };
   }
   function renderFaixa() {
@@ -244,7 +244,7 @@
       pEsq: () => $('#corpo').classList.toggle('sem-esq'), pDir: () => $('#corpo').classList.toggle('sem-dir'), pBaixo: () => $('#corpo').classList.toggle('sem-baixo'),
       focar, camInicio: () => { cam.pos.set(22, 18, 26); cam.yaw = Math.atan2(22, 26); cam.pitch = -0.5; },
       grade: () => { if (grade) grade.visible = !grade.visible; renderFaixa(); },
-      docs: telaDocs, atalhos: telaAtalhos,
+      docs: telaDocs, atalhos: telaAtalhos, tutorial: () => { if (!proj) return toast('Abra um projeto para ver o tutorial'); if (window.StudioTutorial) StudioTutorial.iniciar(ehCena() ? 'cena' : 'codigo'); },
       personagem: () => window.ASPersonagem.abrir({ aoSalvar: () => saida('ok', '🧍 Personagem salvo: ele aparece quando você aperta Jogar') }),
       marketplace: () => telaMarketplace(),
       multi: () => {
@@ -1036,11 +1036,14 @@
   const GENEROS = ['Aventura', 'Ação', 'Obby / Parkour', 'Plataforma', 'Puzzle', 'Corrida', 'Terror', 'Simulador', 'Tycoon', 'RPG', 'Party Game', 'Esporte', 'Arcade', 'Outro'];
   async function telaPublicar() {
     if (!proj) return; await salvar();
-    const capa = ehCena() ? captura() : '';
+    let capa = proj.capaImagem || (ehCena() ? captura() : '');
     const autor = localStorage.getItem('studio.autor') || '';
+    const textoCapa = () => proj.capaImagem ? 'Imagem escolhida por você.' : capa ? 'A capa é a vista atual da câmera.' : 'Sem capa: escolha uma imagem (fica melhor em 16:9, como 1280×720).';
     modal(`<div class="m-cab"><h2>🚀 Publicar “${esc(proj.nome)}”</h2><button data-fechar>✕</button></div><div class="m-corpo">
-      <div style="display:grid;grid-template-columns:${capa ? '240px 1fr' : '1fr'};gap:18px">
-        ${capa ? `<div><img src="${capa}" style="width:100%;border-radius:10px;border:1px solid var(--linha2)"><div style="color:var(--fraco2);font-size:12px;margin-top:6px">A capa é a vista atual da câmera.</div></div>` : ''}
+      <div class="pb-grade" style="display:grid;grid-template-columns:240px 1fr;gap:18px">
+        <div><div id="pb-capa" style="aspect-ratio:16/9;border-radius:10px;border:1px solid var(--linha2);background:var(--painel2) center/cover no-repeat;${capa ? `background-image:url(${capa});` : ''}display:grid;place-items:center;color:var(--fraco2);font-size:12px">${capa ? '' : '🖼️ Sem capa'}</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><label class="btn" style="cursor:pointer;display:inline-flex;align-items:center;height:30px">🖼️ Escolher imagem<input type="file" id="pb-capa-arq" accept="image/*" style="display:none"></label>${ehCena() ? '<button class="btn" id="pb-capa-cam" style="height:30px">📷 Vista da câmera</button>' : ''}</div>
+          <div id="pb-capa-info" style="color:var(--fraco2);font-size:12px;margin-top:6px;line-height:1.4">${textoCapa()}</div></div>
         <div>
           <label class="campo"><span>Nome do jogo</span><input id="pb-nome" value="${esc(proj.nome)}"></label>
           <div class="linha2"><label class="campo"><span>Gênero</span><select id="pb-gen">${GENEROS.map(g => `<option ${g === proj.genero ? 'selected' : ''}>${g}</option>`).join('')}</select></label>
@@ -1054,6 +1057,22 @@
           <div id="pb-res" style="margin-top:14px"></div>
         </div></div></div>`);
     const metaTela = () => ({ nome: $('#pb-nome').value.trim() || proj.nome, genero: $('#pb-gen').value, subgenero: $('#pb-sub').value.trim(), autor: $('#pb-autor').value.trim() || 'Anônimo', descricao: $('#pb-desc').value.trim() });
+    // capa: imagem escolhida pela pessoa (recortada em 16:9 no meio) ou a vista da câmera
+    const mostrarCapa = () => { const b = $('#pb-capa'); b.style.backgroundImage = capa ? `url(${capa})` : ''; b.textContent = capa ? '' : '🖼️ Sem capa'; $('#pb-capa-info').textContent = textoCapa(); };
+    $('#pb-capa-arq').onchange = ev => {
+      const arq = ev.target.files && ev.target.files[0]; if (!arq) return;
+      if (!/^image\//.test(arq.type)) { toast('⚠ Escolha um arquivo de imagem'); return; }
+      const url = URL.createObjectURL(arq), im = new Image();
+      im.onload = () => {
+        const W = 960, H = 540, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+        const esc2 = Math.max(W / im.width, H / im.height), w = im.width * esc2, h = im.height * esc2; g.imageSmoothingQuality = 'high'; g.drawImage(im, (W - w) / 2, (H - h) / 2, w, h); URL.revokeObjectURL(url);
+        let d = ''; for (const q of [0.85, 0.75, 0.6]) { d = c.toDataURL('image/jpeg', q); if (d.length < 180000) break; }
+        capa = d; proj.capaImagem = d; salvar(); mostrarCapa(); toast('🖼️ Capa trocada');
+      };
+      im.onerror = () => { URL.revokeObjectURL(url); toast('⚠ Não consegui abrir essa imagem'); };
+      im.src = url;
+    };
+    if ($('#pb-capa-cam')) $('#pb-capa-cam').onclick = () => { proj.capaImagem = ''; capa = captura(); salvar(); mostrarCapa(); };
     if ($('#pb-entrar')) $('#pb-entrar').onclick = () => { Conta() && Conta().abrir('entrar'); const volta = () => { removeEventListener('arcadia-conta', volta); if (Conta().logado()) telaPublicar(); }; addEventListener('arcadia-conta', volta); };
     if ($('#pb-online')) $('#pb-online').onclick = async () => {
       const b = $('#pb-online'), txt = b.textContent; b.disabled = true; b.textContent = '⏳ Enviando para o servidor…';
