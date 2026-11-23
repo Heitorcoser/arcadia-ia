@@ -29,6 +29,8 @@ Sandbox de química com a tabela periódica inteira, para estudar e testar.
 - 🏠 **Aba Casa**: detergente, sabão, água sanitária, vinagre, limão, óleo, leite, vela, palha de aço… (espuma, emulsão, sabão caseiro, leite coalhando e por que nunca jogar água em óleo quente)
 - ✨ **Faíscas** que voam e acendem o que tocam, arco elétrico e fios que esquentam com a corrente
 - 🧴 **Reagentes de laboratório**: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona (catalisadores, titulação, indicadores de pH, teste do amido)
+- 🫧 **Física de verdade, sem efeitos prontos**: gás dissolvido pela lei de Henry, bolhas que nascem em superfícies ásperas, grudam, crescem e estouram; detergente vira espuma; objetos boiam ou afundam por Arquimedes e giram pelo torque das bolhas (**milho dançante**, Mentos, rolha, gelo, pipoca que estoura a 180 °C)
+- 🔬 **Microscópio**: mostra as moléculas de qualquer ponto (formas pela fórmula, cores CPK) e explica o fenômeno com os números da simulação
 - 🫀 **Simulação no organismo**: beba, coma ou inale a amostra e veja quais órgãos seriam afetados, com fontes (ATSDR/CDC, NIH, MSD). Educativo, não é orientação médica · Disque-Intoxicação 0800 722 6001
 
 **Controles:** arraste na caixa para usar a ferramenta · `Espaço` pausa · `Esc` fecha janelas

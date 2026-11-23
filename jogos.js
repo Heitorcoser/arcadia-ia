@@ -373,14 +373,14 @@ const CAPA_LAB = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.18.0";
+window.ARCADIA_VERSAO = "1.19.0";
 
 window.JOGOS = [
   {
     id: "laboratorio-dos-elementos",
-    versao: "1.2.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
-    atualizadoEm: "2026-11-22",
-    novidades: "Faísca nova: faíscas de verdade que voam, caem e acendem o que tocam, arco elétrico e fios que esquentam com corrente. Aba Casa com detergente, sabão, água sanitária, óleo, leite, limão, vela, palha de aço e mais. Espuma, emulsão, sabão caseiro, leite coalhando e 6 experimentos novos.",
+    versao: "1.3.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-23",
+    novidades: "Física de verdade: gás dissolvido pela lei de Henry, bolhas que nascem em superfícies ásperas, grudam, crescem e estouram, espuma pelo detergente, objetos que boiam ou afundam por Arquimedes e giram pelo torque das bolhas (milho dançante), pipoca estourando e um microscópio que mostra as moléculas e explica cada fenômeno.",
     nome: "Laboratório dos Elementos",
     genero: "Simulação",
     subgenero: "Sandbox de química (educativo)",
@@ -413,15 +413,20 @@ window.JOGOS = [
       "Faíscas que voam e acendem gases, álcool, pó de metal e espuma de hidrogênio; arco elétrico e aquecimento por corrente",
       "Reagentes de laboratório: peróxido de hidrogênio, permanganato, água destilada e da torneira, indicadores (fenolftaleína, repolho roxo), lugol e amido",
       "29 experimentos prontos (sódio na água, termite, pasta de dente de elefante, palha de aço + bateria, repolho roxo, leite + vinagre…)",
-      "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes"
+      "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes",
+      "Física fina sem efeitos prontos: gás dissolvido (lei de Henry), nucleação em superfícies ásperas, bolhas que grudam e se soltam pela tensão superficial, espuma com detergente",
+      "Objetos soltos que boiam ou afundam pelo empuxo e giram pelo torque das bolhas: milho dançante, Mentos, rolha, gelo, pipoca que estoura a 180 °C",
+      "Microscópio: as moléculas de cada ponto montadas pela fórmula, com a explicação do fenômeno e os números da simulação"
     ],
     controles: [
       ["Mouse / dedo", "Arrastar na caixa usa a ferramenta escolhida"],
+      ["🔬 Microscópio", "Passar ou tocar num ponto para ver as moléculas"],
       ["Espaço", "Pausar e continuar"],
       ["Esc", "Fechar janelas"]
     ],
     tecnologia: [
       "Autômato celular em Canvas 2D com temperatura, estado físico e condução de calor por célula",
+      "Física fina por célula: gás dissolvido, volume de cada bolha e objetos rígidos com empuxo, arrasto e torque",
       "Motor de regras químicas gerado a partir de tabelas (reatividade, solubilidade, ignição, redução)",
       "Dados dos elementos da PubChem (NIH); toxicologia resumida de ATSDR/CDC, NIH e Manual MSD",
       "Sons gerados com Web Audio API"

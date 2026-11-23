@@ -304,7 +304,8 @@ function regraAgua(A, W) {
   if (!ehAgua(W)) return null;
   // gases que se dissolvem formando ácido ou base
   if (A.chave === 'HCl' || A.chave === 'HBr' || A.chave === 'HI' || A.chave === 'HF' || A.chave === 'NH3') { const pa = solChave(A.agua); return R({ pa, pb: pa, p: 0.3, dT: 10, nome: `${A.nome} dissolvendo na água`, eq: `${fmt(A.formula)} + H₂O → ${fmt(MATS[pa].formula)}`, nota: 'Este gás é extremamente solúvel em água.' }); }
-  if (A.chave === 'SO2' || A.chave === 'SO3' || A.chave === 'NO2' || A.chave === 'CO2' || A.chave === 'P4O10') {
+  // (o CO₂ se dissolve pela lei de Henry em fisica.js: aqui ficam só os gases que reagem de vez com a água)
+  if (A.chave === 'SO2' || A.chave === 'SO3' || A.chave === 'NO2' || A.chave === 'P4O10') {
     const alvo = { SO2: solucao('H', 'SO3'), SO3: solucao('H', 'SO4'), NO2: solucao('H', 'NO3'), CO2: solucao('H', 'CO3'), P4O10: solucao('H', 'PO4') }[A.chave];
     return R({ pa: alvo, pb: alvo, p: A.chave === 'CO2' ? 0.01 : 0.15, dT: A.chave === 'SO3' ? 60 : A.chave === 'P4O10' ? 80 : 3, nome: `${A.nome} + água → ácido`, eq: { SO2: 'SO₂ + H₂O → H₂SO₃', SO3: 'SO₃ + H₂O → H₂SO₄', NO2: '3 NO₂ + H₂O → 2 HNO₃ + NO', CO2: 'CO₂ + H₂O ⇌ H₂CO₃', P4O10: 'P₄O₁₀ + 6 H₂O → 4 H₃PO₄' }[A.chave], nota: A.chave === 'SO2' || A.chave === 'NO2' ? 'É assim que se forma a chuva ácida.' : '' });
   }
@@ -372,7 +373,8 @@ function regraSolucoes(A, B) {
   }
   if (A.base && B.acido) return null; // a regra inversa é achada pela vizinha
   // ácido + carbonato / sulfito → gás
-  if (A.acido && (B.an === 'CO3' || B.an === 'SO3')) { const gas = B.an === 'CO3' ? id('CO2') : id('SO2'); const c = B.cat, an = A.an; return R({ pa: soluvel(c, an) ? solucao(c, an) : sal(c, an), pb: gas, p: 0.2, dT: 1, nome: B.an === 'CO3' ? 'Ácido + carbonato: efervescência' : 'Ácido + sulfito', eq: B.an === 'CO3' ? 'CO₃²⁻ + 2 H⁺ → CO₂↑ + H₂O' : 'SO₃²⁻ + 2 H⁺ → SO₂↑ + H₂O', nota: 'As bolhas são de gás carbônico (é o "vulcão" de vinagre com bicarbonato).' }); }
+  // (o ácido carbônico não solta CO₂ de carbonatos: é fraco demais; só vira bicarbonato. E não reage com ele mesmo)
+  if (A.acido && A.an !== 'CO3' && B.cat !== 'H' && (B.an === 'CO3' || B.an === 'SO3')) { const gas = B.an === 'CO3' ? id('CO2') : id('SO2'); const c = B.cat, an = A.an; return R({ pa: soluvel(c, an) ? solucao(c, an) : sal(c, an), pb: gas, p: 0.2, dT: 1, nome: B.an === 'CO3' ? 'Ácido + carbonato: efervescência' : 'Ácido + sulfito', eq: B.an === 'CO3' ? 'CO₃²⁻ + 2 H⁺ → CO₂↑ + H₂O' : 'SO₃²⁻ + 2 H⁺ → SO₂↑ + H₂O', nota: 'As bolhas são de gás carbônico (é o "vulcão" de vinagre com bicarbonato).' }); }
   // ácido + hipoclorito (água sanitária) → cloro! (acidente doméstico comum)
   if (A.acido && B.an === 'ClO') return R({ pa: solucao(B.cat, A.an === 'CH3COO' ? 'CH3COO' : A.an), pb: id('Cl'), p: 0.2, dT: 2, nome: '⚠️ Água sanitária + ácido: gás cloro', eq: 'ClO⁻ + Cl⁻ + 2 H⁺ → Cl₂↑ + H₂O', nota: 'Misturar água sanitária com produtos ácidos (desincrustantes, vinagre) solta gás cloro, que é tóxico. Nunca misture produtos de limpeza.' });
   // base forte + sal de amônio → amônia
@@ -393,7 +395,7 @@ function regraSolucoes(A, B) {
 function regraAcidoSolido(A, S) {
   const an = S.an;
   // carbonatos e bicarbonato
-  if (A.ions && A.ions[1] === 'CO3') { const c = A.ions[0], ok = soluvel(c, an); return R({ pa: ok ? solucao(c, an) : sal(c, an), pb: id('CO2'), p: 0.08, dT: 1, poA: !ok, nome: `${A.nome} + ácido: efervescência`, eq: A.chave === 'NaHCO3' ? 'HCO₃⁻ + H⁺ → CO₂↑ + H₂O' : 'CO₃²⁻ + 2 H⁺ → CO₂↑ + H₂O', nota: 'Solta gás carbônico. É assim que o vinagre "come" o calcário e o mármore.' }); }
+  if (A.ions && A.ions[1] === 'CO3' && an !== 'CO3') { const c = A.ions[0], ok = soluvel(c, an); return R({ pa: ok ? solucao(c, an) : sal(c, an), pb: id('CO2'), p: A.chave === 'NaHCO3' ? 0.3 : 0.08, dT: 1, poA: !ok, nome: `${A.nome} + ácido: efervescência`, eq: A.chave === 'NaHCO3' ? 'HCO₃⁻ + H⁺ → CO₂↑ + H₂O' : 'CO₃²⁻ + 2 H⁺ → CO₂↑ + H₂O', nota: 'Solta gás carbônico. É assim que o vinagre "come" o calcário e o mármore.' }); }
   // óxidos e hidróxidos básicos → sal + água (ex.: ácido tirando ferrugem; antiácido no estômago)
   const c = A.oxidoBasico || A.hidroxido;
   if (c && CATIONS[c]) { const ok = soluvel(c, an); return R({ pa: ok ? solucao(c, an) : sal(c, an), pb: ok ? solucao(c, an) : AGUA, p: A.chave === 'Al2O3' ? 0.002 : 0.04, dT: 5, nome: `${A.nome} + ácido`, eq: A.hidroxido ? 'OH⁻ + H⁺ → H₂O' : 'O²⁻ + 2 H⁺ → H₂O', nota: A.chave === 'Fe2O3' ? 'É assim que produtos ácidos removem ferrugem.' : A.chave === 'Mg(OH)2' ? 'É como o leite de magnésia neutraliza a acidez do estômago.' : 'Óxido básico + ácido → sal + água.' }); }
@@ -454,7 +456,8 @@ function regraLigas(A, B) {
 function regraLab(A, B) {
   const O2 = id('O');
   // gás atravessando água com detergente ou sabão: espuma
-  if (B.surfactante && A.tipo !== 'solucao' && !A.surfactante && A.tipo !== 'especial' && estadoDe(A, 25) === 2 && A.chave !== 'vazio') {
+  // (gás + detergente não vira mais espuma por regra: a espuma nasce da física das bolhas em fisica.js)
+  if (false) {
     const h = A.simb === 'H';
     return R({ pa: id(h ? 'EspumaH2' : 'Espuma'), pb: B.id, p: 0.5, poA: true, extra: id(h ? 'EspumaH2' : 'Espuma'), nome: h ? 'Bolhas de hidrogênio na espuma' : 'Gás + detergente: espuma', eq: 'gás + água com detergente → bolhas', nota: h ? 'Cada bolha guarda hidrogênio: com uma faísca a espuma vira uma bola de fogo.' : 'O detergente forma uma película em volta de cada bolha de gás, que demora para estourar.' });
   }
