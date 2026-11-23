@@ -11,6 +11,7 @@
 registrar({ chave: 'AQUECEDOR', nome: 'Placa aquecedora', formula: '—', tipo: 'especial2', cores: ['#7a2a1a'], d: 8, cp: 0.5, lam: 60, inerte: true, fixo: 0, tempFixa: 1200 });
 registrar({ chave: 'RESFRIADOR', nome: 'Placa refrigerada', formula: '—', tipo: 'especial2', cores: ['#1a4a7a'], d: 8, cp: 0.5, lam: 60, inerte: true, fixo: 0, tempFixa: -120 });
 registrar({ chave: 'BATERIA', nome: 'Fonte de energia (eletrodo ligado)', formula: '—', tipo: 'especial2', cores: ['#d0a020'], d: 8, cp: 0.4, lam: 100, inerte: true, fixo: 0, condutor: true, bateria: true });
+registrar({ chave: 'BICO', nome: 'Bico de Bunsen (gás aceso)', formula: '—', tipo: 'especial2', cores: ['#3a4a6a'], d: 8, cp: 0.5, lam: 30, inerte: true, fixo: 0, bico: true });
 registrar({ chave: 'FAISCA', nome: 'Faísca', formula: '—', tipo: 'especial', cores: [null, null, '#fff4b0'], d: 0.0003, cp: 1, lam: 0.1, fixo: 3 });
 const FOGO = id('FOGO'), FUMACA = id('FUMACA'), FAISCA = id('FAISCA'), H2O = id('H2O'), PAREDE = id('Parede');
 
@@ -19,12 +20,15 @@ let mt, T, flg, vida, carga, varc, aux, capA, kA;
 // física fina (fisica.js): gás dissolvido no líquido (volumes de gás por volume de líquido, a 1 atm),
 // qual gás está dissolvido, volume de gás de cada bolha, estado da bolha e o objeto rígido a que a célula pertence
 let dis, disG, gv, bfl, corpo;
+let estPrev, lat, matPrev; // calor latente de fusão (motor.js)
+L.sondasPedidas = [];
 const PO = 1, TK = 2;
 function criarGrade(W, H) {
   L.W = W; L.H = H; L.N = W * H;
   mt = new Uint16Array(L.N); T = new Float32Array(L.N).fill(L.AMB); flg = new Uint8Array(L.N); vida = new Uint8Array(L.N); carga = new Uint8Array(L.N); varc = new Uint8Array(L.N); aux = new Uint16Array(L.N);
   capA = new Float32Array(L.N); kA = new Float32Array(L.N);
   dis = new Float32Array(L.N); disG = new Uint16Array(L.N); gv = new Float32Array(L.N); bfl = new Uint8Array(L.N); corpo = new Uint16Array(L.N);
+  estPrev = new Uint8Array(L.N); lat = new Float32Array(L.N); matPrev = new Uint16Array(L.N);
   for (let i = 0; i < L.N; i++) varc[i] = Math.random() * 255;
 }
 const rnd = Math.random;
@@ -38,6 +42,7 @@ function troca(i, j) {
   a = varc[i]; varc[i] = varc[j]; varc[j] = a; a = aux[i]; aux[i] = aux[j]; aux[j] = a;
   t = dis[i]; dis[i] = dis[j]; dis[j] = t; a = disG[i]; disG[i] = disG[j]; disG[j] = a;
   t = gv[i]; gv[i] = gv[j]; gv[j] = t; a = bfl[i]; bfl[i] = bfl[j]; bfl[j] = a; a = corpo[i]; corpo[i] = corpo[j]; corpo[j] = a;
+  a = estPrev[i]; estPrev[i] = estPrev[j]; estPrev[j] = a; a = lat[i]; lat[i] = lat[j]; lat[j] = a; a = matPrev[i]; matPrev[i] = matPrev[j]; matPrev[j] = a;
 }
 function limparCelula(i) { mt[i] = 0; flg[i] &= TK; vida[i] = 0; carga[i] = 0; aux[i] = 0; dis[i] = 0; disG[i] = 0; gv[i] = 0; bfl[i] = 0; corpo[i] = 0; }
 // pode a célula i entrar no lugar de j?
@@ -68,7 +73,7 @@ function passo() {
       atualizar(i, x, y, m);
     }
   }
-  calor(); eletricidade();
+  calor(); fusaoLatente(); eletricidade();
   if (typeof fisica === 'function') fisica();
 }
 function atualizar(i, x, y, m) {
@@ -76,15 +81,20 @@ function atualizar(i, x, y, m) {
   if (m === FOGO) return fogo(i, x, y);
   if (m === FUMACA) return fumaca(i, x, y);
   if (m === FAISCA) return faiscaVoa(i, x, y);
+  if (M.bico) return bico(i, x, y);
   if (M.tempFixa !== undefined) T[i] = M.tempFixa;
   // espuma: as bolhas estouram sozinhas
   if (M.efemero && (vida[i] > 0 ? (rnd() < 0.25 && vida[i]--, false) : rnd() < M.efemero)) { /* vida = proteção da película: mais detergente, espuma mais estável */ if (M.efemeroVira && rnd() < 0.2) { mt[i] = id(M.efemeroVira); flg[i] &= TK; } else limparCelula(i); return; }
   const t = T[i];
+  // materiais com o próprio oxidante (pólvora, pavio, cabeça de fósforo): queimam sem ar
+  if (M.autoComb && (vida[i] > 0 || (t >= M.autoComb.ign && rnd() < M.autoComb.v))) return queimaPropria(i, x, y, M);
   // decomposição pelo calor
   if (M.decomp && t >= M.decomp[0] && rnd() < 0.02) return decompor(i, x, y, M);
   if (M.chave === 'Amalgama' && t >= 357 && rnd() < 0.02) { const metal = aux[i] || id('Hg'); mt[i] = metal; flg[i] |= PO; espalhar(i, x, y, id('Hg'), t); evento('Mercúrio evaporando da amálgama: VAPOR TÓXICO'); return; }
   const s = estadoDe(M, t);
   if (M.tipo === 'solucao' && s === 2) return ferver(i, x, y, M, t);
+  // líquidos voláteis evaporam pela superfície (mais rápido quando quentes)
+  if (s === 1 && M.vapor >= 0 && y > 0 && mt[i - L.W] === 0 && rnd() < M.volatil * (1 + Math.max(0, t - 25) / 25)) { const j = i - L.W; mt[j] = M.vapor; T[j] = t; flg[j] &= TK; vida[j] = 0; carga[j] = 0; if (rnd() < 0.12) { limparCelula(i); return; } }
   if (M.decompGas && s === 2) { mt[i] = id(M.decompGas[0]); espalhar(i, x, y, id(M.decompGas[1]), t); return; }
   // teste de chama: sal ou metal muito quente solta chama colorida
   if (M.chama && t > 650 && s < 2 && rnd() < 0.04) { const j = vizinhoVazio(i, x, y, true); if (j >= 0) { mt[j] = FOGO; vida[j] = 12 + rnd() * 10; T[j] = t; aux[j] = corFogo(M.chama); } }
@@ -130,7 +140,7 @@ function aplicar(r, i, j, x, y) {
   if (typeof gasNoLiquido === 'function') { gasNoLiquido(i, x, y); if (pb !== undefined) gasNoLiquido(j, j % L.W, (j / L.W) | 0); }
   if (r.extra >= 0 && r.extra !== undefined) { if (!(typeof dissolverExtra === 'function' && dissolverExtra(i, x, y, r.extra))) espalhar(i, x, y, r.extra, T[i]); }
   if (r.gasB) { const g = id('OsO4'); if (g >= 0) espalhar(i, x, y, g, T[i]); }
-  if (r.explosao) explosao(x, y, r);
+  if (r.explosao && (r.explosaoChance == null || rnd() < r.explosaoChance)) explosao(x, y, r);
   if (r.faiscas && rnd() < 0.35) soltarFaisca(x + (rnd() < 0.5 ? -1 : 1), y - 1, (rnd() * 5 | 0) - 2, -2, 6 + rnd() * 14);
   const rc = canonico(r), n = (L.contagem.get(rc) || 0) + 1; L.contagem.set(rc, n); L.ultimaReacao = rc;
   if (n === 1) evento('Nova reação: ' + rc.nome, rc);
@@ -171,6 +181,8 @@ corFogo('#ff8a1a');
 function fogo(i, x, y) {
   if (vida[i] <= 1) { if (rnd() < 0.35) { mt[i] = FUMACA; vida[i] = 60 + rnd() * 80; } else limparCelula(i); return; }
   vida[i]--; T[i] = Math.max(T[i] * 0.985, 400 + vida[i] * 25);
+  // a chama esquenta o que ela toca (convecção e radiação)
+  for (const d of [-L.W, -1, 1, L.W]) { const n = i + d; if (n < 0 || n >= L.N) continue; const b = mt[n]; if (b && b !== FOGO && b !== FUMACA && b !== FAISCA && !MATS[b].inerte && MATS[b].tempFixa === undefined && T[n] < T[i]) { const B = MATS[b], cap = B.capacidade[Math.min(2, estadoDe(B, T[n]))] || 1; T[n] += Math.min((T[i] - T[n]) * 0.04, 5 / cap); } }
   // sobe tremulando
   const d = [0, 1, 2][(rnd() * 3) | 0], nx = x + DX[d], ny = y + DY[d];
   if (ny >= 0 && nx >= 0 && nx < L.W) { const j = ny * L.W + nx; if (mt[j] === 0) troca(i, j); }
@@ -236,14 +248,15 @@ function moverLiquido(i, x, y, M) {
 function moverGas(i, x, y, M) {
   const W = L.W, dm = densidade(i), leve = dm < AR_D;
   if (y === 0 && L.ventilacao && rnd() < 0.08) { limparCelula(i); return; } // escapa pela ventilação
-  let dy = rnd() < 0.55 ? (leve ? -1 : 1) : (rnd() < 0.5 ? -1 : 1); if (Math.abs(dm - AR_D) < 0.0002) dy = rnd() < 0.5 ? -1 : 1;
+  // gravidade x difusão: quanto mais pesado (ou leve) que o ar, mais ele tende a descer (ou subir), mas sempre se mistura um pouco
+  const lr = Math.log(Math.max(1e-4, dm) / AR_D), desce = 0.5 + 0.25 * Math.sign(lr) * Math.tanh(lr * lr / 3); let dy = rnd() < desce ? 1 : -1; // pouca diferença (gás de cozinha, CO₂): mistura bastante; muita (vapor de gasolina, hidrogênio): escorre ou sobe
   const dx = (rnd() * 3 | 0) - 1, nx = x + dx, ny = y + (rnd() < 0.7 ? dy : 0);
   if (nx < 0 || ny < 0 || nx >= W || ny >= L.H) return;
   const j = ny * W + nx, b = mt[j];
   if (b === 0) return troca(i, j);
   const B = MATS[b], sb = estadoDe(B, T[j]);
   if (sb >= 3) return troca(i, j);
-  if (sb === 2 && b !== mt[i]) { const db = densidade(j); if ((ny < y && dm < db) || (ny > y && dm > db)) return troca(i, j); }
+  if (sb === 2 && b !== mt[i]) { const db = densidade(j); if ((ny < y && dm < db) || (ny > y && dm > db) || rnd() < 0.25) return troca(i, j); }
 }
 function explosao(x, y, r) {
   L.explosoes++;
@@ -258,6 +271,85 @@ function explosao(x, y, r) {
   }
 }
 
+/* ---------- queima própria (oxidante embutido) ---------- */
+const R_AUTO = new Map();
+function queimaPropria(i, x, y, M) {
+  const a = M.autoComb;
+  for (const d of [-1, 1, -L.W, L.W, -L.W - 1, -L.W + 1]) { const n = i + d; if (n >= 0 && n < L.N && mt[n] && !MATS[mt[n]].inerte && MATS[mt[n]].tempFixa === undefined) T[n] = Math.max(T[n], a.viz); }
+  // cada pedaço queima por um tempinho (brasa), esquentando os vizinhos o tempo todo: é isso que faz a chama andar sem apagar
+  if (vida[i] === 0 && (a.dur || 1) > 1) { vida[i] = a.dur; T[i] = Math.max(T[i], a.viz); }
+  if (vida[i] > 1) { vida[i]--; T[i] = Math.max(T[i], a.viz); if (rnd() < 0.3) { const j = vizinhoVazio(i, x, y, true); if (j >= 0) { mt[j] = rnd() < 0.6 ? FOGO : FUMACA; vida[j] = mt[j] === FOGO ? 6 + rnd() * 8 : 50 + rnd() * 60; aux[j] = mt[j] === FOGO ? corFogo(a.fogo || '#ffb040') : 0; T[j] = 1100; } } return; }
+  vida[i] = 0;
+  const v = a.vira ? id(a.vira) : -1;
+  if (v > 0) { mt[i] = v; flg[i] |= PO; T[i] = Math.max(T[i], 700); } else limparCelula(i);
+  for (let k = 0; k < (a.fumaca || 0); k++) { const j = vizinhoVazio(i, x, y, true); if (j < 0) break; if (rnd() < 0.5) { mt[j] = FOGO; vida[j] = 10 + rnd() * 14; aux[j] = corFogo(a.fogo || '#ffb040'); T[j] = 1300; } else { mt[j] = FUMACA; vida[j] = 70 + rnd() * 90; T[j] = 400; } }
+  if (a.faiscas && rnd() < 0.45) soltarFaisca(x + (rnd() < 0.5 ? -1 : 1), y - 1, (rnd() * 5 | 0) - 2, -2, 6 + rnd() * 12);
+  let r = R_AUTO.get(M.id); if (!r) { r = { nome: `Queima: ${M.nome}`, eq: a.eq, nota: a.nota }; R_AUTO.set(M.id, r); }
+  const n = (L.contagem.get(r) || 0) + 1; L.contagem.set(r, n); if (n === 1) evento('Nova reação: ' + r.nome, r);
+}
+/* ---------- bico de Bunsen: chama azul de gás que esquenta o que estiver em cima ---------- */
+function bico(i, x, y) {
+  if (!temO2()) return;
+  for (let k = 1; k <= 5; k++) {
+    const yy = y - k; if (yy < 0) return;
+    const j = yy * L.W + x, b = mt[j];
+    if (b === 0) { if (rnd() < 0.35) { mt[j] = FOGO; vida[j] = 3 + k * 3 + rnd() * 5; aux[j] = corFogo('#5aa8ff'); T[j] = 1500; flg[j] &= TK; } continue; }
+    if (b === FOGO || b === FUMACA || b === FAISCA || MATS[b].bico) continue;
+    if (!MATS[b].inerte) { const B = MATS[b], cap = B.capacidade[Math.min(2, estadoDe(B, T[j]))] || 1; T[j] += Math.min(1500 - T[j], 16 / cap); } // fluxo de calor limitado: a chama não esquenta o vidro mais rápido do que a água leva embora
+    return;
+  }
+}
+/* ---------- chama de fósforo (ferramenta) ---------- */
+function chama(cx, cy, r) {
+  let n = 0;
+  noRaio(cx, cy, r, i => {
+    if (mt[i] === 0) { if (temO2() && rnd() < 0.45) { mt[i] = FOGO; vida[i] = 8 + rnd() * 12; aux[i] = corFogo('#ffb040'); T[i] = 900; } }
+    else if (mt[i] !== FOGO && mt[i] !== FUMACA && mt[i] !== FAISCA && !MATS[mt[i]].inerte && MATS[mt[i]].tempFixa === undefined) { T[i] += (850 - T[i]) * 0.12; n++; }
+  });
+  return n;
+}
+function colocarPalito(cx, cy) {
+  const mad = id('Madeira'), cab = id('CabecaFosforo');
+  for (let k = 0; k < 10; k++) { put(cx, cy + k, mad, false); put(cx + 1, cy + k, mad, false); }
+  for (const [dx, dy] of [[0, -1], [1, -1], [0, -2], [1, -2], [-1, -1], [2, -1]]) put(cx + dx, cy + dy, cab, false);
+}
+/* ---------- calor latente de fusão: derreter e congelar "gastam" calor (a temperatura para no ponto de fusão) ---------- */
+function calLatente(M, sobe, s0) {
+  const agua = M.chave === 'H2O' || M.comoAgua || M.tipo === 'solucao';
+  const MM = M.Mgas || M.M || 60;
+  const lf = agua ? 334 : 8.3 * ((M.pf ?? 0) + 273.15) / (M.M || MM);        // regra de Richards
+  const lv = agua ? 2257 : 88 * ((M.pe ?? 100) + 273.15) / MM;              // regra de Trouton
+  if (M.sublima) return Math.max(20, lf + lv);
+  const f = sobe ? s0 : s0 - 1;
+  return Math.max(20, f === 0 ? lf : lv);
+}
+function fronteira(M, sobe, s0) { if (M.sublima) return M.pe; const f = sobe ? s0 : s0 - 1; return f === 0 ? M.pf : M.pe; }
+// só derreter/congelar (e sublimar): ferver fica com fisica.js, que já tem o calor latente de vaporização
+function fusaoLatente() {
+  for (let i = 0; i < L.N; i++) {
+    const m = mt[i]; if (!m) continue;
+    const M = MATS[m];
+    if (M.fixo !== undefined || M.tempFixa !== undefined || M.pf == null || M.tipo === 'especial') { matPrev[i] = m; continue; }
+    const s = estadoDe(M, T[i]);
+    if (matPrev[i] !== m) { matPrev[i] = m; estPrev[i] = s; lat[i] = 0; continue; }
+    const s0 = estPrev[i], cp = M.cpv || 1;
+    if (s === s0) {
+      if (lat[i] === 0) continue;
+      const sobe = lat[i] > 0, tb = fronteira(M, sobe, s0); if (tb == null) { lat[i] = 0; continue; }
+      const Lx = calLatente(M, sobe, s0), dT = sobe ? tb - T[i] : T[i] - tb;
+      const f = Math.abs(lat[i]) - Math.max(0, dT) * cp / Lx;
+      if (f > 0) { lat[i] = sobe ? f : -f; T[i] = sobe ? tb - 0.01 : tb + 0.01; }
+      else { lat[i] = 0; T[i] = sobe ? tb + f * Lx / cp : tb - f * Lx / cp; }
+      continue;
+    }
+    const sobe = s > s0, tb = fronteira(M, sobe, s0);
+    if (tb == null || (!M.sublima && ((sobe && s0 >= 1) || (!sobe && s0 === 2)))) { estPrev[i] = s; lat[i] = 0; continue; }
+    const Lx = calLatente(M, sobe, s0), dT = sobe ? T[i] - tb : tb - T[i];
+    const f = (sobe ? Math.max(0, lat[i]) : Math.max(0, -lat[i])) + Math.max(0, dT) * cp / Lx;
+    if (f >= 1) { const sobra = (f - 1) * Lx / cp; T[i] = sobe ? tb + 0.01 + sobra : tb - 0.01 - sobra; lat[i] = 0; estPrev[i] = M.sublima ? (sobe ? 2 : 0) : s0 + (sobe ? 1 : -1); }
+    else { lat[i] = sobe ? f : -f; T[i] = sobe ? tb - 0.01 : tb + 0.01; }
+  }
+}
 /* ---------- calor ---------- */
 function calor() {
   const W = L.W, H = L.H, N = L.N, amb = L.AMB;
@@ -372,9 +464,10 @@ function ima(cx, cy, r) {
   return n;
 }
 function martelo(cx, cy, r) {
-  const res = { quebrou: new Set(), resistiu: new Set() };
-  noRaio(cx, cy, r, i => {
-    const m = mt[i]; if (!m) return; const M = MATS[m]; if (estadoDe(M, T[i]) !== 0 || flg[i] & PO || M.inerte || M.tempFixa !== undefined) return;
+  const res = { quebrou: new Set(), resistiu: new Set(), acendeu: false };
+  noRaio(cx, cy, r, (i, x, y) => {
+    const m = mt[i]; if (!m) return; const M = MATS[m];
+    if (M.chave === 'CabecaFosforo') { for (let d = 0; d < 8; d++) { const nx = x + DX[d], ny = y + DY[d]; if (nx < 0 || ny < 0 || nx >= L.W || ny >= L.H) continue; const k = mt[ny * L.W + nx]; if (k && MATS[k].chave === 'FosforoVermelho') { T[i] = Math.max(T[i], 450); res.acendeu = true; break; } } return; } if (estadoDe(M, T[i]) !== 0 || flg[i] & PO || M.inerte || M.tempFixa !== undefined) return;
     if (M.fragil || (M.mohs !== undefined && M.mohs !== null && M.mohs < 1.5 && !M.metal)) { flg[i] |= PO; res.quebrou.add(M.nome); }
     else res.resistiu.add(M.nome);
   });
@@ -453,7 +546,7 @@ const EXP = {
   ret(x0, y0, x1, y1, chave, o = {}) { const m = typeof chave === 'number' ? chave : id(chave); for (let y = Math.round(y0); y <= Math.round(y1); y++) for (let x = Math.round(x0); x <= Math.round(x1); x++) put(x, y, m, o.po, o.temp, o.chance); },
 };
 function put(x, y, m, po, temp, chance) { if (x < 0 || y < 0 || x >= L.W || y >= L.H || m < 0) return; if (chance && rnd() > chance) return; const i = y * L.W + x; if (mt[i] && (MATS[mt[i]].vidro || MATS[mt[i]].inerte) && !(MATS[m].vidro || MATS[m].inerte)) return; mt[i] = m; T[i] = temp ?? (MATS[m].tempFixa ?? L.AMB); flg[i] = (flg[i] & TK) | (po ? PO : 0); vida[i] = 0; carga[i] = 0; aux[i] = 0; dis[i] = 0; disG[i] = 0; gv[i] = 0; bfl[i] = 0; corpo[i] = 0; const Mp = MATS[m]; if (Mp.gasDis && estadoDe(Mp, T[i]) === 1) { disG[i] = id(Mp.gasDis[0]); dis[i] = Mp.gasDis[1]; } }
-function limparTudo() { mt.fill(0); T.fill(L.AMB); flg.fill(0); vida.fill(0); carga.fill(0); aux.fill(0); dis.fill(0); disG.fill(0); gv.fill(0); bfl.fill(0); corpo.fill(0); if (typeof limparFisica === 'function') limparFisica(); L.contagem.clear(); decompVistas.clear(); L.eventos = []; }
+function limparTudo() { mt.fill(0); T.fill(L.AMB); flg.fill(0); vida.fill(0); carga.fill(0); aux.fill(0); lat.fill(0); matPrev.fill(0); L.sondasPedidas = []; L.velReacao = 1; dis.fill(0); disG.fill(0); gv.fill(0); bfl.fill(0); corpo.fill(0); if (typeof limparFisica === 'function') limparFisica(); L.contagem.clear(); decompVistas.clear(); L.eventos = []; }
 const EXPERIMENTOS = [
   { n: '💧 Sódio na água', d: 'Metal alcalino reagindo com água: hidróxido de sódio e hidrogênio.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.6, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.45, H * 0.2, W * 0.55, H * 0.25, 'Na', { po: true, chance: 0.6 }); } },
   { n: '🔥 Potássio na água', d: 'Mais reativo que o sódio: o hidrogênio pega fogo com chama lilás.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.6, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.47, H * 0.2, W * 0.53, H * 0.24, 'K', { po: true, chance: 0.6 }); } },
@@ -489,4 +582,30 @@ const EXPERIMENTOS = [
   { n: '⚖️ Boia ou afunda?', d: 'Rolha (0,24 g/cm³), pipoca (0,06), gelo (0,92), milho (1,25), uva-passa (1,3) e ferro (7,9) na água (1,0). Cada um para onde o princípio de Arquimedes manda.', f: (W, H) => { const x0 = W * 0.15 | 0, w = W * 0.7 | 0; EXP.bequer(x0, H * 0.3 | 0, w, H * 0.65 | 0); EXP.ret(x0 + 1, H * 0.5, x0 + w - 1, H * 0.95 - 1, 'H2O'); const itens = [['Rolha', 2], ['Pipoca', 2], ['H2O', 4, -40], ['Milho', 2], ['UvaPassa', 2], ['Fe', 2]]; itens.forEach(([k, r, t], n) => EXP.objeto(x0 + 6 + (n + 0.5) * (w - 12) / itens.length, H * 0.62, r, k, t)); } },
   { n: '🍿 Pipoca na panela', d: 'Grãos de milho numa panela quente. A água dentro de cada grão vira vapor e, perto de 180 °C, a casca rompe: o amido infla e o grão pula.', f: (W, H) => { EXP.ret(0, H - 3, W - 1, H - 1, 'AQUECEDOR'); EXP.bequer(W * 0.3 | 0, H * 0.55 | 0, W * 0.4 | 0, H - 4 - (H * 0.55 | 0), 'Cadinho'); for (let k = 0; k < 6; k++) EXP.objeto(W * 0.33 + k * W * 0.06, H - 7, 2, 'Milho'); } },
   { n: '🫒 Detergente tirando gordura', d: 'Óleo boiando na água; o detergente cai por cima e quebra o óleo em gotinhas (emulsão).', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.75, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.3 + 1, H * 0.66, W * 0.7 - 1, H * 0.75 - 1, 'Oleo'); EXP.ret(W * 0.44, H * 0.2, W * 0.56, H * 0.32, 'Detergente'); } },
+  { n: '⛽ Vapor de gasolina', d: 'Um pote de gasolina aberto. O vapor (mais pesado que o ar) escorre pelo chão. Uma faísca longe do pote acende o vapor, e o fogo volta até a gasolina.', f: (W, H) => { EXP.bequer(W * 0.05 | 0, H - 7, W * 0.16 | 0, 6, 'Cadinho'); EXP.ret(W * 0.05 + 1, H - 5, W * 0.21 - 1, H - 2, 'Gasolina'); L.sondasPedidas = [[W * 0.13 | 0, H - 3], [W * 0.8 | 0, H - 2]]; },
+    r: { objetivo: 'Ver que quem pega fogo é o vapor, não o líquido, e que o vapor viaja.', passos: [{ t: 'Espere o vapor escorrer pelo chão (uns segundos)', ok: S => S.conta('vap:Gasolina') > 25 }, { t: 'Solte ✨ faíscas no chão a um palmo do pote, onde o vapor chegou (passe o mouse para ver)', ok: S => S.reacao('Combustão: Vapor de gasolina') }, { t: 'O fogo volta pelo rastro de vapor e fica queimando em cima do pote', ok: S => S.vezes('Combustão: Vapor de gasolina') > 20 }], conclusao: 'A gasolina tem ponto de fulgor de −43 °C: em quase qualquer temperatura há vapor suficiente sobre ela para queimar. O vapor é ~3,5 vezes mais pesado que o ar, escorre e se espalha; uma faísca a metros de distância acende a nuvem e a chama volta até a fonte. Por isso é proibido fumar e usar celular perto de bombas de combustível.' } },
+  { n: '🔥 Riscar um fósforo', d: 'Palito de fósforo encostado na lixa da caixa (fósforo vermelho). O atrito acende a cabeça, que acende a madeira. Do lado, uma folha de papel.', f: (W, H) => { const x = W * 0.4 | 0, y = H * 0.55 | 0; EXP.ret(0, H - 2, W - 1, H - 1, 'Cadinho'); colocarPalito(x, y); EXP.ret(x + 3, y - 3, x + 8, y, 'FosforoVermelho'); EXP.ret(W * 0.62, H * 0.5, W * 0.64, H - 3, 'Papel'); L.sondasPedidas = [[x, y + 3]]; },
+    r: { objetivo: 'Entender como o fósforo de segurança acende e a ordem de ignição dos materiais.', passos: [{ t: 'Escolha 🔨 Martelo e bata na cabeça vermelha encostada na lixa (atrito)', ok: S => S.reacao('Queima: Cabeça de fósforo') }, { t: 'A chama da cabeça acende o palito de madeira', ok: S => S.reacao('Combustão: Madeira') }, { t: 'Leve fogo ao papel: com 🔥 Chama, ou encoste o palito', ok: S => S.reacao('Combustão: Papel') }], conclusao: 'O atrito na lixa vira um pouco de fósforo vermelho em fósforo branco, que pega fogo sozinho no ar. Esse calor decompõe o clorato de potássio da cabeça, que solta oxigênio e queima enxofre e sulfeto de antimônio a mais de 1000 °C. A madeira precisa de ~300 °C para acender; o papel, só ~233 °C.' } },
+  { n: '🧨 Rastilho de pólvora', d: 'Um pavio leva o fogo até uma trilha de pólvora negra, que termina num montinho. A pólvora tem o próprio oxidante e queima muito rápido.', f: (W, H) => { EXP.ret(0, H - 2, W - 1, H - 1, 'Cadinho'); EXP.ret(W * 0.08, H - 3, W * 0.3, H - 3, 'Pavio'); EXP.ret(W * 0.3, H - 3, W * 0.7, H - 3, 'Polvora', { po: true }); EXP.ret(W * 0.7, H - 7, W * 0.8, H - 3, 'Polvora', { po: true }); L.sondasPedidas = [[W * 0.75 | 0, H - 5]]; },
+    r: { objetivo: 'Comparar uma queima lenta (pavio) com uma muito rápida (pólvora) e ver que a pólvora não precisa de ar.', passos: [{ t: 'Acenda a ponta esquerda do pavio com 🔥 Chama', ok: S => S.reacao('Queima: Pavio') }, { t: 'O fogo anda devagar pelo pavio até a pólvora', ok: S => S.reacao('Queima: Pólvora negra') }, { t: 'Repita em ⚙ Vácuo (atmosfera lá em cima): a pólvora queima mesmo sem ar', ok: S => S.reacao('Queima: Pólvora negra') && ATMOSFERA === 'vacuo' }], conclusao: 'O salitre (nitrato de potássio) da pólvora fornece o oxigênio, então ela queima sem ar e numa velocidade enorme, transformando um sólido em muito gás quente. Ao ar livre isso é só um clarão com fumaça; dentro de um tubo fechado a pressão sobe até estourar. Por isso fogos de artifício só devem ser manuseados por profissionais.' } },
+  { n: '🏠 Vazamento de gás de cozinha', d: 'Uma cozinha fechada com gás vazando (mais pesado que o ar, ele fica embaixo). Um interruptor de luz solta uma faísca…', f: (W, H) => { const x0 = W * 0.1 | 0, x1 = W * 0.9 | 0, y0 = H * 0.25 | 0; for (let x = x0; x <= x1; x++) { put(x, y0, PAREDE, false); put(x, H - 1, PAREDE, false); } for (let y = y0; y < H; y++) { put(x0, y, PAREDE, false); put(x1, y, PAREDE, false); } for (let y = H * 0.6 | 0; y < H - 1; y++) for (let x = x0 + 1; x < x1; x++) if (rnd() < 0.35) put(x, y, id('GLP')); },
+    r: { objetivo: 'Ver por que vazamento de gás é tão perigoso e o que fazer.', passos: [{ t: 'Observe o gás ficar perto do chão (passe o mouse para ver)', ok: S => S.t > 3 }, { t: 'Solte uma ✨ faísca dentro da cozinha (como um interruptor)', ok: S => S.reacao('Combustão: Gás de cozinha') }], conclusao: 'Misturado com o ar na proporção certa (~2% a 10%), o gás de cozinha queima tão rápido que vira uma explosão. Se sentir cheiro de gás: não acenda luz nem fósforo, não ligue aparelhos, abra portas e janelas, feche o registro e saia; ligue para os bombeiros (193) de fora de casa.' } },
+  { n: '🌡️ Curva de aquecimento da água', d: 'Gelo a −20 °C num béquer sobre o bico de Bunsen. A sonda mostra a temperatura: ela para em 0 °C enquanto o gelo derrete e em 100 °C enquanto a água ferve.', f: (W, H) => { const x0 = W * 0.38 | 0, w = W * 0.24 | 0; EXP.ret(x0 + 3, H - 2, x0 + w - 3, H - 2, 'BICO'); EXP.bequer(x0, H * 0.5 | 0, w, (H - 6) - (H * 0.5 | 0), 'Vidro'); EXP.ret(x0 + 1, H * 0.72, x0 + w - 1, H - 7, 'H2O', { temp: -20 }); L.sondasPedidas = [[x0 + (w >> 1), H - 10]]; },
+    r: { objetivo: 'Ver o calor latente: derreter e ferver gastam energia sem mudar a temperatura.', passos: [{ t: 'A temperatura sobe até 0 °C e PARA enquanto o gelo derrete', ok: S => S.estado('H2O', 1) > 60 }, { t: 'Com tudo líquido, sobe até 100 °C e para de novo: está fervendo', ok: S => S.maxT('H2O') >= 99.9 || S.estado('H2O', 2) > 8 }], conclusao: 'Derreter 1 g de gelo gasta 334 J e ferver 1 g de água gasta 2257 J, sem mudar a temperatura: essa energia vai para soltar as moléculas umas das outras. É por isso que o gráfico tem "patamares" em 0 °C e 100 °C, e que um copo com gelo fica a 0 °C até o gelo acabar.' } },
+  { n: '📄 Temperatura de ignição', d: 'Papel, madeira e carvão no mesmo prato aquecido pelo bico de Bunsen. Qual acende primeiro?', f: (W, H) => { EXP.ret(W * 0.2, H - 2, W * 0.8, H - 2, 'BICO'); EXP.ret(W * 0.2, H - 6, W * 0.8, H - 6, 'Cadinho'); EXP.ret(W * 0.25, H - 10, W * 0.33, H - 7, 'Papel'); EXP.ret(W * 0.46, H - 10, W * 0.54, H - 7, 'Madeira'); EXP.ret(W * 0.67, H - 10, W * 0.75, H - 7, 'C', { po: true }); L.sondasPedidas = [[W * 0.29 | 0, H - 7], [W * 0.5 | 0, H - 7], [W * 0.71 | 0, H - 7]]; },
+    r: { objetivo: 'Comparar temperaturas de ignição medindo com as sondas.', passos: [{ t: 'O papel acende primeiro (~233 °C)', ok: S => S.reacao('Combustão: Papel') }, { t: 'Depois a madeira (~300 °C)', ok: S => S.reacao('Combustão: Madeira') }, { t: 'O carvão é o último', ok: S => S.reacao('Combustão: Carbono') }], conclusao: 'Cada material precisa de uma temperatura mínima para os gases que ele solta reagirem com o oxigênio sozinhos. O papel é fino e acende a ~233 °C; a madeira, a ~300 °C; o carvão quase não solta gases e precisa estar bem quente. Repare nas sondas: a curva de cada um sobe de repente quando ele pega fogo.' } },
 ];
+const ROTEIROS = {
+  'Sódio na água': { objetivo: 'Ver a reação de um metal alcalino com a água.', passos: [{ t: 'O sódio cai na água e reage', ok: S => S.reacao('Sódio + água') }, { t: 'Meça o pH da água depois com 🧫 Fita de pH', ok: S => S.reacao('dissolvendo') }], conclusao: 'O sódio arranca o hidrogênio da água: forma hidróxido de sódio (a água fica básica, pH ~13) e solta gás hidrogênio, com muito calor.' },
+  'Termite': { objetivo: 'Ver um metal "roubar" o oxigênio de outro.', passos: [{ t: 'Use ✨ Faísca ou 🔥 Chama na mistura', ok: S => S.reacao('Termite') }, { t: 'Sobra ferro derretido (acima de 1538 °C)', ok: S => S.maxT('Fe') > 1538 }], conclusao: 'O alumínio tem mais afinidade pelo oxigênio que o ferro. A troca libera tanta energia que o ferro sai líquido, a ~2500 °C: é como se soldam trilhos de trem.' },
+  'Eletrólise da água': { objetivo: 'Quebrar a água com eletricidade.', passos: [{ t: 'Ligue a corrente: toque com ✨ nas fontes amarelas', ok: S => S.reacao('Eletrólise') }, { t: 'Leve uma faísca às bolhas: o hidrogênio estoura', ok: S => S.reacao('hidrogênio') || S.reacao('Hidrogênio') }], conclusao: 'A corrente separa a água em hidrogênio e oxigênio. A água pura quase não conduz: o sulfato de sódio dissolvido é que leva a corrente.' },
+  'Pasta de dente de elefante': { objetivo: 'Ver um catalisador e uma reação que solta gás e calor.', passos: [{ t: 'O iodeto cai e começa a quebrar o peróxido', ok: S => S.reacao('Decomposição catalisada') }, { t: 'A espuma sobe e transborda', ok: S => S.conta('Espuma') > 40 }], conclusao: 'O iodeto acelera 2 H₂O₂ → 2 H₂O + O₂ sem ser gasto. O oxigênio e o vapor ficam presos no detergente e viram uma montanha de espuma quente.' },
+  'Indicador de repolho roxo': { objetivo: 'Usar um indicador natural para comparar o pH.', passos: [{ t: 'O extrato cai nas cinco soluções e muda de cor', ok: S => S.reacoes('repolho') >= 5 }], conclusao: 'As antocianinas mudam de forma com o pH: vermelho no ácido forte, rosa no fraco, roxo no neutro, verde e amarelo na base.' },
+  'Titulação com fenolftaleína': { objetivo: 'Ver o ponto final de uma neutralização.', passos: [{ t: 'A base com fenolftaleína fica rosa', ok: S => S.reacao('fenolftaleína') }, { t: 'O ácido neutraliza e a cor some', ok: S => S.reacao('Neutralização') }], conclusao: 'No laboratório se mede exatamente quanto ácido foi preciso para a cor sumir e se calcula a concentração da base.' },
+  'Leite + vinagre': { objetivo: 'Ver uma proteína coagular com ácido.', passos: [{ t: 'O vinagre cai e o leite coalha', ok: S => S.reacao('coalhou') }], conclusao: 'Abaixo de pH ~4,6 a caseína deixa de se dissolver: é o princípio da ricota e dos queijos frescos.' },
+  'Palha de aço + bateria': { objetivo: 'Ver o efeito Joule: a corrente esquenta fios finos.', passos: [{ t: 'Ligue as fontes com ✨ (toque nas barras amarelas)', ok: S => S.maxT('PalhaAco') > 200 }, { t: 'A palha brilha e pega fogo', ok: S => S.reacao('Combustão: Palha') }], conclusao: 'Fios finos têm resistência alta: a corrente os aquece até ~400 °C, quando o ferro queima no ar soltando faíscas.' },
+  'Bolhas de hidrogênio': { objetivo: 'Guardar hidrogênio em bolhas e acender.', passos: [{ t: 'O zinco reage com o ácido e solta hidrogênio', ok: S => S.reacao('Zinco + ácido') }, { t: 'O hidrogênio vira espuma no detergente', ok: S => S.conta('EspumaH2') > 10 }, { t: 'Encoste uma ✨ faísca na espuma', ok: S => S.reacao('Combustão: Espuma') }], conclusao: 'Zn + 2 H⁺ → Zn²⁺ + H₂. As bolhas guardam o gás, que queima numa bola de fogo e vira só água.' },
+  'Água no óleo quente': { objetivo: 'Entender por que nunca se joga água em óleo quente.', passos: [{ t: 'A água cai no óleo a 260 °C', ok: S => S.reacao('Água em óleo') }], conclusao: 'A água afunda, vira vapor de uma vez (1700 vezes mais volume) e joga o óleo para cima, onde ele pega fogo. Em óleo pegando fogo: desligue e abafe com uma tampa.' },
+  'Hidrogênio + oxigênio': { objetivo: 'Ver uma mistura explosiva.', passos: [{ t: 'Solte uma ✨ faísca dentro do frasco', ok: S => S.reacao('Explosão de hidrogênio') || S.reacao('Combustão: Hidrogênio') }], conclusao: '2 H₂ + O₂ → 2 H₂O. A mistura só precisa de uma faísca; o produto é só vapor de água.' },
+};
+for (const e of EXPERIMENTOS) { if (e.r) continue; const k = Object.keys(ROTEIROS).find(k => e.n.includes(k)); e.r = k ? ROTEIROS[k] : { objetivo: e.d, passos: [{ t: 'Observe a reação acontecer', ok: S => S.nReacoes() > 0 }], conclusao: 'Abra 📓 Caderno para ver as equações e as explicações de cada reação que aconteceu.' }; }

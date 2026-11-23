@@ -75,6 +75,29 @@
   .toast b{display:block}
   .toast code{color:#a5f3fc;font-size:12px}
   @keyframes entra{from{transform:translateX(30px);opacity:0}}
+  .painel{position:absolute;z-index:6;background:rgba(10,15,24,.93);border:1px solid #2b3d5c;border-radius:12px;font-size:12px;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+  #rot{left:8px;top:8px;width:min(290px,62%);max-height:62%;overflow:auto;padding:8px 10px;display:none}
+  #rot h4{margin:0 0 4px;font-size:13px;display:flex;gap:6px;align-items:center}
+  #rot h4 span{flex:1}
+  #rot .passo{display:flex;gap:6px;padding:3px 0;line-height:1.35}
+  #rot .passo.atual{color:#fde68a;font-weight:700}
+  #rot .passo.ok{color:#86efac}
+  #rot .concl{margin-top:6px;padding:6px 8px;border-radius:8px;background:#0f2a1f;border:1px solid #166534;line-height:1.45}
+  #rot.mini .corpo{display:none}
+  #inst{left:8px;bottom:40px;width:250px;padding:6px 8px;display:none}
+  #inst canvas{width:234px;height:90px;display:block;background:#070b12;border-radius:6px;margin-top:4px}
+  #inst .linha{display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #inst i{width:9px;height:9px;border-radius:50%;display:inline-block;flex:0 0 auto}
+  .xs{border:0;background:transparent;color:#93a3bd;cursor:pointer;font-size:14px;padding:0 2px}
+  .abas-m{display:flex;gap:6px;margin:4px 0 10px}
+  .abas-m button{border:1px solid var(--linha);background:var(--painel2);border-radius:9px;padding:6px 12px;font-weight:700}
+  .abas-m button.on{background:#134e4a;border-color:var(--ac);color:#ccfbf1}
+  .bc-linha{display:grid;grid-template-columns:1fr 90px 46px auto;gap:6px;align-items:center;margin:4px 0}
+  .bc-linha input[type=number],.bc-linha input[list],.bc input,.bc select{height:34px;border-radius:8px;border:1px solid var(--linha);background:#0d131d;padding:0 8px;width:100%}
+  .bc{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .bc label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--fraco)}
+  .tag-r{display:inline-block;font-size:10.5px;border-radius:999px;padding:1px 7px;background:#1e3a5f;color:#bfdbfe;margin-left:4px}
+  @media (max-width:900px), (orientation:portrait){ #rot{width:min(250px,70%);font-size:11.5px} #inst{width:200px;bottom:36px} #inst canvas{width:184px;height:70px} .bc{grid-template-columns:1fr} .bc-linha{grid-template-columns:1fr 70px 34px auto} }
   #btn-amostra{position:absolute;left:10px;top:10px;z-index:5;display:none}
   /* janelas */
   .modal{position:fixed;inset:0;background:rgba(3,6,10,.72);z-index:40;display:none;align-items:flex-start;justify-content:center;padding:18px;overflow:auto}
@@ -138,7 +161,7 @@
     <span class="esp"></span>
     <button class="b pri" id="b-exp">🧪 Experimentos</button>
     <button class="b" id="b-comb">🔀 Combinar</button>
-    <button class="b" id="b-reac">📜 Reações <b id="n-reac">0</b></button>
+    <button class="b" id="b-reac">📓 Caderno <b id="n-reac">0</b></button>
     <button class="b" id="b-fontes">📚 Fontes</button>
     <button class="b perigo" id="b-limpar">🧹 Limpar</button>
     <button class="b" id="b-sair" title="Sair">✕</button>
@@ -162,6 +185,8 @@
       <div id="area">
         <canvas id="cv"></canvas>
         <button class="b pri" id="btn-amostra">🥤 Amostra</button>
+        <div class="painel" id="rot"></div>
+        <div class="painel" id="inst"></div>
         <div id="toasts"></div>
         <div id="status"></div>
       </div>
@@ -171,9 +196,9 @@
 <div class="modal" id="modal"><div class="jan" id="jan"></div></div>
 
 <script src="pubchem.js?v=1"></script>
-<script src="dados.js?v=5"></script>
-<script src="quimica.js?v=11"></script>
-<script src="motor.js?v=13"></script>
+<script src="dados.js?v=8"></script>
+<script src="quimica.js?v=12"></script>
+<script src="motor.js?v=19"></script>
 <script src="fisica.js?v=3"></script>
 <script src="microscopio.js?v=3"></script>
 <script src="alimentos.js?v=2"></script>
@@ -188,8 +213,8 @@ const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arca
 /* ---------- estado da interface ---------- */
 const UI = { aba: 'tabela', sel: id('H2O'), ferr: 'desenhar', busca: '', amostra: { mapa: new Map(), total: 0 }, hover: null, pressionado: false, ultimoXY: null };
 const FERRAMENTAS = [
-  ['desenhar', '✏️', 'Colocar'], ['apagar', '🧽', 'Apagar'], ['aquecer', '🔥', 'Aquecer'], ['resfriar', '❄️', 'Resfriar'], ['temp', '🌡️', 'Definir °C'], ['faisca', '⚡', 'Faísca / corrente'],
-  ['ima', '🧲', 'Ímã'], ['martelo', '🔨', 'Martelo'], ['ph', '🧫', 'Fita de pH'], ['inspecionar', '🔍', 'Inspecionar'], ['micro', '🔬', 'Microscópio'], ['mexer', '🥄', 'Mexer / sovar'], ['geiger', '☢️', 'Geiger'], ['coletar', '🥤', 'Coletar amostra'],
+  ['desenhar', '✏️', 'Colocar'], ['apagar', '🧽', 'Apagar'], ['aquecer', '♨️', 'Aquecer'], ['resfriar', '❄️', 'Resfriar'], ['temp', '🌡️', 'Definir °C'], ['faisca', '⚡', 'Faísca / corrente'], ['chama', '🔥', 'Chama (fósforo)'],
+  ['ima', '🧲', 'Ímã'], ['martelo', '🔨', 'Martelo'], ['ph', '🧫', 'Fita de pH'], ['inspecionar', '🔍', 'Inspecionar'], ['micro', '🔬', 'Microscópio'], ['sonda', '📈', 'Sonda'], ['mexer', '🥄', 'Mexer / sovar'], ['geiger', '☢️', 'Geiger'], ['coletar', '🥤', 'Coletar amostra'],
 ];
 const ABAS = [['tabela', 'Tabela'], ['gas', 'Gases'], ['liquido', 'Líquidos'], ['solido', 'Sólidos'], ['compostos', 'Compostos'], ['solucoes', 'Soluções'], ['casa', 'Casa'], ['alimentos', 'Alimentos'], ['lab', 'Laboratório']];
 $('#ferr').innerHTML = FERRAMENTAS.map(([k, ic, n]) => `<button data-f="${k}" class="${k === UI.ferr ? 'on' : ''}" title="${n}">${ic} <span>${n}</span></button>`).join('');
@@ -197,7 +222,7 @@ $('#ferr').addEventListener('click', e => { const b = e.target.closest('[data-f]
 function escolherFerr(f) { UI.ferr = f; [...$('#ferr').children].forEach(x => x.classList.toggle('on', x.dataset.f === f)); dicaFerr(); }
 function dicaFerr() {
   const d = { desenhar: 'Arraste na caixa para colocar o material escolhido.', apagar: 'Arraste para apagar.', aquecer: 'Segure em cima de algo para esquentar (até 6000 °C).', resfriar: 'Segure para esfriar (até −273 °C).', temp: 'Define a temperatura exata do que estiver no pincel (escolha o valor em "Temperatura ao colocar").',
-    faisca: 'Solta faíscas que voam, caem e acendem o que tocam (gases, álcool, pó de metal, espuma de hidrogênio). Em metais, grafite e soluções liga a corrente: eletrólise, e fios finos como a palha de aço esquentam até pegar fogo. Segure para um borrifo contínuo.', ima: 'Atrai ferro, cobalto, níquel e magnetita em pó (só abaixo da temperatura de Curie).', martelo: 'Bate: materiais quebradiços viram pó; metais dúcteis só amassam.',
+    faisca: 'Solta faíscas que voam, caem e acendem o que tocam (gases, álcool, pó de metal, espuma de hidrogênio). Em metais, grafite e soluções liga a corrente: eletrólise, e fios finos como a palha de aço esquentam até pegar fogo. Segure para um borrifo contínuo.', chama: 'Uma chama de fósforo (~800 °C) onde você segurar: acende papel, madeira, pavio, álcool, gasolina, gás… Precisa de oxigênio.', sonda: 'Toque para colocar uma sonda (até 3): ela mede a temperatura ali e desenha o gráfico ao longo do tempo no painel de instrumentos.', ima: 'Atrai ferro, cobalto, níquel e magnetita em pó (só abaixo da temperatura de Curie).', martelo: 'Bate: materiais quebradiços viram pó; metais dúcteis só amassam.',
     mexer: 'Arraste sobre ingredientes para misturar, sovar (forma o glúten) ou bater (claras em neve). Óleo e água só se misturam com um emulsificante, como a gema.',
     micro: 'Passe o microscópio (ou toque) em qualquer ponto: mostra as moléculas e explica o que está acontecendo ali, com os números da simulação.',
     ph: 'Toque numa solução para medir o pH.', inspecionar: 'Toque para ver tudo sobre aquela célula.', geiger: 'Conta a radioatividade perto do ponteiro.', coletar: 'Arraste para recolher uma amostra no copo. Depois aperte "🥤 Amostra" para analisar ou simular no organismo.' }[UI.ferr];
@@ -213,6 +238,7 @@ function botaoMat(m) { const s = estadoDe(m, L.AMB); return `<button class="mt $
 const COLOCAVEIS = () => MATS.filter(m => m.id > 2 && (m.tipo === 'elemento' || m.tipo === 'composto') && m.chave !== 'Parede');
 function categoria(m) {
   const k = m.chave;
+  if (m.combustivel) return 'Combustíveis e pirotecnia';
   if (m.casa) return 'Produtos de casa';
   if (m.reagente) return 'Reagentes de laboratório';
   if (m.liga) return 'Ligas metálicas';
@@ -240,7 +266,7 @@ function renderPaleta() {
     h += `<p class="muted" style="font-size:11.5px">Mude a temperatura ambiente lá em cima e veja os elementos trocarem de aba.</p>`;
   } else if (UI.aba === 'compostos') {
     const grupos = {}; for (const m of COLOCAVEIS().filter(m => m.tipo === 'composto' && !m.inerte && !m.vidro)) (grupos[categoria(m)] = grupos[categoria(m)] || []).push(m);
-    for (const g of ['Produtos de casa', 'Reagentes de laboratório', 'Óxidos', 'Sais', 'Hidróxidos (bases)', 'Ácidos concentrados', 'Gases', 'Ligas metálicas', 'Outros']) if (grupos[g]) h += `<div class="sec">${g} (${grupos[g].length})</div><div class="lista">${grupos[g].map(botaoMat).join('')}</div>`;
+    for (const g of ['Combustíveis e pirotecnia', 'Produtos de casa', 'Reagentes de laboratório', 'Óxidos', 'Sais', 'Hidróxidos (bases)', 'Ácidos concentrados', 'Gases', 'Ligas metálicas', 'Outros']) if (grupos[g]) h += `<div class="sec">${g} (${grupos[g].length})</div><div class="lista">${grupos[g].map(botaoMat).join('')}</div>`;
   } else if (UI.aba === 'solucoes') {
     const sol = [mat('H2O'), ...SOLUCOES_PRONTAS.map(i => MATS[i])];
     const ac = sol.filter(m => m.acido), ba = sol.filter(m => m.base), sa = sol.filter(m => !m.acido && !m.base);
@@ -249,7 +275,8 @@ function renderPaleta() {
   } else if (UI.aba === 'casa') {
     const item = (m, nome) => { if (m == null || m < 0 || !MATS[m]) return ''; const M = MATS[m], st = estadoDe(M, L.AMB); return `<button class="mt ${m === UI.sel ? 'sel' : ''}" data-m="${m}" title="${esc(M.nome)}"><span class="sw" style="background:${cssRgb(M.rgb[st])}"></span><span><b>${esc(nome)}</b><small>${esc(fmt(M.formula).slice(0, 18))}</small></span></button>`; };
     const sec = (t, l) => `<div class="sec">${t}</div><div class="lista">${l.map(([m, n]) => item(m, n)).join('')}</div>`;
-    h = sec('🧽 Limpeza', [[id('Detergente'), 'Detergente'], [id('Sabao'), 'Sabão'], [solucao('Na', 'ClO'), 'Água sanitária'], [id('AguaOxigenada'), 'Água oxigenada'], [solucao('NH4', 'OH'), 'Amoníaco'], [id('Etanol'), 'Álcool'], [id('Acetona'), 'Removedor de esmalte'], [id('NaOH'), 'Soda cáustica'], [id('PalhaAco'), 'Palha de aço']])
+    h = sec('🔥 Fogo e combustíveis', [[id('Palito'), 'Palito de fósforo'], [id('FosforoVermelho'), 'Lixa (fósforo vermelho)'], [id('Gasolina'), 'Gasolina'], [id('GLP'), 'Gás de cozinha'], [id('Etanol'), 'Álcool'], [id('Madeira'), 'Madeira'], [id('Papel'), 'Papel'], [id('C'), 'Carvão'], [id('Parafina'), 'Vela'], [id('Pavio'), 'Pavio (estopim)'], [id('Polvora'), 'Pólvora negra']])
+      + sec('🧽 Limpeza', [[id('Detergente'), 'Detergente'], [id('Sabao'), 'Sabão'], [solucao('Na', 'ClO'), 'Água sanitária'], [id('AguaOxigenada'), 'Água oxigenada'], [solucao('NH4', 'OH'), 'Amoníaco'], [id('Etanol'), 'Álcool'], [id('Acetona'), 'Removedor de esmalte'], [id('NaOH'), 'Soda cáustica'], [id('PalhaAco'), 'Palha de aço']])
       + sec('🍳 Cozinha', [[id('AguaTorneira'), 'Água da torneira'], [id('NaCl'), 'Sal de cozinha'], [id('Sacarose'), 'Açúcar'], [id('NaHCO3'), 'Bicarbonato'], [solucao('H', 'CH3COO'), 'Vinagre'], [solucao('H', 'C6H5O7'), 'Suco de limão'], [id('Oleo'), 'Óleo de cozinha'], [id('Leite'), 'Leite'], [id('Amido'), 'Polvilho (amido)'], [solucao('H', 'CO3'), 'Água com gás'], [id('RepolhoRoxo'), 'Suco de repolho roxo']])
       + sec('🫧 Bolhas, boiar e afundar', [[id('Refrigerante'), 'Refrigerante'], [solucao('H', 'CO3'), 'Água com gás'], [id('Milho'), 'Milho de pipoca'], [id('UvaPassa'), 'Uva-passa'], [id('Mentos'), 'Bala Mentos'], [id('Rolha'), 'Rolha de cortiça'], [id('Pipoca'), 'Pipoca']])
       + sec('🏠 Outros', [[id('Parafina'), 'Vela'], [id('CaCO3'), 'Giz / calcário'], [id('CaO'), 'Cal virgem'], [id('Mg(OH)2'), 'Leite de magnésia'], [id('CO2'), 'Gelo seco'], [id('Fe'), 'Prego (ferro)'], [id('Cu'), 'Fio de cobre'], [id('Al'), 'Papel alumínio'], [id('Glicerina'), 'Glicerina']]);
@@ -394,8 +421,153 @@ function combinar() {
   $('#cb-por').onclick = () => { fechar(); limparTudo(); const W = L.W, H = L.H; EXP.bequer(W * 0.2 | 0, H * 0.35 | 0, W * 0.6 | 0, H * 0.6 | 0, 'Vidro'); EXP.ret(W * 0.22, H * 0.7, W * 0.48, H * 0.95 - 1, A.id, { po: A.po || estadoDe(A, t) === 0, temp: t }); if (B.id) EXP.ret(W * 0.52, H * 0.7, W * 0.78, H * 0.95 - 1, B.id, { po: B.po || estadoDe(B, t) === 0, temp: t }); toast('Montado: ' + A.nome + (B.id ? ' + ' + B.nome : ' no ar'), 'Use 🔥 Aquecer ou ⚡ Faísca se a reação precisar.'); };
 }
 /* ---------- experimentos, reações, fontes ---------- */
-$('#b-exp').onclick = () => abrir(`<h2 class="titulo">🧪 Experimentos prontos</h2><p class="muted">Monta a cena na caixa. Depois é com você: aqueça, dê faísca, colete amostras…</p><div class="exps">${EXPERIMENTOS.map((e, k) => `<button class="exp" data-e="${k}"><b>${e.n}</b><small>${e.d}</small></button>`).join('')}</div>`) || document.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { fechar(); limparTudo(); L.velReacao = 1; EXPERIMENTOS[+b.dataset.e].f(L.W, L.H); toast(EXPERIMENTOS[+b.dataset.e].n, EXPERIMENTOS[+b.dataset.e].d, 7000); if (L.pausado) alternarPausa(); });
-$('#b-reac').onclick = abrirReacoes;
+$('#b-exp').onclick = () => abrirExperimentos('prontos');
+$('#b-reac').onclick = abrirCaderno;
+function abrirExperimentos(aba) {
+  // experimentos acrescentados por outros módulos (alimentos, física) ganham um roteiro simples
+  for (const e of EXPERIMENTOS) if (!e.r) e.r = { objetivo: e.d, passos: [{ t: 'Observe o que acontece (as mudanças aparecem como avisos)', ok: S => S.nReacoes() > 0 || S.t > 20 }], conclusao: 'Abra o 📓 Caderno para rever o que aconteceu, com as equações e explicações.' };
+  abrir(`<h2 class="titulo">🧪 Experimentos</h2><div class="abas-m"><button data-ab="prontos" class="${aba === 'prontos' ? 'on' : ''}">📋 Com roteiro (${EXPERIMENTOS.length})</button><button data-ab="bancada" class="${aba === 'bancada' ? 'on' : ''}">🔧 Montar o seu</button></div><div id="exp-corpo"></div>`);
+  document.querySelectorAll('[data-ab]').forEach(b => b.onclick = () => abrirExperimentos(b.dataset.ab));
+  const c = $('#exp-corpo');
+  if (aba === 'prontos') {
+    c.innerHTML = `<p class="muted">Cada experimento monta a cena e mostra um roteiro com objetivo, passos que se marcam sozinhos quando acontecem e a explicação no final. Tudo vai para o 📓 Caderno.</p><div class="exps">${EXPERIMENTOS.map((e, k) => `<button class="exp" data-e="${k}"><b>${e.n}<span class="tag-r">${e.r.passos.length} passo${e.r.passos.length > 1 ? 's' : ''}</span></b><small>${e.d}</small></button>`).join('')}</div>`;
+    c.querySelectorAll('[data-e]').forEach(b => b.onclick = () => { fechar(); iniciarExperimento(EXPERIMENTOS[+b.dataset.e]); });
+  } else bancada(c);
+}
+function iniciarExperimento(e) {
+  limparTudo(); limparSondas(); L.velReacao = 1; e.f(L.W, L.H);
+  UI.rot = { e, feitos: new Set(), fim: false, mini: false, t0: L.tick };
+  anotar(`▶ Experimento: ${e.n}`); toast(e.n, e.r.objetivo, 6000); renderRoteiro();
+  if (L.pausado) alternarPausa();
+}
+/* ---------- bancada: monte o seu experimento com quantidades ---------- */
+function bancada(c) {
+  const linha = k => `<div class="bc-linha"><input list="dl-mats" id="bc-m${k}" placeholder="${k === 0 ? 'ex.: Água destilada' : k === 1 ? 'ex.: Sódio (Na)' : '(opcional)'}"><input type="number" id="bc-q${k}" min="0" step="any" value="${k === 0 ? 30 : k === 1 ? 1 : ''}"><span id="bc-u${k}" class="muted">—</span><label style="flex-direction:row;align-items:center;gap:4px;font-size:11.5px"><input type="checkbox" id="bc-c${k}" ${k > 0 ? 'checked' : ''}> cai de cima</label></div>`;
+  c.innerHTML = `<datalist id="dl-mats">${nomesLista()}</datalist><p class="muted">Escolha o recipiente, o aquecimento e até 3 substâncias com a quantidade. 1 célula da caixa = 0,05 mL.</p>
+    <div class="bc"><label>Recipiente<select id="bc-rec"><option value="bequer">Béquer de vidro</option><option value="tubo">Tubo de ensaio</option><option value="frasco">Frasco fechado (com tampa)</option><option value="cadinho">Cadinho de cerâmica</option><option value="prato">Prato (sem paredes)</option></select></label>
+    <label>Aquecimento<select id="bc-calor"><option value="nenhum">Nenhum</option><option value="bico">Bico de Bunsen (chama de gás)</option><option value="placa">Placa aquecedora (1200 °C)</option><option value="frio">Placa refrigerada (−120 °C)</option></select></label>
+    <label>Temperatura inicial (°C)<input type="number" id="bc-t" value="${L.AMB}"></label><label>Sonda<select id="bc-sonda"><option value="1">Colocar sonda no meio</option><option value="0">Sem sonda</option></select></label></div>
+    <div style="margin-top:8px"><b style="font-size:13px">Substâncias</b> <span class="muted" style="font-size:12px">(as sem "cai de cima" ficam em camadas, a 1ª no fundo)</span>${[0, 1, 2].map(linha).join('')}</div>
+    <div id="bc-prev" class="cartao" style="margin-top:8px"></div>
+    <div style="display:flex;gap:8px;margin-top:10px"><button class="b pri" id="bc-ir">🔧 Montar na caixa</button></div>`;
+  const atualizar = () => {
+    const ms = [0, 1, 2].map(k => acharMat($('#bc-m' + k).value));
+    ms.forEach((m, k) => { $('#bc-u' + k).textContent = m ? (estadoDe(m, +$('#bc-t').value) === 0 ? 'g' : 'mL') : '—'; });
+    const ok = ms.filter(Boolean); let h = '<h4>Previsão (regras do simulador)</h4>';
+    const prev = [];
+    for (let a = 0; a < ok.length; a++) { for (let b = a + 1; b < ok.length; b++) { const r = regra(ok[a].id, ok[b].id) || regra(ok[b].id, ok[a].id); if (r) prev.push([ok[a].nome + ' + ' + ok[b].nome, r]); } const ra = regra(ok[a].id, 0); if (ra && ra.p > 0) prev.push([ok[a].nome + ' + ar', ra]); }
+    h += prev.length ? prev.map(([n, r]) => `<div class="reacao" style="${r.p > 0 ? '' : 'border-color:#475569'}"><b>${esc(n)}:</b> ${esc(r.nome)}<br><code>${esc(r.eq || '')}</code>${condicoes(r)}</div>`).join('') : '<p class="muted">Sem reação prevista entre estas substâncias (ou ainda faltam escolher).</p>';
+    $('#bc-prev').innerHTML = h;
+  };
+  c.querySelectorAll('input,select').forEach(el => el.addEventListener('input', atualizar)); atualizar();
+  $('#bc-ir').onclick = () => {
+    const regs = [0, 1, 2].map(k => ({ m: acharMat($('#bc-m' + k).value), q: +$('#bc-q' + k).value || 0, cai: $('#bc-c' + k).checked })).filter(r => r.m && r.q > 0);
+    if (!regs.length) { toast('Escolha pelo menos uma substância', 'Use a lista que aparece ao digitar.'); return; }
+    const info = montarBancada({ rec: $('#bc-rec').value, calor: $('#bc-calor').value, t: +$('#bc-t').value, sonda: $('#bc-sonda').value === '1', regs });
+    fechar();
+    UI.rot = { e: { n: '🔧 Meu experimento', d: '', r: { objetivo: regs.map(r => `${n1(r.q, 2)} ${estadoDe(r.m, info.t) === 0 ? 'g' : 'mL'} de ${r.m.nome}`).join(' + '), passos: [{ t: 'Observe (aqueça, use faísca ou chama se precisar)', ok: S => S.nReacoes() > 0 }], conclusao: 'Abra o 📓 Caderno para ver as equações e as medidas anotadas.' } }, feitos: new Set(), fim: false, mini: false, t0: L.tick };
+    anotar('🔧 Montado: ' + UI.rot.e.r.objetivo + (info.cortou ? ' (quantidade reduzida para caber na caixa)' : ''));
+    renderRoteiro(); if (L.pausado) alternarPausa();
+    if (info.cortou) toast('Quantidade reduzida', 'Não cabia tudo na caixa: usei o máximo possível.');
+  };
+}
+function montarBancada(cfg) {
+  limparTudo(); limparSondas();
+  const W = L.W, H = L.H;
+  const tipos = { bequer: { w: Math.min(W * 0.42 | 0, 46), h: H * 0.6 | 0, mat: 'Vidro' }, tubo: { w: 8, h: H * 0.65 | 0, mat: 'Vidro' }, frasco: { w: Math.min(W * 0.42 | 0, 46), h: H * 0.6 | 0, mat: 'Vidro', tampa: true }, cadinho: { w: Math.min(W * 0.32 | 0, 32), h: H * 0.32 | 0, mat: 'Cadinho' }, prato: { w: W * 0.6 | 0, h: 0, mat: 'Cadinho' } };
+  const c = tipos[cfg.rec] || tipos.bequer;
+  const fundo = cfg.calor === 'nenhum' ? H - 1 : H - 6, x0 = (W - c.w) >> 1;
+  if (cfg.calor === 'bico') EXP.ret(x0 + 2, H - 2, x0 + c.w - 2, H - 2, 'BICO');
+  if (cfg.calor === 'placa' || cfg.calor === 'frio') EXP.ret(x0 - 2, fundo + 1, x0 + c.w + 2, H - 1, cfg.calor === 'placa' ? 'AQUECEDOR' : 'RESFRIADOR');
+  if (c.h) EXP.bequer(x0, fundo - c.h, c.w, c.h, c.mat); else EXP.ret(x0, fundo, x0 + c.w, fundo, c.mat);
+  if (c.tampa) EXP.ret(x0, fundo - c.h, x0 + c.w, fundo - c.h, 'Vidro');
+  const wi = c.h ? c.w - 1 : c.w + 1, xi = c.h ? x0 + 1 : x0;
+  const capac = c.h ? wi * (c.h - 1) : wi * (H * 0.4 | 0);
+  const celDe = r => { const st = estadoDe(r.m, cfg.t); return Math.max(1, Math.round(st === 0 ? r.q / r.m.dens[0] / ML_CELULA : r.q / ML_CELULA)); };
+  let total = cfg.regs.reduce((a, r) => a + celDe(r), 0), k = 1, cortou = false;
+  if (total > capac * 0.95) { k = capac * 0.95 / total; cortou = true; }
+  let y = (c.h ? fundo - 1 : fundo - 1), yCai = fundo - c.h - 3;
+  const encher = (r, n, yIni, sobe, larg, xIni) => { let feitas = 0, yy = yIni; while (feitas < n && yy >= 0 && yy < H) { const fila = Math.min(larg, n - feitas), xa = xIni + ((larg - fila) >> 1); for (let x = xa; x < xa + fila; x++) put(x, yy, r.m.id, estadoDe(r.m, cfg.t) === 0 && (r.m.po || !r.m.metal), cfg.t); feitas += fila; yy += sobe ? -1 : 1; } return yy; };
+  for (const r of cfg.regs.filter(r => !r.cai)) y = encher(r, Math.round(celDe(r) * k), y, true, wi, xi);
+  for (const r of cfg.regs.filter(r => r.cai)) { const n = Math.round(celDe(r) * k), larg = Math.max(2, Math.min(wi - 2, Math.ceil(Math.sqrt(n * 2)))); const linhas = Math.ceil(n / larg); yCai = encher(r, n, Math.max(0, yCai - linhas + 1), false, larg, xi + ((wi - larg) >> 1)) - linhas - 2; }
+  if (cfg.sonda) L.sondasPedidas = [[x0 + (c.w >> 1), fundo - 2]];
+  return { cortou, t: cfg.t };
+}
+/* ---------- roteiro guiado ---------- */
+const STATS = { cnt: new Map(), est: new Map(), maxT: new Map() };
+function calcularStats() {
+  STATS.cnt.clear(); STATS.est.clear(); STATS.maxT.clear();
+  for (let i = 0; i < L.N; i++) { const m = mt[i]; if (!m) continue; STATS.cnt.set(m, (STATS.cnt.get(m) || 0) + 1); const M = MATS[m], st = estadoDe(M, T[i]); const k = m * 8 + st; STATS.est.set(k, (STATS.est.get(k) || 0) + 1); if (T[i] > (STATS.maxT.get(m) ?? -999)) STATS.maxT.set(m, T[i]); }
+}
+const S = {
+  get t() { return (L.tick - (UI.rot ? UI.rot.t0 : 0)) / 60; },
+  reacao: sub => [...L.contagem.keys()].some(r => r.nome.includes(sub)),
+  reacoes: sub => [...L.contagem.keys()].filter(r => r.nome.includes(sub)).length,
+  vezes: sub => [...L.contagem.entries()].reduce((a, [r, n]) => a + (r.nome.includes(sub) ? n : 0), 0),
+  nReacoes: () => L.contagem.size,
+  conta: k => STATS.cnt.get(id(k)) || 0,
+  estado: (k, st) => STATS.est.get(id(k) * 8 + st) || 0,
+  maxT: k => STATS.maxT.get(id(k)) ?? -999,
+};
+function renderRoteiro() {
+  const p = $('#rot'), R = UI.rot; if (!R) { p.style.display = 'none'; return; }
+  const ps = R.e.r.passos, atual = ps.findIndex((_, k) => !R.feitos.has(k));
+  p.style.display = 'block'; p.classList.toggle('mini', R.mini);
+  p.innerHTML = `<h4><span>📋 ${esc(R.e.n)}</span><button class="xs" id="rot-min" title="Recolher">${R.mini ? '▸' : '▾'}</button><button class="xs" id="rot-x" title="Fechar">✕</button></h4><div class="corpo"><div class="muted" style="margin-bottom:4px"><b>Objetivo:</b> ${esc(R.e.r.objetivo)}</div>${ps.map((q, k) => `<div class="passo ${R.feitos.has(k) ? 'ok' : k === atual ? 'atual' : ''}">${R.feitos.has(k) ? '✅' : k === atual ? '👉' : '⬜'} <span>${esc(q.t)}</span></div>`).join('')}${R.fim ? `<div class="concl"><b>🔬 O que aconteceu</b><br>${esc(R.e.r.conclusao)}</div>` : ''}<div class="muted" style="margin-top:4px">⏱ ${n1(S.t, 1)} s</div></div>`;
+  $('#rot-min').onclick = () => { R.mini = !R.mini; renderRoteiro(); };
+  $('#rot-x').onclick = () => { UI.rot = null; renderRoteiro(); };
+}
+function checarRoteiro() {
+  const R = UI.rot; if (!R || R.fim) return;
+  let mudou = false;
+  R.e.r.passos.forEach((q, k) => { if (!R.feitos.has(k)) { let ok = false; try { ok = q.ok(S); } catch (e) {} if (ok) { R.feitos.add(k); mudou = true; anotar(`✅ Passo: ${q.t}`); toast('✅ ' + q.t, '', 3500); som('nova'); } } });
+  if (R.feitos.size === R.e.r.passos.length) { R.fim = true; mudou = true; anotar(`🔬 Conclusão (${R.e.n}): ${R.e.r.conclusao}`); }
+  if (mudou || L.tick % 30 === 0) renderRoteiro();
+}
+/* ---------- caderno de laboratório ---------- */
+UI.caderno = [];
+function anotar(txt) { UI.caderno.push({ t: L.tick / 60, txt }); if (UI.caderno.length > 300) UI.caderno.shift(); }
+function abrirCaderno() {
+  const l = [...L.contagem.entries()];
+  const linhas = UI.caderno.map(a => `<tr><td class="muted" style="white-space:nowrap">${n1(a.t, 1)} s</td><td>${esc(a.txt)}</td></tr>`).join('');
+  abrir(`<h2 class="titulo">📓 Caderno de laboratório</h2><div style="display:flex;gap:8px;margin-bottom:8px"><button class="b" id="cad-copiar">📋 Copiar</button><button class="b" id="cad-limpar">🧹 Limpar anotações</button></div>
+    <div class="cartao"><h4>Anotações (${UI.caderno.length})</h4>${UI.caderno.length ? `<table>${linhas}</table>` : '<p class="muted">Nada anotado ainda. Experimentos, passos, reações novas e sondas aparecem aqui sozinhos.</p>'}</div>
+    <div class="cartao" style="margin-top:10px"><h4>Reações que aconteceram (${l.length})</h4>${l.length ? l.map(([r, n]) => `<div class="reacao"><b>${esc(r.nome)}</b> <span class="muted">× ${n}</span><br><code>${esc(r.eq || '')}</code>${r.dH ? ` <span class="muted">ΔH ≈ ${r.dH} kJ/mol</span>` : ''}${r.nota ? `<div class="muted" style="font-size:12px">${esc(r.nota)}</div>` : ''}</div>`).join('') : '<p class="muted">Nenhuma ainda.</p>'}</div>`);
+  $('#cad-copiar').onclick = () => { const txt = UI.caderno.map(a => `[${n1(a.t, 1)} s] ${a.txt}`).join('\n') + '\n\nReações:\n' + l.map(([r, n]) => `- ${r.nome} (×${n}): ${r.eq || ''}`).join('\n'); try { navigator.clipboard.writeText(txt); toast('Caderno copiado', ''); } catch (e) {} };
+  $('#cad-limpar').onclick = () => { UI.caderno = []; abrirCaderno(); };
+}
+/* ---------- sondas e instrumentos ---------- */
+UI.sondas = [];
+const CORES_SONDA = ['#f87171', '#60a5fa', '#facc15'];
+function adicionarSonda(x, y) {
+  if (UI.sondas.length >= 3) UI.sondas.shift();
+  const cor = CORES_SONDA.find(c => !UI.sondas.some(s => s.cor === c)) || CORES_SONDA[0];
+  UI.sondas.push({ x, y, cor, hist: [] });
+  const c = celula(x, y); anotar(`📈 Sonda em (${x}, ${y}): ${c && c.m ? MATS[c.m].nome : 'ar'} a ${n1(c ? c.t : 0, 1)} °C`);
+  desenharInstrumentos(true);
+}
+function limparSondas() { UI.sondas = []; desenharInstrumentos(true); }
+let ultAmostra = 0;
+function amostrarSondas() {
+  if (L.tick - ultAmostra < 6) return; ultAmostra = L.tick;
+  for (const s of UI.sondas) { const c = celula(s.x, s.y); s.hist.push([L.tick / 60, c ? c.t : 0]); if (s.hist.length > 600) s.hist.shift(); }
+}
+function desenharInstrumentos(forcar) {
+  const p = $('#inst');
+  if (!UI.sondas.length) { p.style.display = 'none'; return; }
+  if (p.style.display !== 'block' || forcar) { p.style.display = 'block'; p.innerHTML = '<div class="linha"><b style="flex:1">📈 Instrumentos</b><button class="xs" id="inst-x" title="Tirar sondas">✕</button></div><div id="inst-l"></div><canvas id="inst-cv" width="468" height="180"></canvas>'; $('#inst-x').onclick = limparSondas; }
+  $('#inst-l').innerHTML = UI.sondas.map((s, k) => { const c = celula(s.x, s.y), M = c && c.m ? MATS[c.m] : null, st = M ? estadoDe(M, c.t) : 2, ph = M ? phDe(M) : null; return `<div class="linha"><i style="background:${s.cor}"></i><b>${n1(c ? c.t : 0, 1)} °C</b><span class="muted">${M ? esc(nomeNoEstado(M, st)) + ' · ' + NOME_ESTADO[st] : 'ar'}${ph !== null ? ' · pH ' + n1(ph, 1) : ''}</span></div>`; }).join('');
+  const g = $('#inst-cv').getContext('2d'), Wc = 468, Hc = 180;
+  g.clearRect(0, 0, Wc, Hc);
+  let tmin = Infinity, tmax = -Infinity, t0 = Infinity, t1 = -Infinity;
+  for (const s of UI.sondas) for (const [t, v] of s.hist) { tmin = Math.min(tmin, v); tmax = Math.max(tmax, v); t0 = Math.min(t0, t); t1 = Math.max(t1, t); }
+  if (!isFinite(tmin)) return;
+  if (tmax - tmin < 10) { tmax += 5; tmin -= 5; } const pad = (tmax - tmin) * 0.1; tmax += pad; tmin -= pad; if (t1 - t0 < 1) t1 = t0 + 1;
+  g.strokeStyle = 'rgba(255,255,255,.08)'; g.lineWidth = 1; g.font = '20px Inter, sans-serif'; g.fillStyle = '#93a3bd';
+  for (const ref of [0, 100]) if (ref > tmin && ref < tmax) { const yy = Hc - (ref - tmin) / (tmax - tmin) * Hc; g.beginPath(); g.moveTo(0, yy); g.lineTo(Wc, yy); g.stroke(); g.fillText(ref + ' °C', 4, yy - 3); }
+  g.fillText(Math.round(tmax) + ' °C', Wc - 110, 20); g.fillText(Math.round(tmin) + ' °C', Wc - 110, Hc - 6); g.fillText(n1(t1 - t0, 0) + ' s', 4, Hc - 6);
+  for (const s of UI.sondas) { g.strokeStyle = s.cor; g.lineWidth = 3; g.beginPath(); s.hist.forEach(([t, v], k) => { const xx = (t - t0) / (t1 - t0) * Wc, yy = Hc - (v - tmin) / (tmax - tmin) * Hc; k ? g.lineTo(xx, yy) : g.moveTo(xx, yy); }); g.stroke(); }
+}
 function abrirReacoes() {
   const l = [...L.contagem.entries()];
   abrir(`<h2 class="titulo">📜 Reações que aconteceram na caixa (${l.length})</h2>${l.length ? l.map(([r, n]) => `<div class="reacao"><b>${esc(r.nome)}</b> <span class="muted">× ${n}</span><br><code>${esc(r.eq || '')}</code>${r.dH ? ` <span class="muted">ΔH ≈ ${r.dH} kJ/mol</span>` : ''}${r.nota ? `<div class="muted" style="font-size:12px">${esc(r.nota)}</div>` : ''}</div>`).join('') : '<p class="muted">Nenhuma ainda. Coloque substâncias encostadas e veja o que acontece.</p>'}`);
@@ -426,7 +598,7 @@ function toast(titulo, txt, ms = 4500, r) {
 }
 let evVistos = 0;
 function verEventos() {
-  while (evVistos < L.eventos.length) { const e = L.eventos[evVistos++]; if (e.r) toast('🧪 ' + e.r.nome, `<code>${esc(e.r.eq || '')}</code>`, 6000, e.r); else toast('⚠️ ' + e.txt, ''); som('nova'); }
+  while (evVistos < L.eventos.length) { const e = L.eventos[evVistos++]; if (e.r) { toast('🧪 ' + e.r.nome, `<code>${esc(e.r.eq || '')}</code>`, 6000, e.r); anotar(`🧪 ${e.r.nome}: ${e.r.eq || ''}`); } else { toast('⚠️ ' + e.txt, ''); anotar('⚠️ ' + e.txt); } som('nova'); }
   if (evVistos > L.eventos.length) evVistos = L.eventos.length;
   $('#n-reac').textContent = L.contagem.size;
 }
@@ -458,7 +630,9 @@ function usarFerramenta(clique) {
   const [x, y] = UI.ultimoXY, r = +$('#tam').value - 1;
   const temp = $('#temp-col').value === 'custom' ? +$('#temp-v').value : undefined;
   switch (UI.ferr) {
-    case 'desenhar': pincel(x, y, r, UI.sel, { forma: $('#forma').value, substituir: $('#subst').checked, temp, corpo: UI.corpoAtual }); break;
+    case 'desenhar': if (MATS[UI.sel].molde) { if (clique) { colocarPalito(x, y); toast('🔥 Palito de fósforo', 'Encoste a cabeça vermelha na lixa (fósforo vermelho) e bata com o 🔨 Martelo, ou use a 🔥 Chama.'); } break; } pincel(x, y, r, UI.sel, { forma: $('#forma').value, substituir: $('#subst').checked, temp, corpo: UI.corpoAtual }); break;
+    case 'chama': chama(x, y, Math.max(1, Math.min(3, r))); break;
+    case 'sonda': if (clique) adicionarSonda(x, y); break;
     case 'apagar': apagar(x, y, r); break;
     case 'aquecer': aquecer(x, y, r, 12 * L.vel); break;
     case 'resfriar': aquecer(x, y, r, -12 * L.vel); break;
@@ -473,6 +647,7 @@ function usarFerramenta(clique) {
 }
 function mostrarMartelo() {
   const r = marteloRes; marteloRes = null; if (!r) return;
+  if (r.acendeu) { toast('🔥 O atrito acendeu a cabeça do fósforo!', 'A lixa tem fósforo vermelho: o atrito vira um pouquinho dele em fósforo branco, que pega fogo sozinho.', 6000); anotar('🔥 Fósforo riscado na lixa (atrito)'); }
   const q = [...r.quebrou], s = [...r.resistiu];
   if (q.length || s.length) toast('🔨 Martelada', `${q.length ? 'Quebrou (frágil): ' + q.join(', ') + '. ' : ''}${s.length ? 'Resistiu (dúctil ou duro): ' + s.join(', ') + '.' : ''}`, 6000);
 }
@@ -498,6 +673,7 @@ function statusHover() {
       if (UI.ferr === 'geiger') { const g = geiger(UI.hover[0], UI.hover[1], 20); h += `<span>☢️ ${g ? g * 7 + ' contagens/s' : 'fundo natural'}</span>`; if (g && Math.random() < Math.min(0.9, g / 60)) som('geiger'); }
     }
   }
+  h = `<span>⏱ ${n1(L.tick / 60, 1)} s</span>` + h;
   if (medida) h += `<span>${medida}</span>`;
   if (statusExtra && !UI.hover) h += `<span class="muted">${esc(statusExtra)}</span>`;
   st.innerHTML = h;
@@ -565,7 +741,7 @@ function som(t) {
 }
 
 /* ---------- laço ---------- */
-let ultimo = performance.now(), acc = 0, explosoesVistas = 0, tremor = 0;
+let ultimo = performance.now(), acc = 0, explosoesVistas = 0, tremor = 0, quadros = 0;
 function quadro(agora) {
   requestAnimationFrame(quadro);
   const dt = Math.min(0.1, (agora - ultimo) / 1000); ultimo = agora;
@@ -573,9 +749,13 @@ function quadro(agora) {
     acc += dt * 60 * L.vel; let n = 0;
     while (acc >= 1 && n < 6) { passo(); acc -= 1; n++; }
     if (n >= 6) acc = 0;
-    if (UI.pressionado && ['aquecer', 'resfriar', 'ima', 'faisca', 'temp'].includes(UI.ferr)) usarFerramenta(false);
+    if (UI.pressionado && ['aquecer', 'resfriar', 'ima', 'faisca', 'temp', 'chama'].includes(UI.ferr)) usarFerramenta(false);
   }
-  if (L.explosoes > explosoesVistas) { explosoesVistas = L.explosoes; tremor = 6; som('boom'); }
+  if (L.explosoes > explosoesVistas) { explosoesVistas = L.explosoes; tremor = 6; som('boom'); anotar('💥 Explosão'); }
+  if (L.sondasPedidas && L.sondasPedidas.length) { const ped = L.sondasPedidas; L.sondasPedidas = []; for (const [sx, sy] of ped) adicionarSonda(sx, sy); }
+  amostrarSondas(); quadros++;
+  if (quadros % 15 === 0) { calcularStats(); checarRoteiro(); }
+  if (quadros % 6 === 0) desenharInstrumentos(false);
   const g = desenharGrade(ctx);
   ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
   if (tremor > 0) { cv.style.transform = `translate(${(Math.random() - 0.5) * tremor}px,${(Math.random() - 0.5) * tremor}px)`; tremor = Math.max(0, tremor - 0.5); if (!tremor) cv.style.transform = ''; }
@@ -584,7 +764,8 @@ function quadro(agora) {
   if (UI.ferr === 'micro') atualizarMicro(); else if (micro.style.display !== 'none') micro.style.display = 'none';
   // contorno do pincel
   if (UI.hover) { const r = +$('#tam').value - 1; ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1 / Math.max(1, PX / 2); ctx.beginPath(); ctx.arc(UI.hover[0] + 0.5, UI.hover[1] + 0.5, UI.ferr === 'ima' ? 14 + r * 2 : UI.ferr === 'geiger' ? 20 : r + 0.5, 0, Math.PI * 2); ctx.stroke(); }
-  if (L.tick % 4 === 0) { statusHover(); verEventos(); $('#b-agit').classList.toggle('on', !!L.agitador); if (+$('#amb').value !== Math.round(L.AMB)) { $('#amb').value = L.AMB; $('#amb-v').textContent = Math.round(L.AMB) + ' °C'; } }
+  for (const sd of UI.sondas) { ctx.strokeStyle = sd.cor; ctx.lineWidth = 1; ctx.strokeRect(sd.x - 1.5, sd.y - 1.5, 4, 4); }
+  if (quadros % 4 === 0) { statusHover(); verEventos(); $('#b-agit').classList.toggle('on', !!L.agitador); if (+$('#amb').value !== Math.round(L.AMB)) { $('#amb').value = L.AMB; $('#amb-v').textContent = Math.round(L.AMB) + ' °C'; } }
 }
 montarCaixa(); renderPaleta(); renderFichaMini(); dicaFerr();
 // cena inicial: um béquer com água e um pouco de sódio ao lado, para convidar a experimentar
@@ -593,10 +774,10 @@ toast('Bem-vindo ao laboratório!', 'Escolha um elemento na tabela, arraste na c
 requestAnimationFrame(quadro);
 avisar('iniciado');
 // ganchos para testes automáticos
-window.__lab = { L, MATS, id, regra, passo, pincel, celula, avaliarAmostra, solucao, limparTudo, EXPERIMENTOS, CORPOS, FIS, cenaDe, explicarMicro, get grade() { return { mt, T, flg, dis, disG, gv, bfl, corpo }; } };
+window.__lab = { L, MATS, id, regra, passo, pincel, celula, avaliarAmostra, solucao, limparTudo, EXPERIMENTOS, UI, S, calcularStats, checarRoteiro, iniciarExperimento, montarBancada, adicionarSonda, CORPOS, FIS, cenaDe, explicarMicro, get grade() { return { mt, T, flg, dis, disG, gv, bfl, corpo }; } };
 </script>
 <style>#micro{position:fixed;right:12px;bottom:12px;z-index:40;width:324px;max-width:calc(100vw - 24px);background:rgba(14,18,26,.96);border:1px solid #2a3550;border-radius:14px;padding:10px 12px;box-shadow:0 10px 30px rgba(0,0,0,.5);font:13px/1.45 Inter,system-ui,sans-serif;color:#e6ebf5}#micro .mc-top{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}#micro .mc-top .muted{font-size:11px;color:#8a93a8}#micro canvas{width:100%;height:auto;border-radius:9px;display:block;background:#0b0e14}#micro .mc-txt{margin-top:7px;max-height:170px;overflow:auto;font-size:12.5px}@media (max-width:700px){#micro{left:8px;right:8px;bottom:8px;width:auto}#micro canvas{max-height:140px}#micro .mc-txt{max-height:110px}}</style>
-<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.4.0</div>
-<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.4.0";</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.5.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.5.0";</script>
 </body>
 </html>

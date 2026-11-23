@@ -373,14 +373,14 @@ const CAPA_LAB = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.22.0";
+window.ARCADIA_VERSAO = "1.23.0";
 
 window.JOGOS = [
   {
     id: "laboratorio-dos-elementos",
-    versao: "1.4.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.5.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-23",
-    novidades: "Alimentos de verdade: comida feita de componentes reais (amido, proteína, glúten, gordura, açúcares...) que gelatinizam, coagulam, fermentam, caramelizam e douram (Maillard) nas temperaturas reais; pão, tapioca, caramelo, ovo cozido e mais, reconhecidos pelo que viraram. Dos elementos à comida: Haber-Bosch, fotossíntese de algas, açúcar e gordura sem planta. Gêiser do Mentos com microbolhas, calor latente, convecção, agitador e novos ácidos (fórmico, oxálico, lático, cítrico, vitamina C...) e reagentes (Benedict, biureto, Sudan III, indicadores).",
+    novidades: "Modo simulador: experimentos com roteiro (objetivo, passos que se marcam sozinhos e explicação no final), bancada para montar o seu com quantidades em mL e g, sondas com gráfico de temperatura e caderno de laboratório. Gasolina (o vapor escorre pelo chão), gás de cozinha, fósforo de verdade (risca na lixa), pólvora, pavio, madeira e papel. Bico de Bunsen, chama de fósforo e calor latente de fusão (o gelo para em 0 °C).",
     nome: "Laboratório dos Elementos",
     genero: "Simulação",
     subgenero: "Sandbox de química (educativo)",
@@ -409,10 +409,12 @@ window.JOGOS = [
       "Mais de 1.200 reações com equação, ΔH e condições",
       "Ferramentas: aquecer, resfriar, definir °C, faísca e corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra",
       "Atmosfera de ar, oxigênio puro, nitrogênio ou vácuo",
+      "Modo simulador: roteiros guiados, bancada com quantidades, sondas com gráfico e caderno de laboratório",
+      "Combustíveis e pirotecnia: gasolina e seu vapor, gás de cozinha, fósforo (risca na lixa), pólvora, pavio, madeira e papel",
       "Aba Casa: detergente, sabão, água sanitária, vinagre, limão, óleo, leite, vela, palha de aço e outros produtos do dia a dia",
       "Faíscas que voam e acendem gases, álcool, pó de metal e espuma de hidrogênio; arco elétrico e aquecimento por corrente",
       "Reagentes de laboratório: peróxido de hidrogênio, permanganato, água destilada e da torneira, indicadores (fenolftaleína, repolho roxo), lugol e amido",
-      "29 experimentos prontos (sódio na água, termite, pasta de dente de elefante, palha de aço + bateria, repolho roxo, leite + vinagre…)",
+      "Mais de 45 experimentos prontos com roteiro (vapor de gasolina, riscar fósforo, rastilho de pólvora, vazamento de gás, curva de aquecimento, temperatura de ignição…)",
       "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes",
       "Física fina sem efeitos prontos: gás dissolvido (lei de Henry), nucleação em superfícies ásperas, bolhas que grudam e se soltam pela tensão superficial, espuma com detergente",
       "Objetos soltos que boiam ou afundam pelo empuxo e giram pelo torque das bolhas: milho dançante, Mentos, rolha, gelo, pipoca que estoura a 180 °C",

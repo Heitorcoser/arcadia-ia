@@ -26,6 +26,8 @@ Sandbox de química com a tabela periódica inteira, para estudar e testar.
 - 🔥 Cada célula tem **temperatura**: derrete, ferve e congela nos pontos reais; densidade e condução de calor também são reais
 - 🧪 **Mais de 1.200 reações** (reatividade dos metais, solubilidade, ácido + base, combustão, termite, eletrólise, ligas…) com equação, ΔH e condições, e um **combinador** para testar qualquer par
 - 🧫 Ferramentas: aquecer, resfriar, faísca/corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra
+- 🧭 **Modo simulador**: experimentos com roteiro (objetivo, passos que se marcam sozinhos e explicação), bancada para montar o seu com quantidades, sondas com gráfico de temperatura e caderno de laboratório
+- ⛽ **Combustíveis e pirotecnia**: gasolina (o vapor escorre e leva o fogo), gás de cozinha, fósforo que risca na lixa, pólvora, pavio, madeira e papel; bico de Bunsen e chama de fósforo
 - 🏠 **Aba Casa**: detergente, sabão, água sanitária, vinagre, limão, óleo, leite, vela, palha de aço… (espuma, emulsão, sabão caseiro, leite coalhando e por que nunca jogar água em óleo quente)
 - ✨ **Faíscas** que voam e acendem o que tocam, arco elétrico e fios que esquentam com a corrente
 - 🧴 **Reagentes de laboratório**: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona (catalisadores, titulação, indicadores de pH, teste do amido)
