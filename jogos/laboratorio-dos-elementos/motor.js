@@ -16,11 +16,15 @@ const FOGO = id('FOGO'), FUMACA = id('FUMACA'), FAISCA = id('FAISCA'), H2O = id(
 
 const L = { W: 0, H: 0, N: 0, AMB: 25, vel: 1, pausado: false, ventilacao: true, tick: 0, contagem: new Map(), explosoes: 0, ultimaReacao: null, eventos: [] };
 let mt, T, flg, vida, carga, varc, aux, capA, kA;
+// física fina (fisica.js): gás dissolvido no líquido (volumes de gás por volume de líquido, a 1 atm),
+// qual gás está dissolvido, volume de gás de cada bolha, estado da bolha e o objeto rígido a que a célula pertence
+let dis, disG, gv, bfl, corpo;
 const PO = 1, TK = 2;
 function criarGrade(W, H) {
   L.W = W; L.H = H; L.N = W * H;
   mt = new Uint16Array(L.N); T = new Float32Array(L.N).fill(L.AMB); flg = new Uint8Array(L.N); vida = new Uint8Array(L.N); carga = new Uint8Array(L.N); varc = new Uint8Array(L.N); aux = new Uint16Array(L.N);
   capA = new Float32Array(L.N); kA = new Float32Array(L.N);
+  dis = new Float32Array(L.N); disG = new Uint16Array(L.N); gv = new Float32Array(L.N); bfl = new Uint8Array(L.N); corpo = new Uint16Array(L.N);
   for (let i = 0; i < L.N; i++) varc[i] = Math.random() * 255;
 }
 const rnd = Math.random;
@@ -31,14 +35,19 @@ function troca(i, j) {
   let t = T[i]; T[i] = T[j]; T[j] = t;
   a = flg[i]; flg[i] = flg[j]; flg[j] = a; a = vida[i]; vida[i] = vida[j]; vida[j] = a; a = carga[i]; carga[i] = carga[j]; carga[j] = a;
   a = varc[i]; varc[i] = varc[j]; varc[j] = a; a = aux[i]; aux[i] = aux[j]; aux[j] = a;
+  t = dis[i]; dis[i] = dis[j]; dis[j] = t; a = disG[i]; disG[i] = disG[j]; disG[j] = a;
+  t = gv[i]; gv[i] = gv[j]; gv[j] = t; a = bfl[i]; bfl[i] = bfl[j]; bfl[j] = a; a = corpo[i]; corpo[i] = corpo[j]; corpo[j] = a;
 }
-function limparCelula(i) { mt[i] = 0; flg[i] &= TK; vida[i] = 0; carga[i] = 0; aux[i] = 0; }
+function limparCelula(i) { mt[i] = 0; flg[i] &= TK; vida[i] = 0; carga[i] = 0; aux[i] = 0; dis[i] = 0; disG[i] = 0; gv[i] = 0; bfl[i] = 0; corpo[i] = 0; }
 // pode a célula i entrar no lugar de j?
 function podeEntrar(i, j) {
   const b = mt[j]; if (b === 0) return true;
+  if (corpo[j]) return false;                      // objeto rígido: só se move inteiro (fisica.js)
+  if (bfl[j] & 2) return false;                    // bolha grudada numa superfície
   const B = MATS[b], sb = estadoDe(B, T[j]);
   if (sb >= 3) return true;
   if (sb === 0 && !(flg[j] & PO)) return false;
+  if ((bfl[j] & 1) && sb === 2 && estadoDe(MATS[mt[i]], T[i]) === 1) return rnd() < velBolha(j); // bolha sobe mais devagar quanto menor (lei de Stokes)
   if (sb === 0 && estadoDe(MATS[mt[i]], T[i]) === 0) return false; // grãos não atravessam grãos (pós misturados ficam misturados)
   return densidade(i) > densidade(j) * 1.02 && rnd() < 0.6;
 }
@@ -59,6 +68,7 @@ function passo() {
     }
   }
   calor(); eletricidade();
+  if (typeof fisica === 'function') fisica();
 }
 function atualizar(i, x, y, m) {
   const M = MATS[m];
@@ -67,7 +77,7 @@ function atualizar(i, x, y, m) {
   if (m === FAISCA) return faiscaVoa(i, x, y);
   if (M.tempFixa !== undefined) T[i] = M.tempFixa;
   // espuma: as bolhas estouram sozinhas
-  if (M.efemero && rnd() < M.efemero) { if (M.efemeroVira && rnd() < 0.2) { mt[i] = id(M.efemeroVira); flg[i] &= TK; } else limparCelula(i); return; }
+  if (M.efemero && (vida[i] > 0 ? (rnd() < 0.25 && vida[i]--, false) : rnd() < M.efemero)) { /* vida = proteção da película: mais detergente, espuma mais estável */ if (M.efemeroVira && rnd() < 0.2) { mt[i] = id(M.efemeroVira); flg[i] &= TK; } else limparCelula(i); return; }
   const t = T[i];
   // decomposição pelo calor
   if (M.decomp && t >= M.decomp[0] && rnd() < 0.02) return decompor(i, x, y, M);
@@ -116,7 +126,8 @@ function aplicar(r, i, j, x, y) {
   if (pa === FOGO) { vida[i] = 20 + rnd() * 25; aux[i] = corFogo(r.fogo || '#ff8a1a'); T[i] = Math.max(T[i], 900); }
   if (pb === FOGO) { vida[j] = 20 + rnd() * 25; aux[j] = corFogo(r.fogo || '#ff8a1a'); T[j] = Math.max(T[j], r.tB || 1000); }
   if (r.auxA) aux[i] = r.auxA; if (r.auxB) aux[j] = r.auxB;
-  if (r.extra >= 0 && r.extra !== undefined) espalhar(i, x, y, r.extra, T[i]);
+  if (typeof gasNoLiquido === 'function') { gasNoLiquido(i, x, y); if (pb !== undefined) gasNoLiquido(j, j % L.W, (j / L.W) | 0); }
+  if (r.extra >= 0 && r.extra !== undefined) { if (!(typeof dissolverExtra === 'function' && dissolverExtra(i, x, y, r.extra))) espalhar(i, x, y, r.extra, T[i]); }
   if (r.gasB) { const g = id('OsO4'); if (g >= 0) espalhar(i, x, y, g, T[i]); }
   if (r.explosao) explosao(x, y, r);
   if (r.faiscas && rnd() < 0.35) soltarFaisca(x + (rnd() < 0.5 ? -1 : 1), y - 1, (rnd() * 5 | 0) - 2, -2, 6 + rnd() * 14);
@@ -329,10 +340,13 @@ function pincel(cx, cy, r, matId, opc) {
   noRaio(cx, cy, r, i => {
     if (mt[i] && !opc.substituir) return;
     if (opc.chance && rnd() > opc.chance) return;
-    mt[i] = matId; T[i] = opc.temp ?? (M.tempFixa ?? L.AMB); vida[i] = 0; carga[i] = 0; aux[i] = 0;
+    mt[i] = matId; T[i] = opc.temp ?? (M.tempFixa ?? L.AMB); vida[i] = 0; carga[i] = 0; aux[i] = 0; dis[i] = 0; disG[i] = 0; gv[i] = 0; bfl[i] = 0; corpo[i] = 0;
     const s = estadoDe(M, T[i]);
-    const po = opc.forma === 'po' ? true : opc.forma === 'bloco' ? false : !!M.po;
+    const objeto = s === 0 && opc.corpo && (opc.forma === 'objeto' || (opc.forma === 'auto' && M.objeto));
+    const po = !objeto && (opc.forma === 'po' ? true : opc.forma === 'bloco' || opc.forma === 'objeto' ? false : !!M.po);
     flg[i] = (flg[i] & TK) | (po && s === 0 ? PO : 0);
+    if (objeto) corpo[i] = opc.corpo;
+    if (M.gasDis && s === 1) { disG[i] = id(M.gasDis[0]); dis[i] = M.gasDis[1]; }
   });
 }
 function apagar(cx, cy, r) { noRaio(cx, cy, r, i => limparCelula(i)); }
@@ -409,7 +423,10 @@ function desenharGrade(ctx2) {
     } else {
       const M = MATS[m], s = estadoDe(M, t), c = M.rgb[s] || M.rgb[0], v = (varc[i] - 128) / 14;
       r = c[0] + v; g = c[1] + v; b = c[2] + v;
-      if (s === 2) { // gás: translúcido e granulado
+      if (s === 2 && (bfl[i] & 1)) { // bolha dentro do líquido: borda clara, maior = mais clara
+        const k = 0.35 + 0.45 * Math.min(1, gv[i]), L2 = corLiquidoEmVolta(i);
+        r = L2[0] + (235 - L2[0]) * k; g = L2[1] + (242 - L2[1]) * k; b = L2[2] + (255 - L2[2]) * k;
+      } else if (s === 2) { // gás: translúcido e granulado
         const a = (varc[i] & 3) === 0 ? 0.75 : 0.4;
         r = FUNDO[0] + (r - FUNDO[0]) * a; g = FUNDO[1] + (g - FUNDO[1]) * a; b = FUNDO[2] + (b - FUNDO[2]) * a;
         if (carga[i] && M.descarga) { const d = hexRgb(M.descarga); r = d[0]; g = d[1]; b = d[2]; }
@@ -430,10 +447,12 @@ function desenharGrade(ctx2) {
 /* ---------- experimentos prontos ---------- */
 const EXP = {
   bequer(x0, y0, w, h, mat = 'Vidro') { const v = id(mat); for (let y = y0; y <= y0 + h; y++) for (const x of [x0, x0 + w]) put(x, y, v, false); for (let x = x0; x <= x0 + w; x++) put(x, y0 + h, v, false); },
+  // objeto rígido (elipse) de um material: boia ou afunda inteiro
+  objeto(cx, cy, r, chave, temp) { const m = typeof chave === 'number' ? chave : id(chave), c = novoCorpoId(), ry = Math.max(1, r * 0.8); for (let dy = -Math.ceil(ry); dy <= Math.ceil(ry); dy++) for (let dx = -r; dx <= r; dx++) { if ((dx * dx) / (r * r + 0.5) + (dy * dy) / (ry * ry + 0.5) > 1) continue; const x = Math.round(cx + dx), y = Math.round(cy + dy); if (x < 0 || y < 0 || x >= L.W || y >= L.H) continue; put(x, y, m, false, temp); const i = y * L.W + x; if (mt[i] === m) corpo[i] = c; } },
   ret(x0, y0, x1, y1, chave, o = {}) { const m = typeof chave === 'number' ? chave : id(chave); for (let y = Math.round(y0); y <= Math.round(y1); y++) for (let x = Math.round(x0); x <= Math.round(x1); x++) put(x, y, m, o.po, o.temp, o.chance); },
 };
-function put(x, y, m, po, temp, chance) { if (x < 0 || y < 0 || x >= L.W || y >= L.H || m < 0) return; if (chance && rnd() > chance) return; const i = y * L.W + x; if (mt[i] && (MATS[mt[i]].vidro || MATS[mt[i]].inerte) && !(MATS[m].vidro || MATS[m].inerte)) return; mt[i] = m; T[i] = temp ?? (MATS[m].tempFixa ?? L.AMB); flg[i] = (flg[i] & TK) | (po ? PO : 0); vida[i] = 0; carga[i] = 0; aux[i] = 0; }
-function limparTudo() { mt.fill(0); T.fill(L.AMB); flg.fill(0); vida.fill(0); carga.fill(0); aux.fill(0); L.contagem.clear(); decompVistas.clear(); L.eventos = []; }
+function put(x, y, m, po, temp, chance) { if (x < 0 || y < 0 || x >= L.W || y >= L.H || m < 0) return; if (chance && rnd() > chance) return; const i = y * L.W + x; if (mt[i] && (MATS[mt[i]].vidro || MATS[mt[i]].inerte) && !(MATS[m].vidro || MATS[m].inerte)) return; mt[i] = m; T[i] = temp ?? (MATS[m].tempFixa ?? L.AMB); flg[i] = (flg[i] & TK) | (po ? PO : 0); vida[i] = 0; carga[i] = 0; aux[i] = 0; dis[i] = 0; disG[i] = 0; gv[i] = 0; bfl[i] = 0; corpo[i] = 0; const Mp = MATS[m]; if (Mp.gasDis && estadoDe(Mp, T[i]) === 1) { disG[i] = id(Mp.gasDis[0]); dis[i] = Mp.gasDis[1]; } }
+function limparTudo() { mt.fill(0); T.fill(L.AMB); flg.fill(0); vida.fill(0); carga.fill(0); aux.fill(0); dis.fill(0); disG.fill(0); gv.fill(0); bfl.fill(0); corpo.fill(0); if (typeof limparFisica === 'function') limparFisica(); L.contagem.clear(); decompVistas.clear(); L.eventos = []; }
 const EXPERIMENTOS = [
   { n: '💧 Sódio na água', d: 'Metal alcalino reagindo com água: hidróxido de sódio e hidrogênio.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.6, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.45, H * 0.2, W * 0.55, H * 0.25, 'Na', { po: true, chance: 0.6 }); } },
   { n: '🔥 Potássio na água', d: 'Mais reativo que o sódio: o hidrogênio pega fogo com chama lilás.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.6, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.47, H * 0.2, W * 0.53, H * 0.24, 'K', { po: true, chance: 0.6 }); } },
@@ -463,5 +482,10 @@ const EXPERIMENTOS = [
   { n: '🔥 Água no óleo quente (nunca faça)', d: 'Óleo a 260 °C numa panela e umas gotas de água caindo: a água vira vapor de uma vez e arremessa óleo em chamas.', f: (W, H) => { EXP.ret(0, H - 3, W - 1, H - 1, 'AQUECEDOR'); EXP.bequer(W * 0.3 | 0, H * 0.7 | 0, W * 0.4 | 0, (H * 0.3 | 0) - 4, 'Cadinho'); EXP.ret(W * 0.3 + 1, H * 0.82, W * 0.7 - 1, H - 5, 'Oleo', { temp: 260 }); EXP.ret(W * 0.48, H * 0.2, W * 0.52, H * 0.24, 'H2O'); } },
   { n: '🧀 Leite + vinagre', d: 'O ácido do vinagre faz a caseína do leite coagular: flocos brancos (coalhada) e soro amarelado.', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.62, W * 0.7 - 1, H * 0.95 - 1, 'Leite'); EXP.ret(W * 0.42, H * 0.15, W * 0.58, H * 0.32, solucao('H', 'CH3COO')); } },
   { n: '🧽 Palha de aço + bateria', d: 'A corrente passa pelos fios finíssimos de aço, que esquentam até brilhar e pegar fogo, soltando faíscas.', f: (W, H) => { EXP.ret(W * 0.25, H - 4, W * 0.75, H - 1, 'Cadinho'); EXP.ret(W * 0.3, H - 14, W * 0.7, H - 5, 'PalhaAco', { po: true, chance: 0.75 }); EXP.ret(W * 0.27, H - 16, W * 0.3, H - 5, 'BATERIA'); EXP.ret(W * 0.7, H - 16, W * 0.73, H - 5, 'BATERIA'); } },
+  { n: '🌽 Milho dançante', d: 'Grãos de milho em água com gás. Ninguém programou a dança: as bolhas nascem nas fendinhas da casca, levantam o grão pelo empuxo e estouram na superfície. Use o 🔬 microscópio num grão.', f: (W, H) => { const x0 = W * 0.3 | 0, w = W * 0.4 | 0, y0 = H * 0.25 | 0; EXP.bequer(x0, y0, w, H * 0.7 | 0); EXP.ret(x0 + 1, H * 0.35, x0 + w - 1, H * 0.95 - 1, solucao('H', 'CO3')); for (let k = 0; k < 5; k++) EXP.objeto(x0 + 4 + (k + 0.5) * (w - 8) / 5, H * 0.95 - 4 - (k % 2) * 6, 2, 'Milho'); } },
+  { n: '🍬 Mentos no refrigerante', d: 'Balas Mentos caindo numa garrafa de refrigerante: cada poro da bala vira um ponto de nucleação, as bolhas se soltam pequenas e crescem enquanto sobem, numa coluna de gás. Compare com o milho dançante: mesmo líquido, superfície diferente.', f: (W, H) => { const x0 = W * 0.42 | 0, w = W * 0.16 | 0, y0 = H * 0.3 | 0; EXP.bequer(x0, y0, w, H * 0.65 | 0); EXP.ret(x0 + 1, H * 0.4, x0 + w - 1, H * 0.95 - 1, 'Refrigerante'); for (let k = 0; k < 3; k++) EXP.objeto(x0 + w / 2, H * 0.08 + k * 6, 2, 'Mentos'); } },
+  { n: '🌋 Vulcão com detergente', d: 'Bicarbonato no fundo; vinagre com detergente por cima. O CO₂ da reação fica dissolvido, vira bolhas nos grãos de bicarbonato e o detergente transforma tudo em espuma que transborda.', f: (W, H) => { const x0 = W * 0.38 | 0, w = W * 0.24 | 0; EXP.bequer(x0, H * 0.45 | 0, w, H * 0.5 | 0); EXP.ret(x0 + 1, H * 0.88, x0 + w - 1, H * 0.95 - 1, 'NaHCO3', { po: true }); for (let y = H * 0.6 | 0; y < H * 0.88; y++) for (let x = x0 + 1; x < x0 + w; x++) put(x, y, rnd() < 0.8 ? solucao('H', 'CH3COO') : id('Detergente')); } },
+  { n: '⚖️ Boia ou afunda?', d: 'Rolha (0,24 g/cm³), pipoca (0,06), gelo (0,92), milho (1,25), uva-passa (1,3) e ferro (7,9) na água (1,0). Cada um para onde o princípio de Arquimedes manda.', f: (W, H) => { const x0 = W * 0.15 | 0, w = W * 0.7 | 0; EXP.bequer(x0, H * 0.3 | 0, w, H * 0.65 | 0); EXP.ret(x0 + 1, H * 0.5, x0 + w - 1, H * 0.95 - 1, 'H2O'); const itens = [['Rolha', 2], ['Pipoca', 2], ['H2O', 4, -40], ['Milho', 2], ['UvaPassa', 2], ['Fe', 2]]; itens.forEach(([k, r, t], n) => EXP.objeto(x0 + 6 + (n + 0.5) * (w - 12) / itens.length, H * 0.62, r, k, t)); } },
+  { n: '🍿 Pipoca na panela', d: 'Grãos de milho numa panela quente. A água dentro de cada grão vira vapor e, perto de 180 °C, a casca rompe: o amido infla e o grão pula.', f: (W, H) => { EXP.ret(0, H - 3, W - 1, H - 1, 'AQUECEDOR'); EXP.bequer(W * 0.3 | 0, H * 0.55 | 0, W * 0.4 | 0, H - 4 - (H * 0.55 | 0), 'Cadinho'); for (let k = 0; k < 6; k++) EXP.objeto(W * 0.33 + k * W * 0.06, H - 7, 2, 'Milho'); } },
   { n: '🫒 Detergente tirando gordura', d: 'Óleo boiando na água; o detergente cai por cima e quebra o óleo em gotinhas (emulsão).', f: (W, H) => { EXP.bequer(W * 0.3 | 0, H * 0.45 | 0, W * 0.4 | 0, H * 0.5 | 0); EXP.ret(W * 0.3 + 1, H * 0.75, W * 0.7 - 1, H * 0.95 - 1, 'H2O'); EXP.ret(W * 0.3 + 1, H * 0.66, W * 0.7 - 1, H * 0.75 - 1, 'Oleo'); EXP.ret(W * 0.44, H * 0.2, W * 0.56, H * 0.32, 'Detergente'); } },
 ];
