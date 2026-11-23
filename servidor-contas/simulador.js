@@ -58,6 +58,7 @@ const ctx = {
 };
 vm.createContext(ctx);
 vm.runInContext(fs.readFileSync(path.join(__dirname, 'Code.gs'), 'utf8'), ctx, { filename: 'Code.gs' });
+if (process.env.SELO_CURTIDAS) vm.runInContext('CONFIG.SELO_CURTIDAS = ' + Number(process.env.SELO_CURTIDAS), ctx); // para testar o selo automático sem 1.000 contas
 ctx.configurar();
 
 http.createServer((req, res) => {
