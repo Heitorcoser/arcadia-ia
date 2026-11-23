@@ -371,11 +371,92 @@ const CAPA_LAB = `
   </g>
 </svg>`;
 
+const CAPA_LADEIRA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="ld-ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9e5e"/><stop offset=".55" stop-color="#ffd59a"/><stop offset="1" stop-color="#fbe7c2"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#ld-ceu)"/>
+  <circle cx="520" cy="70" r="34" fill="#fff3c4"/>
+  <g>
+    <polygon points="0,120 120,150 120,360 0,360" fill="#83c5be"/><polygon points="0,112 125,146 120,150 0,120" fill="#b6553a"/>
+    <polygon points="120,150 230,175 230,360 120,360" fill="#f4d35e"/><polygon points="118,146 236,172 230,175 120,150" fill="#b6553a"/>
+    <polygon points="640,120 520,150 520,360 640,360" fill="#f95738"/><polygon points="640,112 515,146 520,150 640,120" fill="#8f3f2a"/>
+    <polygon points="520,150 410,175 410,360 520,360" fill="#cdb4db"/><polygon points="522,146 404,172 410,175 520,150" fill="#8f3f2a"/>
+    <g fill="#2e3b55" opacity=".7"><rect x="30" y="170" width="26" height="30"/><rect x="70" y="180" width="26" height="30"/><rect x="150" y="200" width="22" height="26"/><rect x="580" y="170" width="26" height="30"/><rect x="540" y="180" width="26" height="30"/><rect x="450" y="200" width="22" height="26"/></g>
+  </g>
+  <polygon points="300,190 340,190 600,360 40,360" fill="#5a5248"/>
+  <g stroke="#7a7064" stroke-width="2" opacity=".7"><line x1="240" y1="230" x2="400" y2="230"/><line x1="200" y1="260" x2="440" y2="260"/><line x1="150" y1="295" x2="490" y2="295"/><line x1="100" y1="330" x2="540" y2="330"/></g>
+  <path d="M0 95 Q320 150 640 95" stroke="#6b4a2c" stroke-width="2" fill="none"/>
+  <g><polygon points="11,100.994140625 29,100.994140625 20,120.994140625" fill="#e63946"/><polygon points="49,111.31759765625 67,111.31759765625 58,131.31759765625" fill="#ffd166"/><polygon points="87,120.245 105,120.245 96,140.245" fill="#06d6a0"/><polygon points="125,127.77634765625 143,127.77634765625 134,147.77634765624998" fill="#118ab2"/><polygon points="163,133.91164062500002 181,133.91164062500002 172,153.91164062500002" fill="#f15bb5"/><polygon points="201,138.65087890625 219,138.65087890625 210,158.65087890625" fill="#fb8500"/><polygon points="239,141.99406249999998 257,141.99406249999998 248,161.99406249999998" fill="#e63946"/><polygon points="277,143.94119140625 295,143.94119140625 286,163.94119140625" fill="#ffd166"/><polygon points="315,144.49226562500002 333,144.49226562500002 324,164.49226562500002" fill="#06d6a0"/><polygon points="353,143.64728515625 371,143.64728515625 362,163.64728515625" fill="#118ab2"/><polygon points="391,141.40625 409,141.40625 400,161.40625" fill="#f15bb5"/><polygon points="429,137.76916015625 447,137.76916015625 438,157.76916015625" fill="#fb8500"/><polygon points="467,132.736015625 485,132.736015625 476,152.736015625" fill="#e63946"/><polygon points="505,126.30681640625001 523,126.30681640625001 514,146.30681640625" fill="#ffd166"/><polygon points="543,118.4815625 561,118.4815625 552,138.4815625" fill="#06d6a0"/><polygon points="581,109.26025390625 599,109.26025390625 590,129.26025390625" fill="#118ab2"/></g>
+  <g transform="translate(320 300) rotate(-4)">
+    <ellipse cx="0" cy="34" rx="92" ry="12" fill="rgba(0,0,0,.25)"/>
+    <rect x="-80" y="14" width="160" height="14" rx="4" fill="#b07a44"/>
+    <circle cx="-62" cy="32" r="9" fill="#c9ced6" stroke="#6b7280" stroke-width="3"/><circle cx="62" cy="32" r="9" fill="#c9ced6" stroke="#6b7280" stroke-width="3"/>
+    <rect x="-30" y="-48" width="44" height="62" rx="10" fill="#06d6a0"/>
+    <rect x="10" y="-2" width="70" height="16" rx="6" fill="#2b3f66"/>
+    <circle cx="-6" cy="-66" r="20" fill="#c68a5c"/><path d="M-28 -66 a22 22 0 0 1 44 0z" fill="#7ff0cf"/>
+    <path d="M-2 -30 Q40 -24 72 4" stroke="#d9c58a" stroke-width="4" fill="none"/>
+  </g>
+  <g stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"><line x1="150" y1="250" x2="90" y2="244"/><line x1="160" y1="280" x2="80" y2="276"/><line x1="170" y1="310" x2="100" y2="308"/></g>
+  <text x="24" y="52" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="#1d1300">LADEIRA</text>
+  <text x="24" y="86" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="#fff" stroke="#1d1300" stroke-width="2">ABAIXO</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.23.0";
+window.ARCADIA_VERSAO = "1.24.0";
 
 window.JOGOS = [
+  {
+    id: "ladeira-abaixo",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-23",
+    novidades: "Lançamento: corrida de carrinho de rolimã com física de verdade em 4 ladeiras, campeonato, oficina, contra o relógio com fantasma, 2 jogadores na tela e online até 6.",
+    nome: "Ladeira Abaixo",
+    genero: "Corrida",
+    subgenero: "Carrinho de rolimã (física)",
+    corGenero: "#f59e0b",
+    tags: ["Corrida", "3D", "Física", "Multiplayer", "Online", "Local", "Celular", "Controle"],
+    criadoEm: "2026-11-23",
+    lancadoEm: "2026-11-23T20:56:42-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Corridas de ~1 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/ladeira-abaixo/index.html",
+    capa: CAPA_LADEIRA,
+    sinopse:
+      "Corrida de carrinho de rolimã ladeira abaixo, sem motor: quem empurra é a gravidade. Abaixe o corpo para cortar o vento, pegue o vácuo de quem vai na frente e freie com o pé antes da curva. Quatro ladeiras brasileiras, campeonato, oficina, 2 jogadores e online.",
+    descricao: [
+      "Ladeira Abaixo é uma corrida de rolimã em 3D com física calculada de verdade. A força que te leva é o peso na rampa; contra ela estão o atrito dos rolamentos (maior no paralelepípedo) e o ar, que cresce com o quadrado da velocidade. Abaixado, você tem menos área contra o vento e chega a uns 60 km/h numa ladeira de 10%.",
+      "Atrás de outro carrinho o ar já está \"aberto\" e você ganha velocidade (vácuo). Nas curvas, o que segura são as rodinhas: se a velocidade passar do que a aderência aguenta para aquele raio, o carrinho escorrega para fora e vai parar no fardo de feno, ou capota.",
+      "São 4 ladeiras: a Ladeira da Matriz (cidade histórica de paralelepípedo), a Rua das Bandeirinhas (festa junina no fim de tarde), a Estrada Velha da Serra (curvas fechadas e neblina) e o Morro do Mirante (a mais rápida, com vista do mar).",
+      "Modos: campeonato contra 5 rivais com pontos e moedas, corrida rápida, contra o relógio com o fantasma do seu recorde, 2 jogadores na mesma tela e online até 6 jogadores (sala por código ou pública, com bots para completar). Na oficina do Seu Quinzinho dá para trocar rolamentos, carenagem, direção, freio e a pintura."
+    ],
+    mecanicas: [
+      "Física real: gravidade na rampa, atrito de rolamento, arrasto do ar (½·ρ·CdA·v²) e aderência nas curvas",
+      "Abaixar para cortar o vento, frear com o pé e empurrar com os pés quando está devagar",
+      "Vácuo atrás de outro carrinho e largada com empurrão no \"JÁ!\" (dá para queimar a largada)",
+      "4 ladeiras com cidade, festa junina, serra e mirante; paralelepípedo trepida e segura menos",
+      "Campeonato com pontos, moedas e oficina (rolamentos, carenagem, direção, freio e pintura)",
+      "Contra o relógio com fantasma do recorde",
+      "2 jogadores com tela dividida e online até 6 (código ou sala pública, bots completam)",
+      "Controles de toque no celular e suporte a controle (gamepad)"
+    ],
+    controles: [
+      ["A D / ← →", "Virar"],
+      ["W, ↑ ou Shift", "Abaixar (menos vento) · parado: empurrar com os pés"],
+      ["S, ↓ ou Espaço", "Frear com o pé"],
+      ["Esc", "Pausar"],
+      ["2 jogadores", "J1: A D, W, S · J2: ← →, ↑, ↓"],
+      ["Controle", "Analógico vira, A ou RT abaixa, B ou LT freia"]
+    ],
+    tecnologia: [
+      "Three.js com ladeiras geradas de segmentos (curvatura e inclinação), público e cenários instanciados",
+      "Física em coordenadas da pista a 60 passos por segundo, com IA que calcula a velocidade segura de cada curva (v = √(μ·g/curvatura))",
+      "Online com PeerJS (WebRTC): cada jogador simula o próprio carrinho e o anfitrião repassa o estado e simula os bots",
+      "Rodas, vento e sons gerados com Web Audio API"
+    ]
+  },
   {
     id: "laboratorio-dos-elementos",
     versao: "1.5.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)

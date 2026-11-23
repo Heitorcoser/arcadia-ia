@@ -18,6 +18,18 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Defesa da Feira** | Estratégia | Tower Defense | Mapas de 12–25 min |
 | **Gol de Placa** | Esporte | Futebol arcade | Partidas de 2–6 min |
 | **Laboratório dos Elementos** | Simulação | Sandbox de química (educativo) | Livre |
+| **Ladeira Abaixo** | Corrida | Carrinho de rolimã (física) | Corridas de ~1 min |
+
+### Ladeira Abaixo
+Corrida de carrinho de rolimã em 3D, sem motor: quem empurra é a gravidade.
+
+- 🧮 **Física de verdade**: peso na rampa, atrito dos rolamentos (maior no paralelepípedo), arrasto do ar e aderência nas curvas; abaixado, chega a ~60 km/h numa ladeira de 10%
+- 🌬️ **Vácuo** atrás de outro carrinho, **largada** com empurrão no "JÁ!" e freio com o pé
+- 🏘️ **4 ladeiras**: Ladeira da Matriz, Rua das Bandeirinhas (festa junina), Estrada Velha da Serra e Morro do Mirante
+- 🏆 **Campeonato** com pontos e moedas, **oficina** (rolamentos, carenagem, direção, freio, pintura) e **contra o relógio** com fantasma
+- 👥 **2 jogadores** na tela dividida e 🌐 **online até 6** (código ou sala pública, bots completam)
+
+**Controles:** `A`/`D` ou setas viram · `W`/`↑`/`Shift` abaixa · `S`/`↓`/`Espaço` freia · `Esc` pausa
 
 ### Laboratório dos Elementos
 Sandbox de química com a tabela periódica inteira, para estudar e testar.
