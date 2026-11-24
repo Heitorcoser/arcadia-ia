@@ -3,12 +3,12 @@
    ========================================================================= */
 import * as THREE from 'three';
 import { MX, MZ, LADOS, UNIDADES, MORROS, PONTOS, LOJAS, BOMBAS, HELIPONTO, SPAWNS, VEICULOS_INICIAIS, JANELAS, CAIXAS, CASAS, LINHAS, BASE_POLICIA, POSTO, brZ,
-  alturaTerreno, raio, visivel, construirMalhas, placa, caixasPerto, chaoEm, materialChao, NAV } from './mapa.js?v=1.1.0';
-import { A, iniciarAudio, definirOuvinte, tocar, somTiro, somImpacto, somRicochete, somPassando, somExplosao, volumeGeral, distOuvinte } from './audio.js?v=1.1.0';
-import { ARMAS, CLASSES, GRANADAS, danoNaDistancia, modeloArma } from './armas.js?v=1.1.0';
-import { criarAtor, nascer, moverAtor, olho, direcaoOlhar, raioAtor, animarBoneco, animarMorte, pensarBot, avisoBalaPerto, inimigos, equipar, OLHO, OLHO_AGACHADO } from './atores.js?v=1.1.0';
-import { criarVeiculo, dirigir, pilotoAutomatico, desenharVeiculo, raioVeiculo, bombaPerto, TIPOS } from './veiculos.js?v=1.1.0';
-import * as MAPA from './mapa.js?v=1.1.0';
+  alturaTerreno, raio, visivel, construirMalhas, placa, caixasPerto, chaoEm, materialChao, NAV } from './mapa.js?v=1.1.1';
+import { A, iniciarAudio, definirOuvinte, tocar, somTiro, somImpacto, somRicochete, somPassando, somExplosao, volumeGeral, distOuvinte } from './audio.js?v=1.1.1';
+import { ARMAS, CLASSES, GRANADAS, danoNaDistancia, modeloArma } from './armas.js?v=1.1.1';
+import { criarAtor, nascer, moverAtor, olho, direcaoOlhar, raioAtor, animarBoneco, animarMorte, pensarBot, avisoBalaPerto, inimigos, equipar, OLHO, OLHO_AGACHADO } from './atores.js?v=1.1.1';
+import { criarVeiculo, dirigir, pilotoAutomatico, desenharVeiculo, raioVeiculo, bombaPerto, TIPOS } from './veiculos.js?v=1.1.1';
+import * as MAPA from './mapa.js?v=1.1.1';
 
 const $ = s => document.querySelector(s);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
