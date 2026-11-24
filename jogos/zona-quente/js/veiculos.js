@@ -5,7 +5,7 @@
    Blindado segura tiro de fuzil; carro comum deixa a bala passar.
    ========================================================================= */
 import * as THREE from 'three';
-import { alturaTerreno, caixasPerto, HELIPONTO, chaoEm, MX, MZ, BOMBAS } from './mapa.js';
+import { alturaTerreno, caixasPerto, HELIPONTO, chaoEm, MX, MZ, BOMBAS } from './mapa.js?v=1.1.0';
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 export const TIPOS = {
   carro: { nome: 'Carro', vidaMax: 380, blind: 0, pot: 9, vmax: 32, comp: 4.3, larg: 1.8, alt: 1.45, tanque: 45, consumo: 0.09, cor: null },

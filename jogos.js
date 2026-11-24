@@ -426,14 +426,14 @@ const CAPA_ZONA = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.25.0";
+window.ARCADIA_VERSAO = "1.26.0";
 
 window.JOGOS = [
   {
     id: "zona-quente",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-23",
-    novidades: "Lançamento: tiro em primeira pessoa num mapa enorme com 3 morros, a BR-707 ligando tudo, 3 facções rivais e a polícia unida (BOEPF, PCM e EXANTF), 9 armas com sons de tiro gravados de verdade, balística com queda e penetração, vidro que quebra, granadas, carros, blindado e helicóptero.",
+    novidades: "Mapa refeito: as ruas e a BR agora aparecem e têm o leito nivelado no morro (antes ficavam escondidas debaixo da terra), morros com encosta mais suave, becos calçados e livres, casas com puxadinho, laje com mureta (dá para se proteger no telhado), porta, ferro de espera e caixa d'água. Miras de verdade: holográfica com ponto vermelho no M4 e alça e maça com pontos verdes nas outras armas.",
     nome: "Zona Quente",
     genero: "Tiro em primeira pessoa",
     subgenero: "FPS tático de domínio de pontos",

@@ -3,11 +3,12 @@
    ========================================================================= */
 import * as THREE from 'three';
 import { MX, MZ, LADOS, UNIDADES, MORROS, PONTOS, LOJAS, BOMBAS, HELIPONTO, SPAWNS, VEICULOS_INICIAIS, JANELAS, CAIXAS, CASAS, LINHAS, BASE_POLICIA, POSTO, brZ,
-  alturaTerreno, raio, visivel, construirMalhas, placa, caixasPerto, chaoEm, materialChao, NAV } from './mapa.js';
-import { A, iniciarAudio, definirOuvinte, tocar, somTiro, somImpacto, somRicochete, somPassando, somExplosao, volumeGeral, distOuvinte } from './audio.js';
-import { ARMAS, CLASSES, GRANADAS, danoNaDistancia, modeloArma } from './armas.js';
-import { criarAtor, nascer, moverAtor, olho, direcaoOlhar, raioAtor, animarBoneco, animarMorte, pensarBot, avisoBalaPerto, inimigos, equipar, OLHO, OLHO_AGACHADO } from './atores.js';
-import { criarVeiculo, dirigir, pilotoAutomatico, desenharVeiculo, raioVeiculo, bombaPerto, TIPOS } from './veiculos.js';
+  alturaTerreno, raio, visivel, construirMalhas, placa, caixasPerto, chaoEm, materialChao, NAV } from './mapa.js?v=1.1.0';
+import { A, iniciarAudio, definirOuvinte, tocar, somTiro, somImpacto, somRicochete, somPassando, somExplosao, volumeGeral, distOuvinte } from './audio.js?v=1.1.0';
+import { ARMAS, CLASSES, GRANADAS, danoNaDistancia, modeloArma } from './armas.js?v=1.1.0';
+import { criarAtor, nascer, moverAtor, olho, direcaoOlhar, raioAtor, animarBoneco, animarMorte, pensarBot, avisoBalaPerto, inimigos, equipar, OLHO, OLHO_AGACHADO } from './atores.js?v=1.1.0';
+import { criarVeiculo, dirigir, pilotoAutomatico, desenharVeiculo, raioVeiculo, bombaPerto, TIPOS } from './veiculos.js?v=1.1.0';
+import * as MAPA from './mapa.js?v=1.1.0';
 
 const $ = s => document.querySelector(s);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -342,7 +343,7 @@ vmCena.add(vm.g);
 function atualizarVM(dt) {
   const a = J.jogador; if (!a || !vm.modelo) return;
   const d = vm.def, ads = a.ads, vh = Math.hypot(a.vel.x, a.vel.z);
-  vm.chute = Math.max(0, vm.chute - dt * 8);
+  vm.chute = Math.max(0, vm.chute - dt * 8); const amort = Math.pow(0.0005, dt); mouseVel.x = clamp(mouseVel.x * amort, -40, 40); mouseVel.y = clamp(mouseVel.y * amort, -40, 40);
   vm.balanco += dt * vh * (a.correndo ? 1.5 : 1.15);
   const bob = Math.min(1, vh / 4) * (1 - ads * 0.85), bx = Math.sin(vm.balanco) * 0.012 * bob, by = Math.abs(Math.cos(vm.balanco)) * 0.01 * bob;
   const hip = new THREE.Vector3(0.17, -0.18, d.tipo === 'pistola' ? -0.38 : -0.5), mira = new THREE.Vector3(0, -vm.modelo.miraY, d.tipo === 'pistola' ? -0.34 : -0.3);
@@ -815,5 +816,5 @@ prepararMapaBase();
 $('#carregando').style.display = 'none';
 tela('t-inicio');
 requestAnimationFrame(quadro);
-window.__zq = { J, CFG, comecarPartida, escolha, MALHAS, passo, mouse, teclas, toque, montarToque, explodir, renderer, cena, get estado() { return estado; }, set estado(v) { estado = v; }, cam, vm, NAV };
+window.__zq = { MAPA, J, CFG, comecarPartida, escolha, MALHAS, passo, mouse, teclas, toque, montarToque, explodir, renderer, cena, get estado() { return estado; }, set estado(v) { estado = v; }, cam, vm, NAV };
 avisar('iniciado');

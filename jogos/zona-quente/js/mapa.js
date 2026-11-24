@@ -24,9 +24,9 @@ export const UNIDADES = [
   { id: 'EXANTF', nome: 'EXANTF', desc: 'Exército Anti-Facção', farda: 0x4b5a32, detalhe: 0x3a4627 },
 ];
 export const MORROS = [
-  { id: 'jatoba', nome: 'Morro do Jatobá', x: -220, z: -120, r: 105, h: 46, lado: 0, ang: 0.6 },
-  { id: 'cajueiro', nome: 'Vila Cajueiro', x: 0, z: 140, r: 115, h: 34, lado: 1, ang: -Math.PI / 2 },
-  { id: 'antena', nome: 'Morro da Antena', x: 225, z: -125, r: 100, h: 56, lado: 2, ang: Math.PI - 0.6 },
+  { id: 'jatoba', nome: 'Morro do Jatobá', x: -220, z: -120, r: 105, h: 30, lado: 0, ang: 0.6 },
+  { id: 'cajueiro', nome: 'Vila Cajueiro', x: 0, z: 140, r: 115, h: 22, lado: 1, ang: -Math.PI / 2 },
+  { id: 'antena', nome: 'Morro da Antena', x: 225, z: -125, r: 100, h: 36, lado: 2, ang: Math.PI - 0.6 },
 ];
 export const BASE_POLICIA = { x: 0, z: -175 };
 export const POSTO = { x: -55 };
@@ -57,24 +57,54 @@ const RUA_BASE = linha([[BASE_POLICIA.x, BASE_POLICIA.z + 22], [BASE_POLICIA.x, 
 LINHAS.ruas.push(RUA_BASE);
 
 /* ---------- altura do terreno ---------- */
-function alturaBruta(x, z) {
+const QUEDA = 1.5; // o morro vai até 1,5 × o raio da favela (encosta suave, dá para subir a pé)
+const perfilMorro = (m, d) => d < QUEDA ? m.h * 0.5 * (1 + Math.cos(Math.PI * d / QUEDA)) : 0;
+function alturaBase(x, z) {
   let h = 0;
-  for (const m of MORROS) { const d = Math.hypot(x - m.x, z - m.z) / m.r; if (d < 1.35) h += m.h * 0.5 * (1 + Math.cos(Math.PI * d / 1.35)) * (d < 0.12 ? 1 : 1) ; }
+  for (const m of MORROS) h += perfilMorro(m, Math.hypot(x - m.x, z - m.z) / m.r);
   // serras no fundo (o mapa termina em morros sem casas)
   const e = Math.max(Math.abs(x) - (MX - 50), Math.abs(z) - (MZ - 50));
   if (e > 0) h += Math.pow(e / 50, 1.6) * 70;
-  h += Math.sin(x * 0.045) * Math.cos(z * 0.05) * 1.6 + Math.sin(x * 0.11 + z * 0.07) * 0.6;
+  h += Math.sin(x * 0.045) * Math.cos(z * 0.05) * 1.2 + Math.sin(x * 0.11 + z * 0.07) * 0.4;
   // topo dos morros: pracinha plana
-  for (const m of MORROS) { const d = Math.hypot(x - m.x, z - m.z); if (d < 16) h = h * (1 - smooth(16, 7, d)) + (m.h * 0.5 * (1 + Math.cos(Math.PI * (7 / m.r) / 1.35)) + 0.5) * smooth(16, 7, d); }
-  // BR e acesso à base: chão nivelado
-  const [dBR] = distLinha(BR, x, z); h = h * (1 - smooth(26, 11, dBR)) + 1.0 * smooth(26, 11, dBR);
+  for (const m of MORROS) { const d = Math.hypot(x - m.x, z - m.z); if (d < 18) h = h * (1 - smooth(18, 8, d)) + (perfilMorro(m, 8 / m.r) + 0.3) * smooth(18, 8, d); }
+  // base da polícia e posto: pátio plano
   const db = Math.hypot(x - BASE_POLICIA.x, z - BASE_POLICIA.z); h = h * (1 - smooth(60, 40, db)) + 1.2 * smooth(60, 40, db);
-  const [dRb] = distLinha(RUA_BASE, x, z); h = h * (1 - smooth(14, 6, dRb)) + 1.1 * smooth(14, 6, dRb);
+  const dp = Math.hypot(x - POSTO.x, z - brZ(POSTO.x) - 20); h = h * (1 - smooth(34, 20, dp)) + 1.0 * smooth(34, 20, dp);
   return h;
 }
 export const RES = 2, NX = Math.round(MX * 2 / RES) + 1, NZ = Math.round(MZ * 2 / RES) + 1;
 export const ALT = new Float32Array(NX * NZ);
-for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) ALT[j * NX + i] = alturaBruta(-MX + i * RES, -MZ + j * RES);
+for (let j = 0; j < NZ; j++) for (let i = 0; i < NX; i++) ALT[j * NX + i] = alturaBase(-MX + i * RES, -MZ + j * RES);
+/* ---------- estradas cortadas no terreno ----------
+   Cada via tem um perfil de altura (o terreno no eixo, suavizado ao longo dela) e o chão
+   fica NIVELADO de lado a lado na largura da pista, com talude/aterro suave nas bordas.
+   Assim a rua nunca fica enterrada nem flutuando, mesmo subindo o morro. */
+export const VIAS = [];
+function via(L, meia, margem, suav, min = -99) {
+  const P = linha(L, 1); const h0 = P.map(([x, z]) => alturaBase(x, z));
+  const h = h0.map((_, i) => { let s = 0, n = 0; for (let k = Math.max(0, i - suav); k <= Math.min(h0.length - 1, i + suav); k++) { s += h0[k]; n++; } return Math.max(min, s / n); });
+  const v = { L, P, h, meia, margem }; VIAS.push(v); return v;
+}
+{
+  via(BR, 10.5, 10, 40, 0.6);
+  via(RUA_BASE, 4.2, 6, 8);
+  for (const m of MORROS) { via(m.rua, 3.6, 5, 10); for (const b of m.becos) via(b, 1.4, 2.4, 2); }
+  // rasteriza: em cada célula fica a via cuja BORDA está mais perto
+  const N = NX * NZ, borda = new Float32Array(N).fill(1e9), hv = new Float32Array(N), peso = new Float32Array(N);
+  for (const v of VIAS) {
+    const R = v.meia + v.margem, rc = Math.ceil(R / RES);
+    for (let k = 0; k < v.P.length; k++) {
+      const [px, pz] = v.P[k], ci = Math.round((px + MX) / RES), cj = Math.round((pz + MZ) / RES);
+      for (let j = Math.max(0, cj - rc); j <= Math.min(NZ - 1, cj + rc); j++) for (let i = Math.max(0, ci - rc); i <= Math.min(NX - 1, ci + rc); i++) {
+        const x = -MX + i * RES, z = -MZ + j * RES, d = Math.hypot(x - px, z - pz); if (d > R) continue;
+        const idx = j * NX + i, b = d - v.meia; if (b >= borda[idx]) continue;
+        borda[idx] = b; hv[idx] = v.h[k]; peso[idx] = smooth(R, v.meia, d);
+      }
+    }
+  }
+  for (let k = 0; k < N; k++) if (borda[k] < 1e8) ALT[k] = ALT[k] * (1 - peso[k]) + hv[k] * peso[k];
+}
 export function alturaTerreno(x, z) {
   const fx = clamp((x + MX) / RES, 0, NX - 1.001), fz = clamp((z + MZ) / RES, 0, NZ - 1.001), i = fx | 0, j = fz | 0, tx = fx - i, tz = fz - j;
   const a = ALT[j * NX + i], b = ALT[j * NX + i + 1], c = ALT[(j + 1) * NX + i], d = ALT[(j + 1) * NX + i + 1];
@@ -173,49 +203,100 @@ export const VEICULOS_INICIAIS = [];
 const perto = (L, x, z, r) => distLinha(L, x, z)[0] < r;
 function livre(x, z, folga = 0) { let ok = true; caixasPerto(x, z, folga + 4, b => { if (ok && x + folga > b.x0 - 0.4 && x - folga < b.x1 + 0.4 && z + folga > b.z0 - 0.4 && z - folga < b.z1 + 0.4) ok = false; }); return ok; }
 const PINTADAS = ['#e9c46a', '#f4a261', '#e76f51', '#8ecae6', '#90be6d', '#f1faee', '#ffafcc', '#cdb4db', '#a8dadc', '#ffd6a5'];
-function casa(x, z, w, dd, andares, opts = {}) {
-  const hs = [alturaTerreno(x - w / 2, z - dd / 2), alturaTerreno(x + w / 2, z - dd / 2), alturaTerreno(x - w / 2, z + dd / 2), alturaTerreno(x + w / 2, z + dd / 2)];
-  const y0 = Math.min(...hs) - 0.4, yTop = Math.max(...hs) + andares * 2.9;
-  const tijolo = opts.cor ? false : rnd() < 0.62;
-  const c = addCaixa({ x0: x - w / 2, y0, z0: z - dd / 2, x1: x + w / 2, y1: yTop, z1: z + dd / 2, mat: 'tijolo', tipo: 'casa' });
-  CASAS.push({ b: c, cor: opts.cor || (tijolo ? '#b5654a' : PINTADAS[(rnd() * PINTADAS.length) | 0]), tijolo });
-  // janelas de vidro em cada andar (quebram com tiro)
-  const base = Math.max(...hs);
+export const PORTAS = [], VERGALHOES = [];
+const CORES_PORTA = ['#3b2a1e', '#5a5f66', '#2d4a6b', '#6b2d2d', '#4a5a32'];
+const ANDAR = 2.8;
+// janelas de vidro numa caixa (quebram com tiro); "base" = chão do primeiro andar visível
+function janelas(x, z, w, dd, base, andares, yTop, chance, vitrine) {
   for (let a = 0; a < andares; a++) {
-    const yj = base + a * 2.9 + 1.25; if (yj > yTop - 0.6) break;
+    const yj = base + a * ANDAR + 1.45; if (yj > yTop - 0.7) break;
     for (const lado of [0, 1, 2, 3]) {
-      if (rnd() > (opts.janelas ?? 0.55)) continue;
-      const largo = lado < 2 ? w : dd; if (largo < 3) continue;
-      const off = R(-largo / 2 + 1, largo / 2 - 1), tj = opts.vitrine ? Math.min(largo - 1, 4) : 0.9, hj = opts.vitrine ? 2.2 : 0.9;
-      let cx, cz, sx, sz;
-      if (lado === 0) { cx = x + off; cz = z - dd / 2 - 0.03; sx = tj; sz = 0.05; } else if (lado === 1) { cx = x + off; cz = z + dd / 2 + 0.03; sx = tj; sz = 0.05; }
-      else if (lado === 2) { cx = x - w / 2 - 0.03; cz = z + off; sx = 0.05; sz = tj; } else { cx = x + w / 2 + 0.03; cz = z + off; sx = 0.05; sz = tj; }
-      const yy = opts.vitrine ? base + 1.3 : yj;
-      if (yy - hj / 2 < alturaTerreno(cx, cz) + 0.3) continue;
-      const idx = JANELAS.length; const bv = caixaCentro(cx, yy, cz, sx, hj, sz, 'vidro', { vidro: idx });
-      JANELAS.push({ b: bv, idx, quebrada: false });
-      if (opts.vitrine) break;
+      if (rnd() > chance) continue;
+      const largo = lado < 2 ? w : dd; if (largo < 2.6) continue;
+      const n = vitrine ? 1 : (largo > 4.6 && rnd() < 0.5 ? 2 : 1);
+      for (let q = 0; q < n; q++) {
+        const off = n === 1 ? R(-largo / 2 + 1, largo / 2 - 1) : (q ? 1 : -1) * largo / 4, tj = vitrine ? Math.min(largo - 1, 4) : R(0.9, 1.2), hj = vitrine ? 2.2 : 1.05;
+        let cx, cz, sx, sz;
+        if (lado === 0) { cx = x + off; cz = z - dd / 2 - 0.03; sx = tj; sz = 0.05; } else if (lado === 1) { cx = x + off; cz = z + dd / 2 + 0.03; sx = tj; sz = 0.05; }
+        else if (lado === 2) { cx = x - w / 2 - 0.03; cz = z + off; sx = 0.05; sz = tj; } else { cx = x + w / 2 + 0.03; cz = z + off; sx = 0.05; sz = tj; }
+        const yy = vitrine ? base + 1.3 : yj;
+        if (yy - hj / 2 < alturaTerreno(cx, cz) + 0.4) continue;
+        const idx = JANELAS.length; const bv = caixaCentro(cx, yy, cz, sx, hj, sz, 'vidro', { vidro: idx });
+        JANELAS.push({ b: bv, idx, quebrada: false });
+      }
+      if (vitrine) return;
     }
   }
-  // caixa d'água azul na laje
-  if (!opts.semCaixa && rnd() < 0.55 && w > 4 && dd > 4) { const cx = x + R(-w / 2 + 1, w / 2 - 1), cz = z + R(-dd / 2 + 1, dd / 2 - 1); CAIXAS_DAGUA.push([cx, yTop, cz]); caixaCentro(cx, yTop + 0.55, cz, 1.3, 1.1, 1.3, 'plastico'); }
+}
+// porta no lado mais baixo da casa que dá para a rua/beco (só visual)
+function porta(x, z, w, dd, lado, cor) {
+  const p = lado === 0 ? [x + R(-w / 4, w / 4), z - dd / 2] : lado === 1 ? [x + R(-w / 4, w / 4), z + dd / 2] : lado === 2 ? [x - w / 2, z + R(-dd / 4, dd / 4)] : [x + w / 2, z + R(-dd / 4, dd / 4)];
+  const hp = alturaTerreno(p[0], p[1]), fx = lado >= 2, e = 0.06;
+  PORTAS.push({ x0: p[0] - (fx ? e : 0.45), x1: p[0] + (fx ? e : 0.45), z0: p[1] - (fx ? 0.45 : e), z1: p[1] + (fx ? 0.45 : e), y0: hp, y1: hp + 2.05, cor: cor || CORES_PORTA[(rnd() * CORES_PORTA.length) | 0] });
+}
+function casa(x, z, w, dd, andares, opts = {}) {
+  const hs = [alturaTerreno(x - w / 2, z - dd / 2), alturaTerreno(x + w / 2, z - dd / 2), alturaTerreno(x - w / 2, z + dd / 2), alturaTerreno(x + w / 2, z + dd / 2)];
+  const hMin = Math.min(...hs), hMax = Math.max(...hs);
+  // na encosta a casa tem "pé" de concreto do lado de baixo; os andares contam do lado de cima
+  const y0 = hMin - 0.4, yTop = hMax + 0.15 + andares * ANDAR;
+  const sorteio = rnd(), tijolo = opts.cor ? false : sorteio < 0.55, cinza = !opts.cor && !tijolo && sorteio < 0.72;
+  const cor = opts.cor || (tijolo ? '#b5654a' : cinza ? '#a7a49d' : PINTADAS[(rnd() * PINTADAS.length) | 0]);
+  const c = addCaixa({ x0: x - w / 2, y0, z0: z - dd / 2, x1: x + w / 2, y1: yTop, z1: z + dd / 2, mat: 'tijolo', tipo: 'casa' });
+  CASAS.push({ b: c, cor, tijolo });
+  janelas(x, z, w, dd, hMax + 0.15, andares, yTop, opts.janelas ?? 0.6, opts.vitrine);
+  if (!opts.semPorta) { const ladoBaixo = hs.indexOf(hMin); porta(x, z, w, dd, opts.ladoPorta ?? [0, 0, 1, 1][ladoBaixo] ?? 0); }
+  if (opts.simples) return c;
+  // puxadinho: mais um cômodo em cima, menor, encostado num canto (a laje que sobra vira varanda)
+  let topo = yTop;
+  if (rnd() < 0.42 && w > 4.4 && dd > 4.4) {
+    const fw = R(0.5, 0.75), fd = R(0.5, 0.75), sw = w * fw, sd = dd * fd, cx = x + (rnd() < 0.5 ? -1 : 1) * (w - sw) / 2, cz = z + (rnd() < 0.5 ? -1 : 1) * (dd - sd) / 2;
+    const y1 = yTop + ANDAR;
+    const cTijolo = tijolo || rnd() < 0.5;
+    const b2 = addCaixa({ x0: cx - sw / 2, y0: yTop, z0: cz - sd / 2, x1: cx + sw / 2, y1, z1: cz + sd / 2, mat: 'tijolo', tipo: 'casa' });
+    CASAS.push({ b: b2, cor: cTijolo ? '#b5654a' : cor, tijolo: cTijolo });
+    janelas(cx, cz, sw, sd, yTop, 1, y1, 0.5);
+    topo = y1;
+    if (rnd() < 0.6) CAIXAS_DAGUA.push([cx + R(-sw / 4, sw / 4), y1, cz + R(-sd / 4, sd / 4)]);
+  } else {
+    // laje aberta: mureta em volta (dá cobertura para quem está no telhado) e ferro de espera nos cantos
+    if (rnd() < 0.55) {
+      const hm = R(0.85, 1.05), e = 0.14;
+      for (const [cx, cz, sx, sz] of [[x, z - dd / 2 + e / 2, w, e], [x, z + dd / 2 - e / 2, w, e], [x - w / 2 + e / 2, z, e, dd - 2 * e], [x + w / 2 - e / 2, z, e, dd - 2 * e]]) {
+        const b = caixaCentro(cx, yTop + hm / 2, cz, sx, hm, sz, 'tijolo', { tipo: 'parapeito' }); CASAS.push({ b, cor, tijolo, parapeito: true });
+      }
+    }
+    if (rnd() < 0.45) for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) VERGALHOES.push([x + sx * (w / 2 - 0.15), yTop, z + sz * (dd / 2 - 0.15), R(0.5, 1.1)]);
+    if (!opts.semCaixa && rnd() < 0.5 && w > 4 && dd > 4) { const cx = x + R(-w / 2 + 1.2, w / 2 - 1.2), cz = z + R(-dd / 2 + 1.2, dd / 2 - 1.2); CAIXAS_DAGUA.push([cx, yTop, cz]); caixaCentro(cx, yTop + 0.55, cz, 1.3, 1.1, 1.3, 'plastico'); }
+  }
   return c;
+}
+// a casa (retângulo) não pode invadir rua, beco nem a BR: testa o centro, os cantos e o meio dos lados
+function lotelivre(m, x, z, w, dd) {
+  const pts = [[0, 0], [-1, -1], [1, -1], [-1, 1], [1, 1], [0, -1], [0, 1], [-1, 0], [1, 0]];
+  for (const [a, b] of pts) {
+    const px = x + a * w / 2, pz = z + b * dd / 2;
+    if (perto(BR, px, pz, 14) || perto(m.rua, px, pz, 4.6)) return false;
+    for (const L of m.becos) if (perto(L, px, pz, 1.7)) return false;
+  }
+  return true;
 }
 // ---------- favelas ----------
 for (const m of MORROS) {
-  const passo = 6.4;
+  const passo = 6.2;
   for (let gz = m.z - m.r; gz <= m.z + m.r; gz += passo) for (let gx = m.x - m.r; gx <= m.x + m.r; gx += passo) {
-    const x = gx + R(-1.1, 1.1), z = gz + R(-1.1, 1.1), d = Math.hypot(x - m.x, z - m.z);
-    if (d > m.r * 0.94 || d < 13) continue;
-    if (alturaTerreno(x, z) < 2.2) continue;
-    if (perto(BR, x, z, 19) || perto(m.rua, x, z, 6.5) || m.becos.some(L => perto(L, x, z, 3.4))) continue;
+    const x = gx + R(-0.9, 0.9), z = gz + R(-0.9, 0.9), d = Math.hypot(x - m.x, z - m.z);
+    if (d > m.r * 0.95 || d < 15) continue;
     if (Math.hypot(x - m.qg.x, z - m.qg.z) < 13) continue;
-    const w = R(4.2, 5.8), dd = R(4.2, 5.8), andares = 1 + (rnd() < 0.7 ? 1 : 0) + (rnd() < 0.45 ? 1 : 0) + (d < m.r * 0.5 && rnd() < 0.3 ? 1 : 0);
+    if (rnd() < 0.06) continue; // terreno baldio / quintal
+    // casas maiores e mais altas embaixo; menores e coladas lá em cima
+    const k = d / m.r, w = R(4.0, 5.6), dd = R(4.0, 5.6);
+    if (!lotelivre(m, x, z, w, dd)) { if (lotelivre(m, x, z, w * 0.7, dd * 0.7)) casa(x, z, w * 0.7, dd * 0.7, 1 + (rnd() < 0.5 ? 1 : 0)); continue; }
+    const andares = 1 + (rnd() < 0.75 ? 1 : 0) + (rnd() < (k < 0.6 ? 0.45 : 0.25) ? 1 : 0);
     casa(x, z, w, dd, andares);
   }
   // QG da facção: casarão + sacos de areia + loja de munição
   const qx = m.qg.x, qz = m.qg.z, hq = alturaTerreno(qx, qz);
-  casa(qx + 7, qz + 6, 7, 6, 2, { cor: '#6d597a', semCaixa: false, janelas: 0.8 });
+  casa(qx + 7, qz + 6, 7, 6, 2, { cor: '#6d597a', semCaixa: false, janelas: 0.8, simples: true });
   for (let k = 0; k < 6; k++) { const a = k / 6 * Math.PI * 2; const sx = qx + Math.cos(a) * 9, sz = qz + Math.sin(a) * 9; caixaCentro(sx, alturaTerreno(sx, sz) + 0.5, sz, 2.4, 1.0, 0.8, 'terra', { tipo: 'saco' }); }
   LOJAS.push({ x: qx - 4, z: qz - 3, lado: m.lado, nome: 'Loja de munição do ' + LADOS[m.lado].sigla });
   caixaCentro(qx - 4, alturaTerreno(qx - 4, qz - 3) + 1.2, qz - 3 - 1.4, 2.6, 2.4, 0.4, 'madeira', { tipo: 'loja' });
@@ -234,22 +315,22 @@ for (const m of MORROS) {
 // ---------- BR-707: mureta central, carros abandonados, postes, ônibus queimado ----------
 for (let i = 2; i < BR.length - 2; i += 1) {
   const [x, z] = BR[i]; if (Math.abs(x) > MX - 40) continue;
-  if (i % 2 === 0 && Math.abs(x - POSTO.x) > 30 && Math.abs(x) > 14) { const [x2, z2] = BR[i + 1]; caixaCentro((x + x2) / 2, 1.45, (z + z2) / 2, Math.abs(x2 - x) + 0.1, 0.9, Math.max(0.6, Math.abs(z2 - z) + 0.6), 'concreto', { tipo: 'mureta' }); }
-  if (i % 9 === 0) for (const l of [-1, 1]) { POSTES.push([x, 1, z + l * 11.5]); }
+  if (i % 2 === 0 && Math.abs(x - POSTO.x) > 30 && Math.abs(x) > 14) { const [x2, z2] = BR[i + 1]; caixaCentro((x + x2) / 2, alturaTerreno((x + x2) / 2, (z + z2) / 2) + 0.45, (z + z2) / 2, Math.abs(x2 - x) + 0.1, 0.9, Math.max(0.6, Math.abs(z2 - z) + 0.6), 'concreto', { tipo: 'mureta' }); }
+  if (i % 9 === 0) for (const l of [-1, 1]) { POSTES.push([x, alturaTerreno(x, z + l * 11.5), z + l * 11.5]); }
 }
-for (let k = 0; k < 10; k++) { const x = -MX + 70 + k * 62 + R(-10, 10); if (Math.abs(x - POSTO.x) < 25 || Math.abs(x) < 16) continue; const z = brZ(x) + (rnd() < 0.5 ? -4.5 : 4.5); const queimado = rnd() < 0.5; caixaCentro(x, 1.0 + 0.8, z, 4.3, 1.5, 1.9, 'metal', { tipo: 'carro', cor: queimado ? '#2b2522' : PINTADAS[(rnd() * PINTADAS.length) | 0], queimado }); }
-{ const x = 40, z = brZ(40) - 4; caixaCentro(x, 1 + 1.6, z, 11, 3.2, 2.6, 'metal', { tipo: 'onibus', cor: '#2b2522', queimado: true }); }
+for (let k = 0; k < 10; k++) { const x = -MX + 70 + k * 62 + R(-10, 10); if (Math.abs(x - POSTO.x) < 25 || Math.abs(x) < 16) continue; const z = brZ(x) + (rnd() < 0.5 ? -4.5 : 4.5); const queimado = rnd() < 0.5; caixaCentro(x, alturaTerreno(x, z) + 0.8, z, 4.3, 1.5, 1.9, 'metal', { tipo: 'carro', cor: queimado ? '#2b2522' : PINTADAS[(rnd() * PINTADAS.length) | 0], queimado }); }
+{ const x = 40, z = brZ(40) - 4; caixaCentro(x, alturaTerreno(x, z) + 1.6, z, 11, 3.2, 2.6, 'metal', { tipo: 'onibus', cor: '#2b2522', queimado: true }); }
 // pontos de controle na BR
 PONTOS.push({ id: 'trevo', nome: 'Trevo da BR', x: 0, z: brZ(0), r: 14, dono: -1, progresso: 0, quem: -1 });
 PONTOS.push({ id: 'posto', nome: 'Posto Serra Alta', x: POSTO.x, z: brZ(POSTO.x) + 20, r: 14, dono: -1, progresso: 0, quem: -1 });
 // ---------- posto de gasolina ----------
 {
   const px = POSTO.x, pz = brZ(px) + 20;
-  for (let j = 0; j < 4; j++) for (let i = 0; i < 4; i++) { if (alturaTerreno(px, pz) > 3) break; }
-  casa(px + 10, pz + 7, 12, 8, 1, { cor: '#f1f1f1', vitrine: true, janelas: 1, semCaixa: true });
-  for (const [dx, dz] of [[-7, -5], [7, -5], [-7, 5], [7, 5]]) caixaCentro(px + dx, 1 + 2.5, pz + dz, 0.5, 5, 0.5, 'metal', { tipo: 'pilar' });
-  caixaCentro(px, 1 + 5.2, pz, 16, 0.4, 12, 'metal', { tipo: 'cobertura', semChao: false, cor: '#c1121f' });
-  for (const dx of [-3.5, 3.5]) { caixaCentro(px + dx, 1 + 0.8, pz, 0.8, 1.6, 0.6, 'metal', { tipo: 'bomba' }); BOMBAS.push({ x: px + dx, z: pz + 1.4 }); BOMBAS.push({ x: px + dx, z: pz - 1.4 }); }
+  const hp = alturaTerreno(px, pz);
+  casa(px + 10, pz + 7, 12, 8, 1, { cor: '#f1f1f1', vitrine: true, janelas: 1, semCaixa: true, simples: true, ladoPorta: 0 });
+  for (const [dx, dz] of [[-7, -5], [7, -5], [-7, 5], [7, 5]]) caixaCentro(px + dx, hp + 2.5, pz + dz, 0.5, 5, 0.5, 'metal', { tipo: 'pilar' });
+  caixaCentro(px, hp + 5.2, pz, 16, 0.4, 12, 'metal', { tipo: 'cobertura', semChao: false, cor: '#c1121f' });
+  for (const dx of [-3.5, 3.5]) { caixaCentro(px + dx, hp + 0.8, pz, 0.8, 1.6, 0.6, 'metal', { tipo: 'bomba' }); BOMBAS.push({ x: px + dx, z: pz + 1.4 }); BOMBAS.push({ x: px + dx, z: pz - 1.4 }); }
   LOJAS.push({ x: px + 10, z: pz + 2.2, lado: -1, nome: 'Loja de munição do posto' });
 }
 // ---------- base da polícia ----------
@@ -260,7 +341,7 @@ PONTOS.push({ id: 'posto', nome: 'Posto Serra Alta', x: POSTO.x, z: brZ(POSTO.x)
     const cx = bx + (x0 + x1) / 2, cz = bz + (z0 + z1) / 2, sx = Math.max(0.6, Math.abs(x1 - x0)), sz = Math.max(0.6, Math.abs(z1 - z0));
     caixaCentro(cx, hb + 1.5, cz, sx, 3, sz, 'concreto', { tipo: 'muro' });
   }
-  casa(bx - 16, bz - 8, 24, 12, 2, { cor: '#d9d9d9', janelas: 0.9, semCaixa: true });
+  casa(bx - 16, bz - 8, 24, 12, 2, { cor: '#d9d9d9', janelas: 0.9, semCaixa: true, simples: true, ladoPorta: 1 });
   caixaCentro(bx + 22, hb + 0.06, bz - 8, 14, 0.12, 14, 'concreto', { tipo: 'heliponto', semChao: false });
   LOJAS.push({ x: bx - 2, z: bz + 6, lado: 3, nome: 'Arsenal da base' });
   caixaCentro(bx - 2, hb + 1.2, bz + 7.6, 3, 2.4, 0.5, 'metal', { tipo: 'loja' });
@@ -275,7 +356,7 @@ PONTOS.push({ id: 'posto', nome: 'Posto Serra Alta', x: POSTO.x, z: brZ(POSTO.x)
 for (const x of [-120, 95, 160, -280, 290]) VEICULOS_INICIAIS.push({ tipo: 'carro', x, z: brZ(x) + 9.5, yaw: Math.PI / 2, lado: -1 });
 VEICULOS_INICIAIS.push({ tipo: 'carro', x: POSTO.x - 12, z: brZ(POSTO.x) + 26, yaw: 0, lado: -1 });
 // postes e fios nas favelas
-for (const m of MORROS) for (const L of m.becos) for (let k = 0; k < L.length; k += 7) { const [x, z] = L[k]; if (!livre(x + 1.6, z, 0.2)) continue; POSTES.push([x + 1.6, alturaTerreno(x + 1.6, z), z]); }
+for (const m of MORROS) for (const L of m.becos) for (let k = 3; k < L.length - 1; k += 7) { const [x, z] = L[k], [x2, z2] = L[k + 1], dl = Math.hypot(x2 - x, z2 - z) || 1, px = x - (z2 - z) / dl * 1.5, pz = z + (x2 - x) / dl * 1.5; if (!livre(px, pz, 0.15)) continue; POSTES.push([px, alturaTerreno(px, pz), pz]); }
 for (let i = 0; i < POSTES.length; i++) { const a = POSTES[i]; for (let j = i + 1; j < Math.min(POSTES.length, i + 6); j++) { const b = POSTES[j]; const d = Math.hypot(a[0] - b[0], a[2] - b[2]); if (d > 4 && d < 24) FIOS.push([a, b]); } }
 // árvores nos morros vazios do fundo e no pé dos morros
 for (let k = 0; k < 520; k++) { const x = R(-MX + 10, MX - 10), z = R(-MZ + 10, MZ - 10), h = alturaTerreno(x, z); if (perto(BR, x, z, 16)) continue; if (MORROS.some(m => Math.hypot(x - m.x, z - m.z) < m.r)) continue; if (Math.hypot(x - BASE_POLICIA.x, z - BASE_POLICIA.z) < 50) continue; if (!livre(x, z, 1)) continue; ARVORES.push([x, h, z, R(0.8, 1.4)]); if (rnd() < 0.5) caixaCentro(x, h + 2, z, 0.6, 4, 0.6, 'madeira', { tipo: 'tronco' }); }
@@ -329,7 +410,7 @@ export function caminho(de, para, limite = 4000) {
 function texCanvas(w, h, f) { const c = document.createElement('canvas'); c.width = w; c.height = h; f(c.getContext('2d'), w, h); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.wrapS = t.wrapT = THREE.RepeatWrapping; t.anisotropy = 8; return t; }
 export const TEX = {
   tijolo: texCanvas(256, 256, (g, w, h) => { g.fillStyle = '#c9c2b5'; g.fillRect(0, 0, w, h); for (let r = 0; r < 16; r++) for (let c = 0; c < 8; c++) { const x = c * 32 + (r % 2 ? 16 : 0), y = r * 16; const v = 150 + Math.random() * 60 | 0; g.fillStyle = `rgb(${v},${v * 0.55 | 0},${v * 0.42 | 0})`; g.fillRect(x + 1.5, y + 1.5, 29, 13); g.fillRect(x - 256 + 1.5, y + 1.5, 29, 13); } }),
-  reboco: texCanvas(256, 256, (g, w, h) => { g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); for (let i = 0; i < 4000; i++) { const v = 200 + Math.random() * 55 | 0; g.fillStyle = `rgba(${v},${v},${v},.35)`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } for (let i = 0; i < 18; i++) { g.fillStyle = 'rgba(90,70,50,.10)'; g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, 20 + Math.random() * 40, 8 + Math.random() * 30, 0, 0, 7); g.fill(); } }),
+  reboco: texCanvas(256, 256, (g, w, h) => { g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); for (let i = 0; i < 4000; i++) { const v = 200 + Math.random() * 55 | 0; g.fillStyle = `rgba(${v},${v},${v},.35)`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } for (let i = 0; i < 10; i++) { g.fillStyle = 'rgba(90,70,50,.05)'; g.beginPath(); g.ellipse(Math.random() * w, Math.random() * h, 20 + Math.random() * 40, 8 + Math.random() * 30, 0, 0, 7); g.fill(); } }),
   asfalto: texCanvas(256, 256, (g, w, h) => { g.fillStyle = '#3b3d42'; g.fillRect(0, 0, w, h); for (let i = 0; i < 3500; i++) { const v = 45 + Math.random() * 40 | 0; g.fillStyle = `rgb(${v},${v},${v + 4})`; g.fillRect(Math.random() * w, Math.random() * h, 2, 2); } }),
   chao: texCanvas(256, 256, (g, w, h) => { g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h); for (let i = 0; i < 5000; i++) { const v = 170 + Math.random() * 85 | 0; g.fillStyle = `rgba(${v},${v},${v},.5)`; g.fillRect(Math.random() * w, Math.random() * h, 3, 3); } }),
 };
@@ -373,16 +454,17 @@ export function construirMalhas(cena, qualidade) {
     const p = [], idx = []; let n = 0;
     for (let i = 0; i < L.length; i++) {
       const a = L[Math.max(0, i - 1)], b = L[Math.min(L.length - 1, i + 1)], dx = b[0] - a[0], dz = b[1] - a[1], d = Math.hypot(dx, dz) || 1, nx = -dz / d, nz = dx / d;
-      for (const s of [-1, 1]) { const x = L[i][0] + nx * larg / 2 * s, z = L[i][1] + nz * larg / 2 * s; p.push(x, alturaTerreno(x, z) + dy, z); }
-      if (i) idx.push(n - 2, n, n - 1, n - 1, n, n + 1); n += 2;
+      const hc = alturaTerreno(L[i][0], L[i][1]);
+      for (const s of [-1, 1]) { const x = L[i][0] + nx * larg / 2 * s, z = L[i][1] + nz * larg / 2 * s; p.push(x, Math.max(alturaTerreno(x, z), hc) + dy, z); }
+      if (i) idx.push(n - 2, n - 1, n, n - 1, n + 1, n); n += 2;
     }
     const gg = new THREE.BufferGeometry(); gg.setAttribute('position', new THREE.Float32BufferAttribute(p, 3)); gg.setIndex(idx); gg.computeVertexNormals();
     const mm = new THREE.Mesh(gg, matMundo(TEX.asfalto, 0.25, { color: cor, polygonOffset: true, polygonOffsetFactor: -2 })); mm.receiveShadow = true; return mm;
   };
-  g.add(faixa(BR, 21, 0xffffff));
+  g.add(faixa(linha(BR, 2), 21, 0xffffff, 0.08));
   const listras = []; for (let i = 0; i < BR.length - 1; i += 2) { const [x, z] = BR[i]; if (Math.abs(x) > MX - 30) continue; for (const o of [-5.2, 5.2]) listras.push([x, z + o]); }
-  g.add(faixa(RUA_BASE, 8, 0xdddddd));
-  for (const m of MORROS) g.add(faixa(m.rua, 7, 0xbfbfbf));
+  g.add(faixa(linha(RUA_BASE, 2), 8, 0xdddddd, 0.08));
+  for (const m of MORROS) { { const fr = faixa(linha(m.rua, 2), 7, 0xffffff, 0.08); fr.material = matMundo(TEX.asfalto, 0.25, { color: 0xd0ccc4, polygonOffset: true, polygonOffsetFactor: -2 }); g.add(fr); } for (const b of m.becos) { const fb = faixa(linha(b, 1.5), 2.6, 0xd8d2c4, 0.07); fb.material = matMundo(TEX.chao, 0.5, { color: 0xb9b2a6, polygonOffset: true, polygonOffsetFactor: -2 }); g.add(fb); } }
   // caixas instanciadas por tipo
   const geoCaixa = new THREE.BoxGeometry(1, 1, 1);
   const inst = (lista, mat, cast = true) => { if (!lista.length) return null; const im = new THREE.InstancedMesh(geoCaixa, mat, lista.length); const o = new THREE.Object3D(), cc = new THREE.Color(); lista.forEach((b, k) => { o.position.set((b.x0 + b.x1) / 2, (b.y0 + b.y1) / 2, (b.z0 + b.z1) / 2); o.scale.set(b.x1 - b.x0, b.y1 - b.y0, b.z1 - b.z0); o.updateMatrix(); im.setMatrixAt(k, o.matrix); im.setColorAt(k, cc.set(b.cor || '#ffffff')); }); im.instanceMatrix.needsUpdate = true; im.castShadow = cast && qualidade > 0; im.receiveShadow = true; g.add(im); return im; };
@@ -393,7 +475,7 @@ export function construirMalhas(cena, qualidade) {
   inst([...porTipo('carro'), ...porTipo('onibus'), ...porTipo('conteiner'), ...porTipo('cobertura'), ...porTipo('bomba'), ...porTipo('loja'), ...porTipo('antena')].map(b => Object.assign({}, b, { cor: b.cor || (b.tipo === 'bomba' ? '#d62828' : b.tipo === 'loja' ? '#6b4f2a' : '#9aa0a6') })), new THREE.MeshLambertMaterial({ color: 0xffffff }));
   inst([...porTipo('saco'), ...porTipo('pneus'), ...porTipo('tronco')].map(b => Object.assign({}, b, { cor: b.tipo === 'saco' ? '#b9a27a' : b.tipo === 'pneus' ? '#1d1d1d' : '#5b4630' })), new THREE.MeshLambertMaterial({ color: 0xffffff }));
   // laje (topo cinza) das casas
-  const lajes = CASAS.map(c => ({ x0: c.b.x0 - 0.05, x1: c.b.x1 + 0.05, z0: c.b.z0 - 0.05, z1: c.b.z1 + 0.05, y0: c.b.y1 - 0.02, y1: c.b.y1 + 0.12, cor: '#8c8c8c' }));
+  const lajes = CASAS.filter(c => !c.parapeito).map(c => ({ x0: c.b.x0 - 0.05, x1: c.b.x1 + 0.05, z0: c.b.z0 - 0.05, z1: c.b.z1 + 0.05, y0: c.b.y1 - 0.02, y1: c.b.y1 + 0.12, cor: '#8c8c8c' }));
   inst(lajes, matMundo(TEX.chao, 0.3), false);
   // janelas (vidro) — uma malha só; quebrar = sumir a instância
   const matVidro = new THREE.MeshPhongMaterial({ color: 0x7fa7c4, specular: 0xffffff, shininess: 90, transparent: true, opacity: 0.55 });
@@ -403,6 +485,10 @@ export function construirMalhas(cena, qualidade) {
   // parte escura atrás de cada janela (dá a ideia de cômodo)
   const fundos = JANELAS.map(j => { const b = j.b, fx = (b.x1 - b.x0) < 0.2, e = 0.04; return { x0: b.x0 - (fx ? e : 0), x1: b.x1 + (fx ? e : 0), z0: b.z0 - (fx ? 0 : e), z1: b.z1 + (fx ? 0 : e), y0: b.y0, y1: b.y1, cor: '#1e2329' }; });
   inst(fundos, new THREE.MeshBasicMaterial({ color: 0xffffff }), false).renderOrder = -1;
+  // portas (só visual)
+  if (PORTAS.length) inst(PORTAS, new THREE.MeshLambertMaterial({ color: 0xffffff }), false);
+  // ferro de espera nas lajes
+  if (VERGALHOES.length) { const pv = []; for (const [x, y, z, h] of VERGALHOES) for (const [dx, dz] of [[0, 0], [0.12, 0], [0, 0.12], [0.12, 0.12]]) pv.push(x + dx - 0.06, y, z + dz - 0.06, x + dx - 0.06, y + h, z + dz - 0.06); const gv = new THREE.BufferGeometry(); gv.setAttribute('position', new THREE.Float32BufferAttribute(pv, 3)); g.add(new THREE.LineSegments(gv, new THREE.LineBasicMaterial({ color: 0x5a3b2a }))); }
   // caixas d'água
   if (CAIXAS_DAGUA.length) { const im = new THREE.InstancedMesh(new THREE.CylinderGeometry(0.62, 0.55, 1.1, 10), new THREE.MeshLambertMaterial({ color: 0x2f6fb5 }), CAIXAS_DAGUA.length); CAIXAS_DAGUA.forEach(([x, y, z], k) => { o.position.set(x, y + 0.55, z); o.scale.set(1, 1, 1); o.updateMatrix(); im.setMatrixAt(k, o.matrix); }); im.castShadow = qualidade > 0; g.add(im); }
   // postes, fios, árvores
