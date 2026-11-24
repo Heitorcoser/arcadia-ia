@@ -19,6 +19,19 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Gol de Placa** | Esporte | Futebol arcade | Partidas de 2–6 min |
 | **Laboratório dos Elementos** | Simulação | Sandbox de química (educativo) | Livre |
 | **Ladeira Abaixo** | Corrida | Carrinho de rolimã (física) | Corridas de ~1 min |
+| **Zona Quente** | Tiro em primeira pessoa | FPS tático de domínio de pontos | Partidas de até 15 min |
+
+### Zona Quente
+Tiro em primeira pessoa na Serra Alta: três morros fictícios ligados pela rodovia BR-707.
+
+- 🏴 **4 lados**: Bonde do Trovão, Tropa da Garça e Os Corvos (cada facção por si) e a **Força Integrada** — BOEPF, PCM e EXANTF lutando juntos, sem fogo amigo
+- 🔫 **9 armas** (pistola, revólver, 2 submetralhadoras, AK-47, M4, escopeta, fuzil de precisão com luneta, metralhadora) + granada de fragmentação e de fumaça
+- 🎯 **Balística**: bala com velocidade e queda, perda de dano, penetração (madeira, vidro, lataria), ricochete e dano por região
+- 🔊 **Sons reais** (CC0/CC-BY/domínio público): tiros gravados de perto e de longe, zunido de bala passando, vidro quebrando e impacto por material, com atraso pela velocidade do som
+- 📦 **Munição limitada** (loja de munição grátis) e ⛽ **gasolina** (posto grátis na BR); carros, viatura, blindado e helicóptero
+- 🤖 Bots com visão, audição, granadas e idas à loja; modo **Domínio** com 5 pontos; toque no celular
+
+**Controles:** `WASD` anda · `Shift` corre · mouse mira/atira · botão direito mira pela alça · `R` recarrega · `G`/`T` granadas · `F` interage · `Q`/`E` inclina · `M` mapa · `Esc` pausa
 
 ### Ladeira Abaixo
 Corrida de carrinho de rolimã em 3D, sem motor: quem empurra é a gravidade.

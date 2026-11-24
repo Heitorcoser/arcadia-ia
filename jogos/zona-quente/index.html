@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Zona Quente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700;800&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--ac:#ffb703;--txt:#eef2f7;--muted:#9aa8bb;--linha:rgba(255,255,255,.14);--painel:rgba(10,13,18,.88)}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0a0c10;color:var(--txt);font-family:Inter,system-ui,sans-serif;user-select:none;-webkit-tap-highlight-color:transparent}
+  button,input,select{font:inherit;color:inherit}
+  button{cursor:pointer}
+  .cond{font-family:"Barlow Condensed",Inter,sans-serif;letter-spacing:.3px}
+  #cv{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #hud{position:fixed;inset:0;pointer-events:none;display:none}
+  #hud.on{display:block}
+  /* mira */
+  #mira{position:absolute;left:50%;top:50%;width:0;height:0}
+  #mira i{position:absolute;background:#fff;box-shadow:0 0 2px #000}
+  #mira .p{width:2px;height:2px;left:-1px;top:-1px}
+  #hit{position:absolute;left:50%;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;opacity:0;transition:opacity .08s}
+  #hit i{position:absolute;width:10px;height:2px;background:#fff;box-shadow:0 0 2px #000}
+  #hit.cab i{background:#ffd166}
+  #hit.morte i{background:#ff4d4d;height:3px}
+  /* barras */
+  .bl{position:absolute;text-shadow:0 1px 3px rgba(0,0,0,.9)}
+  #bl-arma{right:22px;bottom:20px;text-align:right}
+  #bl-arma .mun{font-size:52px;font-weight:800;line-height:.9}
+  #bl-arma .mun small{font-size:24px;color:var(--muted);font-weight:700}
+  #bl-arma .nome{font-size:20px;font-weight:700;color:#d6dde8}
+  #bl-arma .extra{font-size:16px;color:#c8d0dc;margin-top:2px}
+  #bl-vida{left:22px;bottom:20px;width:260px}
+  .barra{height:10px;background:rgba(255,255,255,.12);border-radius:3px;overflow:hidden;margin-top:4px}
+  .barra i{display:block;height:100%;width:100%;transition:width .15s}
+  #bl-vida .rot{display:flex;justify-content:space-between;font-size:18px;font-weight:700}
+  #bussola{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:420px;max-width:60vw;height:30px;overflow:hidden;mask-image:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent);-webkit-mask-image:linear-gradient(90deg,transparent,#000 20%,#000 80%,transparent)}
+  #bussola .faixa{position:absolute;top:4px;white-space:nowrap;font-weight:700;font-size:16px}
+  #bussola::after{content:'';position:absolute;left:50%;top:0;width:2px;height:8px;background:var(--ac)}
+  #placar{position:absolute;top:42px;left:50%;transform:translateX(-50%);display:flex;gap:6px;align-items:center}
+  #placar .ld{min-width:70px;text-align:center;padding:2px 8px;border-radius:6px;background:rgba(0,0,0,.45);font-weight:800;font-size:20px;border-bottom:3px solid}
+  #placar .ld.meu{outline:2px solid #fff}
+  #placar .tempo{font-weight:800;font-size:20px;padding:0 8px}
+  #pontos{position:absolute;top:80px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+  #pontos .cp{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;background:rgba(0,0,0,.5);border:3px solid #777;position:relative}
+  #minimapa{position:absolute;left:16px;top:16px;width:190px;height:190px;border-radius:50%;border:2px solid rgba(255,255,255,.35);background:rgba(0,0,0,.4)}
+  #feed{position:absolute;right:16px;top:16px;display:flex;flex-direction:column;gap:4px;align-items:flex-end}
+  #feed div{background:rgba(0,0,0,.55);padding:3px 9px;border-radius:5px;font-weight:700;font-size:15px}
+  #aviso{position:absolute;left:50%;top:62%;transform:translateX(-50%);background:rgba(0,0,0,.6);padding:6px 14px;border-radius:8px;font-weight:700;font-size:18px;display:none}
+  #centro{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);text-align:center;font-weight:800;font-size:42px;text-shadow:0 2px 12px rgba(0,0,0,.9);opacity:0;transition:opacity .25s}
+  #centro small{display:block;font-size:20px;font-weight:700;color:#dfe6ef}
+  #vinheta{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 45%,rgba(120,0,0,.0) 100%)}
+  #supr{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at center,transparent 40%,rgba(0,0,0,.65) 100%);opacity:0}
+  #setas{position:absolute;left:50%;top:50%;width:0;height:0}
+  #setas div{position:absolute;width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-bottom:34px solid rgba(255,40,40,.75);left:-16px;top:-150px;transform-origin:16px 150px}
+  #luneta{position:absolute;inset:0;display:none;background:radial-gradient(circle at 50% 50%,transparent 0,transparent 34vmin,#000 34.2vmin)}
+  #luneta::before{content:'';position:absolute;left:50%;top:0;bottom:0;width:1px;background:rgba(0,0,0,.85)}
+  #luneta::after{content:'';position:absolute;top:50%;left:0;right:0;height:1px;background:rgba(0,0,0,.85)}
+  #luneta .mil{position:absolute;left:50%;top:50%;width:0;height:0}
+  #luneta .mil i{position:absolute;background:#000}
+  #veic{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);display:none;background:rgba(0,0,0,.55);padding:8px 14px;border-radius:10px;min-width:280px}
+  #veic b{font-size:20px}
+  #flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none}
+  #tabela{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;background:var(--painel);border:1px solid var(--linha);border-radius:14px;padding:14px 18px;min-width:min(820px,94vw)}
+  #tabela table{width:100%;border-collapse:collapse;font-size:15px}
+  #tabela td,#tabela th{padding:3px 8px;text-align:left}
+  #mapaGrande{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:none;border:2px solid rgba(255,255,255,.3);border-radius:10px;max-width:92vw;max-height:86vh}
+  #fps{position:absolute;right:10px;bottom:4px;font-size:12px;color:var(--muted)}
+  /* telas */
+  .tela{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;z-index:10;overflow:auto;background:linear-gradient(180deg,rgba(6,8,11,.72),rgba(6,8,11,.92))}
+  .tela.on{display:flex}
+  .caixa{width:min(900px,100%);background:var(--painel);border:1px solid var(--linha);border-radius:18px;padding:18px 20px;margin:auto}
+  h1{margin:0;font-family:"Barlow Condensed";font-size:64px;line-height:.9;letter-spacing:1px}
+  h1 span{color:#ff5d5d}
+  h2{margin:0 0 8px;font-family:"Barlow Condensed";font-size:34px}
+  .sub{color:var(--muted);line-height:1.45;margin:6px 0 14px}
+  .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px}
+  .op{border:2px solid var(--linha);background:rgba(255,255,255,.04);border-radius:14px;padding:12px 14px;text-align:left;display:flex;flex-direction:column;gap:4px;font-weight:700}
+  .op:hover{border-color:var(--ac)}
+  .op small{color:var(--muted);font-weight:500;line-height:1.35}
+  .op .nm{font-family:"Barlow Condensed";font-size:26px}
+  .b{border:1px solid var(--linha);background:rgba(255,255,255,.06);border-radius:10px;padding:10px 16px;font-weight:700}
+  .b.pri{background:var(--ac);color:#1d1300;border-color:#d08700}
+  .linha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  label.cfg{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:6px 0;border-bottom:1px solid var(--linha)}
+  #carregando{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:30;background:#0a0c10;font-weight:700;color:var(--muted)}
+  #carregando .bar{width:min(360px,80vw);height:6px;background:rgba(255,255,255,.1);border-radius:3px;overflow:hidden}
+  #carregando .bar i{display:block;height:100%;width:0;background:var(--ac)}
+  #morte{position:fixed;left:50%;bottom:8%;transform:translateX(-50%);display:none;z-index:9;background:var(--painel);border:1px solid var(--linha);border-radius:14px;padding:12px 18px;text-align:center;min-width:min(560px,94vw)}
+  /* toque */
+  #toque{position:fixed;inset:0;z-index:5;display:none;touch-action:none}
+  #toque .tb{position:absolute;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;color:#fff;touch-action:none}
+  #toque .tb.on{background:rgba(255,183,3,.4)}
+  #joy{position:absolute;left:30px;bottom:40px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2)}
+  #joy i{position:absolute;left:45px;top:45px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.35)}
+  body.toque #minimapa{width:110px;height:110px}
+  body.toque #bl-vida{top:132px;bottom:auto;left:12px;transform:scale(.72);transform-origin:top left}
+  body.toque #bl-arma{right:auto;left:50%;bottom:4px;transform:translateX(-50%) scale(.68);transform-origin:bottom center;text-align:center}
+  body.toque #veic{bottom:auto;top:118px;transform:translateX(-50%) scale(.8)}
+  body.toque #feed{top:70px;transform:scale(.75);transform-origin:top right}
+  #girar{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:rgba(10,12,16,.92);font-size:20px;font-weight:800;text-align:center;padding:24px}
+  @media (orientation:portrait){ body.toque #girar{display:flex} }
+  @media (max-width:700px){ h1{font-size:46px} #bl-arma .mun{font-size:38px} #minimapa{width:120px;height:120px} #bussola{width:240px} #bl-vida{width:170px} }
+</style>
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js", "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/" } }
+</script>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="carregando"><div class="cond" style="font-size:40px;color:#fff">ZONA <span style="color:#ff5d5d">QUENTE</span></div><div id="car-txt">Gerando o mapa…</div><div class="bar"><i id="car-bar"></i></div></div>
+
+<div id="hud">
+  <div id="vinheta"></div><div id="supr"></div><div id="flash"></div>
+  <div id="luneta"><div class="mil"></div></div>
+  <div id="mira"><i class="p"></i><i id="mt"></i><i id="mb"></i><i id="ml"></i><i id="mr"></i></div>
+  <div id="hit"><i style="left:-1px;top:2px;transform:rotate(45deg)"></i><i style="right:-1px;top:2px;transform:rotate(-45deg)"></i><i style="left:-1px;bottom:2px;transform:rotate(-45deg)"></i><i style="right:-1px;bottom:2px;transform:rotate(45deg)"></i></div>
+  <div id="setas"></div>
+  <canvas id="minimapa" width="380" height="380"></canvas>
+  <div id="bussola"><div class="faixa cond" id="bussola-faixa"></div></div>
+  <div id="placar"></div>
+  <div id="pontos"></div>
+  <div id="feed"></div>
+  <div id="aviso"></div>
+  <div id="centro"></div>
+  <div class="bl cond" id="bl-vida"><div class="rot"><span>❤ VIDA</span><span id="t-vida">100</span></div><div class="barra"><i id="b-vida" style="background:#e9ecef"></i></div><div class="rot" style="margin-top:6px"><span>🛡 COLETE</span><span id="t-colete">0</span></div><div class="barra"><i id="b-colete" style="background:#4cc9f0"></i></div><div class="rot" style="margin-top:6px;font-size:16px;color:#c8d0dc"><span id="t-folego">FÔLEGO</span><span id="t-cur"></span></div></div>
+  <div class="bl cond" id="bl-arma"><div class="nome" id="t-arma"></div><div class="mun" id="t-mun"></div><div class="extra" id="t-extra"></div></div>
+  <div id="veic" class="cond"></div>
+  <div id="tabela"></div>
+  <canvas id="mapaGrande" width="1440" height="1040"></canvas>
+  <div id="fps"></div>
+</div>
+<div id="toque"><div id="joy"><i></i></div></div>
+<div id="girar"><div style="font-size:54px">📱↻</div>Gire o celular para jogar deitado<small style="font-weight:500;color:#aab">O jogo funciona melhor na horizontal.</small></div>
+<div id="morte" class="cond"></div>
+
+<div class="tela" id="t-inicio"><div class="caixa">
+  <h1>ZONA <span>QUENTE</span></h1>
+  <p class="sub">Tiro em primeira pessoa na Serra Alta: três morros e a BR-707 que liga tudo. Três facções brigam entre si — <b style="color:#f6c90e">Bonde do Trovão</b>, <b style="color:#4cc9f0">Tropa da Garça</b> e <b style="color:#c77dff">Os Corvos</b> — e a <b style="color:#ff5d5d">Força Integrada</b> (BOEPF, PCM e EXANTF) entra junta. Domine os pontos. Munição acaba: reabasteça na loja (de graça). Combustível também: posto na BR.</p>
+  <p class="sub" style="font-size:13px;margin-top:-6px">Obra de ficção: nomes de lugares, grupos e pessoas são inventados. Sons de tiro são gravações reais de armas de verdade (créditos no menu).</p>
+  <div class="linha"><button class="b pri" id="b-jogar" style="font-size:20px;padding:12px 26px">▶ Jogar</button><button class="b" id="b-ajuda">Controles</button><button class="b" id="b-config">Opções</button><button class="b" id="b-creditos">Créditos dos sons</button><span style="flex:1"></span><button class="b" id="b-sair">Sair</button></div>
+</div></div>
+
+<div class="tela" id="t-lado"><div class="caixa"><h2>Escolha o seu lado</h2><div class="grade" id="lista-lados"></div>
+  <h2 style="margin-top:16px;font-size:26px">Dificuldade</h2><div class="linha" id="lista-dif"></div>
+  <div class="linha" style="margin-top:14px"><button class="b" data-voltar="t-inicio">← Voltar</button></div></div></div>
+<div class="tela" id="t-unidade"><div class="caixa"><h2>Unidade da Força Integrada</h2><p class="sub">As três trabalham juntas e não se atacam.</p><div class="grade" id="lista-unidades"></div><div class="linha" style="margin-top:14px"><button class="b" data-voltar="t-lado">← Voltar</button></div></div></div>
+<div class="tela" id="t-classe"><div class="caixa"><h2 id="classe-tit">Equipamento</h2><div class="grade" id="lista-classes"></div><div class="linha" style="margin-top:14px"><button class="b" id="classe-voltar">← Voltar</button></div></div></div>
+<div class="tela" id="t-pausa"><div class="caixa" style="max-width:560px"><h2>Pausa</h2>
+  <div id="cfg-campos"></div>
+  <div class="linha" style="margin-top:14px"><button class="b pri" id="b-continuar">Continuar</button><button class="b" id="b-trocar">Trocar equipamento</button><button class="b" id="b-menu">Sair da partida</button></div></div></div>
+<div class="tela" id="t-ajuda"><div class="caixa"><h2>Controles</h2>
+  <div class="grade" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr));font-size:15px;line-height:1.7">
+    <div><b>WASD</b> andar · <b>Shift</b> correr<br><b>Espaço</b> pular · <b>C / Ctrl</b> agachar<br><b>Q / E</b> inclinar (espiar)</div>
+    <div><b>Botão esquerdo</b> atirar<br><b>Botão direito</b> mirar<br><b>R</b> recarregar · <b>B</b> modo de tiro<br><b>Shift</b> na luneta: prender a respiração</div>
+    <div><b>1 / 2 / roda</b> trocar arma<br><b>G</b> granada (segure para cozinhar)<br><b>T</b> fumaça · <b>V</b> coronhada<br><b>X</b> curativo</div>
+    <div><b>F</b> interagir: loja, pegar arma, entrar/sair do veículo<br><b>Segure F</b> no posto/heliponto: abastecer<br><b>M</b> mapa · <b>Tab</b> placar · <b>Esc</b> pausa</div>
+    <div><b>Carro</b>: W/S acelera e ré, A/D vira, Espaço freia<br><b>Helicóptero</b>: W/S inclina, A/D gira, Espaço sobe, Ctrl desce, Q/E de lado</div>
+  </div>
+  <p class="sub">Realismo: a bala tem velocidade e cai com a gravidade (o fuzil de precisão precisa mirar acima de longe); cabeça mata quase sempre; o colete segura bem tiro de pistola e mal tiro de fuzil; vidro, madeira e lataria de carro deixam a bala passar, tijolo e concreto não; o som chega atrasado de longe (343 m/s).</p>
+  <div class="linha"><button class="b" data-voltar="t-inicio">← Voltar</button></div></div></div>
+<div class="tela" id="t-creditos"><div class="caixa"><h2>Créditos dos sons</h2><p class="sub">Todos são gravações reais, usadas conforme as licenças (CC0, domínio público e CC-BY 3.0).</p><pre id="txt-creditos" style="white-space:pre-wrap;font-size:13px;line-height:1.5;max-height:55vh;overflow:auto"></pre><div class="linha"><button class="b" data-voltar="t-inicio">← Voltar</button></div></div></div>
+<div class="tela" id="t-fim"><div class="caixa"><h2 id="fim-tit">Fim</h2><div id="fim-txt"></div><div class="linha" style="margin-top:14px"><button class="b pri" id="b-revanche">Jogar de novo</button><button class="b" id="b-fim-menu">Menu</button></div></div></div>
+
+<script>setTimeout(() => { const c = document.getElementById('car-txt'); if (c && document.getElementById('carregando').style.display !== 'none' && !window.__zq) c.textContent = 'Não deu para carregar o 3D. Confira a internet e recarregue.'; }, 20000);</script>
+<script type="module" src="js/jogo.js?v=1"></script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.0.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.0.0";</script>
+</body>
+</html>

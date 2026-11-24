@@ -401,11 +401,92 @@ const CAPA_LADEIRA = `
   <text x="24" y="86" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="#fff" stroke="#1d1300" stroke-width="2">ABAIXO</text>
 </svg>`;
 
+const CAPA_ZONA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="zq-ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f78a8"/><stop offset=".6" stop-color="#e3a86f"/><stop offset="1" stop-color="#f0c48e"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#zq-ceu)"/>
+  <path d="M0 250 Q120 120 250 170 Q330 90 430 150 Q540 100 640 190 L640 360 L0 360z" fill="#7a6a5a"/>
+  <g>
+    <rect x="40" y="200" width="40" height="36" fill="#c9724f"/><rect x="82" y="188" width="34" height="48" fill="#e0b860"/><rect x="118" y="176" width="44" height="60" fill="#b85c3c"/><rect x="164" y="166" width="38" height="70" fill="#8ab0c4"/>
+    <rect x="204" y="150" width="46" height="86" fill="#c98a5a"/><rect x="252" y="128" width="40" height="108" fill="#d6c08a"/><rect x="294" y="112" width="48" height="124" fill="#b0503a"/><rect x="344" y="124" width="36" height="112" fill="#e3a06a"/>
+    <rect x="382" y="138" width="44" height="98" fill="#9cb87a"/><rect x="428" y="122" width="40" height="114" fill="#c97a4f"/><rect x="470" y="140" width="46" height="96" fill="#d8b06a"/><rect x="518" y="160" width="40" height="76" fill="#b6604a"/><rect x="560" y="178" width="44" height="58" fill="#8aa4b8"/>
+    <g fill="#2a3446" opacity=".75"><rect x="52" y="210" width="10" height="10"/><rect x="128" y="190" width="10" height="10"/><rect x="144" y="210" width="10" height="10"/><rect x="214" y="166" width="10" height="10"/><rect x="232" y="196" width="10" height="10"/><rect x="262" y="142" width="10" height="10"/><rect x="304" y="128" width="10" height="10"/><rect x="322" y="160" width="10" height="10"/><rect x="392" y="152" width="10" height="10"/><rect x="438" y="136" width="10" height="10"/><rect x="480" y="156" width="10" height="10"/><rect x="528" y="176" width="10" height="10"/></g>
+    <g fill="#5c6b7a"><rect x="300" y="100" width="22" height="14"/><rect x="434" y="110" width="22" height="14"/><rect x="210" y="138" width="22" height="14"/></g>
+  </g>
+  <rect x="0" y="236" width="640" height="40" fill="#34373d"/><g fill="#f3f3f3"><rect x="20" y="254" width="40" height="4"/><rect x="110" y="254" width="40" height="4"/><rect x="200" y="254" width="40" height="4"/><rect x="290" y="254" width="40" height="4"/><rect x="380" y="254" width="40" height="4"/><rect x="470" y="254" width="40" height="4"/><rect x="560" y="254" width="40" height="4"/></g>
+  <rect x="0" y="276" width="640" height="84" fill="#6d5a45"/>
+  <g transform="translate(470 58)"><ellipse cx="0" cy="0" rx="38" ry="12" fill="#1d2430"/><rect x="30" y="-4" width="56" height="7" fill="#1d2430"/><line x1="-60" y1="-16" x2="60" y2="-16" stroke="#1d2430" stroke-width="3"/><rect x="-2" y="-16" width="4" height="6" fill="#1d2430"/><line x1="-18" y1="12" x2="18" y2="12" stroke="#1d2430" stroke-width="3"/></g>
+  <g transform="translate(80 236)"><rect x="0" y="-30" width="112" height="30" rx="4" fill="#3c4a3a"/><rect x="18" y="-50" width="64" height="22" rx="3" fill="#4a5a48"/><rect x="26" y="-46" width="20" height="10" fill="#9fb4c6"/><circle cx="22" cy="2" r="11" fill="#141414"/><circle cx="90" cy="2" r="11" fill="#141414"/></g>
+  <g stroke="#ffd27a" stroke-width="2" opacity=".85"><line x1="640" y1="200" x2="560" y2="214"/><line x1="620" y1="170" x2="520" y2="190"/></g>
+  <g transform="translate(330 360)"><path d="M-170 0 L-40 -96 L10 -96 L60 -60 L230 -60 L230 -40 L70 -40 L40 0z" fill="#16181c"/><rect x="40" y="-92" width="60" height="18" rx="3" fill="#20242a"/><path d="M-12 -110 L4 -110 L8 -96 L-14 -96z" fill="#16181c"/></g>
+  <g stroke="#fff" stroke-width="2" opacity=".9"><line x1="320" y1="172" x2="320" y2="182"/><line x1="320" y1="192" x2="320" y2="202"/><line x1="305" y1="187" x2="315" y2="187"/><line x1="325" y1="187" x2="335" y2="187"/></g>
+  <text x="24" y="54" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#fff" stroke="#111" stroke-width="2">ZONA</text>
+  <text x="24" y="98" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#ffb703" stroke="#111" stroke-width="2">QUENTE</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.24.0";
+window.ARCADIA_VERSAO = "1.25.0";
 
 window.JOGOS = [
+  {
+    id: "zona-quente",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-23",
+    novidades: "Lançamento: tiro em primeira pessoa num mapa enorme com 3 morros, a BR-707 ligando tudo, 3 facções rivais e a polícia unida (BOEPF, PCM e EXANTF), 9 armas com sons de tiro gravados de verdade, balística com queda e penetração, vidro que quebra, granadas, carros, blindado e helicóptero.",
+    nome: "Zona Quente",
+    genero: "Tiro em primeira pessoa",
+    subgenero: "FPS tático de domínio de pontos",
+    corGenero: "#ef4444",
+    tags: ["Tiro", "FPS", "3D", "Veículos", "Bots", "Celular"],
+    criadoEm: "2026-11-23",
+    lancadoEm: "2026-11-23T21:55:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Partidas de até 15 min",
+    classificacao: "16+",
+    finais: 2,
+    caminho: "jogos/zona-quente/index.html",
+    capa: CAPA_ZONA,
+    sinopse:
+      "Tiro em primeira pessoa na Serra Alta, um complexo fictício de três morros ligados pela rodovia BR-707. Três facções brigam entre si e a polícia (BOEPF, PCM e EXANTF) entra junta. Domine os pontos, economize munição (só a loja repõe) e abasteça o carro no posto.",
+    descricao: [
+      "Zona Quente é um FPS tático em 3D num mapa grande: o Morro do Jatobá, o Morro do Cajueiro e o Morro da Antena, com becos, escadarias, lajes, caixas d'água e fios, ligados pela BR-707, que tem trevo, posto de gasolina e o batalhão da polícia. Todos os nomes, lugares e grupos são inventados.",
+      "São quatro lados: Bonde do Trovão, Tropa da Garça e Os Corvos (facções que brigam cada uma por si) e a Força Integrada da polícia, em que BOEPF (Batalhão Especial para Favelas), PCM (Polícia da Comunidade) e EXANTF (Exército Anti-Facção) lutam juntos, sem fogo amigo. O modo é Domínio: cada ponto dominado rende pontos; quem chegar a 1000 (ou estiver na frente em 15 minutos) vence.",
+      "Os tiros são de verdade: a bala é um projétil com velocidade e gravidade, perde força com a distância, atravessa madeira, vidro e lataria fina, ricocheteia em ângulo rasante e não passa do blindado. Os sons de tiro são gravações reais de armas, com eco de longe e atraso do som pela distância, o zunido de bala passando perto, vidro estilhaçando e um som diferente para cada material atingido.",
+      "Munição é limitada: para repor, passe numa loja de munição (de graça). Carros gastam gasolina e só enchem no posto da BR (também de graça). Há viaturas, picapes, carros comuns, um blindado à prova de fuzil e o helicóptero da polícia, que patrulha sozinho com um atirador na porta ou pode ser pilotado."
+    ],
+    mecanicas: [
+      "9 armas: pistola, revólver, 2 submetralhadoras, AK-47, fuzil M4 (auto, rajada e semi), escopeta de bomba, fuzil de precisão com luneta e metralhadora",
+      "Balística: queda da bala, perda de dano com a distância, penetração de materiais, ricochete e dano por região (cabeça, tronco, pernas)",
+      "Recuo que você controla, espalhamento que aumenta correndo ou pulando, mira pela alça, respiração presa na luneta",
+      "Colete e capacete, curativos, dano de queda, coronhada, inclinar pela quina (Q/E), agachar e correr com fôlego",
+      "Granada de fragmentação (segure para cozinhar) e de fumaça, que corta a visão dos bots",
+      "Munição limitada com reposição grátis nas lojas; gasolina limitada, abastecida de graça no posto",
+      "Carros, picape, viatura, blindado e helicóptero com combustível, dano e atropelamento",
+      "Bots que ouvem tiros, se assustam com bala passando, jogam granada e vão à loja quando a munição acaba",
+      "Pontos de controle, renascer na base ou num ponto dominado, troca de equipamento, minimapa, mapa grande e placar",
+      "Controles de toque no celular (deitado)"
+    ],
+    controles: [
+      ["WASD", "Andar · Shift corre (e prende a respiração na luneta)"],
+      ["Mouse", "Olhar · botão esquerdo atira · botão direito mira pela alça"],
+      ["R / B", "Recarregar · trocar modo de disparo"],
+      ["1 / 2 / roda", "Trocar de arma"],
+      ["G / T", "Granada (segure para cozinhar) · fumaça"],
+      ["C ou Ctrl / Espaço", "Agachar · pular"],
+      ["Q / E", "Inclinar para espiar"],
+      ["F", "Loja, pegar arma, entrar/sair do veículo · segure no posto para abastecer"],
+      ["X / V", "Curativo · coronhada"],
+      ["M / Tab / Esc", "Mapa · placar · pausa"],
+      ["Veículo", "W/S acelera, A/D vira, Espaço freia · helicóptero: Espaço sobe, Ctrl desce, Q/E de lado"]
+    ],
+    tecnologia: [
+      "Three.js com mapa gerado (terreno, casas, ruas, rodovia) e colisão por caixas em grade espacial",
+      "Balas simuladas como projéteis com raycast contra o mundo, as pessoas (cabeça/tronco/pernas) e os veículos",
+      "IA com percepção (campo de visão, fumaça, audição), caminhos por A* numa malha de navegação e estados de combate",
+      "Áudio 3D com Web Audio API (HRTF, eco, abafamento e atraso pela velocidade do som) usando gravações reais com licença livre (CC0, CC-BY e domínio público; créditos no jogo)"
+    ]
+  },
   {
     id: "ladeira-abaixo",
     versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
