@@ -8,7 +8,7 @@
 /* Versão e cache: o navegador e o app guardam esta página por um tempo (até ~10 min no GitHub Pages).
    Ao abrir, pergunta ao servidor (sem cache) a versão atual e, se esta página for velha, recarrega
    com ?v=versão para pegar os arquivos novos. Mantenha igual a "versao" em ../versao.json. */
-window.VERSAO_STUDIO = "1.27.0";
+window.VERSAO_STUDIO = "1.28.0";
 (function () {
   fetch("../versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
     const v = String(d.versao || ""); let tentou = "";
@@ -56,12 +56,12 @@ window.VERSAO_STUDIO = "1.27.0";
 <div id="erro"></div>
 <div id="barra"><span>🎮</span><b id="titulo"></b><span id="autor" style="color:#9aa3b8"></span><a href="../index.html">Arcádia IA ↗</a></div>
 <iframe id="moldura" sandbox="allow-scripts allow-pointer-lock allow-popups" allow="autoplay; fullscreen; gamepad"></iframe>
-<script src="nucleo.js?v=1.27.0"></script>
-<script src="avatar.js?v=1.27.0"></script>
-<script src="motor.js?v=1.27.0"></script>
-<script src="rede.js?v=1.27.0"></script>
+<script src="nucleo.js?v=1.28.0"></script>
+<script src="avatar.js?v=1.28.0"></script>
+<script src="motor.js?v=1.28.0"></script>
+<script src="rede.js?v=1.28.0"></script>
 <script src="../salas-publicas.js?v=1"></script>
-<script src="../conta.js?v=1.27.0"></script>
+<script src="../conta.js?v=1.28.0"></script>
 <script>
 (function () {
   const params = new URLSearchParams(location.search);

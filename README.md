@@ -20,17 +20,17 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Laboratório dos Elementos** | Simulação | Sandbox de química (educativo) | Livre |
 | **Ladeira Abaixo** | Corrida | Carrinho de rolimã (física) | Corridas de ~1 min |
 | **Zona Quente** | Tiro em primeira pessoa | FPS tático de domínio de pontos | Partidas de até 15 min |
-| **Labirinto Maluco** | Obby | Corrida em labirinto com poderes | Corridas de 4–8 min |
+| **Labirinto Maluco** | Obby | Corrida em labirinto com poderes | Corridas de 4–7 min |
 
 ### Labirinto Maluco
-Corrida até o topo de uma torre de 10 labirintos sorteados que flutuam sobre o vazio.
+Corrida até o terraço de um prédio de 10 andares, e cada andar é um labirinto fechado sorteado na hora.
 
-- 🛗 **Elevadores**: 10 no nível 1, um a menos a cada nível, só 1 no nível 10
-- 🎓 **5 classes, 25 poderes** que mudam o labirinto: Demolidor (buracos, terremoto), Construtor (pilares, muralha, passarela), Feiticeiro do Obby (lava, gelo, pisca-pisca, hélice), Trapaceiro (esteira, mola, armadilha, embaralhar) e Velocista (disparada, pulo duplo, radar, escudo, fantasma)
-- 🧗 **Obby**: lava, gelo, esteira, mola, chão que pisca e chão rachado; dá para andar por cima das paredes
-- 🤖 Drones sabotadores, bots e 🌐 **online até 12**; pontos desbloqueiam poderes novos
+- 🛗 **Elevadores**: 10 no 1º andar, um a menos a cada andar, só 1 no 10º
+- 🏢 **Andares empilhados**: buraco no chão derruba para o andar de baixo; com **Q** a mira passa para o **andar de cima** (minimapa mostra quem está lá)
+- 🎓 **5 classes, 25 poderes**: Demolidor (buraco, marreta, cratera, bomba-relógio, terremoto), Construtor (tapar, pilar, ponte, muralha, túnel), Feiticeiro do Obby (lava, gelo, pisca-pisca, hélice, mar de lava), Trapaceiro (esteira, mola, remexer, armadilha, embaralhar) e Velocista (disparada, pulo duplo, radar, escudo, fantasma)
+- 🤖 Eventos do prédio, bots e 🌐 **online até 12**; pontos desbloqueiam poderes novos
 
-**Controles:** `WASD` anda · `Espaço` pula · mouse gira a câmera · `1`–`5` escolhe o poder · clique ou `E` usa · `R` volta ao começo do nível
+**Controles:** `WASD` anda · `Espaço` pula · mouse gira a câmera · `1`–`5` escolhe o poder · clique ou `E` usa · `Q` mira no andar de cima · `R` volta ao começo do andar
 
 ### Zona Quente
 Tiro em primeira pessoa na Serra Alta: três morros fictícios ligados pela rodovia BR-707.

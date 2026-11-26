@@ -453,14 +453,14 @@ const CAPA_LABIRINTO = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.27.0";
+window.ARCADIA_VERSAO = "1.28.0";
 
 window.JOGOS = [
   {
     id: "labirinto-maluco",
-    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-26",
-    novidades: "Lançamento: corrida por 10 labirintos sorteados em escada sobre o vazio, elevadores (10 no nível 1 até 1 no nível 10), 5 classes com 25 poderes que mudam o labirinto, drones sabotadores, pontos para desbloquear poderes, bots e online até 12.",
+    novidades: "Labirinto refeito: agora é um prédio de 10 andares fechados, com corredores largos e paredes até o teto. Buraco no chão derruba você para o andar de baixo, e dá para sabotar quem está no andar de cima mirando no teto (tecla Q), com minimapa mostrando quem está lá. Poderes novos: bomba-relógio, ponte, túnel e marreta; avisos quando alguém usa um poder em você.",
     nome: "Labirinto Maluco",
     genero: "Obby",
     subgenero: "Corrida em labirinto com poderes",
@@ -469,28 +469,29 @@ window.JOGOS = [
     criadoEm: "2026-11-26",
     lancadoEm: "2026-11-26T00:00:00-03:00", // o selo "Novo" some 2 dias depois
     criadoPor: "Claude Opus 5.5 (Anthropic)",
-    duracao: "Corridas de 4–8 min",
+    duracao: "Corridas de 4–7 min",
     classificacao: "Livre",
     finais: 2,
     caminho: "jogos/labirinto-maluco/index.html",
     capa: CAPA_LABIRINTO,
     sinopse:
-      "Uma torre de 10 labirintos sorteados flutuando sobre o vazio. Ache um elevador em cada nível (cada vez há menos) e chegue ao topo primeiro, enquanto todo mundo usa poderes para abrir buracos, levantar muros e transformar o caminho em obby.",
+      "Um prédio de 10 andares, e cada andar é um labirinto fechado sorteado na hora. Ache um elevador em cada andar (cada vez há menos) e chegue ao terraço primeiro, enquanto todo mundo usa poderes para abrir buracos, levantar muros e sabotar quem está no andar de cima.",
     descricao: [
-      "Labirinto Maluco é uma corrida em 3D com câmera em terceira pessoa. Os 10 níveis são labirintos gerados na hora, cada um maior e mais alto que o anterior, ligados por elevadores: o nível 1 tem 10, o nível 2 tem 9… e o nível 10 tem um só, que leva ao topo da torre.",
-      "Cada jogador escolhe uma classe com poderes que mudam o labirinto em tempo real: o Demolidor abre buracos para o vazio e derruba paredes, o Construtor tapa buracos e levanta pilares e muralhas, o Feiticeiro do Obby transforma o chão em lava, gelo, plataformas que piscam e hélices, o Trapaceiro cria esteiras, molas e armadilhas e refaz os corredores, e o Velocista corre, pula duas vezes, enxerga o caminho e atravessa paredes. A mudança dura alguns segundos e depois o labirinto volta ao normal.",
-      "Os níveis mais altos já vêm com mais obstáculos de obby e têm drones que mexem no labirinto sozinhos. Cair no vazio, pisar em lava ou levar uma hélice manda você de volta ao começo do nível. Mana vem com o tempo e dos cristais azuis.",
-      "Chegar ao topo, e ir longe na torre, dá pontos que desbloqueiam os outros poderes de cada classe, incluindo um ultimate. Dá para jogar com 3 a 11 bots ou online com até 12 pessoas (sala por código ou pública)."
+      "Labirinto Maluco é uma corrida em 3D com câmera em terceira pessoa dentro de um prédio de 10 andares. Cada andar é um labirinto fechado, com corredores largos e paredes até o teto, gerado na hora. Os elevadores levam ao andar de cima: o 1º andar tem 10, o 2º tem 9… e o 10º tem um só, que leva ao terraço.",
+      "Cada jogador escolhe uma classe com poderes que mudam o labirinto em tempo real: o Demolidor abre buracos e solta bombas-relógio, o Construtor tapa buracos, faz pontes, pilares, muralhas e túneis, o Feiticeiro do Obby transforma o chão em lava, gelo, plataformas que piscam e hélices, o Trapaceiro cria esteiras, molas e armadilhas e refaz os corredores, e o Velocista corre, pula duas vezes, enxerga o caminho e atravessa paredes.",
+      "Um buraco no chão derruba quem estiver em cima para o andar de baixo. Com a tecla Q a mira passa para o andar de cima: o minimapa mostra quem está lá, e o poder cai bem em cima da cabeça de quem está na frente. Uma mola embaixo de um buraco no teto joga você para o andar de cima.",
+      "Chegar ao terraço, e ir longe no prédio, dá pontos que desbloqueiam os outros poderes de cada classe, incluindo um ultimate. Dá para jogar com 3 a 11 bots ou online com até 12 pessoas (sala por código ou pública)."
     ],
     mecanicas: [
-      "10 labirintos sorteados a cada partida, em escada sobre o vazio",
-      "Elevadores: 10 no nível 1, um a menos em cada nível, 1 no último",
-      "5 classes e 25 poderes: buraco, cratera, chão podre, terremoto, muralha, degrau, passarela de vidro, lava, gelo, pisca-pisca, hélice, esteira, mola, armadilha, embaralhar, disparada, pulo duplo, radar, escudo, fantasma…",
-      "Obby: lava, gelo, esteira, mola, chão que pisca, chão rachado que cai, hélice e buraco para o vazio",
-      "Andar por cima das paredes usando degrau ou mola",
-      "Drones que sabotam o labirinto nos níveis altos",
+      "Prédio de 10 andares fechados, sorteados a cada partida, com corredores largos e paredes até o teto",
+      "Elevadores: 10 no 1º andar, um a menos em cada andar, 1 no último (leva ao terraço)",
+      "Buraco derruba para o andar de baixo; mola embaixo de um buraco no teto sobe um andar",
+      "Mira no andar de cima (tecla Q) com minimapa mostrando quem está lá",
+      "5 classes e 25 poderes: buraco, marreta, cratera, bomba-relógio, terremoto, tapar, pilar, ponte, muralha, túnel, lava, gelo, pisca-pisca, hélice, mar de lava, esteira, mola, remexer, armadilha, embaralhar, disparada, pulo duplo, radar, escudo e fantasma",
+      "Obby: lava, gelo, esteira, mola, chão que pisca, chão rachado que cai, hélice e buracos",
+      "Eventos malucos do prédio mexem nos andares altos sozinhos",
       "Mana com recarga e cristais; pontos ao chegar longe desbloqueiam poderes",
-      "Bots que acham caminho, pulam obstáculos e usam poderes em quem está na frente",
+      "Bots que acham caminho, pulam obstáculos e sabotam quem está na frente ou no andar de cima",
       "Online até 12 jogadores (código ou sala pública) e controles de toque"
     ],
     controles: [
@@ -499,11 +500,12 @@ window.JOGOS = [
       ["Mouse", "Girar a câmera (clique para prender o mouse)"],
       ["1 a 5 / roda", "Escolher o poder"],
       ["Clique ou E", "Usar o poder no bloco mirado"],
-      ["R", "Voltar ao começo do nível"],
+      ["Q ou botão direito", "Mirar neste andar ou no andar de cima"],
+      ["R", "Voltar ao começo do andar"],
       ["Esc", "Pausa"]
     ],
     tecnologia: [
-      "Three.js com blocos instanciados; labirintos por backtracking com caminhos extras, garantindo um caminho seguro até um elevador",
+      "Three.js com blocos instanciados; andares empilhados gerados por backtracking com caminhos extras, garantindo um caminho seguro até um elevador",
       "Física própria de personagem (colisão círculo × caixas, pulo, gelo, esteira, mola) e caminho dos bots por Dijkstra com pulos sobre perigo",
       "Online com PeerJS (WebRTC): o anfitrião decide o efeito de cada poder e manda a lista de mudanças para todos",
       "Sons gerados com Web Audio API"
