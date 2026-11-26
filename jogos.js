@@ -424,21 +424,101 @@ const CAPA_ZONA = `
   <text x="24" y="98" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#ffb703" stroke="#111" stroke-width="2">QUENTE</text>
 </svg>`;
 
+const CAPA_LABIRINTO = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="lm-ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6aa8ff"/><stop offset=".65" stop-color="#c9d8ff"/><stop offset="1" stop-color="#2a1d5c"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#lm-ceu)"/>
+  <g transform="translate(40 300) skewX(-28)">
+    <rect x="0" y="-40" width="150" height="40" fill="#8fb9ff"/><g fill="#5a7fd6"><rect x="0" y="-44" width="150" height="6"/><rect x="30" y="-44" width="6" height="30"/><rect x="70" y="-24" width="50" height="6"/><rect x="110" y="-44" width="6" height="26"/></g>
+  </g>
+  <g transform="translate(170 245) skewX(-28)">
+    <rect x="0" y="-40" width="160" height="40" fill="#b9a2ff"/><g fill="#7e5ce0"><rect x="0" y="-44" width="160" height="6"/><rect x="40" y="-44" width="6" height="26"/><rect x="90" y="-26" width="40" height="6"/><rect x="130" y="-44" width="6" height="30"/></g>
+    <rect x="60" y="-30" width="22" height="14" fill="#ff4b1f"/>
+  </g>
+  <g transform="translate(310 190) skewX(-28)">
+    <rect x="0" y="-40" width="170" height="40" fill="#ffb3d1"/><g fill="#d6609a"><rect x="0" y="-44" width="170" height="6"/><rect x="50" y="-44" width="6" height="30"/><rect x="100" y="-24" width="40" height="6"/></g>
+    <rect x="120" y="-36" width="22" height="14" fill="#1a1238"/>
+  </g>
+  <g transform="translate(455 135) skewX(-28)">
+    <rect x="0" y="-40" width="150" height="40" fill="#9dffc4"/><g fill="#3ddc84"><rect x="0" y="-44" width="150" height="6"/><rect x="60" y="-44" width="6" height="28"/></g>
+  </g>
+  <g transform="translate(560 70)"><rect x="-16" y="-34" width="32" height="38" fill="none" stroke="#ffc23d" stroke-width="5"/><rect x="-18" y="-40" width="36" height="7" fill="#ffc23d"/><text x="0" y="-48" text-anchor="middle" font-family="Arial Black,Arial" font-size="13" fill="#fff">TOPO</text></g>
+  <g transform="translate(250 175)"><rect x="-8" y="-28" width="16" height="18" fill="#ffd166"/><rect x="-7" y="-40" width="14" height="12" fill="#f1c27d"/><rect x="-5" y="-10" width="4" height="12" fill="#2b3a67"/><rect x="1" y="-10" width="4" height="12" fill="#2b3a67"/></g>
+  <g transform="translate(120 248)"><rect x="-8" y="-28" width="16" height="18" fill="#ff6b6b"/><rect x="-7" y="-40" width="14" height="12" fill="#c68642"/><rect x="-5" y="-10" width="4" height="12" fill="#2b3a67"/><rect x="1" y="-10" width="4" height="12" fill="#2b3a67"/></g>
+  <g fill="#5ee7ff"><polygon points="395,130 403,118 411,130 403,142"/><polygon points="205,190 211,181 217,190 211,199"/></g>
+  <g transform="translate(470 90)"><rect x="-14" y="-14" width="28" height="28" fill="#23263d"/><rect x="-9" y="-4" width="18" height="5" fill="#ff3df2"/></g>
+  <text x="24" y="58" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#fff" stroke="#1a1238" stroke-width="3">LABIRINTO</text>
+  <text x="24" y="104" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#ffd166" stroke="#1a1238" stroke-width="3">MALUCO</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.26.1";
+window.ARCADIA_VERSAO = "1.27.0";
 
 window.JOGOS = [
   {
+    id: "labirinto-maluco",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-26",
+    novidades: "Lançamento: corrida por 10 labirintos sorteados em escada sobre o vazio, elevadores (10 no nível 1 até 1 no nível 10), 5 classes com 25 poderes que mudam o labirinto, drones sabotadores, pontos para desbloquear poderes, bots e online até 12.",
+    nome: "Labirinto Maluco",
+    genero: "Obby",
+    subgenero: "Corrida em labirinto com poderes",
+    corGenero: "#a855f7",
+    tags: ["Obby", "Labirinto", "3D", "Multiplayer", "Online", "Bots", "Celular"],
+    criadoEm: "2026-11-26",
+    lancadoEm: "2026-11-26T00:00:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Corridas de 4–8 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/labirinto-maluco/index.html",
+    capa: CAPA_LABIRINTO,
+    sinopse:
+      "Uma torre de 10 labirintos sorteados flutuando sobre o vazio. Ache um elevador em cada nível (cada vez há menos) e chegue ao topo primeiro, enquanto todo mundo usa poderes para abrir buracos, levantar muros e transformar o caminho em obby.",
+    descricao: [
+      "Labirinto Maluco é uma corrida em 3D com câmera em terceira pessoa. Os 10 níveis são labirintos gerados na hora, cada um maior e mais alto que o anterior, ligados por elevadores: o nível 1 tem 10, o nível 2 tem 9… e o nível 10 tem um só, que leva ao topo da torre.",
+      "Cada jogador escolhe uma classe com poderes que mudam o labirinto em tempo real: o Demolidor abre buracos para o vazio e derruba paredes, o Construtor tapa buracos e levanta pilares e muralhas, o Feiticeiro do Obby transforma o chão em lava, gelo, plataformas que piscam e hélices, o Trapaceiro cria esteiras, molas e armadilhas e refaz os corredores, e o Velocista corre, pula duas vezes, enxerga o caminho e atravessa paredes. A mudança dura alguns segundos e depois o labirinto volta ao normal.",
+      "Os níveis mais altos já vêm com mais obstáculos de obby e têm drones que mexem no labirinto sozinhos. Cair no vazio, pisar em lava ou levar uma hélice manda você de volta ao começo do nível. Mana vem com o tempo e dos cristais azuis.",
+      "Chegar ao topo, e ir longe na torre, dá pontos que desbloqueiam os outros poderes de cada classe, incluindo um ultimate. Dá para jogar com 3 a 11 bots ou online com até 12 pessoas (sala por código ou pública)."
+    ],
+    mecanicas: [
+      "10 labirintos sorteados a cada partida, em escada sobre o vazio",
+      "Elevadores: 10 no nível 1, um a menos em cada nível, 1 no último",
+      "5 classes e 25 poderes: buraco, cratera, chão podre, terremoto, muralha, degrau, passarela de vidro, lava, gelo, pisca-pisca, hélice, esteira, mola, armadilha, embaralhar, disparada, pulo duplo, radar, escudo, fantasma…",
+      "Obby: lava, gelo, esteira, mola, chão que pisca, chão rachado que cai, hélice e buraco para o vazio",
+      "Andar por cima das paredes usando degrau ou mola",
+      "Drones que sabotam o labirinto nos níveis altos",
+      "Mana com recarga e cristais; pontos ao chegar longe desbloqueiam poderes",
+      "Bots que acham caminho, pulam obstáculos e usam poderes em quem está na frente",
+      "Online até 12 jogadores (código ou sala pública) e controles de toque"
+    ],
+    controles: [
+      ["WASD / setas", "Andar"],
+      ["Espaço", "Pular"],
+      ["Mouse", "Girar a câmera (clique para prender o mouse)"],
+      ["1 a 5 / roda", "Escolher o poder"],
+      ["Clique ou E", "Usar o poder no bloco mirado"],
+      ["R", "Voltar ao começo do nível"],
+      ["Esc", "Pausa"]
+    ],
+    tecnologia: [
+      "Three.js com blocos instanciados; labirintos por backtracking com caminhos extras, garantindo um caminho seguro até um elevador",
+      "Física própria de personagem (colisão círculo × caixas, pulo, gelo, esteira, mola) e caminho dos bots por Dijkstra com pulos sobre perigo",
+      "Online com PeerJS (WebRTC): o anfitrião decide o efeito de cada poder e manda a lista de mudanças para todos",
+      "Sons gerados com Web Audio API"
+    ]
+  },
+  {
     id: "zona-quente",
-    versao: "1.1.1", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
-    atualizadoEm: "2026-11-23",
-    novidades: "Correção: árvores não nascem mais em cima da BR, das ruas e dos becos. Mapa refeito: as ruas e a BR agora aparecem e têm o leito nivelado no morro (antes ficavam escondidas debaixo da terra), morros com encosta mais suave, becos calçados e livres, casas com puxadinho, laje com mureta (dá para se proteger no telhado), porta, ferro de espera e caixa d'água. Miras de verdade: holográfica com ponto vermelho no M4 e alça e maça com pontos verdes nas outras armas.",
+    versao: "1.2.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-26",
+    novidades: "Multiplayer online: até 10 pessoas por sala (código ou sala pública), cada um escolhe o lado, com bots para completar; tiros, mortes, granadas, carros e placar sincronizados. Correção: árvores não nascem mais em cima da BR, das ruas e dos becos. Mapa refeito: as ruas e a BR agora aparecem e têm o leito nivelado no morro (antes ficavam escondidas debaixo da terra), morros com encosta mais suave, becos calçados e livres, casas com puxadinho, laje com mureta (dá para se proteger no telhado), porta, ferro de espera e caixa d'água. Miras de verdade: holográfica com ponto vermelho no M4 e alça e maça com pontos verdes nas outras armas.",
     nome: "Zona Quente",
     genero: "Tiro em primeira pessoa",
     subgenero: "FPS tático de domínio de pontos",
     corGenero: "#ef4444",
-    tags: ["Tiro", "FPS", "3D", "Veículos", "Bots", "Celular"],
+    tags: ["Tiro", "FPS", "3D", "Multiplayer", "Online", "Veículos", "Bots", "Celular"],
     criadoEm: "2026-11-23",
     lancadoEm: "2026-11-23T21:55:00-03:00", // o selo "Novo" some 2 dias depois
     criadoPor: "Claude Opus 5.5 (Anthropic)",
@@ -465,7 +545,8 @@ window.JOGOS = [
       "Carros, picape, viatura, blindado e helicóptero com combustível, dano e atropelamento",
       "Bots que ouvem tiros, se assustam com bala passando, jogam granada e vão à loja quando a munição acaba",
       "Pontos de controle, renascer na base ou num ponto dominado, troca de equipamento, minimapa, mapa grande e placar",
-      "Controles de toque no celular (deitado)"
+      "Controles de toque no celular (deitado)",
+      "Online até 10 jogadores (código ou sala pública): o anfitrião cuida dos bots, dos veículos e do placar"
     ],
     controles: [
       ["WASD", "Andar · Shift corre (e prende a respiração na luneta)"],

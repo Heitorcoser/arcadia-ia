@@ -140,7 +140,24 @@
   <h1>ZONA <span>QUENTE</span></h1>
   <p class="sub">Tiro em primeira pessoa na Serra Alta: três morros e a BR-707 que liga tudo. Três facções brigam entre si — <b style="color:#f6c90e">Bonde do Trovão</b>, <b style="color:#4cc9f0">Tropa da Garça</b> e <b style="color:#c77dff">Os Corvos</b> — e a <b style="color:#ff5d5d">Força Integrada</b> (BOEPF, PCM e EXANTF) entra junta. Domine os pontos. Munição acaba: reabasteça na loja (de graça). Combustível também: posto na BR.</p>
   <p class="sub" style="font-size:13px;margin-top:-6px">Obra de ficção: nomes de lugares, grupos e pessoas são inventados. Sons de tiro são gravações reais de armas de verdade (créditos no menu).</p>
-  <div class="linha"><button class="b pri" id="b-jogar" style="font-size:20px;padding:12px 26px">▶ Jogar</button><button class="b" id="b-ajuda">Controles</button><button class="b" id="b-config">Opções</button><button class="b" id="b-creditos">Créditos dos sons</button><span style="flex:1"></span><button class="b" id="b-sair">Sair</button></div>
+  <div class="linha"><button class="b pri" id="b-jogar" style="font-size:20px;padding:12px 26px">▶ Jogar</button><button class="b pri" id="b-online" style="font-size:20px;padding:12px 22px">🌐 Online</button><button class="b" id="b-ajuda">Controles</button><button class="b" id="b-config">Opções</button><button class="b" id="b-creditos">Créditos dos sons</button><span style="flex:1"></span><button class="b" id="b-sair">Sair</button></div>
+</div></div>
+
+<div class="tela" id="t-online"><div class="caixa">
+  <h2>Jogar online</h2>
+  <p class="sub">Até 10 pessoas na mesma partida. Quem cria a sala comanda os bots e o placar. Passe o código para os amigos ou entre numa sala pública.</p>
+  <div class="linha"><label class="sub" style="margin:0">Seu nome <input id="on-nome" maxlength="14" style="padding:8px 10px;border-radius:8px;border:1px solid var(--linha);background:#0c1016;color:#fff;font-weight:700;width:170px"></label></div>
+  <div class="linha" style="margin-top:10px"><button class="b pri" id="on-criar">Criar sala</button><button class="b pri" id="on-publica">🌍 Sala pública</button><input id="on-cod" maxlength="4" placeholder="CÓDIGO" style="padding:10px;border-radius:8px;border:1px solid var(--linha);background:#0c1016;color:#fff;font-weight:800;width:110px;text-transform:uppercase;letter-spacing:3px"><button class="b" id="on-entrar">Entrar</button><span style="flex:1"></span><button class="b" data-voltar="t-inicio">← Voltar</button></div>
+  <p id="on-erro" class="sub" style="min-height:22px;margin-top:8px"></p>
+  <div id="on-sala" style="display:none;margin-top:6px">
+    <h2 id="on-titulo" style="margin:4px 0">Sala</h2>
+    <div class="sub" style="margin:0 0 6px">Escolha o seu lado:</div>
+    <div class="linha" id="on-lados"></div>
+    <div class="linha" id="on-unidades" style="margin-top:6px"></div>
+    <table id="on-jogadores" style="width:100%;margin-top:10px;border-collapse:collapse"></table>
+    <div id="on-host" class="linha" style="margin-top:10px"><label class="sub" style="margin:0"><input type="checkbox" id="on-bots" checked> Completar com bots</label><span class="sub" style="margin:0">Bots:</span><span id="on-dif" class="linha"></span><span style="flex:1"></span><button class="b pri" id="on-comecar" style="font-size:18px">▶ Começar partida</button></div>
+    <p id="on-espera" class="sub">Esperando o anfitrião começar…</p>
+  </div>
 </div></div>
 
 <div class="tela" id="t-lado"><div class="caixa"><h2>Escolha o seu lado</h2><div class="grade" id="lista-lados"></div>
@@ -165,8 +182,10 @@
 <div class="tela" id="t-fim"><div class="caixa"><h2 id="fim-tit">Fim</h2><div id="fim-txt"></div><div class="linha" style="margin-top:14px"><button class="b pri" id="b-revanche">Jogar de novo</button><button class="b" id="b-fim-menu">Menu</button></div></div></div>
 
 <script>setTimeout(() => { const c = document.getElementById('car-txt'); if (c && document.getElementById('carregando').style.display !== 'none' && !window.__zq) c.textContent = 'Não deu para carregar o 3D. Confira a internet e recarregue.'; }, 20000);</script>
-<script type="module" src="js/jogo.js?v=1.1.1"></script>
-<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.1.1</div>
-<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.1.1";</script>
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="../../salas-publicas.js"></script>
+<script type="module" src="js/jogo.js?v=1.2.0"></script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:rgba(255,255,255,.55);background:rgba(0,0,0,.35);border-radius:7px;padding:1px 7px;pointer-events:none;animation:vj 12s forwards">v1.2.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.2.0";</script>
 </body>
 </html>

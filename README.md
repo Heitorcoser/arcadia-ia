@@ -20,6 +20,17 @@ Uma plataforma de jogos para navegador em que **todos os jogos são criados por 
 | **Laboratório dos Elementos** | Simulação | Sandbox de química (educativo) | Livre |
 | **Ladeira Abaixo** | Corrida | Carrinho de rolimã (física) | Corridas de ~1 min |
 | **Zona Quente** | Tiro em primeira pessoa | FPS tático de domínio de pontos | Partidas de até 15 min |
+| **Labirinto Maluco** | Obby | Corrida em labirinto com poderes | Corridas de 4–8 min |
+
+### Labirinto Maluco
+Corrida até o topo de uma torre de 10 labirintos sorteados que flutuam sobre o vazio.
+
+- 🛗 **Elevadores**: 10 no nível 1, um a menos a cada nível, só 1 no nível 10
+- 🎓 **5 classes, 25 poderes** que mudam o labirinto: Demolidor (buracos, terremoto), Construtor (pilares, muralha, passarela), Feiticeiro do Obby (lava, gelo, pisca-pisca, hélice), Trapaceiro (esteira, mola, armadilha, embaralhar) e Velocista (disparada, pulo duplo, radar, escudo, fantasma)
+- 🧗 **Obby**: lava, gelo, esteira, mola, chão que pisca e chão rachado; dá para andar por cima das paredes
+- 🤖 Drones sabotadores, bots e 🌐 **online até 12**; pontos desbloqueiam poderes novos
+
+**Controles:** `WASD` anda · `Espaço` pula · mouse gira a câmera · `1`–`5` escolhe o poder · clique ou `E` usa · `R` volta ao começo do nível
 
 ### Zona Quente
 Tiro em primeira pessoa na Serra Alta: três morros fictícios ligados pela rodovia BR-707.
@@ -30,6 +41,7 @@ Tiro em primeira pessoa na Serra Alta: três morros fictícios ligados pela rodo
 - 🔊 **Sons reais** (CC0/CC-BY/domínio público): tiros gravados de perto e de longe, zunido de bala passando, vidro quebrando e impacto por material, com atraso pela velocidade do som
 - 📦 **Munição limitada** (loja de munição grátis) e ⛽ **gasolina** (posto grátis na BR); carros, viatura, blindado e helicóptero
 - 🤖 Bots com visão, audição, granadas e idas à loja; modo **Domínio** com 5 pontos; toque no celular
+- 🌐 **Online até 10** (código ou sala pública): cada um escolhe o lado, bots completam
 
 **Controles:** `WASD` anda · `Shift` corre · mouse mira/atira · botão direito mira pela alça · `R` recarrega · `G`/`T` granadas · `F` interage · `Q`/`E` inclina · `M` mapa · `Esc` pausa
 

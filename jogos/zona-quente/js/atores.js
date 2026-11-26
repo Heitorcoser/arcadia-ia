@@ -7,8 +7,8 @@
    ida à loja de munição quando a munição acaba.
    ========================================================================= */
 import * as THREE from 'three';
-import { ARMAS, CLASSES, modeloArma } from './armas.js?v=1.1.1';
-import { caixasPerto, chaoEm, alturaTerreno, visivel, noMaisPerto, caminho, NAV, LADOS, UNIDADES, MX, MZ, PONTOS, LOJAS, SPAWNS } from './mapa.js?v=1.1.1';
+import { ARMAS, CLASSES, modeloArma } from './armas.js?v=1.2.0';
+import { caixasPerto, chaoEm, alturaTerreno, visivel, noMaisPerto, caminho, NAV, LADOS, UNIDADES, MX, MZ, PONTOS, LOJAS, SPAWNS } from './mapa.js?v=1.2.0';
 
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 export const RAIO = 0.32, PASSO_SUBIR = 0.55, OLHO = 1.62, OLHO_AGACHADO = 1.12;

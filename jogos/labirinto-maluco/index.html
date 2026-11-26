@@ -1,0 +1,1022 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Labirinto Maluco</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Inter:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--fundo:#0d1020;--painel:rgba(17,20,38,.92);--linha:rgba(255,255,255,.12);--txt:#f3f5ff;--muted:#aab2d5;--amarelo:#ffd166}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--fundo);color:var(--txt);font-family:Inter,system-ui,sans-serif;overflow:hidden;user-select:none;-webkit-user-select:none;touch-action:none}
+  canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block}
+  button{font:inherit;color:inherit;cursor:pointer}
+  h1,h2,.bal{font-family:"Baloo 2",Inter,sans-serif;margin:0}
+  .tela{position:fixed;inset:0;display:none;align-items:center;justify-content:center;padding:16px;z-index:10;overflow:auto;background:linear-gradient(180deg,rgba(8,10,24,.55),rgba(8,10,24,.9))}
+  .tela.on{display:flex}
+  .caixa{width:min(920px,100%);background:var(--painel);border:1px solid var(--linha);border-radius:20px;padding:18px 20px;margin:auto}
+  h1{font-size:58px;line-height:1;letter-spacing:1px;text-shadow:0 4px 0 #0008}
+  h1 span{color:var(--amarelo)}
+  h2{font-size:30px;margin-bottom:8px}
+  .sub{color:var(--muted);line-height:1.45;margin:8px 0 14px}
+  .linha{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .b{border:1px solid var(--linha);background:rgba(255,255,255,.07);border-radius:12px;padding:10px 16px;font-weight:800}
+  .b:hover{background:rgba(255,255,255,.14)}
+  .b.pri{background:var(--amarelo);color:#1b1300;border-color:transparent}
+  .b:disabled{opacity:.45;cursor:default}
+  .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+  .op{border:2px solid var(--linha);background:rgba(255,255,255,.05);border-radius:16px;padding:12px;text-align:left;display:flex;flex-direction:column;gap:4px;font-weight:800}
+  .op.sel{border-color:var(--amarelo);background:rgba(255,209,102,.12)}
+  .op small{color:var(--muted);font-weight:600;line-height:1.35}
+  .hab{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--linha);border-radius:12px;padding:8px 10px;background:rgba(255,255,255,.04)}
+  .hab .ic{font-size:26px;width:36px;text-align:center}
+  .hab .nm{font-weight:800}
+  .hab small{color:var(--muted);display:block;font-weight:500}
+  .hab .cad{margin-left:auto;white-space:nowrap}
+  input.txt{padding:9px 11px;border-radius:10px;border:1px solid var(--linha);background:#0b0e1e;color:#fff;font-weight:800}
+  table{border-collapse:collapse;width:100%} td,th{padding:5px 6px;text-align:left;border-bottom:1px solid var(--linha)}
+  /* HUD */
+  #hud{position:fixed;inset:0;pointer-events:none;display:none;z-index:5}
+  #hud.on{display:block}
+  #topo{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:flex;gap:8px;align-items:center}
+  .pilula{background:rgba(10,12,30,.7);border:1px solid var(--linha);border-radius:999px;padding:6px 14px;font-weight:800;font-family:"Baloo 2",Inter;font-size:20px}
+  #mira{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border:2px solid #fff;border-radius:50%;box-shadow:0 0 0 1px #0007}
+  #alvoInfo{position:absolute;left:50%;top:calc(50% + 18px);transform:translateX(-50%);font-weight:800;font-size:13px;text-shadow:0 1px 2px #000;white-space:nowrap}
+  #rank{position:absolute;right:12px;top:12px;background:rgba(10,12,30,.62);border:1px solid var(--linha);border-radius:12px;padding:8px 10px;min-width:180px;font-size:13px}
+  #rank div{display:flex;justify-content:space-between;gap:10px;padding:1px 0}
+  #feed{position:absolute;left:12px;top:12px;display:flex;flex-direction:column;gap:4px;max-width:44vw}
+  #feed div{background:rgba(10,12,30,.65);padding:4px 10px;border-radius:8px;font-weight:700;font-size:13px}
+  #barra{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px}
+  #mana{width:min(440px,80vw);height:14px;border-radius:999px;background:rgba(0,0,0,.5);border:1px solid var(--linha);overflow:hidden;position:relative}
+  #mana i{position:absolute;inset:0;width:50%;background:linear-gradient(90deg,#4cc9f0,#7b5cff)}
+  #mana b{position:absolute;inset:0;text-align:center;font-size:11px;line-height:14px}
+  #slots{display:flex;gap:8px;pointer-events:auto}
+  .slot{width:62px;height:62px;border-radius:14px;background:rgba(10,12,30,.78);border:2px solid var(--linha);position:relative;display:flex;align-items:center;justify-content:center;font-size:28px;overflow:hidden}
+  .slot.sel{border-color:var(--amarelo)}
+  .slot .k{position:absolute;left:4px;top:2px;font-size:11px;font-weight:800;color:var(--muted)}
+  .slot .m{position:absolute;right:4px;bottom:2px;font-size:11px;font-weight:800;color:#9fd8ff}
+  .slot .cd{position:absolute;inset:0;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800}
+  .slot.tranc{opacity:.35}
+  #nome-hab{font-weight:800;font-size:14px;text-shadow:0 1px 2px #000;min-height:18px}
+  #centro{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%);text-align:center;font-family:"Baloo 2";font-size:46px;font-weight:800;text-shadow:0 4px 0 #0009;opacity:0;transition:opacity .3s}
+  #centro small{display:block;font-size:20px;font-family:Inter;font-weight:700}
+  #flash{position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity .25s}
+  #toque{position:fixed;inset:0;z-index:7;display:none;touch-action:none}
+  #toque .tb{position:absolute;border-radius:50%;background:rgba(255,255,255,.14);border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:22px}
+  #joy{position:absolute;left:26px;bottom:30px;width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.22)}
+  #joy i{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.35)}
+  body.toque #slots{pointer-events:auto}
+  body.toque #barra{left:auto;right:12px;transform:none;bottom:auto;top:62px;align-items:flex-end}
+  body.toque .slot{width:52px;height:52px;font-size:22px}
+  body.toque #rank{top:auto;bottom:10px;right:auto;left:170px;font-size:11px;min-width:130px}
+  #carregando{position:fixed;inset:0;z-index:30;display:flex;align-items:center;justify-content:center;background:var(--fundo);font-weight:800}
+  @media (max-width:700px){h1{font-size:40px}}
+</style>
+</head>
+<body>
+<canvas id="cv"></canvas>
+<div id="carregando">Construindo o labirinto…</div>
+<div id="flash"></div>
+
+<div id="hud">
+  <div id="topo"><span class="pilula" id="t-nivel">Nível 1/10</span><span class="pilula" id="t-elev">🛗 10</span><span class="pilula" id="t-tempo">0:00</span></div>
+  <div id="feed"></div>
+  <div id="rank"></div>
+  <div id="mira"></div><div id="alvoInfo"></div>
+  <div id="centro"></div>
+  <div id="barra"><div id="nome-hab"></div><div id="slots"></div><div id="mana"><i></i><b>MANA</b></div></div>
+</div>
+<div id="toque"><div id="joy"><i></i></div></div>
+
+<div class="tela on" id="t-inicio"><div class="caixa">
+  <h1>LABIRINTO <span>MALUCO</span></h1>
+  <p class="sub">Corrida até o topo de uma torre de <b>10 labirintos sorteados</b> que flutuam sobre o vazio. Em cada nível, ache um <b>elevador</b>: no nível 1 há 10 deles, e cada nível tem um a menos, até sobrar um só no último. Cada classe tem poderes que <b>mudam o labirinto</b>: abrir buraco para o vazio, levantar muros, virar o chão em lava, gelo ou plataforma que pisca. Atrapalhe quem está na sua frente e chegue primeiro!</p>
+  <div class="linha"><button class="b pri" id="b-jogar" style="font-size:20px;padding:12px 24px">▶ Jogar com bots</button><button class="b pri" id="b-online" style="font-size:20px;padding:12px 22px">🌐 Online</button><button class="b" id="b-classes">🎓 Classes e poderes</button><button class="b" id="b-ajuda">Controles</button><span style="flex:1"></span><button class="b" id="b-sair">Sair</button></div>
+  <p class="sub" id="pontos-ini" style="margin-bottom:0"></p>
+</div></div>
+
+<div class="tela" id="t-classes"><div class="caixa">
+  <h2>Classes e poderes</h2>
+  <p class="sub">Escolha sua classe. Cada uma começa com 2 poderes. Chegar ao topo (e ir longe na torre) dá <b>pontos</b>, que desbloqueiam os outros poderes da classe. Você tem <b id="pts">0</b> pontos.</p>
+  <div class="grade" id="lista-classes"></div>
+  <div id="lista-habs" style="display:flex;flex-direction:column;gap:6px;margin-top:12px"></div>
+  <div class="linha" style="margin-top:12px"><button class="b pri" id="b-classe-ok">Pronto</button><span class="sub" id="classe-msg" style="margin:0"></span></div>
+</div></div>
+
+<div class="tela" id="t-solo"><div class="caixa">
+  <h2>Jogar com bots</h2>
+  <div class="linha"><span class="sub" style="margin:0">Seu nome</span><input class="txt" id="solo-nome" maxlength="14"></div>
+  <div class="linha" style="margin-top:10px"><span class="sub" style="margin:0">Bots</span><span class="linha" id="solo-bots"></span></div>
+  <div class="linha" style="margin-top:10px"><span class="sub" style="margin:0">Dificuldade dos bots</span><span class="linha" id="solo-dif"></span></div>
+  <div class="linha" style="margin-top:14px"><button class="b pri" id="b-solo-ir" style="font-size:20px">▶ Começar</button><button class="b" data-voltar="t-inicio">← Voltar</button></div>
+</div></div>
+
+<div class="tela" id="t-online"><div class="caixa">
+  <h2>Jogar online</h2>
+  <p class="sub">Até 12 pessoas. Quem cria a sala controla os bots e os drones. Cada um joga com a classe que escolheu no menu de classes.</p>
+  <div class="linha"><span class="sub" style="margin:0">Seu nome</span><input class="txt" id="on-nome" maxlength="14"></div>
+  <div class="linha" style="margin-top:10px"><button class="b pri" id="on-criar">Criar sala</button><button class="b pri" id="on-publica">🌍 Sala pública</button><input class="txt" id="on-cod" maxlength="4" placeholder="CÓDIGO" style="width:110px;text-transform:uppercase;letter-spacing:3px"><button class="b" id="on-entrar">Entrar</button><span style="flex:1"></span><button class="b" data-voltar="t-inicio">← Voltar</button></div>
+  <p id="on-erro" class="sub" style="min-height:22px"></p>
+  <div id="on-sala" style="display:none">
+    <h2 id="on-titulo">Sala</h2>
+    <table id="on-jogadores"></table>
+    <div id="on-host" class="linha" style="margin-top:10px"><span class="sub" style="margin:0">Completar com bots até</span><span class="linha" id="on-bots"></span><span style="flex:1"></span><button class="b pri" id="on-comecar" style="font-size:18px">▶ Começar</button></div>
+    <p id="on-espera" class="sub">Esperando o anfitrião começar…</p>
+  </div>
+</div></div>
+
+<div class="tela" id="t-ajuda"><div class="caixa">
+  <h2>Controles</h2>
+  <table>
+    <tr><td><b>WASD</b> / setas</td><td>Andar</td></tr>
+    <tr><td><b>Espaço</b></td><td>Pular</td></tr>
+    <tr><td><b>Mouse</b></td><td>Girar a câmera (clique na tela para prender o mouse)</td></tr>
+    <tr><td><b>1 a 5</b> ou roda do mouse</td><td>Escolher o poder</td></tr>
+    <tr><td><b>Clique</b> ou <b>E</b></td><td>Usar o poder no bloco mirado (o quadrado colorido mostra a área)</td></tr>
+    <tr><td><b>R</b></td><td>Voltar ao começo do nível</td></tr>
+    <tr><td><b>Tab</b> / <b>Esc</b></td><td>Placar / pausa</td></tr>
+    <tr><td>Celular</td><td>Joystick à esquerda, arraste para girar, botões de pulo e de poder</td></tr>
+  </table>
+  <p class="sub">Dicas: cristais azuis dão mana. Chão de lava, hélice e vazio te mandam de volta ao começo do nível. Gelo escorrega, esteira empurra, mola joga para cima e o chão rachado cai logo depois que você pisa.</p>
+  <button class="b pri" data-voltar="t-inicio">Ok</button>
+</div></div>
+
+<div class="tela" id="t-pausa"><div class="caixa">
+  <h2>Pausa</h2>
+  <div class="linha"><span class="sub" style="margin:0">Sensibilidade</span><input type="range" id="c-sens" min="0.3" max="3" step="0.05"><span class="sub" style="margin:0">Volume</span><input type="range" id="c-vol" min="0" max="1" step="0.05"></div>
+  <div class="linha" style="margin-top:12px"><button class="b pri" id="b-continuar">Continuar</button><button class="b" id="b-reini">Voltar ao começo do nível</button><button class="b" id="b-menu">Sair da partida</button></div>
+</div></div>
+
+<div class="tela" id="t-fim"><div class="caixa">
+  <h2 id="fim-tit">Fim!</h2><div id="fim-txt"></div>
+  <div class="linha" style="margin-top:14px"><button class="b pri" id="b-revanche">Jogar de novo</button><button class="b" id="b-fim-classes">🎓 Gastar pontos</button><button class="b" id="b-fim-menu">Menu</button></div>
+</div></div>
+
+<script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+<script src="../../salas-publicas.js"></script>
+<script type="importmap">{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }</script>
+<script type="module">
+import * as THREE from 'three';
+const $ = s => document.querySelector(s);
+const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
+const TOQUE = matchMedia('(pointer: coarse)').matches || /Android|iPhone|iPad/i.test(navigator.userAgent);
+const avisar = (evento, extra = {}) => { try { parent.postMessage({ fonte: 'arcadia-jogo', id: 'labirinto-maluco', evento, ...extra }, '*'); } catch (e) {} };
+const ler = (k, p) => { try { const v = JSON.parse(localStorage.getItem(k)); return v ?? p; } catch (e) { return p; } };
+const gravar = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function rngDe(seed) { let n = seed | 0; return () => { n = n + 0x6D2B79F5 | 0; let t = Math.imul(n ^ n >>> 15, 1 | n); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+/* =====================================================================
+   CLASSES E PODERES
+   ===================================================================== */
+const CLASSES = {
+  demolidor: { nome: 'Demolidor', cor: '#ff6b6b', ic: '💣', desc: 'Destrói: abre buracos para o vazio e derruba paredes.', hab: [
+    { id: 'buraco', nome: 'Buraco', ic: '🕳️', mana: 25, cd: 4, area: 1, dur: 25, pts: 0, mal: true, desc: 'O bloco mirado some. Quem estiver em cima cai no vazio.' },
+    { id: 'derrubar', nome: 'Derrubar paredes', ic: '🔨', mana: 20, cd: 3, area: 1, dur: 30, pts: 0, desc: 'Derruba as quatro paredes em volta do bloco mirado. Ótimo para abrir atalho.' },
+    { id: 'cratera', nome: 'Cratera', ic: '💥', mana: 60, cd: 12, area: 3, dur: 18, pts: 3, mal: true, desc: 'Um buraco de 3×3 blocos.' },
+    { id: 'podre', nome: 'Chão podre', ic: '🪵', mana: 45, cd: 10, area: 5, dur: 30, pts: 4, mal: true, desc: 'Metade do chão numa área 5×5 racha e cai logo depois que alguém pisa.' },
+    { id: 'terremoto', nome: 'Terremoto', ic: '🌋', mana: 100, cd: 60, area: 'nivel', dur: 12, pts: 6, mal: true, desc: 'ULTIMATE: 18% do chão do nível mirado desaba por 12 s.' }] },
+  construtor: { nome: 'Construtor', cor: '#ffd166', ic: '🧱', desc: 'Cria: tapa buracos, levanta pilares e muralhas.', hab: [
+    { id: 'tapar', nome: 'Tapar buraco', ic: '🟫', mana: 15, cd: 2, area: 1, dur: 40, pts: 0, desc: 'Cria chão firme no bloco mirado (cobre buraco, lava ou armadilha).' },
+    { id: 'pilar', nome: 'Pilar', ic: '🧱', mana: 25, cd: 4, area: 1, dur: 25, pts: 0, mal: true, desc: 'Levanta um bloco maciço que tranca o corredor.' },
+    { id: 'degrau', nome: 'Degrau', ic: '🪜', mana: 30, cd: 6, area: 1, dur: 30, pts: 3, desc: 'Bloco de meia altura. Pule dele para cima das paredes e ande por cima do labirinto!' },
+    { id: 'muralha', nome: 'Muralha', ic: '🏰', mana: 55, cd: 12, area: 'linha', dur: 22, pts: 4, mal: true, desc: 'Cinco pilares em linha, atravessados na direção em que você olha.' },
+    { id: 'passarela', nome: 'Passarela de vidro', ic: '🌉', mana: 100, cd: 50, area: 'eu', dur: 20, pts: 6, desc: 'ULTIMATE: uma passarela sai dos seus pés para a frente, por cima das paredes.' }] },
+  feiticeiro: { nome: 'Feiticeiro do Obby', cor: '#c77dff', ic: '🔮', desc: 'Encanta e amaldiçoa: lava, gelo, chão que pisca e hélices.', hab: [
+    { id: 'lava', nome: 'Lava', ic: '🔥', mana: 25, cd: 4, area: 1, dur: 25, pts: 0, mal: true, desc: 'O bloco vira lava: quem pisar volta ao começo do nível.' },
+    { id: 'gelo', nome: 'Gelo', ic: '🧊', mana: 20, cd: 4, area: 3, dur: 25, pts: 0, mal: true, desc: 'Área 3×3 de gelo: ninguém consegue frear.' },
+    { id: 'pisca', nome: 'Pisca-pisca', ic: '💡', mana: 40, cd: 9, area: 3, dur: 25, pts: 3, mal: true, desc: 'Área 3×3 que some e volta a cada instante.' },
+    { id: 'helice', nome: 'Hélice', ic: '🌀', mana: 45, cd: 10, area: 1, dur: 30, pts: 4, mal: true, desc: 'Uma barra giratória no chão: pule por cima ou volte ao começo.' },
+    { id: 'marlava', nome: 'Mar de lava', ic: '♨️', mana: 100, cd: 60, area: 'nivel', dur: 10, pts: 6, mal: true, desc: 'ULTIMATE: 25% do chão do nível mirado vira lava por 10 s.' }] },
+  trapaceiro: { nome: 'Trapaceiro', cor: '#4cc9f0', ic: '🃏', desc: 'Engana: esteiras, molas, armadilhas e paredes que mudam.', hab: [
+    { id: 'esteira', nome: 'Esteira', ic: '⏩', mana: 20, cd: 4, area: 'linha3', dur: 25, pts: 0, mal: true, desc: 'Três blocos viram esteira empurrando para onde você olha.' },
+    { id: 'mola', nome: 'Mola', ic: '🦘', mana: 20, cd: 4, area: 1, dur: 30, pts: 0, desc: 'Trampolim que joga lá para cima. Dá para passar por cima das paredes.' },
+    { id: 'remexer', nome: 'Remexer', ic: '🔀', mana: 40, cd: 10, area: 5, dur: 30, pts: 3, mal: true, desc: 'Refaz as paredes numa área 5×5: os corredores mudam de lugar.' },
+    { id: 'armadilha', nome: 'Armadilha', ic: '🪤', mana: 45, cd: 10, area: 1, dur: 35, pts: 4, mal: true, desc: 'Quem pisar é mandado de volta ao começo do nível.' },
+    { id: 'embaralhar', nome: 'Embaralhar', ic: '🌪️', mana: 100, cd: 60, area: 'nivel', dur: 30, pts: 6, mal: true, desc: 'ULTIMATE: refaz o labirinto inteiro do nível mirado.' }] },
+  velocista: { nome: 'Velocista', cor: '#7bd88f', ic: '⚡', desc: 'Corre: poderes que ajudam você a passar mais rápido.', hab: [
+    { id: 'disparada', nome: 'Disparada', ic: '💨', mana: 25, cd: 8, area: 'eu', dur: 5, pts: 0, desc: 'Corre 60% mais rápido por 5 s.' },
+    { id: 'pulo2', nome: 'Pulo duplo', ic: '⏫', mana: 25, cd: 10, area: 'eu', dur: 8, pts: 0, desc: 'Pode pular de novo no ar por 8 s.' },
+    { id: 'radar', nome: 'Radar', ic: '📡', mana: 35, cd: 12, area: 'eu', dur: 8, pts: 3, desc: 'Mostra o caminho até o elevador mais perto.' },
+    { id: 'escudo', nome: 'Escudo', ic: '🛡️', mana: 40, cd: 15, area: 'eu', dur: 6, pts: 4, desc: 'Lava, hélice e armadilha não te pegam por 6 s.' },
+    { id: 'fantasma', nome: 'Fantasma', ic: '👻', mana: 100, cd: 50, area: 'eu', dur: 4, pts: 6, desc: 'ULTIMATE: atravessa paredes por 4 s.' }] },
+};
+const HAB = {}; for (const [cid, c] of Object.entries(CLASSES)) for (const h of c.hab) HAB[h.id] = Object.assign(h, { classe: cid });
+// progresso salvo
+const SAVE = Object.assign({ pontos: 0, classe: 'demolidor', desbl: {}, nome: '', sens: 1, vol: 0.8 }, ler('labmaluco', {}));
+const salvar = () => gravar('labmaluco', SAVE);
+const temHab = (classe, h) => h.pts === 0 || (SAVE.desbl[classe] || []).includes(h.id);
+
+/* =====================================================================
+   SOM (gerado na hora)
+   ===================================================================== */
+const AU = { ctx: null, mestre: null };
+function iniciarSom() { if (AU.ctx) { AU.ctx.resume && AU.ctx.resume(); return; } try { AU.ctx = new (window.AudioContext || window.webkitAudioContext)(); AU.mestre = AU.ctx.createGain(); AU.mestre.gain.value = SAVE.vol; AU.mestre.connect(AU.ctx.destination); } catch (e) {} }
+function tom(f0, f1, dur, tipo = 'sine', vol = 0.2, atraso = 0) { const c = AU.ctx; if (!c) return; const t = c.currentTime + atraso, o = c.createOscillator(), g = c.createGain(); o.type = tipo; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(20, f1), t + dur); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur); o.connect(g); g.connect(AU.mestre); o.start(t); o.stop(t + dur + 0.02); }
+function ruido(dur, vol = 0.2, freq = 1200, atraso = 0) { const c = AU.ctx; if (!c) return; const t = c.currentTime + atraso, n = c.sampleRate * dur | 0, b = c.createBuffer(1, n, c.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / n); const s = c.createBufferSource(); s.buffer = b; const f = c.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = freq; const g = c.createGain(); g.gain.value = vol; s.connect(f); f.connect(g); g.connect(AU.mestre); s.start(t); }
+const SOM = {
+  pulo: () => tom(320, 620, 0.12, 'square', 0.06), mola: () => tom(200, 1200, 0.35, 'triangle', 0.15),
+  ding: () => { tom(880, 880, 0.35, 'sine', 0.2); tom(1320, 1320, 0.5, 'sine', 0.18, 0.18); },
+  cristal: () => { tom(1500, 2400, 0.12, 'sine', 0.12); tom(2000, 3000, 0.15, 'sine', 0.08, 0.06); },
+  magia: () => { tom(300, 900, 0.3, 'sawtooth', 0.06); ruido(0.3, 0.08, 3000); },
+  lava: () => { ruido(0.6, 0.25, 900); tom(180, 60, 0.4, 'sawtooth', 0.08); }, queda: () => tom(700, 80, 0.8, 'sine', 0.12),
+  vitoria: () => [523, 659, 784, 1047].forEach((f, i) => tom(f, f, 0.3, 'triangle', 0.16, i * 0.12)), erro: () => tom(200, 150, 0.15, 'square', 0.06),
+};
+
+/* =====================================================================
+   MUNDO: 10 labirintos sorteados que sobem como uma escada
+   ===================================================================== */
+const C = 4, HW = 3.2, WT = 0.45, FT = 0.7, NIV = 10, GAP = 14, DY = 8;
+const PROTEGIDOS = new Set(['inicio', 'elev']);
+let M = null; // mundo atual
+function gerarMundo(seed) {
+  const rnd = rngDe(seed), niveis = []; let x = 0;
+  for (let k = 0; k < NIV; k++) {
+    const N = 9 + k, L = { k, N, x0: x, z0: -N * C / 2, y: k * DY, cels: [], hW: new Array(N * (N + 1)), vW: new Array(N * (N + 1)), elev: [], cristais: [], sujo: true };
+    x += N * C + GAP;
+    for (let i = 0; i < N * N; i++) L.cels.push({ base: 'n', tipo: 'n', ate: 0, dir: 0, fase: rnd() * 3, caiu: 0 });
+    for (let i = 0; i < L.hW.length; i++) { L.hW[i] = { base: 1, on: 1, ate: 0 }; L.vW[i] = { base: 1, on: 1, ate: 0 }; }
+    L.ini = { i: 0, j: N >> 1 };
+    cavar(L, 0, 0, N, N, rnd, 0.12);
+    // elevadores: longe do começo e longe um do outro
+    const dist = bfs(L, L.ini.i, L.ini.j, true), cand = [];
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) { const d = dist[j * N + i]; if (d >= N * 0.6) cand.push([i, j, d + rnd() * N]); }
+    cand.sort((a, b) => b[2] - a[2]);
+    for (const [i, j] of cand) { if (L.elev.length >= NIV - k) break; if (L.elev.some(e => Math.abs(e.i - i) + Math.abs(e.j - j) < 3)) continue; L.elev.push({ i, j }); }
+    for (const e of L.elev) L.cels[e.j * N + e.i].prot = 'elev';
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const c = cel(L, L.ini.i + di, L.ini.j + dj); if (c) c.prot = 'inicio'; }
+    // obstáculos de obby já no começo (mais a cada nível), sem trancar o caminho
+    const pool = ['gelo', 'esteira', 'mola', 'lava', 'pisca', 'vazio', 'helice', 'falso', 'lava', 'pisca'], frac = 0.03 + 0.028 * k;
+    for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+      const c = L.cels[j * N + i]; if (c.prot || rnd() > frac) continue;
+      const t = pool[Math.floor(rnd() * Math.min(pool.length, 3 + k))]; c.base = c.tipo = t; c.dir = Math.floor(rnd() * 4);
+    }
+    // garante que dá para chegar num elevador sem pular nada perigoso
+    for (let tent = 0; tent < 40 && !alcancaElevador(L); tent++) { const perig = L.cels.filter(c => PERIGO.has(c.base)); if (!perig.length) break; const c = perig[Math.floor(rnd() * perig.length)]; c.base = c.tipo = 'n'; }
+    // cristais de mana
+    for (let n = 0; n < 4 + k; n++) { const i = Math.floor(rnd() * N), j = Math.floor(rnd() * N), c = cel(L, i, j); if (c.prot || c.base !== 'n') continue; L.cristais.push({ i, j, on: true, volta: 0 }); }
+    niveis.push(L);
+  }
+  const topo = { x0: x - GAP + 6, y: NIV * DY, z0: -9, N: 4 };
+  return { seed, niveis, topo, extras: [], t: 0 };
+}
+const PERIGO = new Set(['lava', 'vazio', 'helice', 'armadilha', 'bloco', 'falso']);
+const cel = (L, i, j) => i >= 0 && j >= 0 && i < L.N && j < L.N ? L.cels[j * L.N + i] : null;
+// paredes: hW[i + N*j] fica em z = z0 + j*C (j = 0..N), vW[j + N*i] em x = x0 + i*C (i = 0..N)
+const parede = (L, i, j, d) => d === 0 ? L.hW[i + L.N * j] : d === 1 ? L.vW[j + L.N * (i + 1)] : d === 2 ? L.hW[i + L.N * (j + 1)] : L.vW[j + L.N * i];
+const DIRS = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+const dirDe = yaw => { const fx = -Math.sin(yaw), fz = -Math.cos(yaw); return Math.abs(fx) > Math.abs(fz) ? (fx > 0 ? 1 : 3) : (fz > 0 ? 2 : 0); }; // 0 norte(-z) 1 leste(+x) 2 sul(+z) 3 oeste(-x)
+// labirinto numa região (recursive backtracker) + algumas paredes extras removidas (vários caminhos)
+function cavar(L, i0, j0, w, h, rnd, braid, comDur) {
+  const visit = new Set(), pilha = [[i0 + Math.floor(rnd() * w), j0 + Math.floor(rnd() * h)]], dentro = (i, j) => i >= i0 && j >= j0 && i < i0 + w && j < j0 + h, mud = [];
+  const setP = (p, on) => { if (comDur) { mud.push([p, on]); } else { p.base = p.on = on; } };
+  for (let j = j0; j < j0 + h; j++) for (let i = i0; i < i0 + w; i++) for (let d = 1; d <= 2; d++) { const [di, dj] = DIRS[d]; if (dentro(i + di, j + dj)) setP(parede(L, i, j, d), 1); }
+  visit.add(pilha[0][0] + ',' + pilha[0][1]);
+  while (pilha.length) {
+    const [i, j] = pilha[pilha.length - 1], viz = [];
+    for (let d = 0; d < 4; d++) { const ni = i + DIRS[d][0], nj = j + DIRS[d][1]; if (dentro(ni, nj) && !visit.has(ni + ',' + nj)) viz.push([ni, nj, d]); }
+    if (!viz.length) { pilha.pop(); continue; }
+    const [ni, nj, d] = viz[Math.floor(rnd() * viz.length)]; setP(parede(L, i, j, d), 0); visit.add(ni + ',' + nj); pilha.push([ni, nj]);
+  }
+  for (let j = j0; j < j0 + h; j++) for (let i = i0; i < i0 + w; i++) for (let d = 1; d <= 2; d++) { const [di, dj] = DIRS[d]; if (dentro(i + di, j + dj) && rnd() < braid) setP(parede(L, i, j, d), 0); }
+  return mud;
+}
+// distâncias em células a partir de (i,j); "seguro" = não passa por perigo
+function bfs(L, i0, j0, seguro) {
+  const N = L.N, dist = new Array(N * N).fill(-1), fila = [[i0, j0]]; dist[j0 * N + i0] = 0;
+  while (fila.length) { const [i, j] = fila.shift(); for (let d = 0; d < 4; d++) { const ni = i + DIRS[d][0], nj = j + DIRS[d][1], c = cel(L, ni, nj); if (!c || dist[nj * N + ni] >= 0 || parede(L, i, j, d).on) continue; if (seguro && (PERIGO.has(c.tipo) || c.tipo === 'pisca')) continue; dist[nj * N + ni] = dist[j * N + i] + 1; fila.push([ni, nj]); } }
+  return dist;
+}
+const alcancaElevador = L => { const d = bfs(L, L.ini.i, L.ini.j, true); return L.elev.some(e => d[e.j * L.N + e.i] >= 0); };
+const centroCel = (L, i, j) => ({ x: L.x0 + (i + 0.5) * C, z: L.z0 + (j + 0.5) * C });
+function nivelEm(x) { for (const L of M.niveis) if (x >= L.x0 - 3 && x <= L.x0 + L.N * C + 3) return L; return null; }
+
+/* ---------- caixas de colisão (reconstruídas quando o nível muda) ---------- */
+function chaoAtivo(c, t) { if (c.tipo === 'vazio' || c.tipo === 'bloco') return c.tipo === 'bloco'; if (c.tipo === 'pisca') return ((t + c.fase) % 2.4) < 1.45; if (c.tipo === 'falso' && c.caiu && t - c.caiu > 0.35) return false; return true; }
+function montarCaixas(L, t) {
+  const N = L.N, cx = [], por = Array.from({ length: N * N }, () => []);
+  const add = (b, cels) => { const id = cx.length; cx.push(b); for (const [i, j] of cels) if (i >= 0 && j >= 0 && i < N && j < N) por[j * N + i].push(id); };
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const c = L.cels[j * N + i]; if (!chaoAtivo(c, t)) continue; const x0 = L.x0 + i * C, z0 = L.z0 + j * C;
+    const top = c.tipo === 'bloco' ? L.y + HW : c.tipo === 'degrau' ? L.y + 1.6 : L.y;
+    add({ x0, x1: x0 + C, z0, z1: z0 + C, y0: L.y - FT, y1: top, tipo: c.tipo, i, j, L }, [[i, j]]);
+  }
+  for (let j = 0; j <= N; j++) for (let i = 0; i < N; i++) { const p = L.hW[i + N * j]; if (!p.on) continue; const z = L.z0 + j * C; add({ x0: L.x0 + i * C - WT / 2, x1: L.x0 + (i + 1) * C + WT / 2, z0: z - WT / 2, z1: z + WT / 2, y0: L.y - FT, y1: L.y + HW, tipo: 'parede', L }, [[i, j - 1], [i, j]]); }
+  for (let i = 0; i <= N; i++) for (let j = 0; j < N; j++) { const p = L.vW[j + N * i]; if (!p.on) continue; const x = L.x0 + i * C; add({ x0: x - WT / 2, x1: x + WT / 2, z0: L.z0 + j * C - WT / 2, z1: L.z0 + (j + 1) * C + WT / 2, y0: L.y - FT, y1: L.y + HW, tipo: 'parede', L }, [[i - 1, j], [i, j]]); }
+  L.caixas = cx; L.por = por;
+}
+function caixasPerto(x, z) {
+  const out = [], L = nivelEm(x);
+  if (L && L.caixas) { const i = Math.floor((x - L.x0) / C), j = Math.floor((z - L.z0) / C), vis = new Set(); for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) { const ii = i + di, jj = j + dj; if (ii < 0 || jj < 0 || ii >= L.N || jj >= L.N) continue; for (const id of L.por[jj * L.N + ii]) if (!vis.has(id)) { vis.add(id); out.push(L.caixas[id]); } } }
+  for (const e of M.extras) if (x > e.x0 - 2 && x < e.x1 + 2 && z > e.z0 - 2 && z < e.z1 + 2) out.push(e);
+  const T = M.topo; if (x > T.x0 - 2 && x < T.x0 + T.N * C + 2) out.push(T.caixa);
+  return out;
+}
+
+/* =====================================================================
+   GRÁFICOS
+   ===================================================================== */
+const canvas = $('#cv');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: !TOQUE });
+renderer.setPixelRatio(Math.min(devicePixelRatio, TOQUE ? 1.25 : 1.75)); renderer.outputColorSpace = THREE.SRGBColorSpace;
+const cena = new THREE.Scene(); cena.fog = new THREE.Fog(0x9fb8ff, 80, 330);
+{ const g = new THREE.SphereGeometry(900, 24, 12), cs = [], c = new THREE.Color(), cima = new THREE.Color(0x6aa8ff), meio = new THREE.Color(0xc9d8ff), baixo = new THREE.Color(0x1a1238); const p = g.attributes.position; for (let i = 0; i < p.count; i++) { const y = p.getY(i) / 900; if (y > 0) c.copy(meio).lerp(cima, Math.min(1, y * 2)); else c.copy(meio).lerp(baixo, Math.min(1, -y * 3)); cs.push(c.r, c.g, c.b); } g.setAttribute('color', new THREE.Float32BufferAttribute(cs, 3)); const ceu = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, fog: false, depthWrite: false })); cena.add(ceu); cena.userData.ceu = ceu; }
+cena.add(new THREE.HemisphereLight(0xffffff, 0x5b4a8a, 1.25));
+const sol = new THREE.DirectionalLight(0xfff1d6, 1.5); sol.position.set(-60, 120, 50); cena.add(sol);
+const cam = new THREE.PerspectiveCamera(70, 1, 0.1, 1500);
+// textura de plástico com bordinha (fica com cara de bloco de montar, sem copiar ninguém)
+const texBloco = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'); g.fillStyle = '#fff'; g.fillRect(0, 0, 128, 128); g.strokeStyle = 'rgba(0,0,0,.18)'; g.lineWidth = 6; g.strokeRect(3, 3, 122, 122); g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(10, 10, 108, 6); g.fillStyle = 'rgba(0,0,0,.05)'; for (let i = 0; i < 40; i++) g.fillRect(Math.random() * 128, Math.random() * 128, 3, 3); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t; })();
+const geoCubo = new THREE.BoxGeometry(1, 1, 1);
+const matChao = new THREE.MeshLambertMaterial({ map: texBloco }), matParede = new THREE.MeshLambertMaterial({ map: texBloco });
+const COR_TIPO = { lava: '#ff4b1f', gelo: '#bdeeff', esteira: '#3a3f55', mola: '#47e06b', pisca: '#ffe66b', helice: '#9aa3c7', falso: null, armadilha: '#ff3df2', degrau: null, bloco: null };
+const corNivel = k => new THREE.Color().setHSL((0.58 + k * 0.083) % 1, 0.55, 0.62), corParede = k => new THREE.Color().setHSL((0.58 + k * 0.083) % 1, 0.5, 0.45);
+const _o = new THREE.Object3D(), _c = new THREE.Color();
+function malhasNivel(L) {
+  const N = L.N;
+  L.mChao = new THREE.InstancedMesh(geoCubo, matChao, N * N); L.mParede = new THREE.InstancedMesh(geoCubo, matParede, L.hW.length * 2);
+  L.mChao.frustumCulled = L.mParede.frustumCulled = false; cena.add(L.mChao, L.mParede);
+  // elevadores
+  L.mElev = [];
+  for (const e of L.elev) {
+    const g = new THREE.Group(), p = centroCel(L, e.i, e.j), ultimo = L.k === NIV - 1, cor = ultimo ? 0x3ddc84 : 0xffc23d;
+    const mm = new THREE.MeshLambertMaterial({ color: cor }), vidro = new THREE.MeshBasicMaterial({ color: 0xbfe8ff, transparent: true, opacity: 0.25, depthWrite: false });
+    for (const [sx, sz] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { const m = new THREE.Mesh(new THREE.BoxGeometry(0.3, 4.2, 0.3), mm); m.position.set(sx * 1.55, 2.1, sz * 1.55); g.add(m); }
+    const teto = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.35, 3.6), mm); teto.position.y = 4.3; g.add(teto);
+    const luz = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.06, 3.2), new THREE.MeshBasicMaterial({ color: ultimo ? 0x9dffc4 : 0xfff1b8 })); luz.position.y = 0.04; g.add(luz);
+    const cab = new THREE.Mesh(new THREE.BoxGeometry(3.1, 4.1, 3.1), vidro); cab.position.y = 2.1; g.add(cab);
+    const pl = placa(ultimo ? '🏆 TOPO' : '🛗 SOBE', ultimo ? '#3ddc84' : '#ffc23d', 3.4); pl.position.y = 5.3; g.add(pl);
+    g.position.set(p.x, L.y, p.z); cena.add(g); L.mElev.push(g);
+  }
+  L.mCrist = L.cristais.map(cr => { const m = new THREE.Mesh(new THREE.OctahedronGeometry(0.45), new THREE.MeshBasicMaterial({ color: 0x5ee7ff })); const p = centroCel(L, cr.i, cr.j); m.position.set(p.x, L.y + 1.1, p.z); cena.add(m); return m; });
+  L.placa = placa('NÍVEL ' + (L.k + 1), '#ffffff', 7); const pi = centroCel(L, L.ini.i, L.ini.j); L.placa.position.set(pi.x - 4, L.y + 6, pi.z); cena.add(L.placa);
+  L.helices = new Map(); L.setas = new Map(); L.molas = new Map();
+}
+function placa(texto, cor, larg) { const c = document.createElement('canvas'); c.width = 512; c.height = 128; const g = c.getContext('2d'); g.fillStyle = 'rgba(12,14,32,.85)'; g.beginPath(); g.roundRect(4, 4, 504, 120, 30); g.fill(); g.strokeStyle = cor; g.lineWidth = 8; g.stroke(); g.fillStyle = cor; g.font = '800 64px "Baloo 2", Inter, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(texto, 256, 70); const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: t, depthWrite: false })); s.scale.set(larg, larg / 4, 1); return s; }
+const geoHelice = new THREE.BoxGeometry(3.7, 0.35, 0.35), matHelice = new THREE.MeshLambertMaterial({ color: 0xff3355 });
+const geoSeta = new THREE.ConeGeometry(0.5, 1.1, 3).rotateX(Math.PI / 2), matSeta = new THREE.MeshBasicMaterial({ color: 0xffe066 });
+const geoMola = new THREE.CylinderGeometry(0.9, 0.9, 0.35, 16), matMola = new THREE.MeshLambertMaterial({ color: 0x2cff7a });
+function desenharNivel(L, t) {
+  const N = L.N, base = corNivel(L.k), par = corParede(L.k); let n = 0;
+  for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+    const c = L.cels[j * N + i], x = L.x0 + (i + 0.5) * C, z = L.z0 + (j + 0.5) * C;
+    if (!chaoAtivo(c, t)) { _o.position.set(x, -9999, z); _o.scale.set(0, 0, 0); }
+    else { const alto = c.tipo === 'bloco' ? HW + FT : c.tipo === 'degrau' ? 1.6 + FT : FT; _o.position.set(x, L.y - FT + alto / 2, z); _o.scale.set(C - 0.06, alto, C - 0.06); }
+    _o.updateMatrix(); L.mChao.setMatrixAt(n, _o.matrix);
+    const ct = COR_TIPO[c.tipo]; if (ct) _c.set(ct); else if (c.tipo === 'falso') _c.copy(base).offsetHSL(0.02, -0.25, -0.12); else if (c.tipo === 'bloco' || c.tipo === 'degrau') _c.copy(par).offsetHSL(0, 0.1, 0.08); else _c.copy(base).offsetHSL(0, 0, ((i + j) & 1) ? 0.03 : -0.02);
+    if (c.prot === 'inicio') _c.lerp(new THREE.Color(0xffffff), 0.35);
+    L.mChao.setColorAt(n, _c); n++;
+    // enfeites: hélice, setas da esteira, mola
+    sinc(L.helices, j * N + i, c.tipo === 'helice', () => new THREE.Mesh(geoHelice, matHelice), m => m.position.set(x, L.y + 0.75, z));
+    sinc(L.setas, j * N + i, c.tipo === 'esteira', () => new THREE.Mesh(geoSeta, matSeta), m => { m.position.set(x, L.y + 0.35, z); m.rotation.set(0, Math.atan2(DIRS[c.dir][0], DIRS[c.dir][1]), 0); });
+    sinc(L.molas, j * N + i, c.tipo === 'mola', () => new THREE.Mesh(geoMola, matMola), m => m.position.set(x, L.y + 0.2, z));
+  }
+  L.mChao.instanceMatrix.needsUpdate = true; L.mChao.instanceColor.needsUpdate = true;
+  let w = 0;
+  const parW = (on, x, z, sx, sz) => { if (on) { _o.position.set(x, L.y - FT + (HW + FT) / 2, z); _o.scale.set(sx, HW + FT, sz); } else { _o.position.set(x, -9999, z); _o.scale.set(0, 0, 0); } _o.updateMatrix(); L.mParede.setMatrixAt(w, _o.matrix); L.mParede.setColorAt(w, par); w++; };
+  for (let j = 0; j <= N; j++) for (let i = 0; i < N; i++) parW(L.hW[i + N * j].on, L.x0 + (i + 0.5) * C, L.z0 + j * C, C + WT, WT);
+  for (let i = 0; i <= N; i++) for (let j = 0; j < N; j++) parW(L.vW[j + N * i].on, L.x0 + i * C, L.z0 + (j + 0.5) * C, WT, C + WT);
+  L.mParede.instanceMatrix.needsUpdate = true; L.mParede.instanceColor.needsUpdate = true;
+}
+function sinc(mapa, k, quer, criar, por) { let m = mapa.get(k); if (quer && !m) { m = criar(); cena.add(m); mapa.set(k, m); } else if (!quer && m) { cena.remove(m); mapa.delete(k); m = null; } if (m) por(m); }
+// extras (passarela) e topo
+const matVidro = new THREE.MeshLambertMaterial({ color: 0x9fe3ff, transparent: true, opacity: 0.55 });
+function montarTopo() {
+  const T = M.topo, s = T.N * C; T.caixa = { x0: T.x0, x1: T.x0 + s, z0: T.z0, z1: T.z0 + s, y0: T.y - FT, y1: T.y, tipo: 'topo' };
+  const m = new THREE.Mesh(new THREE.BoxGeometry(s, FT, s), new THREE.MeshLambertMaterial({ color: 0xfff3c4, map: texBloco })); m.position.set(T.x0 + s / 2, T.y - FT / 2, T.z0 + s / 2); cena.add(m); M.malhas.push(m);
+  const tr = new THREE.Group(), ouro = new THREE.MeshLambertMaterial({ color: 0xffc83d, emissive: 0x442800 });
+  const taca = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 0.5, 1.8, 16), ouro); taca.position.y = 3.2; const pe = new THREE.Mesh(new THREE.CylinderGeometry(0.25, 0.25, 1.4, 8), ouro); pe.position.y = 1.7; const bs = new THREE.Mesh(new THREE.BoxGeometry(1.6, 0.6, 1.6), ouro); bs.position.y = 0.3; tr.add(taca, pe, bs);
+  tr.position.set(T.x0 + s / 2, T.y, T.z0 + s / 2); cena.add(tr); M.malhas.push(tr); M.trofeu = tr;
+  const pl = placa('🏆 TOPO DA TORRE', '#ffc83d', 9); pl.position.set(T.x0 + s / 2, T.y + 7, T.z0 + s / 2); cena.add(pl); M.malhas.push(pl);
+}
+function limparMundo() { if (!M) return; for (const L of M.niveis) { cena.remove(L.mChao, L.mParede, L.placa, ...L.mElev, ...L.mCrist); for (const mp of [L.helices, L.setas, L.molas]) for (const m of mp.values()) cena.remove(m); } for (const m of M.malhas || []) cena.remove(m); for (const e of M.extras) cena.remove(e.mesh); for (const d of M.drones || []) cena.remove(d.mesh); }
+function criarMundo(seed) {
+  limparMundo(); M = gerarMundo(seed); M.malhas = [];
+  for (const L of M.niveis) { malhasNivel(L); montarCaixas(L, 0); desenharNivel(L, 0); L.sujo = false; }
+  montarTopo();
+  // drones: cubos que voam sobre os níveis e mexem no labirinto (como zeladores malucos)
+  M.drones = M.niveis.filter(L => L.k >= 1).map(L => { const m = new THREE.Mesh(new THREE.BoxGeometry(1.4, 1.4, 1.4), new THREE.MeshLambertMaterial({ color: 0x23263d, emissive: 0x3a1050 })); const olho = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.3, 0.1), new THREE.MeshBasicMaterial({ color: 0xff3df2 })); olho.position.set(0, 0.15, 0.72); m.add(olho); cena.add(m); const p = centroCel(L, L.N >> 1, L.N >> 1); m.position.set(p.x, L.y + 9, p.z); return { L, mesh: m, alvo: m.position.clone(), prox: 8 + Math.random() * 10 }; });
+}
+// alvo/área (prévia do poder)
+const prevMat = new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0.35, depthWrite: false });
+const prev = new THREE.Mesh(geoCubo, prevMat); prev.visible = false; cena.add(prev);
+const linhaRadar = new THREE.Line(new THREE.BufferGeometry(), new THREE.LineBasicMaterial({ color: 0x5ee7ff })); linhaRadar.frustumCulled = false; cena.add(linhaRadar);
+
+/* =====================================================================
+   JOGADORES (gente e bots) — boneco de blocos
+   ===================================================================== */
+const PELE = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac'];
+function boneco(cor, pele) {
+  const g = new THREE.Group(), mc = new THREE.MeshLambertMaterial({ color: cor }), mp = new THREE.MeshLambertMaterial({ color: pele }), mcal = new THREE.MeshLambertMaterial({ color: 0x2b3a67 });
+  const tronco = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.85, 0.45), mc); tronco.position.y = 1.25;
+  const cab = new THREE.Mesh(new THREE.BoxGeometry(0.55, 0.55, 0.55), mp); cab.position.y = 1.97;
+  const olhos = new THREE.Mesh(new THREE.BoxGeometry(0.34, 0.08, 0.02), new THREE.MeshBasicMaterial({ color: 0x111111 })); olhos.position.set(0, 2.03, -0.285);
+  const bon = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.16, 0.62), mc); bon.position.y = 2.3; const aba = new THREE.Mesh(new THREE.BoxGeometry(0.62, 0.05, 0.3), mc); aba.position.set(0, 2.24, -0.4);
+  const piv = (x, y) => { const p = new THREE.Group(); p.position.set(x, y, 0); g.add(p); return p; };
+  const bE = piv(-0.6, 1.65), bD = piv(0.6, 1.65), pE = piv(-0.22, 0.82), pD = piv(0.22, 0.82);
+  for (const [p, m] of [[bE, mp], [bD, mp]]) { const b = new THREE.Mesh(new THREE.BoxGeometry(0.3, 0.85, 0.3), m); b.position.y = -0.4; p.add(b); }
+  for (const p of [pE, pD]) { const l = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.82, 0.4), mcal); l.position.y = -0.41; p.add(l); }
+  g.add(tronco, cab, olhos, bon, aba);
+  return { g, bE, bD, pE, pD };
+}
+let proxIdJog = 1;
+function criarJogador(o) {
+  const cl = CLASSES[o.classe] || CLASSES.demolidor;
+  const p = Object.assign({ id: proxIdJog++, nome: 'Jogador', bot: false, local: true, nivel: 0, pos: new THREE.Vector3(), vel: new THREE.Vector3(), yaw: 0, noChao: false, mana: 60, cds: {}, ef: {}, olhar: 0, chegou: false, tempo: 0, morto: 0, elev: 0, pulosAr: 0, maxNivel: 0, desbl: [], dif: 1 }, o);
+  p.cor = cl.cor; p.b = boneco(cl.cor, PELE[p.id % PELE.length]); p.mesh = p.b.g; cena.add(p.mesh);
+  p.tag = placa(p.nome, cl.cor, 2.6); p.tag.position.y = 3.0; p.mesh.add(p.tag);
+  return p;
+}
+const J = { lista: [], eu: null, tempo: 0, fimEm: 0, ranking: [], acabou: false, ativo: false };
+function irParaInicio(p, nivel) {
+  const L = M.niveis[nivel ?? p.nivel]; p.nivel = L.k; const c = centroCel(L, L.ini.i, L.ini.j);
+  p.pos.set(c.x + (Math.random() - 0.5) * 1.5, L.y + 0.05, c.z + (Math.random() - 0.5) * 1.5); p.vel.set(0, 0, 0); p.yaw = -Math.PI / 2; p.morto = 0; p.caminho = null;
+  if (p === J.eu) { camYaw = p.yaw; }
+}
+
+/* =====================================================================
+   FÍSICA DO PERSONAGEM
+   ===================================================================== */
+const G = 26, PULO = 9.8, VEL = 7.0, RAIO = 0.4;
+function distRet(x, z, b) { const nx = clamp(x, b.x0, b.x1), nz = clamp(z, b.z0, b.z1); return [Math.hypot(x - nx, z - nz), nx, nz]; }
+function moverJogador(p, dt, ent) {
+  if (p.chegou && p.nivel >= NIV) { /* no topo: anda à vontade */ }
+  const ef = p.ef, t = J.tempo, rap = (ef.disparada > t ? 1.6 : 1) * (p.bot ? (0.86 + p.dif * 0.06) : 1);
+  const chao = p.chaoTipo || 'n', gelo = chao === 'gelo';
+  // vontade de andar
+  const ax = ent.x, az = ent.z, quer = Math.hypot(ax, az) > 0.01;
+  const vx = ax * VEL * rap, vz = az * VEL * rap, acel = p.noChao ? (gelo ? 2.2 : 40) : 10;
+  p.vel.x += (vx - p.vel.x) * Math.min(1, acel * dt); p.vel.z += (vz - p.vel.z) * Math.min(1, acel * dt);
+  if (quer) p.yaw = Math.atan2(-ax, -az);
+  if (p.noChao && chao === 'esteira' && p.chaoCel) { const d = DIRS[p.chaoCel.dir]; p.pos.x += d[0] * 5 * dt; p.pos.z += d[1] * 5 * dt; }
+  // pulo (e pulo duplo)
+  if (ent.pular) {
+    if (p.noChao) { p.vel.y = PULO; p.noChao = false; p.pulosAr = ef.pulo2 > t ? 1 : 0; if (p === J.eu) SOM.pulo(); }
+    else if (p.pulosAr > 0) { p.vel.y = PULO * 0.95; p.pulosAr--; if (p === J.eu) SOM.pulo(); }
+  }
+  p.vel.y -= G * dt; if (p.vel.y < -40) p.vel.y = -40;
+  const yAntes = p.pos.y, fant = ef.fantasma > t;
+  // horizontal
+  p.pos.x += p.vel.x * dt; p.pos.z += p.vel.z * dt;
+  const cx = caixasPerto(p.pos.x, p.pos.z);
+  for (let it = 0; it < 2; it++) for (const b of cx) {
+    if (b.y1 <= yAntes + 0.42 || b.y0 >= yAntes + 1.9) continue; // dá para subir ou passa por baixo
+    if (fant && b.tipo === 'parede') continue;
+    const [d, nx, nz] = distRet(p.pos.x, p.pos.z, b);
+    if (d >= RAIO) continue;
+    if (d > 1e-4) { const k = (RAIO - d) / d; p.pos.x += (p.pos.x - nx) * k; p.pos.z += (p.pos.z - nz) * k; }
+    else { const e = [p.pos.x - b.x0, b.x1 - p.pos.x, p.pos.z - b.z0, b.z1 - p.pos.z], m = Math.min(...e); if (m === e[0]) p.pos.x = b.x0 - RAIO; else if (m === e[1]) p.pos.x = b.x1 + RAIO; else if (m === e[2]) p.pos.z = b.z0 - RAIO; else p.pos.z = b.z1 + RAIO; }
+  }
+  // vertical
+  p.pos.y += p.vel.y * dt;
+  let chaoY = -1e9, chaoB = null;
+  for (const b of cx) { if (fant && b.tipo === 'parede') continue; const [d] = distRet(p.pos.x, p.pos.z, b); if (d >= RAIO * 0.8) continue; if (b.y1 <= yAntes + 0.42 && b.y1 > chaoY) { chaoY = b.y1; chaoB = b; } }
+  const antesNoChao = p.noChao;
+  if (chaoB && p.pos.y <= chaoY + 0.02 && p.vel.y <= 0.01) { p.pos.y = chaoY; p.vel.y = 0; p.noChao = true; p.pulosAr = ef.pulo2 > t ? 1 : 0; }
+  else if (chaoB && p.pos.y <= chaoY + 0.12 && antesNoChao && p.vel.y <= 0) { p.pos.y = chaoY; p.vel.y = 0; p.noChao = true; }
+  else p.noChao = false;
+  p.chaoTipo = p.noChao && chaoB ? chaoB.tipo : null; p.chaoCel = p.noChao && chaoB && chaoB.L ? cel(chaoB.L, chaoB.i, chaoB.j) : null;
+  // efeitos do chão
+  if (p.noChao && chaoB && chaoB.L) {
+    const c = p.chaoCel, L = chaoB.L; if (L.k !== p.nivel && !p.chegou) p.nivel = L.k;
+    const imune = ef.escudo > t;
+    if (c) {
+      if (c.tipo === 'lava' && !imune) return morrer(p, 'lava');
+      if (c.tipo === 'armadilha' && !imune) return morrer(p, 'armadilha');
+      if (c.tipo === 'mola') { p.vel.y = 17.5; p.noChao = false; if (p === J.eu) SOM.mola(); }
+      if (c.tipo === 'falso' && !c.caiu) { c.caiu = J.tempo; L.sujo = true; }
+    }
+    // elevador
+    if (!p.chegou && L.k === p.nivel) for (const e of L.elev) { const ce = centroCel(L, e.i, e.j); if (Math.hypot(p.pos.x - ce.x, p.pos.z - ce.z) < 1.2) { entrarElevador(p, L); break; } }
+    // cristal
+    for (let n = 0; n < L.cristais.length; n++) { const cr = L.cristais[n]; if (!cr.on) continue; const ce = centroCel(L, cr.i, cr.j); if (Math.hypot(p.pos.x - ce.x, p.pos.z - ce.z) < 1.3 && Math.abs(p.pos.y - L.y - 0.5) < 2) { cr.on = false; cr.volta = J.tempo + 20; p.mana = Math.min(100, p.mana + 30); if (p === J.eu) SOM.cristal(); } }
+  }
+  // hélices: barra girando no meio do bloco
+  const Lh = nivelEm(p.pos.x);
+  if (Lh && !(ef.escudo > t)) { const i = Math.floor((p.pos.x - Lh.x0) / C), j = Math.floor((p.pos.z - Lh.z0) / C), c = cel(Lh, i, j); if (c && c.tipo === 'helice' && p.pos.y < Lh.y + 1.05 && p.pos.y > Lh.y - 0.5) { const ce = centroCel(Lh, i, j), ang = J.tempo * 2.6 + c.fase, dx = p.pos.x - ce.x, dz = p.pos.z - ce.z, ca = Math.cos(ang), sa = Math.sin(ang), along = dx * ca + dz * sa, perp = -dx * sa + dz * ca; if (Math.abs(along) < 1.85 && Math.abs(perp) < 0.5) return morrer(p, 'helice'); } }
+  // caiu no vazio
+  const Lr = M.niveis[Math.min(p.nivel, NIV - 1)];
+  if (!p.chegou && p.pos.y < Lr.y - 22) return morrer(p, 'vazio');
+  if (p.chegou && p.pos.y < M.topo.y - 30) { const T = M.topo; p.pos.set(T.x0 + 8, T.y + 1, T.z0 + 8); p.vel.set(0, 0, 0); }
+}
+const MOTIVO = { lava: '🔥 Pisou na lava!', armadilha: '🪤 Caiu numa armadilha!', helice: '🌀 A hélice te pegou!', vazio: '🕳️ Caiu no vazio!' };
+function morrer(p, motivo) {
+  if (p.morto) return; p.morto = J.tempo + (motivo === 'vazio' ? 0.2 : 0.9);
+  if (p === J.eu) { centro(MOTIVO[motivo], 'De volta ao começo do nível ' + (p.nivel + 1), 1.4); flash(motivo === 'lava' ? '#ff4b1f' : motivo === 'armadilha' ? '#ff3df2' : '#000', 0.6); motivo === 'lava' ? SOM.lava() : SOM.queda(); }
+  p.vel.set(0, motivo === 'vazio' ? -10 : 6, 0);
+}
+function entrarElevador(p, L) {
+  if (p.elev) return; p.elev = J.tempo; p.vel.set(0, 0, 0); p.elevL = L.k;
+  if (p === J.eu) { SOM.ding(); flash('#fff8d8', 0.7); }
+}
+function terminarElevador(p) {
+  p.elev = 0; const prox = p.elevL + 1;
+  if (prox >= NIV) { chegouTopo(p); return; }
+  irParaInicio(p, prox); p.maxNivel = Math.max(p.maxNivel, prox);
+  if (p === J.eu) centro('NÍVEL ' + (prox + 1), (NIV - prox) + (NIV - prox === 1 ? ' elevador neste nível' : ' elevadores neste nível'), 1.8);
+  feedTxt(`${esc(p.nome)} chegou ao nível ${prox + 1}`, prox >= 7); if (R.on && R.host) enviar({ t: 'feed', txt: `${esc(p.nome)} chegou ao nível ${prox + 1}`, forte: prox >= 7 });
+  if (R.on && !R.host && p === J.eu) enviar({ t: 'nivel', n: prox });
+}
+function chegouTopo(p) {
+  p.chegou = true; p.nivel = NIV; p.maxNivel = NIV; p.tempo = J.tempo; const T = M.topo;
+  p.pos.set(T.x0 + 4 + Math.random() * 8, T.y + 0.5, T.z0 + 4 + Math.random() * 8); p.vel.set(0, 0, 0);
+  if (!J.ranking.includes(p)) J.ranking.push(p);
+  const pos = J.ranking.indexOf(p) + 1;
+  feedTxt(`🏆 ${esc(p.nome)} chegou ao topo em ${pos}º lugar!`, true);
+  if (p === J.eu) { SOM.vitoria(); centro('🏆 VOCÊ CHEGOU AO TOPO!', `${pos}º lugar · continue atrapalhando os outros lá de cima`, 3.2); }
+  if (!J.fimEm && (!R.on || R.host)) { J.fimEm = J.tempo + 90; feedTxt('⏱️ 90 segundos para os outros chegarem!', true); }
+  if (R.on && !R.host && p === J.eu) enviar({ t: 'topo', tempo: p.tempo });
+}
+
+/* =====================================================================
+   PODERES (o anfitrião decide; todo mundo aplica a lista de mudanças)
+   ===================================================================== */
+// mudanças: c = [nivel, i, j, tipo, dur, dir]; w = [nivel, 'h'|'v', idx, on, dur]; e = [x0,y0,z0,x1,y1,z1,dur]
+function aplicarMudancas(m) {
+  const agora = J.tempo;
+  for (const [n, i, j, tipo, dur, dir] of m.c || []) { const L = M.niveis[n], c = cel(L, i, j); if (!c) continue; c.tipo = tipo; c.ate = agora + dur; c.dir = dir || 0; c.caiu = 0; L.sujo = true; }
+  for (const [n, hv, idx, on, dur] of m.w || []) { const L = M.niveis[n], p = (hv === 'h' ? L.hW : L.vW)[idx]; if (!p) continue; p.on = on; p.ate = agora + dur; L.sujo = true; }
+  for (const [x0, y0, z0, x1, y1, z1, dur] of m.e || []) { const mesh = new THREE.Mesh(geoCubo, matVidro); mesh.position.set((x0 + x1) / 2, (y0 + y1) / 2, (z0 + z1) / 2); mesh.scale.set(x1 - x0, y1 - y0, z1 - z0); cena.add(mesh); M.extras.push({ x0, y0, z0, x1, y1, z1, tipo: 'vidro', ate: agora + dur, mesh }); }
+  if (m.fx) { const { quem, hab, n, i, j } = m.fx, h = HAB[hab]; if (h) { feedTxt(`${h.ic} ${esc(quem)} usou ${h.nome}${n >= 0 ? ' no nível ' + (n + 1) : ''}`); if (n >= 0 && i >= 0) faisca(M.niveis[n], i, j); if (J.eu && Math.abs(J.eu.nivel - n) <= 1) SOM.magia(); } }
+  if (m.dr != null && m.da) { const d = M.drones.find(d => d.L.k === m.dr); if (d) { const p = centroCel(d.L, m.da[0], m.da[1]); d.alvo.set(p.x, d.L.y + 7, p.z); faisca(d.L, m.da[0], m.da[1]); } }
+}
+const faiscas = [];
+function faisca(L, i, j) { const p = centroCel(L, i, j), m = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 1.8, 14, 12, 1, true), new THREE.MeshBasicMaterial({ color: 0xfff0a0, transparent: true, opacity: 0.55, depthWrite: false, side: THREE.DoubleSide })); m.position.set(p.x, L.y + 7, p.z); cena.add(m); faiscas.push({ m, t: 0.6 }); }
+const protegida = (L, i, j) => { const c = cel(L, i, j); return !c || !!c.prot; };
+function areaCels(L, i, j, r) { const out = []; for (let dj = -r; dj <= r; dj++) for (let di = -r; di <= r; di++) { const c = cel(L, i + di, j + dj); if (c) out.push([i + di, j + dj]); } return out; }
+// o que um poder faz (gera a lista de mudanças). rnd vem do anfitrião.
+function efeitoHab(h, quem, alvo, rnd) {
+  const m = { c: [], w: [], e: [], fx: { quem: quem.nome, hab: h.id, n: alvo ? alvo.n : -1, i: alvo ? alvo.i : -1, j: alvo ? alvo.j : -1 } };
+  const L = alvo ? M.niveis[alvo.n] : null, dur = h.dur;
+  const pc = (i, j, tipo, dir, pode) => { if (!cel(L, i, j)) return; if (h.mal && protegida(L, i, j)) return; if (pode && !pode(cel(L, i, j))) return; m.c.push([L.k, i, j, tipo, dur, dir || 0]); };
+  const dirOlhar = dirDe(quem.olhar || 0);
+  switch (h.id) {
+    case 'buraco': pc(alvo.i, alvo.j, 'vazio'); break;
+    case 'cratera': for (const [i, j] of areaCels(L, alvo.i, alvo.j, 1)) pc(i, j, 'vazio'); break;
+    case 'podre': for (const [i, j] of areaCels(L, alvo.i, alvo.j, 2)) if (rnd() < 0.5) pc(i, j, 'falso'); break;
+    case 'terremoto': for (let j = 0; j < L.N; j++) for (let i = 0; i < L.N; i++) if (rnd() < 0.18) pc(i, j, 'vazio'); break;
+    case 'derrubar': for (let d = 0; d < 4; d++) { const ni = alvo.i + DIRS[d][0], nj = alvo.j + DIRS[d][1]; if (!cel(L, ni, nj)) continue; const [hv, idx] = idxParede(L, alvo.i, alvo.j, d); m.w.push([L.k, hv, idx, 0, dur]); } break;
+    case 'tapar': pc(alvo.i, alvo.j, 'n'); break;
+    case 'pilar': pc(alvo.i, alvo.j, 'bloco'); break;
+    case 'degrau': pc(alvo.i, alvo.j, 'degrau'); break;
+    case 'muralha': { const lado = DIRS[(dirOlhar + 1) % 4]; for (let k = -2; k <= 2; k++) pc(alvo.i + lado[0] * k, alvo.j + lado[1] * k, 'bloco'); break; }
+    case 'passarela': { const f = new THREE.Vector3(-Math.sin(quem.olhar), 0, -Math.cos(quem.olhar)), y = quem.pos.y + (quem.noChao ? 0 : 0); for (let k = 0; k < 9; k++) { const x = quem.pos.x + f.x * (1 + k * 3.2), z = quem.pos.z + f.z * (1 + k * 3.2); m.e.push([x - 1.7, y - 0.3, z - 1.7, x + 1.7, y, z + 1.7, dur].map(v => Math.round(v * 100) / 100)); } m.fx.n = -1; break; }
+    case 'lava': pc(alvo.i, alvo.j, 'lava'); break;
+    case 'gelo': for (const [i, j] of areaCels(L, alvo.i, alvo.j, 1)) pc(i, j, 'gelo'); break;
+    case 'pisca': for (const [i, j] of areaCels(L, alvo.i, alvo.j, 1)) pc(i, j, 'pisca'); break;
+    case 'helice': pc(alvo.i, alvo.j, 'helice'); break;
+    case 'marlava': for (let j = 0; j < L.N; j++) for (let i = 0; i < L.N; i++) if (rnd() < 0.25) pc(i, j, 'lava'); break;
+    case 'esteira': for (let k = 0; k < 3; k++) pc(alvo.i + DIRS[dirOlhar][0] * k, alvo.j + DIRS[dirOlhar][1] * k, 'esteira', dirOlhar); break;
+    case 'mola': pc(alvo.i, alvo.j, 'mola'); break;
+    case 'armadilha': pc(alvo.i, alvo.j, 'armadilha'); break;
+    case 'remexer': case 'embaralhar': {
+      const r = h.id === 'remexer' ? 2 : 99, i0 = Math.max(0, alvo.i - r), j0 = Math.max(0, alvo.j - r), w = Math.min(L.N, alvo.i + r + 1) - i0, hh = Math.min(L.N, alvo.j + r + 1) - j0;
+      const mud = cavar(L, i0, j0, w, hh, rnd, 0.14, true);
+      for (const [p, on] of mud) { const hi = L.hW.indexOf(p); if (hi >= 0) m.w.push([L.k, 'h', hi, on, dur]); else m.w.push([L.k, 'v', L.vW.indexOf(p), on, dur]); }
+      break;
+    }
+  }
+  return m;
+}
+function idxParede(L, i, j, d) { return d === 0 ? ['h', i + L.N * j] : d === 2 ? ['h', i + L.N * (j + 1)] : d === 1 ? ['v', j + L.N * (i + 1)] : ['v', j + L.N * i]; }
+// tentar usar um poder (gasta mana e recarga aqui; o efeito no mundo passa pelo anfitrião)
+function usarPoder(p, h, alvo) {
+  const t = J.tempo; if (!h || !temHabP(p, h)) return false; if ((p.cds[h.id] || 0) > t || p.mana < h.mana) { if (p === J.eu) SOM.erro(); return false; }
+  if (h.area !== 'eu' && !alvo) { if (p === J.eu) SOM.erro(); return false; }
+  p.mana -= h.mana; p.cds[h.id] = t + h.cd;
+  if (h.area === 'eu' && h.id !== 'passarela') {
+    if (h.id === 'disparada') p.ef.disparada = t + h.dur; if (h.id === 'pulo2') { p.ef.pulo2 = t + h.dur; p.pulosAr = 1; } if (h.id === 'escudo') p.ef.escudo = t + h.dur; if (h.id === 'fantasma') p.ef.fantasma = t + h.dur; if (h.id === 'radar') p.ef.radar = t + h.dur;
+    if (p === J.eu) { SOM.magia(); centro('', h.ic + ' ' + h.nome, 1.2); }
+    return true;
+  }
+  const pedido = { hab: h.id, n: alvo ? alvo.n : -1, i: alvo ? alvo.i : -1, j: alvo ? alvo.j : -1, olhar: Math.round(p.olhar * 1000) / 1000, x: p.pos.x, y: p.pos.y, z: p.pos.z, quem: p.id };
+  if (R.on && !R.host) enviar({ t: 'hab', ...pedido }); else resolverPoder(pedido);
+  return true;
+}
+const temHabP = (p, h) => p.bot ? p.desbl.includes(h.id) || h.pts === 0 : temHab(p.classe, h);
+let rndHost = Math.random;
+function resolverPoder(pd) {
+  const h = HAB[pd.hab], quem = J.lista.find(q => q.id === pd.quem); if (!h || !quem) return;
+  const falso = { nome: quem.nome, olhar: pd.olhar, pos: new THREE.Vector3(pd.x, pd.y, pd.z), noChao: true };
+  const m = efeitoHab(h, falso, pd.n >= 0 ? { n: pd.n, i: pd.i, j: pd.j } : null, rndHost);
+  aplicarMudancas(m); if (R.on) enviar({ t: 'mud', m });
+}
+
+/* =====================================================================
+   BOTS
+   ===================================================================== */
+const NOMES_BOT = ['Zezinho', 'Bia Blocos', 'Turbo', 'Pipoca', 'Lalá', 'Dudu', 'Nina', 'Kiko', 'Mel', 'Tutu', 'Juju', 'Gugu', 'Lulu', 'Fifi', 'Rafa'];
+// caminho até o elevador mais perto (Dijkstra simples). Passos perigosos de 1 bloco podem ser pulados.
+function caminhoBot(p, ousado) {
+  const L = M.niveis[p.nivel]; if (!L) return null; const N = L.N, i0 = clamp(Math.floor((p.pos.x - L.x0) / C), 0, N - 1), j0 = clamp(Math.floor((p.pos.z - L.z0) / C), 0, N - 1);
+  const custo = new Array(N * N).fill(1e9), veio = new Array(N * N).fill(-1), pulo = new Array(N * N).fill(0), perig = new Array(N * N).fill(0), aberto = [[0, i0, j0]]; custo[j0 * N + i0] = 0;
+  const ok = c => c && !PERIGO.has(c.tipo) || (c && c.tipo === 'falso' && !c.caiu), alvos = new Set(L.elev.map(e => e.j * N + e.i));
+  while (aberto.length) {
+    let mi = 0; for (let k = 1; k < aberto.length; k++) if (aberto[k][0] < aberto[mi][0]) mi = k; const [cs, i, j] = aberto.splice(mi, 1)[0];
+    if (cs > custo[j * N + i]) continue; if (alvos.has(j * N + i)) { const out = []; let k = j * N + i; while (k >= 0) { out.push([k % N, Math.floor(k / N), pulo[k], perig[k]]); k = veio[k]; } return out.reverse(); }
+    for (let d = 0; d < 4; d++) {
+      const ni = i + DIRS[d][0], nj = j + DIRS[d][1], c = cel(L, ni, nj); if (!c || parede(L, i, j, d).on) continue;
+      let nk = nj * N + ni, add = c.tipo === 'pisca' ? 2 : c.tipo === 'gelo' ? 1.5 : 1, pl = 0, pg = 0;
+      if (!ok(c) && ousado && c.tipo !== 'bloco') { add = c.tipo === 'helice' || c.tipo === 'falso' ? 4 : 9; pg = 1; }
+      else if (!ok(c)) { // pula por cima de um bloco perigoso se o próximo estiver bom e sem parede
+        const ni2 = ni + DIRS[d][0], nj2 = nj + DIRS[d][1], c2 = cel(L, ni2, nj2); if (!c2 || !ok(c2) || parede(L, ni, nj, d).on || c.tipo === 'bloco') continue; nk = nj2 * N + ni2; add = 3.5; pl = 1;
+      }
+      if (cs + add < custo[nk]) { custo[nk] = cs + add; veio[nk] = j * N + i; pulo[nk] = pl; perig[nk] = pg; aberto.push([cs + add, nk % N, Math.floor(nk / N)]); }
+    }
+  }
+  return null;
+}
+function pensarBot(p, dt) {
+  const ent = { x: 0, z: 0, pular: false }; if (p.chegou || p.elev || p.morto) return ent;
+  const L = M.niveis[p.nivel]; p.tCam = (p.tCam || 0) - dt;
+  if (!p.caminho || p.tCam <= 0 || p.caminhoNivel !== p.nivel) { p.caminho = caminhoBot(p) || caminhoBot(p, true); p.caminhoNivel = p.nivel; p.passo = 1; p.tCam = 0.8 + Math.random() * 0.5; }
+  if (!p.caminho) { ent.x = Math.sin(J.tempo + p.id) * 0.3; return ent; }
+  const passo = p.caminho[Math.min(p.passo, p.caminho.length - 1)], alvo = centroCel(L, passo[0], passo[1]);
+  const dx = alvo.x - p.pos.x, dz = alvo.z - p.pos.z, d = Math.hypot(dx, dz);
+  if (d < 0.9 && p.passo < p.caminho.length - 1) p.passo++;
+  const prox = p.caminho[Math.min(p.passo, p.caminho.length - 1)], cprox = cel(L, prox[0], prox[1]);
+  if (cprox && cprox.tipo === 'pisca' && !chaoAtivo(cprox, J.tempo + 0.25) && d < 3.2) return ent; // espera acender
+  if (d > 0.05) { ent.x = dx / d; ent.z = dz / d; }
+  // pulos: sobre perigo, para subir degrau, ou se estiver travado
+  if (prox[2] && d < 6.7 && d > 6.0 && p.noChao) ent.pular = true;
+  if (prox[3] && cprox) { // próximo bloco é perigoso: construtor tapa; os outros tentam pular
+    if (p.classe === 'construtor' && d < 9) usarPoder(p, HAB.tapar, { n: L.k, i: prox[0], j: prox[1] });
+    else if (d < 2.8 && d > 2.05 && p.noChao && cprox.tipo !== 'helice') ent.pular = true;
+  }
+  if (cprox && cprox.tipo === 'degrau' && d < 2.8 && p.noChao) ent.pular = true;
+  p.travado = (Math.hypot(p.vel.x, p.vel.z) < 0.5 && Math.hypot(ent.x, ent.z) > 0.5) ? (p.travado || 0) + dt : 0;
+  if (p.travado > 1.2 && p.noChao) { ent.pular = true; p.tCam = 0; p.travado = 0; }
+  // erro humano: às vezes erra o tempo do pulo
+  if (ent.pular && Math.random() < 0.12 - p.dif * 0.04) ent.pular = false;
+  return ent;
+}
+function botPoderes(p, dt) {
+  p.tPoder = (p.tPoder || 3 + Math.random() * 5) - dt; if (p.tPoder > 0 || p.morto || p.elev) return; p.tPoder = 9 + Math.random() * 8 - p.dif * 1.5;
+  const habs = CLASSES[p.classe].hab.filter(h => temHabP(p, h) && p.mana >= h.mana && (p.cds[h.id] || 0) <= J.tempo);
+  if (!habs.length) return;
+  const proprios = habs.filter(h => h.area === 'eu'); if (proprios.length && Math.random() < 0.5) { const h = proprios[Math.floor(Math.random() * proprios.length)]; p.olhar = p.yaw; usarPoder(p, h, null); return; }
+  // atrapalhar quem está na frente (mais alto ou mais perto do elevador)
+  const vitimas = J.lista.filter(q => q !== p && !q.chegou && !q.morto && (q.nivel > p.nivel || (q.nivel === p.nivel && Math.random() < 0.25)) && q.pos.distanceTo(p.pos) < 60);
+  const mals = habs.filter(h => h.mal && h.area !== 'eu'); if (!vitimas.length || !mals.length) return;
+  const v = vitimas[Math.floor(Math.random() * vitimas.length)], L = M.niveis[v.nivel]; if (!L) return;
+  const vx = v.pos.x + v.vel.x * 0.6, vz = v.pos.z + v.vel.z * 0.6, alvo = { n: L.k, i: clamp(Math.floor((vx - L.x0) / C), 0, L.N - 1), j: clamp(Math.floor((vz - L.z0) / C), 0, L.N - 1) };
+  const h = mals[Math.floor(Math.random() * mals.length)]; p.olhar = Math.atan2(-(vx - p.pos.x), -(vz - p.pos.z)); usarPoder(p, h, alvo);
+}
+
+/* =====================================================================
+   CÂMERA, MIRA E ENTRADA
+   ===================================================================== */
+let camYaw = -Math.PI / 2, camPitch = 0.62, camDist = 8.5, travado = false;
+const teclas = new Set(), toque = { ativo: false, joy: { x: 0, y: 0 }, pular: false };
+let habSel = 0, alvoAtual = null;
+addEventListener('keydown', e => {
+  if (!J.ativo) return; if (['Tab', 'Space', 'ArrowUp', 'ArrowDown'].includes(e.code)) e.preventDefault();
+  if (e.code === 'Escape') { pausar(); return; }
+  if (/^Digit[1-5]$/.test(e.code)) habSel = +e.code.slice(5) - 1;
+  if (e.code === 'KeyE') lancar();
+  if (e.code === 'KeyR' && J.eu && !J.eu.chegou && !J.eu.elev) irParaInicio(J.eu);
+  if (e.code === 'Space' && !teclas.has('Space')) pularPedido = true;
+  teclas.add(e.code);
+});
+addEventListener('keyup', e => teclas.delete(e.code));
+addEventListener('blur', () => teclas.clear());
+let pularPedido = false;
+canvas.addEventListener('mousedown', e => { if (!J.ativo || TOQUE) return; iniciarSom(); if (!travado) { canvas.requestPointerLock(); return; } if (e.button === 0) lancar(); });
+addEventListener('wheel', e => { if (!J.ativo) return; habSel = (habSel + (e.deltaY > 0 ? 1 : 4)) % 5; });
+addEventListener('mousemove', e => { if (!travado || !J.ativo) return; camYaw -= e.movementX * 0.0025 * SAVE.sens; camPitch = clamp(camPitch + e.movementY * 0.0025 * SAVE.sens, -0.6, 1.35); });
+document.addEventListener('pointerlockchange', () => { travado = document.pointerLockElement === canvas; if (!travado && J.ativo && !TOQUE && !document.querySelector('.tela.on')) pausar(); });
+const raycastCx = new THREE.Raycaster();
+function atualizarCamera(dt) {
+  const p = J.eu; if (!p) return;
+  const alvo = new THREE.Vector3(p.pos.x, p.pos.y + 2.1, p.pos.z);
+  const dir = new THREE.Vector3(Math.sin(camYaw) * Math.cos(camPitch), Math.sin(camPitch), Math.cos(camYaw) * Math.cos(camPitch));
+  // encurta se bater numa parede
+  let dist = camDist; for (let s = 0.6; s <= camDist; s += 0.35) { const q = alvo.clone().addScaledVector(dir, s); if (dentroDeCaixa(q)) { dist = Math.max(0.6, s - 0.4); break; } }
+  const pos = alvo.clone().addScaledVector(dir, dist);
+  cam.position.lerp(pos, 1 - Math.pow(0.0001, dt)); cam.lookAt(alvo);
+  p.olhar = camYaw;
+}
+function dentroDeCaixa(q) { for (const b of caixasPerto(q.x, q.z)) if (q.x > b.x0 && q.x < b.x1 && q.z > b.z0 && q.z < b.z1 && q.y > b.y0 && q.y < b.y1) return b; return null; }
+// mira: anda pelo raio da câmera até achar chão/parede de algum nível
+function mirar() {
+  const p = J.eu; alvoAtual = null; if (!p) return;
+  const h = habAtual(); if (!h || h.area === 'eu') { prev.visible = false; $('#alvoInfo').textContent = h ? h.ic + ' ' + h.nome + ' · em você' : ''; return; }
+  const o = cam.position.clone(), d = new THREE.Vector3(); cam.getWorldDirection(d);
+  let achou = null;
+  for (let s = 1; s < 110; s += 0.3) { const q = o.clone().addScaledVector(d, s); const b = dentroDeCaixa(q); if (b && b.L) { let i = b.i, j = b.j; if (b.tipo === 'parede') { const q2 = o.clone().addScaledVector(d, s - 0.4); i = Math.floor((q2.x - b.L.x0) / C); j = Math.floor((q2.z - b.L.z0) / C); } if (cel(b.L, i, j)) achou = { n: b.L.k, i, j, L: b.L, dist: q.distanceTo(p.pos) }; break; }
+    // também mira buracos: o ponto passou da altura do nível dentro da grade
+    const L = nivelEm(q.x); if (L && q.y < L.y && q.y > L.y - FT) { const i = Math.floor((q.x - L.x0) / C), j = Math.floor((q.z - L.z0) / C); if (cel(L, i, j)) { achou = { n: L.k, i, j, L, dist: q.distanceTo(p.pos) }; break; } } }
+  if (!achou) { prev.visible = false; $('#alvoInfo').textContent = 'Mire num bloco do labirinto'; return; }
+  const longe = achou.dist > 70, L = achou.L, protAlvo = h.mal && h.area === 1 && protegida(L, achou.i, achou.j);
+  const r = h.area === 3 ? 1 : h.area === 5 ? 2 : 0, ce = centroCel(L, achou.i, achou.j);
+  if (h.area === 'nivel') { prev.position.set(L.x0 + L.N * C / 2, L.y + 0.4, L.z0 + L.N * C / 2); prev.scale.set(L.N * C, 0.9, L.N * C); }
+  else if (h.area === 'linha' || h.area === 'linha3') { const dd = dirDe(p.olhar || 0), ao = h.area === 'linha' ? (dd + 1) % 4 : dd, horiz = ao === 1 || ao === 3, n = h.area === 'linha' ? 5 : 3, off = h.area === 'linha' ? 0 : 1; prev.position.set(ce.x + (horiz ? DIRS[ao][0] * off * C : 0), L.y + 0.4, ce.z + (horiz ? 0 : DIRS[ao][1] * off * C)); prev.scale.set(horiz ? n * C : C, 0.9, horiz ? C : n * C); }
+  else { prev.position.set(ce.x, L.y + 0.4, ce.z); prev.scale.set((2 * r + 1) * C, 0.9, (2 * r + 1) * C); }
+  prev.visible = true; prevMat.color.set(longe || protAlvo ? '#ff4d4d' : h.mal ? '#ff9f43' : '#5ee7ff');
+  $('#alvoInfo').textContent = longe ? 'Longe demais (máx. 70 m)' : protAlvo ? '🛡️ Bloco protegido (começo do nível ou elevador)' : `${h.ic} ${h.nome} · nível ${L.k + 1}`;
+  if (!longe && !protAlvo) alvoAtual = achou;
+}
+const habAtual = () => J.eu ? CLASSES[J.eu.classe].hab[habSel] : null;
+function lancar() { const p = J.eu, h = habAtual(); if (!p || !h) return; if (!temHab(p.classe, h)) { centro('', '🔒 Poder bloqueado: desbloqueie com pontos', 1.4); SOM.erro(); return; } if (p.morto || p.elev) return; usarPoder(p, h, alvoAtual); }
+function entradaJogador() {
+  const ent = { x: 0, z: 0, pular: false };
+  let f = (teclas.has('KeyW') || teclas.has('ArrowUp') ? 1 : 0) - (teclas.has('KeyS') || teclas.has('ArrowDown') ? 1 : 0), s = (teclas.has('KeyD') || teclas.has('ArrowRight') ? 1 : 0) - (teclas.has('KeyA') || teclas.has('ArrowLeft') ? 1 : 0);
+  if (toque.ativo) { f -= toque.joy.y; s += toque.joy.x; }
+  const fx = -Math.sin(camYaw), fz = -Math.cos(camYaw), rx = Math.cos(camYaw), rz = -Math.sin(camYaw);
+  let x = fx * f + rx * s, z = fz * f + rz * s; const l = Math.hypot(x, z); if (l > 1) { x /= l; z /= l; }
+  ent.x = x; ent.z = z; ent.pular = pularPedido || toque.pular; pularPedido = false; toque.pular = false;
+  return ent;
+}
+
+/* =====================================================================
+   HUD
+   ===================================================================== */
+let centroT = 0;
+function centro(t, sub, s = 2) { $('#centro').innerHTML = t + (sub ? `<small>${sub}</small>` : ''); $('#centro').style.opacity = 1; centroT = s; }
+function flash(cor, op) { const f = $('#flash'); f.style.transition = 'none'; f.style.background = cor; f.style.opacity = op; requestAnimationFrame(() => { f.style.transition = 'opacity .6s'; f.style.opacity = 0; }); }
+function feedTxt(t, forte) { const el = document.createElement('div'); el.innerHTML = t; if (forte) el.style.borderLeft = '3px solid #ffd166'; $('#feed').prepend(el); while ($('#feed').children.length > 6) $('#feed').lastChild.remove(); setTimeout(() => el.remove(), 6500); }
+function montarSlots() {
+  const p = J.eu, cl = CLASSES[p.classe];
+  $('#slots').innerHTML = cl.hab.map((h, k) => `<div class="slot ${temHab(p.classe, h) ? '' : 'tranc'}" data-k="${k}"><span class="k">${k + 1}</span>${h.ic}<span class="m">${h.mana}</span><div class="cd" style="display:none"></div></div>`).join('');
+  $('#slots').querySelectorAll('.slot').forEach(s => s.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); habSel = +s.dataset.k; if (TOQUE) lancar(); }));
+}
+let hudT = 0;
+function atualizarHUD(dt) {
+  centroT -= dt; if (centroT <= 0) $('#centro').style.opacity = 0;
+  hudT -= dt; if (hudT > 0) return; hudT = 0.1;
+  const p = J.eu, L = M.niveis[Math.min(p.nivel, NIV - 1)];
+  $('#t-nivel').textContent = p.chegou ? '🏆 TOPO' : `Nível ${p.nivel + 1}/${NIV}`; $('#t-elev').textContent = p.chegou ? `${J.ranking.indexOf(p) + 1}º lugar` : `🛗 ${L.elev.length}`;
+  const seg = J.fimEm ? Math.max(0, J.fimEm - J.tempo) : J.tempo; $('#t-tempo').textContent = (J.fimEm ? '⏱️ ' : '') + Math.floor(seg / 60) + ':' + String(Math.floor(seg % 60)).padStart(2, '0');
+  $('#t-tempo').style.color = J.fimEm ? '#ff8a8a' : '';
+  $('#mana i').style.width = p.mana + '%'; $('#mana b').textContent = 'MANA ' + Math.floor(p.mana);
+  const cl = CLASSES[p.classe], h = cl.hab[habSel];
+  $('#nome-hab').textContent = `${h.ic} ${h.nome}` + (temHab(p.classe, h) ? ` · ${h.mana} mana` : ' · 🔒');
+  $('#slots').querySelectorAll('.slot').forEach((s, k) => { s.classList.toggle('sel', k === habSel); const r = (p.cds[cl.hab[k].id] || 0) - J.tempo, cd = s.querySelector('.cd'); cd.style.display = r > 0 ? 'flex' : 'none'; if (r > 0) cd.textContent = Math.ceil(r); s.style.borderColor = k === habSel ? '' : p.mana < cl.hab[k].mana ? 'rgba(255,80,80,.4)' : ''; });
+  const ord = [...J.lista].sort((a, b) => (b.chegou ? 100 - J.ranking.indexOf(b) : b.nivel) - (a.chegou ? 100 - J.ranking.indexOf(a) : a.nivel));
+  $('#rank').innerHTML = ord.slice(0, 12).map(q => `<div><span style="color:${q.cor}">${q === J.eu ? '⭐ ' : ''}${esc(q.nome)}</span><b>${q.chegou ? '🏆 ' + (J.ranking.indexOf(q) + 1) + 'º' : 'N' + (q.nivel + 1)}</b></div>`).join('');
+}
+
+/* =====================================================================
+   PARTIDA
+   ===================================================================== */
+function comecar(cfg) {
+  // cfg: { seed, jogadores: [{id, nome, classe, bot, dif, desbl, dono}] , meuId }
+  for (const p of J.lista) cena.remove(p.mesh);
+  criarMundo(cfg.seed); rndHost = rngDe(cfg.seed ^ 0x5bd1e995);
+  J.lista = []; J.ranking = []; J.tempo = 0; J.fimEm = 0; J.acabou = false;
+  for (const o of cfg.jogadores) { const p = criarJogador({ id: o.id, nome: o.nome, classe: o.classe, bot: !!o.bot, dif: o.dif ?? 1, desbl: o.desbl || [], dono: o.dono ?? 0 }); p.local = o.bot ? (!R.on || R.host) : o.id === cfg.meuId; J.lista.push(p); irParaInicio(p, 0); p.pos.x += (J.lista.length % 4) * 0.6 - 1; p.pos.z += Math.floor(J.lista.length / 4) * 0.6 - 0.6; }
+  J.eu = J.lista.find(p => p.id === cfg.meuId); J.eu.mesh.visible = true; J.eu.tag.visible = false;
+  camYaw = -Math.PI / 2; camPitch = 0.62; habSel = 0; J.ativo = true;
+  montarSlots(); tela(null); $('#hud').classList.add('on');
+  if (TOQUE) montarToque(); else canvas.requestPointerLock();
+  centro('NÍVEL 1', 'Ache um dos 10 elevadores! Clique para usar seu poder.', 3);
+  avisar('iniciado');
+}
+function comecarSolo() {
+  const nome = ($('#solo-nome').value || SAVE.nome || 'Você').trim().slice(0, 14) || 'Você'; SAVE.nome = nome; salvar();
+  const jog = [{ id: 1, nome, classe: SAVE.classe, bot: false }], nomes = [...NOMES_BOT].sort(() => Math.random() - 0.5), cls = Object.keys(CLASSES);
+  for (let k = 0; k < cfgSolo.bots; k++) jog.push(botNovo(2 + k, nomes[k], cls[k % cls.length], cfgSolo.dif));
+  comecar({ seed: (Math.random() * 1e9) | 0, jogadores: jog, meuId: 1 });
+}
+function botNovo(id, nome, classe, dif) { const extras = CLASSES[classe].hab.filter(h => h.pts > 0).filter((h, k) => k < 1 + dif || Math.random() < 0.3).map(h => h.id); return { id, nome, classe, bot: true, dif, desbl: extras }; }
+function terminarPartida() {
+  if (J.acabou) return; J.acabou = true; J.ativo = false; if (document.pointerLockElement) document.exitPointerLock();
+  const ord = [...J.lista].sort((a, b) => (b.chegou ? 1000 - J.ranking.indexOf(b) : b.maxNivel * 10 + b.nivel) - (a.chegou ? 1000 - J.ranking.indexOf(a) : a.maxNivel * 10 + a.nivel));
+  const eu = J.eu, pos = J.ranking.indexOf(eu);
+  const ganho = (eu.chegou ? 3 : 0) + (pos === 0 ? 2 : pos === 1 ? 1 : 0) + Math.floor(Math.max(eu.maxNivel, eu.nivel) / 4);
+  SAVE.pontos += ganho; salvar();
+  $('#fim-tit').textContent = eu.chegou ? (pos === 0 ? '🏆 VOCÊ VENCEU!' : `🏆 Chegou ao topo em ${pos + 1}º`) : 'Fim da corrida';
+  $('#fim-txt').innerHTML = `<table>${ord.map((q, k) => `<tr><td>${k + 1}º</td><td style="color:${q.cor}">${q === eu ? '⭐ ' : ''}${esc(q.nome)}</td><td>${CLASSES[q.classe].ic} ${CLASSES[q.classe].nome}</td><td>${q.chegou ? '🏆 topo · ' + fmt(q.tempo) : 'nível ' + (Math.max(q.maxNivel, q.nivel) + 1)}</td></tr>`).join('')}</table><p class="sub">Você ganhou <b>+${ganho} pontos</b> (agora tem ${SAVE.pontos}). Use em <b>Classes e poderes</b> para desbloquear poderes novos.</p>`;
+  $('#hud').classList.remove('on'); $('#toque').style.display = 'none'; document.body.classList.remove('toque'); toque.ativo = false;
+  $('#b-revanche').style.display = R.on && !R.host ? 'none' : '';
+  tela('t-fim'); avisar('concluido', { final: eu.chegou ? 'topo' : 'fim' });
+}
+const fmt = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+function sairPartida() { J.ativo = false; J.acabou = true; if (R.on || R.peer) fecharRede(); $('#hud').classList.remove('on'); $('#toque').style.display = 'none'; document.body.classList.remove('toque'); toque.ativo = false; if (document.pointerLockElement) document.exitPointerLock(); tela('t-inicio'); atualizarInicio(); }
+let pausado = false;
+function pausar() { if (!J.ativo) return; pausado = !R.on; $('#c-sens').value = SAVE.sens; $('#c-vol').value = SAVE.vol; tela('t-pausa'); if (document.pointerLockElement) document.exitPointerLock(); }
+
+/* =====================================================================
+   LAÇO
+   ===================================================================== */
+let ultimo = performance.now(), tam = [0, 0];
+function quadro(agora) {
+  requestAnimationFrame(quadro);
+  const dt = Math.min(0.05, (agora - ultimo) / 1000); ultimo = agora;
+  const W = innerWidth, H = innerHeight; if (W !== tam[0] || H !== tam[1]) { renderer.setSize(W, H, false); cam.aspect = W / H; cam.updateProjectionMatrix(); tam = [W, H]; if (toque.ativo) montarToque(); }
+  if (J.ativo && !pausado) passo(dt);
+  else if (!J.ativo && M) { const t = agora / 14000, L = M.niveis[4]; cam.position.set(L.x0 + Math.cos(t) * 120, 70, Math.sin(t) * 120); cam.lookAt(L.x0, 30, 0); animarMundo(dt, agora / 1000); }
+  cena.userData.ceu.position.copy(cam.position);
+  renderer.render(cena, cam);
+}
+function animarMundo(dt, t) {
+  for (const L of M.niveis) { L.mCrist.forEach((m, k) => { m.rotation.y = t * 2 + k; m.visible = L.cristais[k].on; m.position.y = L.y + 1.1 + Math.sin(t * 3 + k) * 0.15; }); }
+  if (M.trofeu) M.trofeu.rotation.y = t * 0.8;
+}
+function passo(dt) {
+  J.tempo += dt; const t = J.tempo;
+  // mudanças que acabaram voltam ao normal; chão podre cai
+  for (const L of M.niveis) {
+    for (const c of L.cels) { if (c.ate && t > c.ate) { c.tipo = c.base; c.ate = 0; c.caiu = 0; L.sujo = true; } if (c.tipo === 'pisca' || (c.tipo === 'falso' && c.caiu)) { const on = chaoAtivo(c, t); if (on !== c.ultOn) { c.ultOn = on; L.sujo = true; } if (c.tipo === 'falso' && c.caiu && t - c.caiu > 6 && !c.ate) { c.caiu = 0; L.sujo = true; } } }
+    for (const arr of [L.hW, L.vW]) for (const p of arr) if (p.ate && t > p.ate) { p.on = p.base; p.ate = 0; L.sujo = true; }
+    for (const cr of L.cristais) if (!cr.on && t > cr.volta) cr.on = true;
+    if (L.sujo) { montarCaixas(L, t); desenharNivel(L, t); L.sujo = false; }
+    for (const [k, m] of L.helices) m.rotation.y = -(t * 2.6 + L.cels[k].fase);
+  }
+  for (let k = M.extras.length - 1; k >= 0; k--) if (t > M.extras[k].ate) { cena.remove(M.extras[k].mesh); M.extras.splice(k, 1); }
+  // drones (só o anfitrião decide)
+  for (const d of M.drones) { d.mesh.position.lerp(d.alvo, 1 - Math.pow(0.3, dt)); d.mesh.rotation.y += dt; if (!R.on || R.host) { d.prox -= dt; if (d.prox <= 0) { d.prox = 13 + Math.random() * 10 - d.L.k * 0.5; droneAge(d); } } }
+  // jogadores
+  for (const p of J.lista) {
+    if (p.morto) { if (t >= p.morto) { if (p.local) irParaInicio(p); p.morto = 0; } else { p.vel.y -= G * dt; p.pos.addScaledVector(p.vel, dt); } }
+    else if (p.elev) { p.pos.y += dt * 3; if (t - p.elev > 1.6 && p.local) terminarElevador(p); }
+    else if (p.local) { const ent = p === J.eu ? entradaJogador() : pensarBot(p, dt); moverJogador(p, dt, ent); if (p.bot) botPoderes(p, dt); }
+    else interpolar(p, dt);
+    p.mana = Math.min(100, p.mana + dt * 3);
+    animarBoneco(p, dt);
+  }
+  // fim: todos chegaram ou o tempo acabou
+  if ((!R.on || R.host) && !J.acabou) { const humanos = J.lista.filter(p => !p.bot); if ((J.fimEm && t > J.fimEm) || J.lista.every(p => p.chegou) || (humanos.length && humanos.every(p => p.chegou) && J.lista.filter(p => p.chegou).length >= Math.min(3, J.lista.length))) { if (R.on) enviar({ t: 'fim', rk: J.ranking.map(p => p.id) }); terminarPartida(); return; } }
+  for (let k = faiscas.length - 1; k >= 0; k--) { const f = faiscas[k]; f.t -= dt; f.m.material.opacity = Math.max(0, f.t); f.m.scale.x = f.m.scale.z = 1 + (0.6 - f.t); if (f.t <= 0) { cena.remove(f.m); faiscas.splice(k, 1); } }
+  animarMundo(dt, t);
+  atualizarCamera(dt); mirar();
+  // radar: linha até o elevador
+  const eu = J.eu; if (eu.ef.radar > t && !eu.chegou) { const cm = caminhoBot(eu); const L = M.niveis[eu.nivel]; if (cm) { const pts = cm.map(([i, j]) => { const c = centroCel(L, i, j); return new THREE.Vector3(c.x, L.y + 0.3, c.z); }); linhaRadar.geometry.setFromPoints(pts); linhaRadar.visible = true; } } else linhaRadar.visible = false;
+  atualizarHUD(dt);
+}
+function droneAge(d) {
+  const L = d.L, pool = ['vazio', 'lava', 'gelo', 'pisca', 'derrubar', 'bloco', 'esteira'].slice(0, 3 + Math.min(4, L.k));
+  const i = Math.floor(rndHost() * L.N), j = Math.floor(rndHost() * L.N); if (protegida(L, i, j)) return;
+  const tipo = pool[Math.floor(rndHost() * pool.length)], m = { c: [], w: [], dr: L.k, da: [i, j] };
+  if (tipo === 'derrubar') { const dd = Math.floor(rndHost() * 4); if (cel(L, i + DIRS[dd][0], j + DIRS[dd][1])) { const [hv, idx] = idxParede(L, i, j, dd); m.w.push([L.k, hv, idx, 0, 20]); } }
+  else m.c.push([L.k, i, j, tipo, 18, Math.floor(rndHost() * 4)]);
+  aplicarMudancas(m); if (R.on) enviar({ t: 'mud', m });
+}
+function animarBoneco(p, dt) {
+  p.mesh.position.copy(p.pos); const vh = Math.hypot(p.vel.x, p.vel.z);
+  let d = p.yaw - p.mesh.rotation.y; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; p.mesh.rotation.y += d * Math.min(1, dt * 12);
+  p.fase = (p.fase || 0) + dt * vh * 1.6; const s = p.noChao ? Math.sin(p.fase) * Math.min(1, vh / 4) * 0.9 : 0.5;
+  p.b.bE.rotation.x = s; p.b.bD.rotation.x = -s; p.b.pE.rotation.x = -s; p.b.pD.rotation.x = s;
+  p.mesh.visible = !(p.elev && J.tempo - p.elev > 1.2);
+  const fant = p.ef.fantasma > J.tempo; if (fant !== p.eraFant) { p.eraFant = fant; p.mesh.traverse(o => { if (o.isMesh && o.material) { o.material.transparent = fant; o.material.opacity = fant ? 0.4 : 1; } }); }
+}
+
+/* =====================================================================
+   ONLINE (PeerJS)
+   ===================================================================== */
+const PREFIXO = 'arcadia-labmaluco-';
+const R = { on: false, host: false, peer: null, conns: [], conn: null, meuId: 0, sala: { jog: [], nome: '', bots: 6 }, timer: 0 };
+function enviar(d, exceto) { if (R.host) { for (const c of R.conns) if (c.open && c !== exceto) c.send(d); } else if (R.conn && R.conn.open) R.conn.send(d); }
+const r2 = x => Math.round(x * 100) / 100;
+const estJog = p => [p.id, r2(p.pos.x), r2(p.pos.y), r2(p.pos.z), Math.round(p.yaw * 100) / 100, p.nivel, (p.noChao ? 1 : 0) | (p.chegou ? 2 : 0) | (p.elev ? 4 : 0) | (p.ef.fantasma > J.tempo ? 8 : 0), r2(Math.hypot(p.vel.x, p.vel.z))];
+function aplicarJog(q) { const p = J.lista.find(x => x.id === q[0]); if (!p || p.local) return; p.rede = q; p.nivel = q[5]; p.noChao = !!(q[6] & 1); const ch = !!(q[6] & 2); if (ch && !p.chegou) { p.chegou = true; if (!J.ranking.includes(p)) J.ranking.push(p); } p.elev = q[6] & 4 ? (p.elev || J.tempo) : 0; p.ef.fantasma = q[6] & 8 ? J.tempo + 0.3 : 0; p.vrede = q[7]; p.maxNivel = Math.max(p.maxNivel, p.nivel); }
+function interpolar(p, dt) { const q = p.rede; if (!q) return; const k = 1 - Math.pow(0.0005, dt), alvo = new THREE.Vector3(q[1], q[2], q[3]); if (p.pos.distanceTo(alvo) > 6) p.pos.copy(alvo); else p.pos.lerp(alvo, k); let d = q[4] - p.yaw; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; p.yaw += d * k; p.vel.set(Math.sin(-p.yaw) * (p.vrede || 0), 0, -Math.cos(p.yaw) * (p.vrede || 0)); }
+function receber(d, c) {
+  if (d.t === 'eu' && R.host) { aplicarJog(d.q); return; }
+  if (d.t === 'est' && !R.host) { for (const q of d.p) aplicarJog(q); J.ranking = d.rk.map(id => J.lista.find(p => p.id === id)).filter(Boolean); if (d.fe) J.fimEm = J.tempo + d.fe; return; }
+  if (d.t === 'hab' && R.host) { resolverPoder(d); return; }
+  if (d.t === 'mud' && !R.host) { aplicarMudancas(d.m); return; }
+  if (d.t === 'nivel' && R.host) { const p = J.lista.find(x => x.dono === c.idJog && !x.bot); if (p) { p.nivel = d.n; p.maxNivel = Math.max(p.maxNivel, d.n); const txt = `${esc(p.nome)} chegou ao nível ${d.n + 1}`; feedTxt(txt, d.n >= 7); enviar({ t: 'feed', txt, forte: d.n >= 7 }, c); } return; }
+  if (d.t === 'topo' && R.host) { const p = J.lista.find(x => x.dono === c.idJog && !x.bot); if (p && !p.chegou) { p.local = false; chegouTopoRemoto(p, d.tempo); } return; }
+  if (d.t === 'fim' && !R.host) { J.ranking = d.rk.map(id => J.lista.find(p => p.id === id)).filter(Boolean); terminarPartida(); return; }
+  if (d.t === 'feed') { feedTxt(d.txt, d.forte); return; }
+}
+function chegouTopoRemoto(p, tempo) { p.chegou = true; p.tempo = tempo; p.maxNivel = NIV; if (!J.ranking.includes(p)) J.ranking.push(p); const pos = J.ranking.indexOf(p) + 1; feedTxt(`🏆 ${esc(p.nome)} chegou ao topo em ${pos}º lugar!`, true); enviar({ t: 'feed', txt: `🏆 ${esc(p.nome)} chegou ao topo em ${pos}º lugar!`, forte: true }); if (!J.fimEm) J.fimEm = J.tempo + 90; }
+function enviarRetrato() {
+  if (!J.ativo || !J.eu) return;
+  if (R.host) enviar({ t: 'est', p: J.lista.map(estJog), rk: J.ranking.map(p => p.id), fe: J.fimEm ? Math.max(0, J.fimEm - J.tempo) : 0 });
+  else enviar({ t: 'eu', q: estJog(J.eu) });
+}
+const nomeOnline = () => (($('#on-nome').value || SAVE.nome || 'Jogador').trim().slice(0, 14)) || 'Jogador';
+function erroOn(t, neutro) { $('#on-erro').textContent = t; $('#on-erro').style.color = neutro ? '' : '#ff8a8a'; }
+function fecharRede() { clearInterval(R.timer); try { R.conns.forEach(c => c.close()); R.conn && R.conn.close(); } catch (e) {} try { R.peer && R.peer.destroy(); } catch (e) {} Object.assign(R, { on: false, host: false, peer: null, conns: [], conn: null }); $('#on-sala').style.display = 'none'; }
+function desenharSala() {
+  $('#on-sala').style.display = ''; $('#on-titulo').textContent = R.sala.nome;
+  $('#on-jogadores').innerHTML = '<tr><th>Jogador</th><th>Classe</th></tr>' + R.sala.jog.map(j => `<tr><td>${j.id === 0 ? '👑 ' : ''}${esc(j.nome)}${j.id === R.meuId ? ' (você)' : ''}</td><td style="color:${CLASSES[j.classe].cor}">${CLASSES[j.classe].ic} ${CLASSES[j.classe].nome}</td></tr>`).join('');
+  $('#on-host').style.display = R.host ? '' : 'none'; $('#on-espera').style.display = R.host ? 'none' : '';
+  $('#on-bots').innerHTML = [0, 4, 6, 8, 12].map(n => `<button class="b ${R.sala.bots === n ? 'pri' : ''}" data-n="${n}">${n === 0 ? 'sem bots' : n}</button>`).join('');
+  $('#on-bots').querySelectorAll('[data-n]').forEach(b => b.onclick = () => { R.sala.bots = +b.dataset.n; desenharSala(); });
+}
+const euSala = () => ({ nome: nomeOnline(), classe: SAVE.classe, desbl: SAVE.desbl[SAVE.classe] || [] });
+function hospedar(pronto, nomePub) {
+  if (!window.Peer) return erroOn('Sem internet: não deu para carregar o sistema de salas.');
+  SAVE.nome = nomeOnline(); salvar();
+  const tentar = n => {
+    const cod = nomePub ? null : Array.from({ length: 4 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ'[Math.random() * 23 | 0]).join('');
+    R.peer = pronto || new Peer(PREFIXO + cod, { debug: 0 }); R.host = true; R.meuId = 0; R.sala = { jog: [{ id: 0, ...euSala() }], nome: nomePub || 'Sala ' + cod, bots: 6 };
+    let prox = 1;
+    const aberta = () => { erroOn(nomePub ? '🌍 Sala pública aberta. Esperando gente…' : `Sala criada! Código: ${cod}`, true); desenharSala(); };
+    if (pronto) aberta(); else R.peer.on('open', aberta);
+    R.peer.on('connection', c => {
+      c.on('data', d => {
+        if (!d || typeof d !== 'object') return;
+        if (d.t === 'classe') { const j = R.sala.jog.find(j => j.id === c.idJog); if (j && CLASSES[d.classe]) { j.classe = d.classe; j.desbl = Array.isArray(d.desbl) ? d.desbl.slice(0, 5) : []; enviar({ t: 'sala', sala: R.sala }); desenharSala(); } return; }
+        if (d.t === 'oi') { if (R.sala.jog.length >= 12 || J.ativo) { c.send({ t: 'cheio' }); setTimeout(() => c.close(), 300); return; } const id = prox++; c.idJog = id; R.conns.push(c); R.sala.jog.push({ id, nome: String(d.nome || 'Jogador').slice(0, 14), classe: CLASSES[d.classe] ? d.classe : 'demolidor', desbl: Array.isArray(d.desbl) ? d.desbl.slice(0, 5) : [] }); c.send({ t: 'ola', id }); enviar({ t: 'sala', sala: R.sala }); desenharSala(); return; }
+        receber(d, c);
+      });
+      c.on('close', () => { R.conns = R.conns.filter(x => x !== c); R.sala.jog = R.sala.jog.filter(j => j.id !== c.idJog); enviar({ t: 'sala', sala: R.sala }); const p = J.lista.find(x => x.dono === c.idJog && !x.bot); if (p && J.ativo) { cena.remove(p.mesh); J.lista = J.lista.filter(x => x !== p); feedTxt(esc(p.nome) + ' saiu'); } if (!J.ativo) desenharSala(); });
+    });
+    R.peer.on('error', e => { if (e.type === 'unavailable-id' && !nomePub && n < 4) { R.peer.destroy(); tentar(n + 1); } else if (!nomePub) erroOn('Erro de conexão: ' + e.type); });
+  };
+  tentar(0);
+}
+function entrar(cod, falhou) {
+  if (!window.Peer) return erroOn('Sem internet: não deu para carregar o sistema de salas.');
+  if (!falhou) { cod = (cod || '').toUpperCase().replace(/[^A-Z]/g, ''); if (cod.length !== 4) return erroOn('O código tem 4 letras.'); fecharRede(); }
+  SAVE.nome = nomeOnline(); salvar(); erroOn('Conectando…', true);
+  let ok = false; const desistir = msg => { if (ok) return; try { R.peer.destroy(); } catch (e) {} if (falhou) falhou(); else erroOn(msg); };
+  const limite = setTimeout(() => desistir('Não achei a sala. Confira o código.'), 10000);
+  R.peer = new Peer({ debug: 0 });
+  R.peer.on('open', () => {
+    const cn = R.conn = R.peer.connect(PREFIXO + cod, { reliable: true });
+    cn.on('open', () => cn.send({ t: 'oi', ...euSala() }));
+    cn.on('data', d => {
+      if (!d || typeof d !== 'object') return;
+      if (d.t === 'ola') { ok = true; clearTimeout(limite); R.meuId = d.id; erroOn('Você entrou na sala!', true); }
+      else if (d.t === 'cheio') { clearTimeout(limite); desistir('A sala está cheia ou a corrida já começou.'); }
+      else if (d.t === 'sala') { R.sala = d.sala; if (!J.ativo) { tela('t-online'); desenharSala(); } }
+      else if (d.t === 'ini') { R.on = true; comecar({ seed: d.seed, jogadores: d.jog, meuId: d.jog.find(j => !j.bot && j.dono === R.meuId).id }); clearInterval(R.timer); R.timer = setInterval(enviarRetrato, 66); }
+      else receber(d, null);
+    });
+    cn.on('close', () => { if (ok && R.conn === cn) { const jogando = J.ativo; fecharRede(); if (jogando) sairPartida(); tela('t-online'); erroOn('O anfitrião saiu da sala.'); } });
+  });
+  R.peer.on('error', e => { clearTimeout(limite); desistir(e.type === 'peer-unavailable' ? 'Sala não encontrada.' : 'Erro de conexão: ' + e.type); });
+}
+function salaPublica() { if (!window.Peer || !window.ArcadiaPublica) return erroOn('Sem internet: não deu para carregar o sistema de salas.'); fecharRede(); erroOn('Procurando sala pública…', true); ArcadiaPublica.procurar({ Peer, prefixo: PREFIXO, aoStatus: t => erroOn(t, true), aoHospedar: (p, nome) => hospedar(p, nome), aoEntrar: (cod, falhou) => entrar(cod, falhou), aoErro: t => erroOn(t) }); }
+function comecarOnline() {
+  const jog = R.sala.jog.map((j, k) => ({ id: k + 1, dono: j.id, nome: j.nome, classe: j.classe, bot: false, desbl: j.desbl }));
+  const nomes = [...NOMES_BOT].sort(() => Math.random() - 0.5), cls = Object.keys(CLASSES);
+  for (let k = jog.length; k < R.sala.bots; k++) jog.push(Object.assign(botNovo(k + 1, nomes[k % nomes.length], cls[k % cls.length], 1), { dono: 0 }));
+  const seed = (Math.random() * 1e9) | 0; R.on = true;
+  enviar({ t: 'ini', seed, jog }); comecar({ seed, jogadores: jog, meuId: jog.find(j => j.dono === 0 && !j.bot).id });
+  clearInterval(R.timer); R.timer = setInterval(enviarRetrato, 66);
+}
+
+/* =====================================================================
+   TELAS
+   ===================================================================== */
+function tela(id) { document.querySelectorAll('.tela').forEach(t => t.classList.toggle('on', t.id === id)); }
+document.querySelectorAll('[data-voltar]').forEach(b => b.onclick = () => { tela(b.dataset.voltar); atualizarInicio(); });
+function atualizarInicio() { $('#pontos-ini').innerHTML = `Classe: <b style="color:${CLASSES[SAVE.classe].cor}">${CLASSES[SAVE.classe].ic} ${CLASSES[SAVE.classe].nome}</b> · Pontos: <b>${SAVE.pontos}</b>`; }
+const cfgSolo = { bots: 7, dif: 1 };
+$('#b-jogar').onclick = () => { iniciarSom(); $('#solo-nome').value = SAVE.nome || ''; desenharSolo(); tela('t-solo'); };
+function desenharSolo() {
+  $('#solo-bots').innerHTML = [3, 5, 7, 11].map(n => `<button class="b ${cfgSolo.bots === n ? 'pri' : ''}" data-n="${n}">${n}</button>`).join('');
+  $('#solo-dif').innerHTML = ['Fácil', 'Normal', 'Difícil'].map((n, i) => `<button class="b ${cfgSolo.dif === i ? 'pri' : ''}" data-d="${i}">${n}</button>`).join('');
+  $('#solo-bots').querySelectorAll('[data-n]').forEach(b => b.onclick = () => { cfgSolo.bots = +b.dataset.n; desenharSolo(); });
+  $('#solo-dif').querySelectorAll('[data-d]').forEach(b => b.onclick = () => { cfgSolo.dif = +b.dataset.d; desenharSolo(); });
+}
+$('#b-solo-ir').onclick = () => { iniciarSom(); comecarSolo(); };
+$('#b-online').onclick = () => { iniciarSom(); $('#on-nome').value = SAVE.nome || ''; if (!R.peer) { $('#on-sala').style.display = 'none'; erroOn(''); } tela('t-online'); };
+$('#on-criar').onclick = () => { fecharRede(); erroOn('Criando sala…', true); hospedar(null, null); };
+$('#on-entrar').onclick = () => entrar($('#on-cod').value);
+$('#on-publica').onclick = () => salaPublica();
+$('#on-comecar').onclick = () => { if (R.host) comecarOnline(); };
+$('#b-ajuda').onclick = () => tela('t-ajuda');
+$('#b-sair').onclick = () => avisar('sair');
+$('#b-classes').onclick = () => { abrirClasses(); tela('t-classes'); };
+$('#b-fim-classes').onclick = () => { abrirClasses(); tela('t-classes'); };
+$('#b-classe-ok').onclick = () => { tela(J.acabou && J.lista.length ? 't-fim' : 't-inicio'); atualizarInicio(); if (R.peer && !R.host) enviar({ t: 'classe', ...euSala() }); else if (R.peer && R.host && R.sala.jog[0]) { Object.assign(R.sala.jog[0], euSala()); enviar({ t: 'sala', sala: R.sala }); desenharSala(); } };
+let classeVendo = SAVE.classe;
+function abrirClasses() {
+  $('#pts').textContent = SAVE.pontos;
+  $('#lista-classes').innerHTML = Object.entries(CLASSES).map(([id, c]) => `<button class="op ${id === classeVendo ? 'sel' : ''}" data-c="${id}"><span style="font-size:26px">${c.ic}</span><span style="color:${c.cor}">${c.nome}${id === SAVE.classe ? ' ✓' : ''}</span><small>${c.desc}</small></button>`).join('');
+  $('#lista-classes').querySelectorAll('[data-c]').forEach(b => b.onclick = () => { classeVendo = b.dataset.c; SAVE.classe = classeVendo; salvar(); abrirClasses(); });
+  const c = CLASSES[classeVendo];
+  $('#lista-habs').innerHTML = c.hab.map(h => { const tem = temHab(classeVendo, h); return `<div class="hab"><span class="ic">${h.ic}</span><div><span class="nm">${h.nome}</span> <small style="display:inline">${h.mana} mana · recarga ${h.cd}s${h.dur && h.area !== 'eu' ? ' · dura ' + h.dur + 's' : ''}</small><small>${h.desc}</small></div><span class="cad">${tem ? '✅' : `<button class="b ${SAVE.pontos >= h.pts ? 'pri' : ''}" data-h="${h.id}" ${SAVE.pontos >= h.pts ? '' : 'disabled'}>🔓 ${h.pts} pts</button>`}</span></div>`; }).join('');
+  $('#lista-habs').querySelectorAll('[data-h]').forEach(b => b.onclick = () => { const h = HAB[b.dataset.h]; if (SAVE.pontos < h.pts) return; SAVE.pontos -= h.pts; (SAVE.desbl[classeVendo] = SAVE.desbl[classeVendo] || []).push(h.id); salvar(); $('#classe-msg').textContent = `Desbloqueado: ${h.ic} ${h.nome}!`; SOM.vitoria(); abrirClasses(); });
+}
+$('#b-continuar').onclick = () => { pausado = false; tela(null); if (!TOQUE) canvas.requestPointerLock(); };
+$('#b-reini').onclick = () => { pausado = false; tela(null); if (J.eu && !J.eu.chegou) irParaInicio(J.eu); if (!TOQUE) canvas.requestPointerLock(); };
+$('#b-menu').onclick = () => { pausado = false; sairPartida(); };
+$('#c-sens').oninput = e => { SAVE.sens = +e.target.value; salvar(); };
+$('#c-vol').oninput = e => { SAVE.vol = +e.target.value; salvar(); if (AU.mestre) AU.mestre.gain.value = SAVE.vol; };
+$('#b-revanche').onclick = () => { if (R.on && R.host) comecarOnline(); else if (!R.on) comecarSolo(); };
+$('#b-fim-menu').onclick = () => sairPartida();
+
+/* ---------- toque ---------- */
+function montarToque() {
+  toque.ativo = true; document.body.classList.add('toque'); const T = $('#toque'); T.style.display = 'block'; T.querySelectorAll('.tb').forEach(b => b.remove());
+  const W = innerWidth, H = innerHeight, d = Math.min(86, H * 0.2);
+  for (const [txt, x, y, tam, acao] of [['⤒', W - d - 24, H - d - 24, d, 'pular'], ['✨', W - d * 2.2 - 34, H - d * 0.9 - 24, d * 0.9, 'poder'], ['↺', W - d * 0.75 - 24, H - d * 2 - 40, d * 0.7, 'reini'], ['II', 14, 14, d * 0.6, 'pausa']]) {
+    const b = document.createElement('div'); b.className = 'tb'; b.textContent = txt; b.style.cssText = `left:${x}px;top:${y}px;width:${tam}px;height:${tam}px`; T.appendChild(b);
+    b.addEventListener('pointerdown', e => { e.preventDefault(); e.stopPropagation(); iniciarSom(); if (acao === 'pular') { toque.pular = true; pularPedido = true; } if (acao === 'poder') lancar(); if (acao === 'reini' && J.eu && !J.eu.chegou) irParaInicio(J.eu); if (acao === 'pausa') pausar(); });
+  }
+  const joy = $('#joy'), bola = joy.querySelector('i'); let idJ = null, idO = null, ux = 0, uy = 0;
+  const mexer = e => { const r = joy.getBoundingClientRect(); let dx = (e.clientX - r.left - r.width / 2) / (r.width / 2), dy = (e.clientY - r.top - r.height / 2) / (r.height / 2); const l = Math.hypot(dx, dy); if (l > 1) { dx /= l; dy /= l; } toque.joy.x = dx; toque.joy.y = dy; bola.style.left = 40 + dx * 40 + 'px'; bola.style.top = 40 + dy * 40 + 'px'; };
+  T.onpointerdown = e => { if (e.clientX < W * 0.4 && idJ === null) { idJ = e.pointerId; mexer(e); } else if (idO === null) { idO = e.pointerId; ux = e.clientX; uy = e.clientY; } };
+  T.onpointermove = e => { if (e.pointerId === idJ) mexer(e); else if (e.pointerId === idO) { camYaw -= (e.clientX - ux) * 0.006 * SAVE.sens; camPitch = clamp(camPitch + (e.clientY - uy) * 0.006 * SAVE.sens, -0.6, 1.35); ux = e.clientX; uy = e.clientY; } };
+  T.onpointerup = T.onpointercancel = e => { if (e.pointerId === idJ) { idJ = null; toque.joy.x = toque.joy.y = 0; bola.style.left = bola.style.top = '40px'; } if (e.pointerId === idO) idO = null; };
+}
+
+/* ---------- início ---------- */
+criarMundo((Math.random() * 1e9) | 0);
+$('#carregando').style.display = 'none';
+atualizarInicio();
+requestAnimationFrame(quadro);
+window.__lab = { J, R, get M() { return M; }, comecar, comecarSolo, passo, usarPoder, HAB, CLASSES, SAVE, caminhoBot, receber, teclas, cfgSolo, cel, centroCel, terminarPartida, get cam() { return cam; }, set camYaw(v) { camYaw = v; }, set camPitch(v) { camPitch = v; } };
+avisar('iniciado');
+</script>
+<style>@keyframes vj{0%,85%{opacity:1}100%{opacity:0}}</style><div id="versao-jogo" style="position:fixed;left:8px;bottom:6px;z-index:60;font:700 11px system-ui,sans-serif;color:#fff;opacity:.55;pointer-events:none;text-shadow:0 1px 2px #000;animation:vj 8s forwards">v1.0.0</div>
+<script>/* versão deste arquivo: igual a "versao" em jogos.js */ window.VERSAO_JOGO = "1.0.0";</script>
+</body>
+</html>

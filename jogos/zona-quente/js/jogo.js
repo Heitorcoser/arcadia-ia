@@ -3,12 +3,12 @@
    ========================================================================= */
 import * as THREE from 'three';
 import { MX, MZ, LADOS, UNIDADES, MORROS, PONTOS, LOJAS, BOMBAS, HELIPONTO, SPAWNS, VEICULOS_INICIAIS, JANELAS, CAIXAS, CASAS, LINHAS, BASE_POLICIA, POSTO, brZ,
-  alturaTerreno, raio, visivel, construirMalhas, placa, caixasPerto, chaoEm, materialChao, NAV } from './mapa.js?v=1.1.1';
-import { A, iniciarAudio, definirOuvinte, tocar, somTiro, somImpacto, somRicochete, somPassando, somExplosao, volumeGeral, distOuvinte } from './audio.js?v=1.1.1';
-import { ARMAS, CLASSES, GRANADAS, danoNaDistancia, modeloArma } from './armas.js?v=1.1.1';
-import { criarAtor, nascer, moverAtor, olho, direcaoOlhar, raioAtor, animarBoneco, animarMorte, pensarBot, avisoBalaPerto, inimigos, equipar, OLHO, OLHO_AGACHADO } from './atores.js?v=1.1.1';
-import { criarVeiculo, dirigir, pilotoAutomatico, desenharVeiculo, raioVeiculo, bombaPerto, TIPOS } from './veiculos.js?v=1.1.1';
-import * as MAPA from './mapa.js?v=1.1.1';
+  alturaTerreno, raio, visivel, construirMalhas, placa, caixasPerto, chaoEm, materialChao, NAV } from './mapa.js?v=1.2.0';
+import { A, iniciarAudio, definirOuvinte, tocar, somTiro, somImpacto, somRicochete, somPassando, somExplosao, volumeGeral, distOuvinte } from './audio.js?v=1.2.0';
+import { ARMAS, CLASSES, GRANADAS, danoNaDistancia, modeloArma } from './armas.js?v=1.2.0';
+import { criarAtor, nascer, moverAtor, olho, direcaoOlhar, raioAtor, animarBoneco, animarMorte, pensarBot, avisoBalaPerto, inimigos, equipar, OLHO, OLHO_AGACHADO } from './atores.js?v=1.2.0';
+import { criarVeiculo, dirigir, pilotoAutomatico, desenharVeiculo, raioVeiculo, bombaPerto, TIPOS } from './veiculos.js?v=1.2.0';
+import * as MAPA from './mapa.js?v=1.2.0';
 
 const $ = s => document.querySelector(s);
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
@@ -110,13 +110,15 @@ J.disparar = (a, mira) => {
   let o, yaw = a.yaw, pitch = a.pitch;
   if (eu) { o = cam.position.clone(); const e = new THREE.Euler(); e.setFromQuaternion(cam.quaternion, 'YXZ'); yaw = e.y; pitch = e.x; }
   else { o = olho(a, new THREE.Vector3()); if (mira) { yaw = mira.yaw; pitch = mira.pitch; } }
-  const esp = espalhamento(a) * DEG * (eu ? 1 : 0.6);
+  const esp = espalhamento(a) * DEG * (eu ? 1 : 0.6); let dirsRede = [];
   for (let k = 0; k < (d.bagos || 1); k++) {
     const r = esp * Math.sqrt(Math.random()), t = Math.random() * Math.PI * 2;
     const y = yaw + Math.cos(t) * r, p = pitch + Math.sin(t) * r, cp = Math.cos(p);
     const dir = new THREE.Vector3(-Math.sin(y) * cp, Math.sin(p), -Math.cos(y) * cp);
-    J.balas.push({ p: o.clone(), v: dir.multiplyScalar(d.vel), dono: a, arma: d, dist: 0, pen: d.pen, mult: 1, tracer: (eu ? Math.random() < 0.35 : Math.random() < 0.3), passou: new Set(), inicio: o.clone() });
+    if (R.on) dirsRede.push(Math.round(dir.x * 1e4) / 1e4, Math.round(dir.y * 1e4) / 1e4, Math.round(dir.z * 1e4) / 1e4);
+    J.balas.push({ p: o.clone(), v: dir.multiplyScalar(d.vel), dono: a, arma: d, dist: 0, pen: d.pen, mult: 1, tracer: (eu ? Math.random() < 0.35 : Math.random() < 0.3), passou: new Set(), inicio: o.clone(), dano: true });
   }
+  if (R.on && dirsRede.length) { enviar({ t: 'tiro', a: a.id, ar: d.id, o: [o.x, o.y, o.z].map(r2), d: dirsRede }); dirsRede = []; }
   // som, clarão, cápsula
   const boca = eu ? vm.bocaMundo() : tmpA.copy(o).add(direcaoOlhar(a, tmpB).multiplyScalar(0.8));
   somTiro(d, o, eu);
@@ -154,7 +156,8 @@ J.tiroHeli = (v, alvo) => {
   const o = new THREE.Vector3(v.pos.x + Math.cos(v.yaw) * 1.2, v.pos.y + 1.3, v.pos.z - Math.sin(v.yaw) * 1.2), t = new THREE.Vector3(alvo.pos.x, alvo.pos.y + 1.1, alvo.pos.z);
   const dir = t.sub(o).normalize(), e = 3.2 * DEG; dir.x += (Math.random() - 0.5) * e * 2; dir.y += (Math.random() - 0.5) * e * 2; dir.z += (Math.random() - 0.5) * e * 2; dir.normalize();
   ATIRADOR_HELI.pos.copy(v.pos);
-  J.balas.push({ p: o.clone(), v: dir.multiplyScalar(ARMAS.metralhadora.vel), dono: ATIRADOR_HELI, arma: ARMAS.metralhadora, dist: 0, pen: 0.8, mult: 1, tracer: Math.random() < 0.4, passou: new Set(), inicio: o.clone() });
+  if (R.on) enviar({ t: 'tiro', a: -5, ar: 'metralhadora', o: [o.x, o.y, o.z].map(r2), d: [dir.x, dir.y, dir.z].map(x => Math.round(x * 1e4) / 1e4) });
+  J.balas.push({ p: o.clone(), v: dir.multiplyScalar(ARMAS.metralhadora.vel), dono: ATIRADOR_HELI, arma: ARMAS.metralhadora, dist: 0, pen: 0.8, mult: 1, tracer: Math.random() < 0.4, passou: new Set(), inicio: o.clone(), dano: true });
   somTiro(ARMAS.metralhadora, o, false); clarao(o, 0.7); J.sonsRecentes.push({ x: o.x, z: o.z, lado: 3, t: J.tempo });
 };
 // quebrar vidro
@@ -204,7 +207,7 @@ function atualizarBalas(dt) {
         vivo = false;
       } else if (alvo.tipo === 'ator') {
         const a = alvo.a; let dano = danoNaDistancia(b.arma, b.dist) * b.mult * (alvo.zona === 'cabeca' ? b.arma.cabeca : alvo.zona === 'pernas' ? 0.72 : 1);
-        aplicarDano(a, dano, alvo.zona, b.dono, dir, b.arma);
+        if (b.dano) aplicarDano(a, dano, alvo.zona, b.dono, dir, b.arma);
         somImpacto(alvo.zona === 'cabeca' && a.lado === 3 && b.arma.pen < 0.3 ? 'metal' : 'corpo', p, 0.9);
         emitir(p, 8, 0x8a0f0f, 1.4, 9.81, 0.45, dir);
         if (b.arma.pen >= 0.7) { b.mult *= 0.4; b.pen = 0; b.p.copy(p).addScaledVector(dir, 0.6); continue; }
@@ -212,9 +215,9 @@ function atualizarBalas(dt) {
       } else {
         const v = alvo.v; somImpacto('metal', p, 0.9); emitir(p, 6, 0xffd27a, 3, 9.81, 0.25); furo(p, dir.clone().negate());
         const dano = danoNaDistancia(b.arma, b.dist) * b.mult;
-        J.danoVeiculo(v, dano * (1 - v.T.blind), b.dono);
+        if (b.dano) J.danoVeiculo(v, dano * (1 - v.T.blind), b.dono);
         // carro comum: a bala pode atravessar a lataria e acertar quem está dentro
-        if (v.motorista && Math.random() < (1 - v.T.blind) * 0.4 && inimigos(b.dono, v.motorista)) aplicarDano(v.motorista, dano * 0.7, 'tronco', b.dono, dir, b.arma, true);
+        if (b.dano && v.motorista && Math.random() < (1 - v.T.blind) * 0.4 && inimigos(b.dono, v.motorista)) aplicarDano(v.motorista, dano * 0.7, 'tronco', b.dono, dir, b.arma, true);
         vivo = false;
       }
     }
@@ -228,6 +231,7 @@ let supressao = 0, ultimoDanoDir = [];
 function aplicarDano(a, dano, zona, atacante, dir, arma, dentroCarro) {
   if (!a.vivo) return;
   if (atacante && atacante !== a && !inimigos(atacante, a)) return; // sem fogo amigo
+  if (R.on && !local(a)) { danoRede(a, dano, zona, atacante, dir, arma, dentroCarro); if (atacante === J.jogador) mostrarHit(zona === 'cabeca' ? 'cab' : ''); return; }
   let d = dano;
   if (zona === 'tronco' && a.colete > 0 && !dentroCarro) { const absorve = arma ? (arma.pen < 0.3 ? 0.85 : 0.5) : 0.4, segura = Math.min(a.colete, d * absorve); a.colete = Math.max(0, a.colete - segura * (arma && arma.pen >= 0.3 ? 1.3 : 0.8)); d -= segura; }
   if (zona === 'cabeca' && a.lado === 3 && arma && arma.pen < 0.3) d *= 0.45; // capacete segura pistola
@@ -242,7 +246,8 @@ function matar(a, atacante, arma, zona) {
   a.vivo = false; a.vida = 0; a.morteT = 0; a.respawn = 6; a.mortes++; a.caiDir = Math.random() < 0.5 ? 1 : -1;
   if (a.veiculo) { const v = a.veiculo; v.motorista = null; a.veiculo = null; a.pos.copy(v.pos); }
   if (a.partes) a.mesh.visible = true;
-  if (atacante && atacante !== a && atacante.lado !== undefined) { atacante.abates = (atacante.abates || 0) + 1; if (atacante.lado !== a.lado) J.placar[atacante.lado] += 5; }
+  if (atacante && atacante !== a && atacante.lado !== undefined) { atacante.abates = (atacante.abates || 0) + 1; if (atacante.lado !== a.lado && (!R.on || R.host)) J.placar[atacante.lado] += 5; }
+  if (R.on && local(a) && !R.recebendo) enviar({ t: 'morte', vit: a.id, at: atacante ? atacante.id : null, ar: arma && arma.id ? arma.id : null, an: arma && !arma.id ? arma.nome || null : null, pen: arma ? arma.pen : 1, z: zona || null });
   addFeed(atacante, a, arma, zona);
   // a arma cai no chão (dá para pegar)
   const w = a.armas[0];
@@ -254,19 +259,21 @@ function matar(a, atacante, arma, zona) {
   if (a === J.jogador) aoMorrer(atacante, arma, zona);
 }
 // explosão: dano com linha de visão, quebra vidro, empurra fumaça
-function explodir(p, raioMax, letal, danoMax, dono) {
+function explodir(p, raioMax, letal, danoMax, dono, semDano) {
   somExplosao(p);
   clarao(p, 6); emitir(p, 70, 0x3a3128, 9, 9.81, 1.2); emitir(p, 40, 0xffb347, 7, 2, 0.35);
   for (let k = 0; k < 10; k++) nuvem(new THREE.Vector3(p.x + (Math.random() - 0.5) * 2, p.y + Math.random() * 1.5, p.z + (Math.random() - 0.5) * 2), 2.2, 4 + Math.random() * 2, 0x4a4540, 0.7);
   const de = distOuvinte(p); if (de < 30) tremor = Math.max(tremor, 1 - de / 30);
+  if (R.on && !semDano && R.host) enviar({ t: 'boom', p: [p.x, p.y, p.z].map(r2), r: raioMax });
   for (const a of J.atores) {
+    if (semDano) break;
     if (!a.vivo || (dono && dono !== a && !inimigos(dono, a))) continue;
     const alvo = new THREE.Vector3(a.pos.x, a.pos.y + 1, a.pos.z), d = alvo.distanceTo(p); if (d > raioMax) continue;
     if (!visivel({ x: p.x, y: p.y + 0.35, z: p.z }, alvo, true)) continue;
     const dano = d < letal ? danoMax : danoMax * Math.pow(1 - (d - letal) / (raioMax - letal), 1.6) * 0.8;
     aplicarDano(a, dano, 'tronco', dono, alvo.clone().sub(p).normalize(), { pen: 0.5 });
   }
-  for (const v of J.veiculos) { const d = v.pos.distanceTo(p); if (d < raioMax) J.danoVeiculo(v, danoMax * 2.2 * (1 - d / raioMax), dono); }
+  if (!semDano) for (const v of J.veiculos) { const d = v.pos.distanceTo(p); if (d < raioMax) J.danoVeiculo(v, danoMax * 2.2 * (1 - d / raioMax), dono); }
   caixasPerto(p.x, p.z, 7, b => { if (b.vidro !== undefined && !b.quebrado) { const c = { x: (b.x0 + b.x1) / 2, y: (b.y0 + b.y1) / 2, z: (b.z0 + b.z1) / 2 }; if (Math.hypot(c.x - p.x, c.y - p.y, c.z - p.z) < 7) quebrarJanela(b, p, new THREE.Vector3(c.x - p.x, 0.3, c.z - p.z).normalize()); } });
 }
 J.lancarGranada = (a, tipo, alvoPos, forca) => {
@@ -276,7 +283,8 @@ J.lancarGranada = (a, tipo, alvoPos, forca) => {
   if (alvoPos) { const dx = alvoPos.x - o.x, dz = alvoPos.z - o.z, dy = alvoPos.y - o.y, d = Math.hypot(dx, dz), t = clamp(d / 13, 0.6, 1.8); v = new THREE.Vector3(dx / t, (dy + 0.5 * 9.81 * t * t) / t, dz / t); }
   else { const dir = new THREE.Vector3(); cam.getWorldDirection(dir); v = dir.multiplyScalar(forca || 17).add(new THREE.Vector3(0, 2.5, 0)); }
   const m = new THREE.Mesh(tipo === 'frag' ? new THREE.SphereGeometry(0.07, 8, 6) : new THREE.CylinderGeometry(0.05, 0.05, 0.16, 8), new THREE.MeshLambertMaterial({ color: tipo === 'frag' ? 0x3b4a2a : 0x8d99ae })); cena.add(m);
-  J.granadas.push({ tipo, p: o.clone().addScaledVector(v.clone().normalize(), 0.5), v, t: a.cozido || 0, dono: a, m, solta: 0 });
+  const g0 = { tipo, p: o.clone().addScaledVector(v.clone().normalize(), 0.5), v, t: a.cozido || 0, dono: a, m, solta: 0 }; J.granadas.push(g0);
+  if (R.on) enviar({ t: 'gran', a: a.id, tipo, p: [g0.p.x, g0.p.y, g0.p.z].map(r2), v: [v.x, v.y, v.z].map(r2), c: r2(g0.t) });
   a.cozido = 0;
   if (a === J.jogador) tocar('impacto_metal1', { vol: 0.2, taxa: 1.6 });
 };
@@ -284,7 +292,7 @@ function atualizarGranadas(dt) {
   for (let i = J.granadas.length - 1; i >= 0; i--) {
     const g = J.granadas[i]; g.t += dt;
     const G = GRANADAS[g.tipo];
-    if (g.tipo === 'frag' && g.t >= G.fusivel) { explodir(g.p.clone().setY(g.p.y + 0.1), G.raio, G.letal, G.dano, g.dono); cena.remove(g.m); J.granadas.splice(i, 1); continue; }
+    if (g.tipo === 'frag' && g.t >= G.fusivel) { explodir(g.p.clone().setY(g.p.y + 0.1), G.raio, G.letal, G.dano, g.dono, g.remota); cena.remove(g.m); J.granadas.splice(i, 1); continue; }
     if (g.tipo === 'fumaca' && g.t >= G.fusivel) { if (!g.fumacaRef) { g.fumacaRef = { x: g.p.x, y: g.p.y + 1.5, z: g.p.z, t: 0 }; J.fumacas.push(g.fumacaRef); tocar('estouro', { pos: g.p, vol: 0.35, ref: 4, taxa: 0.6 }); } g.fumacaRef.t += dt; if (Math.random() < dt * 14) nuvem(new THREE.Vector3(g.p.x + (Math.random() - 0.5) * 3, g.p.y + 0.6 + Math.random() * 1.5, g.p.z + (Math.random() - 0.5) * 3), 3 + Math.random() * 2, 7 + Math.random() * 4, 0xd9dcdf, 0.75, new THREE.Vector3((Math.random() - 0.5) * 1.2, 0.25, (Math.random() - 0.5) * 1.2)); if (g.t > G.fusivel + G.duracao) { cena.remove(g.m); J.fumacas.splice(J.fumacas.indexOf(g.fumacaRef), 1); J.granadas.splice(i, 1); } continue; }
     // física: quica no chão e nas paredes
     g.v.y -= 9.81 * dt; const sp = g.v.length(); if (sp > 0.05) { const dir = g.v.clone().divideScalar(sp), len = sp * dt, h = raio(g.p, dir, len + 0.08); if (h) { const n = new THREE.Vector3(h.nx, h.ny, h.nz); g.p.addScaledVector(dir, Math.max(0, h.t - 0.08)); g.v.reflect(n).multiplyScalar(0.38); if (sp > 3) tocar('impacto_metal' + (1 + ((Math.random() * 4) | 0)), { pos: g.p, vol: Math.min(0.6, sp / 20), ref: 3, taxa: 1.5 }); if (h.caixa && h.caixa.vidro !== undefined) quebrarJanela(h.caixa, g.p, dir); } else g.p.addScaledVector(g.v, dt); }
@@ -294,17 +302,18 @@ function atualizarGranadas(dt) {
   for (const f of J.fumacas) f.t += 0;
 }
 J.danoVeiculo = (v, dano, atacante) => {
-  if (v.destruido || dano <= 0) return; v.vida -= dano; if (v.motorista === J.jogador) flashDano = Math.min(1, flashDano + dano / 400);
+  if (v.destruido || dano <= 0) return;
+  if (R.on && !R.host) { enviar({ t: 'dveic', v: J.veiculos.indexOf(v), d: r2(dano), at: atacante ? atacante.id : null }); return; } v.vida -= dano; if (v.motorista === J.jogador) flashDano = Math.min(1, flashDano + dano / 400);
   if (v.vida < v.T.vidaMax * 0.3 && Math.random() < 0.1) nuvem(new THREE.Vector3(v.pos.x, v.pos.y + 1.6, v.pos.z), 1.2, 3, 0x2b2b2b, 0.6);
   if (v.vida <= 0) {
     v.destruido = true; v.respawn = 75;
     const quem = v.motorista; if (quem) { quem.veiculo = null; v.motorista = null; quem.pos.copy(v.pos); aplicarDano(quem, 999, 'tronco', atacante, null, { pen: 1 }); }
     explodir(v.pos.clone().setY(v.pos.y + 1), 8, 3, 120, atacante);
-    v.mesh.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.color && o.material.color.setHex(0x1c1a18); } });
-    if (v.som) { v.som.parar(); v.som = null; }
+    queimarVeiculo(v);
     if (v.heli) { v.velV.y = -6; }
   }
 };
+function queimarVeiculo(v) { v.mesh.traverse(o => { if (o.isMesh) { o.material = o.material.clone(); o.material.color && o.material.color.setHex(0x1c1a18); } }); if (v.som) { v.som.parar(); v.som = null; } }
 J.somBatida = v => tocar('metal_caindo', { pos: v.pos, vol: 0.9, ref: 6 });
 J.atropelar = (v, a) => { if (a.atropeladoT && J.tempo - a.atropeladoT < 0.6) return; a.atropeladoT = J.tempo; const dano = Math.abs(v.vel) * 7; const quem = v.motorista; if (quem && !inimigos(quem, a)) return; aplicarDano(a, dano, 'tronco', quem, null, { pen: 1 }); a.vel.x += -Math.sin(v.yaw) * v.vel * 0.6; a.vel.z += -Math.cos(v.yaw) * v.vel * 0.6; a.vel.y = 3; somImpacto('corpo', a.pos, 1); };
 
@@ -419,12 +428,13 @@ function interagir(a) {
   if (t.tipo === 'arma') { const w = t.w, def = ARMAS[w.id], slot = def.tipo === 'pistola' ? 1 : 0, velha = a.armas[slot]; a.armas[slot] = { def, pente: w.pente, reserva: w.reserva }; cena.remove(w.g); J.armasChao.splice(J.armasChao.indexOf(w), 1); if (velha) { const md = modeloArma(velha.def.id); md.g.scale.setScalar(1.15); md.g.position.set(a.pos.x, a.pos.y + 0.08, a.pos.z); md.g.rotation.set(0, Math.random() * 6, Math.PI / 2); cena.add(md.g); J.armasChao.push({ id: velha.def.id, pente: velha.pente, reserva: velha.reserva, pos: a.pos.clone(), g: md.g, t: 60 }); } a.atual = slot; J.trocarArma(a, slot === 0 ? 1 : 0); J.trocarArma(a, slot); }
   if (t.tipo === 'veic') entrarVeiculo(a, t.v);
 }
-function entrarVeiculo(a, v) { a.veiculo = v; v.motorista = a; v.ia = null; camOrbita.yaw = 0; camOrbita.pitch = -0.15; tocar('impacto_metal1', { vol: 0.3, taxa: 0.7 }); centro('', v.heli ? 'W/S inclina · A/D gira · Espaço sobe · Ctrl desce · Q/E de lado · F sai' : 'W/S acelera · A/D vira · Espaço freia · F sai · segure F no posto para abastecer', 4); }
+function entrarVeiculo(a, v) { if (R.on && !R.host) enviar({ t: 'entra', v: J.veiculos.indexOf(v) }); a.veiculo = v; v.motorista = a; v.ia = null; camOrbita.yaw = 0; camOrbita.pitch = -0.15; tocar('impacto_metal1', { vol: 0.3, taxa: 0.7 }); centro('', v.heli ? 'W/S inclina · A/D gira · Espaço sobe · Ctrl desce · Q/E de lado · F sai' : 'W/S acelera · A/D vira · Espaço freia · F sai · segure F no posto para abastecer', 4); }
 function sairVeiculo() {
   const a = J.jogador, v = a.veiculo; if (!v) return;
   if (v.heli && v.pos.y > chaoEm(v.pos.x, v.pos.z, v.pos.y + 0.5, 1.2, 1.5) + 2.5) { centro('', 'Pouse antes de sair!', 1.5); return; }
   const rx = Math.cos(v.yaw), rz = -Math.sin(v.yaw), off = (v.heli ? 2.6 : v.T.larg / 2 + 1.0);
   a.pos.set(v.pos.x - rx * off, v.pos.y + 0.3, v.pos.z - rz * off); a.pos.y = chaoEm(a.pos.x, a.pos.z, a.pos.y + 1.5) + 0.05; a.vel.set(0, 0, 0);
+  if (R.on && !R.host) enviar({ t: 'sai', v: J.veiculos.indexOf(v) });
   v.motorista = null; a.veiculo = null; a.yaw = v.yaw; a.pitch = 0;
   if (v.som && !v.heli) { v.som.parar(); v.som = null; }
 }
@@ -534,6 +544,7 @@ function atualizarCamera(dt) {
 let tPontos = 0, tPlacar = 0;
 function atualizarPontos(dt) {
   tPontos += dt; if (tPontos < 0.25) return; const pass = tPontos; tPontos = 0;
+  if (R.on && !R.host) { visualPontos(); return; }
   for (const p of PONTOS) {
     const cont = [0, 0, 0, 0];
     for (const a of J.atores) if (a.vivo && !a.veiculo && Math.hypot(a.pos.x - p.x, a.pos.z - p.z) < p.r && Math.abs(a.pos.y - p.y) < 10) cont[a.lado]++;
@@ -549,8 +560,9 @@ function atualizarPontos(dt) {
     p.anel.material.color.set(p.disputa ? '#ff5d5d' : p.quem >= 0 ? LADOS[p.quem].cor : '#ffffff');
   }
   tPlacar += pass; if (tPlacar >= 2) { tPlacar = 0; for (const p of PONTOS) if (p.dono >= 0) J.placar[p.dono] += 2; }
-  const max = Math.max(...J.placar); if ((max >= META || tempoPartida >= DURACAO) && !fimPartida) terminar();
+  const max = Math.max(...J.placar); if ((max >= META || tempoPartida >= DURACAO) && !fimPartida) { if (R.on) enviar({ t: 'fim', pl: J.placar }); terminar(); }
 }
+function visualPontos() { for (const p of PONTOS) { p.bandeira.material.color.set(p.dono >= 0 ? LADOS[p.dono].cor : '#dddddd'); p.bandeira.position.y = p.y + 1.6 + 6.5 * (p.dono >= 0 ? 1 : p.progresso); p.anel.material.color.set(p.disputa ? '#ff5d5d' : p.quem >= 0 ? LADOS[p.quem].cor : '#ffffff'); } }
 
 /* ---------------- HUD ---------------- */
 const mmCtx = $('#minimapa').getContext('2d'); let mapaBase = null;
@@ -688,13 +700,13 @@ function montarConfig() {
   const s = () => { CFG.sens = +$('#c-sens').value; CFG.fov = +$('#c-fov').value; CFG.vol = +$('#c-vol').value; CFG.inverter = $('#c-inv').checked; CFG.fps = $('#c-fps').checked; const q = $('#c-qual').checked ? 1 : 0; if (q !== CFG.qualidade) { CFG.qualidade = q; renderer.shadowMap.enabled = !!q; sol.castShadow = !!q; cena.traverse(o => { if (o.material) o.material.needsUpdate = true; }); } CFG.bots = $('#c-bots').checked ? 1 : 0; volumeGeral(CFG.vol); gravar('zq.cfg', CFG); $('#fps').style.display = CFG.fps ? 'block' : 'none'; };
   $('#cfg-campos').querySelectorAll('input').forEach(i => i.oninput = s);
 }
-function pausar() { if (estado !== 'jogo') return; estado = 'pausa'; montarConfig(); $('#b-continuar').textContent = 'Continuar'; $('#b-trocar').style.display = ''; $('#b-menu').style.display = ''; tela('t-pausa'); }
+function pausar() { if (estado !== 'jogo') return; estado = 'pausa'; if (R.on) centro('', 'Online: o jogo continua rolando enquanto você está no menu', 2); montarConfig(); $('#b-continuar').textContent = 'Continuar'; $('#b-trocar').style.display = ''; $('#b-menu').style.display = ''; tela('t-pausa'); }
 $('#b-continuar').onclick = () => { if (estado === 'pausa') { estado = 'jogo'; tela(null); if (!TOQUE && !morteAberta) canvas.requestPointerLock(); } else tela('t-inicio'); };
 $('#b-trocar').onclick = () => { estado = 'jogo'; abrirClasses(true); };
 $('#b-menu').onclick = () => { sairPartida(); };
-$('#b-revanche').onclick = () => comecarPartida();
+$('#b-revanche').onclick = () => { if (R.on) { if (R.host) comecarOnline(); } else comecarPartida(); };
 $('#b-fim-menu').onclick = () => { sairPartida(); };
-function sairPartida() { estado = 'menu'; fimPartida = true; $('#hud').classList.remove('on'); $('#morte').style.display = 'none'; morteAberta = false; $('#toque').style.display = 'none'; document.body.classList.remove('toque'); toque.ativo = false; if (document.pointerLockElement) document.exitPointerLock(); tela('t-inicio'); }
+function sairPartida() { if (R.on) fecharRede(); estado = 'menu'; fimPartida = true; $('#hud').classList.remove('on'); $('#morte').style.display = 'none'; morteAberta = false; $('#toque').style.display = 'none'; document.body.classList.remove('toque'); toque.ativo = false; if (document.pointerLockElement) document.exitPointerLock(); tela('t-inicio'); }
 
 /* ---------------- partida ---------------- */
 function limparPartida() {
@@ -705,6 +717,7 @@ function limparPartida() {
   MALHAS.vidros.instanceMatrix.needsUpdate = true;
 }
 function comecarPartida() {
+  if (R.peer) fecharRede();
   limparPartida();
   J.dif = escolha.dif; tempoPartida = 0; fimPartida = false;
   const nf = CFG.bots ? 6 : 3, np = CFG.bots ? 9 : 5;
@@ -726,6 +739,7 @@ function terminar() {
   const ordem = LADOS.map(L => [L, J.placar[L.id]]).sort((a, b) => b[1] - a[1]), venceu = ordem[0][0].id === J.jogador.lado;
   $('#fim-tit').textContent = venceu ? '🏆 VITÓRIA' : 'Fim da partida';
   $('#fim-txt').innerHTML = `<p class="sub">${ordem[0][0].nome} dominou a Serra Alta.</p><table style="width:100%">${ordem.map(([L, p], i) => `<tr><td>${i + 1}º</td><td style="color:${L.cor}"><b>${L.nome}</b></td><td>${Math.round(p)} pts</td></tr>`).join('')}</table><p class="sub">Você: ${J.jogador.abates} abates · ${J.jogador.mortes} mortes</p>`;
+  $('#b-revanche').style.display = R.on && !R.host ? 'none' : ''; $('#b-revanche').textContent = R.on ? 'Nova partida (mesma sala)' : 'Jogar de novo';
   $('#hud').classList.remove('on'); $('#toque').style.display = 'none'; document.body.classList.remove('toque'); toque.ativo = false; tela('t-fim'); avisar('concluido', { final: venceu ? 'vitoria' : 'derrota' });
 }
 
@@ -768,7 +782,7 @@ function quadro(agora) {
   requestAnimationFrame(quadro);
   const dtReal = Math.min(0.05, (agora - ultimo) / 1000); ultimo = agora; fpsMed = lerp(fpsMed, 1 / Math.max(0.001, dtReal), 0.05);
   const W = innerWidth, H = innerHeight; if (W !== tamAtual[0] || H !== tamAtual[1]) { renderer.setSize(W, H, false); tamAtual = [W, H]; cam.aspect = vmCam.aspect = W / H; cam.updateProjectionMatrix(); vmCam.updateProjectionMatrix(); if (toque.ativo) montarToque(); }
-  if (estado === 'jogo') passo(dtReal);
+  if (estado === 'jogo' || (R.on && (estado === 'pausa' || morteAberta) && estado !== 'fim' && estado !== 'menu')) passo(dtReal);
   else if (estado === 'menu') { const t = agora / 9000; cam.position.set(Math.cos(t) * 260, 95, Math.sin(t) * 200 - 20); cam.lookAt(0, 20, 0); }
   // sombra acompanha a câmera
   if (CFG.qualidade) { const p = cam.position; sol.position.set(p.x + SOL_DIR.x * 200, p.y + SOL_DIR.y * 200, p.z + SOL_DIR.z * 200); sol.target.position.set(p.x, p.y - 10, p.z); }
@@ -781,8 +795,9 @@ function passo(dt) {
   J.sonsRecentes = J.sonsRecentes.filter(s => J.tempo - s.t < 0.5);
   atualizarJogador(dt);
   for (const a of J.atores) {
-    if (!a.vivo) { animarMorte(a, dt); if (a !== J.jogador || !morteAberta) a.respawn -= dt; else a.respawn -= dt; if (a.bot && a.respawn <= 0) { const donos = PONTOS.filter(p => p.dono === a.lado && !p.disputa); let lista = null; if (donos.length && Math.random() < 0.4) { const p = donos[(Math.random() * donos.length) | 0]; lista = [[p.x + (Math.random() - 0.5) * 8, p.z + p.r + 4]]; } nascer(J, a, lista); } continue; }
-    if (a.bot) {
+    if (!a.vivo) { animarMorte(a, dt); if (a !== J.jogador || !morteAberta) a.respawn -= dt; else a.respawn -= dt; if (a.bot && local(a) && a.respawn <= 0) { const donos = PONTOS.filter(p => p.dono === a.lado && !p.disputa); let lista = null; if (donos.length && Math.random() < 0.4) { const p = donos[(Math.random() * donos.length) | 0]; lista = [[p.x + (Math.random() - 0.5) * 8, p.z + p.r + 4]]; } nascer(J, a, lista); } continue; }
+    if (!local(a)) interpolar(a, dt);
+    else if (a.bot) {
       pensarBot(J, a, dt);
       a.cad -= dt; a.trocando = Math.max(0, a.trocando - dt); a.ferrolho = Math.max(0, a.ferrolho - dt);
       if (a.recarregando > 0) { a.recarregando -= dt; if (a.recarregando <= 0) fimRecarga(a); }
@@ -793,7 +808,8 @@ function passo(dt) {
     animarBoneco(a, dt, J.tempo);
   }
   for (const v of J.veiculos) {
-    if (v.destruido) { v.respawn -= dt; if (v.respawn <= 0 && !v.motorista) { cena.remove(v.mesh); const i = J.veiculos.indexOf(v); J.veiculos[i] = criarVeiculo(J, v.tipo, v.inicial.x, v.inicial.z, v.inicial.yaw, v.lado); } }
+    if (R.on && (!R.host || v.donoRede)) { if (v.motorista !== J.jogador) interpolarVeic(v, dt); desenharVeiculo(v, dt); continue; }
+    if (v.destruido) { v.respawn -= dt; if (v.respawn <= 0 && !v.motorista) { cena.remove(v.mesh); const i = J.veiculos.indexOf(v); J.veiculos[i] = criarVeiculo(J, v.tipo, v.inicial.x, v.inicial.z, v.inicial.yaw, v.lado); continue; } }
     if (v.heli && !v.motorista) pilotoAutomatico(J, v, dt);
     else if (!v.motorista && !v.heli) dirigir(J, v, { frente: 0, tras: 0, esq: 0, dir: 0, freio: true, sobe: 0 }, dt);
     else if (v.heli && v.destruido) dirigir(J, v, { frente: 0, tras: 0, esq: 0, dir: 0, sobe: -1 }, dt);
@@ -810,11 +826,207 @@ function passo(dt) {
   atualizarHUD(dt);
 }
 
+/* ---------------- ONLINE (PeerJS) ----------------
+   Cada máquina simula o próprio soldado; o anfitrião simula os bots, os veículos,
+   os pontos e o placar e manda um retrato de tudo 15 vezes por segundo.
+   Quem atira calcula o acerto; o dano vai para quem "é dono" da vítima. */
+const PREFIXO = 'arcadia-zonaquente-';
+const R = { on: false, host: false, peer: null, conns: [], conn: null, meuId: 0, sala: { jog: [], nome: '', dif: 1 }, timer: 0, recebendo: false };
+const r2 = x => Math.round(x * 100) / 100, r3 = x => Math.round(x * 1000) / 1000;
+function local(a) { return !R.on || a === J.jogador || (R.host && (a.bot || a === ATIRADOR_HELI)); }
+function ator(id) { return id === -5 ? ATIRADOR_HELI : id == null ? null : J.atores.find(a => a.id === id); }
+function enviar(d, exceto) { if (!R.on && !R.peer) return; if (R.host) { for (const c of R.conns) if (c.open && c !== exceto) c.send(d); } else if (R.conn && R.conn.open) R.conn.send(d); }
+function enviarPara(jog, d) { const c = R.conns.find(c => c.idJog === jog); if (c && c.open) c.send(d); }
+function danoRede(a, dano, zona, atac, dir, arma, dentroCarro) {
+  const m = { t: 'dano', alvo: a.id, d: r2(dano), z: zona, at: atac ? atac.id : null, ar: arma && arma.id ? arma.id : null, an: arma && !arma.id ? arma.nome || null : null, pen: arma ? arma.pen : 1, dir: dir ? [dir.x, dir.y, dir.z].map(r3) : null, dc: dentroCarro ? 1 : 0 };
+  if (R.host) enviarPara(a.donoRede, m); else enviar(m);
+}
+const armaDe = m => m.ar ? ARMAS[m.ar] : (m.an || m.pen != null ? { nome: m.an || undefined, pen: m.pen } : null);
+const vec = q => q ? new THREE.Vector3(q[0], q[1], q[2]) : null;
+// retratos
+const estAtor = a => [a.id, r2(a.pos.x), r2(a.pos.y), r2(a.pos.z), r3(a.yaw), r3(a.pitch), (a.vivo ? 1 : 0) | (a.agachado ? 2 : 0) | (a.correndo ? 4 : 0), a.atual, a.classe, a.veiculo ? J.veiculos.indexOf(a.veiculo) : -1, Math.round(a.vida), a.abates, a.mortes];
+const estVeic = v => [r2(v.pos.x), r2(v.pos.y), r2(v.pos.z), r3(v.yaw), r3(v.pitch || 0), r3(v.roll || 0), Math.round(v.vida), r2(v.comb), v.destruido ? 1 : 0, v.motorista ? v.motorista.id : -1, r2(v.vel || 0), r2(v.rotor || 0)];
+function aplicarAtor(q) {
+  const a = ator(q[0]); if (!a || local(a)) return;
+  a.rede = { x: q[1], y: q[2], z: q[3], yaw: q[4], pitch: q[5] };
+  const vivo = !!(q[6] & 1); a.agachado = !!(q[6] & 2); a.correndo = !!(q[6] & 4);
+  if (q[8] && q[8] !== a.classe) { const lista = a.lado === 3 ? CLASSES[a.unidade] : CLASSES.faccao, cl = lista.find(c => c.id === q[8]); if (cl) { equipar(a, cl); a.atual = -1; } }
+  if (q[7] !== a.atual && a.armas[q[7]]) J.trocarArma(a, q[7]);
+  if (vivo && !a.vivo) { a.vivo = true; a.vida = 100; a.mesh.visible = true; a.mesh.rotation.set(0, 0, 0); a.pos.set(q[1], q[2], q[3]); }
+  else if (!vivo && a.vivo) { a.vivo = false; a.morteT = 0; }
+  const vi = q[9], v = vi >= 0 ? J.veiculos[vi] : null;
+  if (v) { a.veiculo = v; if (!R.host || v.donoRede === a.donoRede) v.motorista = a; } else if (a.veiculo) { if (a.veiculo.motorista === a) a.veiculo.motorista = null; a.veiculo = null; }
+  a.mesh.visible = !a.veiculo && (a.vivo || a.morteT !== undefined);
+  a.vida = q[10]; if (!R.host) { a.abates = q[11]; a.mortes = q[12]; }
+}
+function aplicarVeic(v, q, i) {
+  if (!v) return;
+  if (R.host) { v.rede = { x: q[0], y: q[1], z: q[2], yaw: q[3], pitch: q[4], roll: q[5] }; v.comb = q[7]; v.vel = q[10]; return; }
+  if (!q[8] && v.destruido) { cena.remove(v.mesh); if (v.som) v.som.parar(); v = J.veiculos[i] = criarVeiculo(J, v.tipo, v.inicial.x, v.inicial.z, v.inicial.yaw, v.lado); }
+  if (q[8] && !v.destruido) { v.destruido = true; queimarVeiculo(v); }
+  v.vida = q[6]; if (v.motorista === J.jogador && !R.host) return;
+  v.rede = { x: q[0], y: q[1], z: q[2], yaw: q[3], pitch: q[4], roll: q[5] }; v.comb = q[7]; v.vel = q[10]; v.rotor = q[11];
+  if (!R.host) { const m = q[9] >= 0 ? ator(q[9]) : null; v.motorista = m && m !== J.jogador ? m : (m === J.jogador ? J.jogador : null); }
+}
+const angLerp = (a, b, k) => { let d = b - a; while (d > Math.PI) d -= Math.PI * 2; while (d < -Math.PI) d += Math.PI * 2; return a + d * k; };
+function interpolar(a, dt) {
+  const q = a.rede; if (!q || !a.vivo) return; const k = 1 - Math.pow(0.0004, dt), ox = a.pos.x, oz = a.pos.z;
+  if (Math.hypot(q.x - a.pos.x, q.z - a.pos.z) > 8) a.pos.set(q.x, q.y, q.z); else { a.pos.x += (q.x - a.pos.x) * k; a.pos.y += (q.y - a.pos.y) * k; a.pos.z += (q.z - a.pos.z) * k; }
+  a.vel.set((a.pos.x - ox) / Math.max(dt, 1e-3), 0, (a.pos.z - oz) / Math.max(dt, 1e-3)); a.noChao = true;
+  a.yaw = angLerp(a.yaw, q.yaw, k); a.pitch += (q.pitch - a.pitch) * k;
+}
+function interpolarVeic(v, dt) {
+  const q = v.rede; if (!q) return; const k = 1 - Math.pow(0.0004, dt);
+  if (v.pos.distanceTo(new THREE.Vector3(q.x, q.y, q.z)) > 12) v.pos.set(q.x, q.y, q.z); else { v.pos.x += (q.x - v.pos.x) * k; v.pos.y += (q.y - v.pos.y) * k; v.pos.z += (q.z - v.pos.z) * k; }
+  v.yaw = angLerp(v.yaw, q.yaw, k); v.pitch = angLerp(v.pitch || 0, q.pitch, k); v.roll = angLerp(v.roll || 0, q.roll, k);
+}
+// mensagens da partida (as duas pontas usam)
+function receberJogo(d, c) {
+  if (!J.jogador || estado === 'menu') return;
+  if (d.t === 'est' && !R.host) { for (const q of d.a) aplicarAtor(q); d.v.forEach((q, i) => aplicarVeic(J.veiculos[i], q, i)); d.p.forEach((q, i) => { const p = PONTOS[i]; if (!p) return; const antes = p.dono; p.dono = q[0]; p.quem = q[1]; p.progresso = q[2]; p.disputa = !!q[3]; if (antes !== p.dono && p.dono === J.jogador.lado) centro('✅ PONTO ' + p.letra + ' DOMINADO', p.nome, 2); }); J.placar = d.pl; tempoPartida = d.tp; return; }
+  if (d.t === 'eu' && R.host) { aplicarAtor(d.q); if (d.v && d.vi >= 0) { const v = J.veiculos[d.vi]; if (v && v.donoRede === c.idJog) aplicarVeic(v, d.v, d.vi); } return; }
+  if (d.t === 'tiro') { if (R.host && c) enviar(d, c); const a = ator(d.a), arma = ARMAS[d.ar]; if (!a || !arma || local(a)) return; const o = vec(d.o);
+    for (let k = 0; k + 2 < d.d.length; k += 3) { const dir = new THREE.Vector3(d.d[k], d.d[k + 1], d.d[k + 2]); J.balas.push({ p: o.clone(), v: dir.clone().multiplyScalar(arma.vel), dono: a, arma, dist: 0, pen: arma.pen, mult: 1, tracer: Math.random() < 0.3, passou: new Set(), inicio: o.clone(), dano: false }); if (k === 0) clarao(o.clone().addScaledVector(dir, 0.8), arma.tipo === 'escopeta' ? 0.9 : 0.6); }
+    somTiro(arma, o, false); J.sonsRecentes.push({ x: o.x, z: o.z, lado: a.lado, t: J.tempo, a }); a.revelado = J.tempo; return; }
+  if (d.t === 'gran') { if (R.host && c) enviar(d, c); const a = ator(d.a); if (!a || local(a)) return; const m = new THREE.Mesh(d.tipo === 'frag' ? new THREE.SphereGeometry(0.07, 8, 6) : new THREE.CylinderGeometry(0.05, 0.05, 0.16, 8), new THREE.MeshLambertMaterial({ color: d.tipo === 'frag' ? 0x3b4a2a : 0x8d99ae })); cena.add(m); J.granadas.push({ tipo: d.tipo, p: vec(d.p), v: vec(d.v), t: d.c, dono: a, m, solta: 0, remota: true }); return; }
+  if (d.t === 'dano') { const a = ator(d.alvo); if (!a) return; if (R.host && !local(a)) { enviarPara(a.donoRede, d); return; } aplicarDano(a, d.d, d.z, ator(d.at), vec(d.dir), armaDe(d), !!d.dc); return; }
+  if (d.t === 'morte') { if (R.host && c) enviar(d, c); const a = ator(d.vit); if (!a || local(a) || !a.vivo) return; R.recebendo = true; try { matar(a, ator(d.at), armaDe(d), d.z); } finally { R.recebendo = false; } return; }
+  if (d.t === 'boom' && !R.host) { explodir(vec(d.p), d.r || 8, 3, 120, null, true); return; }
+  if (d.t === 'dveic' && R.host) { const v = J.veiculos[d.v]; if (v) J.danoVeiculo(v, d.d, ator(d.at)); return; }
+  if (d.t === 'entra' && R.host) { const v = J.veiculos[d.v], a = J.atores.find(x => x.donoRede === c.idJog); if (v && a && !v.motorista && !v.destruido) { v.motorista = a; v.donoRede = c.idJog; v.ia = null; a.veiculo = v; } return; }
+  if (d.t === 'sai' && R.host) { const v = J.veiculos[d.v]; if (v && v.donoRede === c.idJog) { if (v.motorista) v.motorista.veiculo = null; v.motorista = null; v.donoRede = null; v.rede = null; } return; }
+  if (d.t === 'fim' && !R.host) { J.placar = d.pl; if (!fimPartida) terminar(); return; }
+}
+function enviarRetrato() {
+  if (!R.on || estado === 'menu' || !J.jogador) return;
+  if (R.host) enviar({ t: 'est', a: J.atores.map(estAtor), v: J.veiculos.map(estVeic), p: PONTOS.map(p => [p.dono, p.quem, r2(p.progresso), p.disputa ? 1 : 0]), pl: J.placar.map(Math.round), tp: Math.round(tempoPartida) });
+  else { const v = J.jogador.veiculo; enviar({ t: 'eu', q: estAtor(J.jogador), vi: v ? J.veiculos.indexOf(v) : -1, v: v ? estVeic(v) : null }); }
+}
+// ---- sala ----
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const nomeOnline = () => (($('#on-nome').value || ler('zq.nome', '') || 'Soldado').trim().slice(0, 14)) || 'Soldado';
+function erroOn(t, neutro) { $('#on-erro').textContent = t; $('#on-erro').style.color = neutro ? '' : '#ff7b7b'; }
+function fecharRede() { clearInterval(R.timer); try { R.conns.forEach(c => c.close()); R.conn && R.conn.close(); } catch (e) {} try { R.peer && R.peer.destroy(); } catch (e) {} Object.assign(R, { on: false, host: false, peer: null, conns: [], conn: null }); $('#on-sala').style.display = 'none'; }
+function desenharSala() {
+  $('#on-sala').style.display = ''; $('#on-titulo').textContent = R.sala.nome;
+  const eu = R.sala.jog.find(j => j.id === R.meuId) || {};
+  $('#on-lados').innerHTML = LADOS.map(L => `<button class="b ${eu.lado === L.id ? 'pri' : ''}" data-l="${L.id}" style="border-color:${L.cor}">${L.sigla} · ${L.nome.replace(' (polícia)', '')}</button>`).join('');
+  $('#on-unidades').innerHTML = eu.lado === 3 ? UNIDADES.map(u => `<button class="b ${eu.unidade === u.id ? 'pri' : ''}" data-u="${u.id}">${u.nome}</button>`).join('') : '';
+  $('#on-lados').querySelectorAll('[data-l]').forEach(b => b.onclick = () => mudarEscolha(+b.dataset.l, eu.unidade || 'BOEPF'));
+  $('#on-unidades').querySelectorAll('[data-u]').forEach(b => b.onclick = () => mudarEscolha(3, b.dataset.u));
+  $('#on-jogadores').innerHTML = '<tr><th style="text-align:left">Jogador</th><th style="text-align:left">Lado</th></tr>' + R.sala.jog.map(j => `<tr><td>${j.id === 0 ? '👑 ' : ''}${esc(j.nome)}${j.id === R.meuId ? ' (você)' : ''}</td><td style="color:${LADOS[j.lado].cor}">${LADOS[j.lado].sigla}${j.lado === 3 ? ' · ' + j.unidade : ''}</td></tr>`).join('');
+  $('#on-host').style.display = R.host ? '' : 'none'; $('#on-espera').style.display = R.host ? 'none' : '';
+  $('#on-dif').innerHTML = ['Recruta', 'Soldado', 'Veterano'].map((n, i) => `<button class="b ${R.sala.dif === i ? 'pri' : ''}" data-d="${i}">${n}</button>`).join('');
+  $('#on-dif').querySelectorAll('[data-d]').forEach(b => b.onclick = () => { R.sala.dif = +b.dataset.d; enviar({ t: 'sala', sala: R.sala }); desenharSala(); });
+}
+function mudarEscolha(lado, unidade) {
+  if (R.host) { const j = R.sala.jog[0]; j.lado = lado; j.unidade = unidade; enviar({ t: 'sala', sala: R.sala }); desenharSala(); }
+  else enviar({ t: 'escolha', lado, unidade });
+}
+function hospedar(peerPronto, nomePub) {
+  if (!window.Peer) return erroOn('Sem internet: não deu para carregar o sistema de salas.');
+  gravar('zq.nome', nomeOnline());
+  const tentar = n => {
+    const cod = nomePub ? null : Array.from({ length: 4 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ'[Math.random() * 23 | 0]).join('');
+    R.peer = peerPronto || new Peer(PREFIXO + cod, { debug: 0 });
+    R.host = true; R.meuId = 0; R.sala = { jog: [{ id: 0, nome: nomeOnline(), lado: 3, unidade: 'BOEPF' }], nome: nomePub || 'Sala ' + cod, dif: 1 };
+    let prox = 1;
+    const aberta = () => { erroOn(nomePub ? '🌍 Você abriu uma sala pública. Esperando gente…' : `Sala criada! Passe o código ${cod} para os amigos.`, true); desenharSala(); };
+    if (peerPronto) aberta(); else R.peer.on('open', aberta);
+    R.peer.on('connection', c => {
+      c.on('data', d => {
+        if (!d || typeof d !== 'object') return;
+        if (d.t === 'oi') {
+          if (R.sala.jog.length >= 10 || estado === 'jogo' || estado === 'pausa') { c.send({ t: 'cheio' }); setTimeout(() => c.close(), 300); return; }
+          const id = prox++; c.idJog = id; R.conns.push(c); R.sala.jog.push({ id, nome: String(d.nome || 'Soldado').slice(0, 14), lado: [0, 1, 2, 3][id % 4], unidade: 'PCM' });
+          c.send({ t: 'ola', id }); enviar({ t: 'sala', sala: R.sala }); desenharSala(); return;
+        }
+        if (d.t === 'escolha') { const j = R.sala.jog.find(j => j.id === c.idJog); if (j && d.lado >= 0 && d.lado <= 3) { j.lado = d.lado; j.unidade = UNIDADES.some(u => u.id === d.unidade) ? d.unidade : 'BOEPF'; enviar({ t: 'sala', sala: R.sala }); desenharSala(); } return; }
+        receberJogo(d, c);
+      });
+      c.on('close', () => {
+        R.conns = R.conns.filter(x => x !== c); R.sala.jog = R.sala.jog.filter(j => j.id !== c.idJog); enviar({ t: 'sala', sala: R.sala });
+        const a = J.atores.find(x => x.donoRede === c.idJog && !x.bot);
+        if (a) { if (a.veiculo) { a.veiculo.motorista = null; a.veiculo.donoRede = null; } cena.remove(a.mesh); J.atores = J.atores.filter(x => x !== a); centro('', esc(a.nome) + ' saiu da partida', 2); }
+        if (estado === 'menu' || !J.jogador) desenharSala();
+      });
+    });
+    R.peer.on('error', e => { if (e.type === 'unavailable-id' && !nomePub && n < 4) { R.peer.destroy(); tentar(n + 1); } else if (!nomePub) erroOn('Erro de conexão: ' + e.type); });
+  };
+  tentar(0);
+}
+function entrar(cod, falhou) {
+  if (!window.Peer) return erroOn('Sem internet: não deu para carregar o sistema de salas.');
+  if (!falhou) { cod = (cod || '').toUpperCase().replace(/[^A-Z]/g, ''); if (cod.length !== 4) return erroOn('O código tem 4 letras.'); fecharRede(); }
+  gravar('zq.nome', nomeOnline()); erroOn('Conectando…', true);
+  let ok = false;
+  const desistir = msg => { if (ok) return; try { R.peer.destroy(); } catch (e) {} if (falhou) falhou(); else erroOn(msg); };
+  const limite = setTimeout(() => desistir('Não achei a sala. Confira o código.'), 10000);
+  R.peer = new Peer({ debug: 0 });
+  R.peer.on('open', () => {
+    const cn = R.conn = R.peer.connect(PREFIXO + cod, { reliable: true });
+    cn.on('open', () => cn.send({ t: 'oi', nome: nomeOnline() }));
+    cn.on('data', d => {
+      if (!d || typeof d !== 'object') return;
+      if (d.t === 'ola') { ok = true; clearTimeout(limite); R.meuId = d.id; R.host = false; erroOn('Você entrou na sala!', true); }
+      else if (d.t === 'cheio') { clearTimeout(limite); desistir('A sala está cheia ou a partida já começou.'); }
+      else if (d.t === 'sala') { R.sala = d.sala; if (estado === 'menu') { tela('t-online'); desenharSala(); } }
+      else if (d.t === 'ini') iniciarOnline(d);
+      else receberJogo(d, null);
+    });
+    cn.on('close', () => { if (ok && R.conn === cn) { const emJogo = estado !== 'menu'; fecharRede(); if (emJogo) { sairPartida(); } tela('t-online'); erroOn('O anfitrião saiu da sala.'); } });
+  });
+  R.peer.on('error', e => { clearTimeout(limite); desistir(e.type === 'peer-unavailable' ? 'Sala não encontrada.' : 'Erro de conexão: ' + e.type); });
+}
+function salaPublica() {
+  if (!window.Peer || !window.ArcadiaPublica) return erroOn('Sem internet: não deu para carregar o sistema de salas.');
+  fecharRede(); gravar('zq.nome', nomeOnline()); erroOn('Procurando sala pública…', true);
+  ArcadiaPublica.procurar({ Peer, prefixo: PREFIXO, aoStatus: t => erroOn(t, true), aoHospedar: (p, nome) => hospedar(p, nome), aoEntrar: (cod, falhou) => entrar(cod, falhou), aoErro: t => erroOn(t) });
+}
+function comecarOnline() {
+  const humanos = R.sala.jog, roster = []; let aid = 1;
+  for (const j of humanos) roster.push({ aid: aid++, jog: j.id, nome: j.nome, lado: j.lado, unidade: j.lado === 3 ? j.unidade : null, bot: false });
+  if ($('#on-bots').checked) {
+    for (let l = 0; l < 3; l++) { const n = Math.max(0, (CFG.bots ? 5 : 3) - humanos.filter(j => j.lado === l).length); for (let k = 0; k < n; k++) roster.push({ aid: aid++, jog: 0, lado: l, unidade: null, bot: true }); }
+    const np = Math.max(0, (CFG.bots ? 7 : 4) - humanos.filter(j => j.lado === 3).length); for (let k = 0; k < np; k++) roster.push({ aid: aid++, jog: 0, lado: 3, unidade: ['BOEPF', 'PCM', 'EXANTF'][k % 3], bot: true });
+  }
+  // nomes dos bots definidos aqui, para todo mundo ver igual
+  const usados = new Set(roster.filter(r => !r.bot).map(r => r.nome));
+  for (const r of roster) if (r.bot) { const tmp = criarAtor({ cena: new THREE.Scene(), atores: [...usados].map(n => ({ nome: n })) }, r.lado, r.unidade, null, true); r.nome = tmp.nome; usados.add(r.nome); }
+  const d = { t: 'ini', roster, dif: R.sala.dif };
+  enviar(d); iniciarOnline(d);
+}
+function iniciarOnline(d) {
+  R.on = true; limparPartida();
+  J.dif = d.dif; tempoPartida = 0; fimPartida = false;
+  for (const r of d.roster) {
+    const eu = r.jog === R.meuId && !r.bot;
+    const a = criarAtor(J, r.lado, r.unidade || (r.lado === 3 ? 'BOEPF' : null), eu ? null : null, r.bot, r.nome);
+    a.id = r.aid; a.donoRede = r.jog; J.atores.push(a); if (eu) J.jogador = a;
+  }
+  for (const a of J.atores) nascer(J, a);
+  J.jogador.mesh.visible = false;
+  for (const vi of VEICULOS_INICIAIS) J.veiculos.push(criarVeiculo(J, vi.tipo, vi.x, vi.z, vi.yaw, vi.lado));
+  J.veiculos.push(criarVeiculo(J, 'heli', HELIPONTO.x, HELIPONTO.z, 0, 3));
+  escolha.lado = J.jogador.lado; escolha.unidade = J.jogador.unidade || 'BOEPF';
+  vm.montar(); estado = 'jogo'; tela(null); $('#hud').classList.add('on'); $('#fps').style.display = CFG.fps ? 'block' : 'none'; morteAberta = false; $('#morte').style.display = 'none';
+  if (TOQUE) montarToque(); else canvas.requestPointerLock();
+  centro(LADOS[J.jogador.lado].nome.toUpperCase(), `Online · ${d.roster.filter(r => !r.bot).length} jogadores. Domine os pontos!`, 4);
+  clearInterval(R.timer); R.timer = setInterval(enviarRetrato, 66);
+  avisar('iniciado');
+}
+$('#b-online').onclick = () => { iniciarAudio('sons/'); $('#on-nome').value = ler('zq.nome', '') || ''; if (!R.peer) { $('#on-sala').style.display = 'none'; erroOn(''); } tela('t-online'); };
+$('#on-criar').onclick = () => { fecharRede(); erroOn('Criando sala…', true); hospedar(null, null); };
+$('#on-entrar').onclick = () => entrar($('#on-cod').value);
+$('#on-publica').onclick = () => salaPublica();
+$('#on-comecar').onclick = () => { if (R.host) comecarOnline(); };
+$('#on-cod').addEventListener('keydown', e => { if (e.key === 'Enter') entrar($('#on-cod').value); });
+
 /* ---------------- início ---------------- */
 carTxt('Calculando os caminhos dos bots…');
 prepararMapaBase();
 $('#carregando').style.display = 'none';
 tela('t-inicio');
 requestAnimationFrame(quadro);
-window.__zq = { MAPA, J, CFG, comecarPartida, escolha, MALHAS, passo, mouse, teclas, toque, montarToque, explodir, renderer, cena, get estado() { return estado; }, set estado(v) { estado = v; }, cam, vm, NAV };
+window.__zq = { R, receberJogo, estAtor, iniciarOnline, comecarOnline, MAPA, J, CFG, comecarPartida, escolha, MALHAS, passo, mouse, teclas, toque, montarToque, explodir, renderer, cena, get estado() { return estado; }, set estado(v) { estado = v; }, cam, vm, NAV };
 avisar('iniciado');
