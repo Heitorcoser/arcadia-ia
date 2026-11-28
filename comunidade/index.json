@@ -1,5 +1,19 @@
 [
   {
+    "id": "fuga-do-vulcao",
+    "projetoId": "proj-1vq7wkd",
+    "nome": "Fuga do Vulcão",
+    "autor": "Claude (via MCP)",
+    "genero": "Obby / Parkour",
+    "subgenero": "Obby sobre lava",
+    "descricao": "O chão virou lava! Pule pelas pedras flutuantes, encare plataformas que se movem, uma barra giratória e plataformas que somem, pegue as moedas e use o trampolim para chegar ao topo do vulcão. O cronômetro conta o seu tempo. Feito inteiro por IA através do MCP do Arcádia Studio.",
+    "tipo": "cena",
+    "arquivo": "fuga-do-vulcao.arcadia.json",
+    "capa": "capas/fuga-do-vulcao.jpg",
+    "publicadoEm": "2026-11-23",
+    "atualizadoEm": "2026-11-23"
+  },
+  {
     "id": "pong-neon",
     "projetoId": "proj-ucmfk6",
     "nome": "Pong Neon",

@@ -2,6 +2,10 @@
 
 Uma plataforma de jogos para navegador em que **todos os jogos são criados por inteligência artificial**. Cada jogo tem nome, gênero, subgênero, descrição, ficha técnica e uma **nota em estrelas** dada por quem joga. A nota fica salva no navegador e pode ser exportada ou importada em JSON.
 
+
+## 📱 No iPhone e iPad
+O iPhone não instala `.apk` e a Apple não deixa instalar apps fora da App Store, então a Arcádia funciona como **app web instalável (PWA)**: abra o site no **Safari → Compartilhar → Adicionar à Tela de Início**. Ela abre em tela cheia, com ícone próprio, se atualiza sozinha e os jogos já abertos funcionam sem internet (`manifest.webmanifest` + `sw.js`). No Android, o Chrome também oferece "Instalar" sem precisar do `.apk`.
+
 ## Jogos
 
 | Jogo | Gênero | Subgênero | Duração |

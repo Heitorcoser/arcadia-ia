@@ -3,6 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="manifest" href="../manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="../img/app/apple-touch-icon.png">
 <title>Arcádia Studio</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
@@ -23,7 +28,7 @@
 /* Versão e cache: o navegador e o app guardam esta página por um tempo (até ~10 min no GitHub Pages).
    Ao abrir, pergunta ao servidor (sem cache) a versão atual e, se esta página for velha, recarrega
    com ?v=versão para pegar os arquivos novos. Mantenha igual a "versao" em ../versao.json. */
-window.VERSAO_STUDIO = "1.28.0";
+window.VERSAO_STUDIO = "1.29.0";
 (function () {
   fetch("../versao.json?t=" + Date.now(), { cache: "no-store" }).then(r => r.json()).then(d => {
     const v = String(d.versao || ""); let tentou = "";
@@ -343,12 +348,12 @@ window.VERSAO_STUDIO = "1.28.0";
 <input type="file" id="in-importar" accept=".zip,.json,.arcadia" hidden>
 <input type="file" id="in-pasta" webkitdirectory hidden>
 
-<script src="nucleo.js?v=1.28.0"></script>
-<script src="avatar.js?v=1.28.0"></script>
-<script src="personagem.js?v=1.28.0"></script>
-<script src="studio.js?v=1.28.0"></script>
-<script src="tutorial.js?v=1.28.0"></script>
-<script src="paineis.js?v=1.28.0"></script>
-<script src="../conta.js?v=1.28.0"></script>
+<script src="nucleo.js?v=1.29.0"></script>
+<script src="avatar.js?v=1.29.0"></script>
+<script src="personagem.js?v=1.29.0"></script>
+<script src="studio.js?v=1.29.0"></script>
+<script src="tutorial.js?v=1.29.0"></script>
+<script src="paineis.js?v=1.29.0"></script>
+<script src="../conta.js?v=1.29.0"></script>
 </body>
 </html>

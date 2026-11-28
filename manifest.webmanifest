@@ -1,0 +1,24 @@
+{
+  "name": "Arcádia IA",
+  "short_name": "Arcádia",
+  "description": "Jogos criados por inteligência artificial, o Arcádia Studio e jogos da comunidade.",
+  "id": "./",
+  "start_url": "./?app=1",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "any",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "lang": "pt-BR",
+  "categories": ["games", "education", "entertainment"],
+  "icons": [
+    { "src": "img/app/icone-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "img/app/icone-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "img/app/icone-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "img/app/apple-touch-icon.png", "sizes": "180x180", "type": "image/png" }
+  ],
+  "shortcuts": [
+    { "name": "Arcádia Studio", "short_name": "Studio", "url": "./studio/index.html", "icons": [{ "src": "img/app/icone-192.png", "sizes": "192x192" }] }
+  ]
+}

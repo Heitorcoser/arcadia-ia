@@ -453,7 +453,7 @@ const CAPA_LABIRINTO = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.28.0";
+window.ARCADIA_VERSAO = "1.29.0";
 
 window.JOGOS = [
   {
