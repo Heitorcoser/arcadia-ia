@@ -118,7 +118,7 @@ for (const [k, c] of Object.entries(COMPOSTOS)) {
   registrar(Object.assign({}, c, {
     chave: k, formula: f, tipo: 'composto', M: mm ? mm.M : null, comp: mm ? mm.comp : null, Mgas: mm ? mm.M : null,
     cores: c.cor, dS: c.dS || c.d, dL: c.d * (c.dS ? 1 : 0.95), cp: c.cp || 0.9, lam: c.lam ?? (c.liga ? 60 : 1),
-    ions: ions || null, sublima: !!c.sublima, po: !!c.po, fragil: !c.liga && !c.vidro && !c.inerte, condutor: !!c.liga, ionico: !!ions,
+    ions: ions || null, sublima: !!c.sublima, po: !!c.po, fragil: c.fragil ?? (!c.liga && !c.vidro && !c.inerte), condutor: !!c.liga, ionico: !!ions,
     tox: c.tox || (ions ? 'ions' : k), curie: c.curie, chama: ions ? CHAMA[simbCat(ions[0])] : null,
   }));
 }
@@ -215,12 +215,12 @@ const ehAgua = m => m.chave === 'H2O' || !!m.comoAgua;
 const ehSolAq = m => m.tipo === 'solucao' || ehAgua(m);
 const serie = s => SERIE.indexOf(s);
 const acimaH = s => serie(s) >= 0 && serie(s) < serie('H');
-const TCHAMA = { H: 2100, C: 1200, S: 1100, P: 1000, Mg: 3100, Al: 3000, Fe: 1800, Zn: 1700, Ti: 2900, Zr: 3000, Na: 1000, K: 900, Li: 1100, Rb: 900, Cs: 900, Ca: 1800, Sr: 1800, Ba: 1600, Ce: 1700, U: 1600, Pu: 1600, B: 2100, CH4: 1950, Etanol: 1900, CO: 2100, Diamante: 1200, FosforoVermelho: 1000, Acetona: 1980, Glicerina: 1500, Oleo: 1100, Parafina: 1400, PalhaAco: 1800, EspumaH2: 2100 };
+const TCHAMA = { H: 2100, C: 1200, S: 1100, P: 1000, Mg: 3100, Al: 3000, Fe: 1800, Zn: 1700, Ti: 2900, Zr: 3000, Na: 1000, K: 900, Li: 1100, Rb: 900, Cs: 900, Ca: 1800, Sr: 1800, Ba: 1600, Ce: 1700, U: 1600, Pu: 1600, B: 2100, CH4: 1950, Etanol: 1900, CO: 2100, Diamante: 1200, FosforoVermelho: 1000, Acetona: 1980, Glicerina: 1500, Oleo: 1100, Parafina: 1400, PalhaAco: 1800, EspumaH2: 2100, Gasolina: 2000, GLP: 1980, Madeira: 1100, Palito: 1100, Papel: 1000 };
 const IGN_BLOCO = { Ti: 1200, Zr: 1100, Ce: 400, U: 600, Pu: 500 };
 const OXIDA_QUENTE = { Cu: ['CuO', 300], Ni: ['NiO', 500], Co: ['CoO', 500], Sn: ['SnO2', 400], Pb: ['PbO', 450], Bi: ['Bi2O3', 400], Sb: ['Sb2O3', 450], As: ['As2O3', 200], Cr: ['Cr2O3', 900], W: ['WO3', 600], Mo: ['MoO3', 600], V: ['V2O5', 650], Ge: ['GeO2', 700], Se: ['SeO2', 300], Hg: ['HgO', 350], Si: ['SiO2', 900], Fe: ['Fe3O4', 600], Mn: ['Mn2O3', 500], Os: ['OsO4', 200] };
 const EQ_COMB = { H: '2 H₂ + O₂ → 2 H₂O', C: 'C + O₂ → CO₂', S: 'S + O₂ → SO₂', P: 'P₄ + 5 O₂ → P₄O₁₀', Mg: '2 Mg + O₂ → 2 MgO', Al: '4 Al + 3 O₂ → 2 Al₂O₃', Fe: '3 Fe + 2 O₂ → Fe₃O₄', Zn: '2 Zn + O₂ → 2 ZnO', Ti: 'Ti + O₂ → TiO₂', Zr: 'Zr + O₂ → ZrO₂',
   Li: '4 Li + O₂ → 2 Li₂O', Na: '2 Na + O₂ → Na₂O₂', K: 'K + O₂ → KO₂', Rb: 'Rb + O₂ → RbO₂', Cs: 'Cs + O₂ → CsO₂', Ca: '2 Ca + O₂ → 2 CaO', Sr: '2 Sr + O₂ → 2 SrO', Ba: '2 Ba + O₂ → 2 BaO', Ce: 'Ce + O₂ → CeO₂', U: '3 U + 4 O₂ → U₃O₈', Pu: 'Pu + O₂ → PuO₂', B: '4 B + 3 O₂ → 2 B₂O₃',
-  CH4: 'CH₄ + 2 O₂ → CO₂ + 2 H₂O', Etanol: 'C₂H₅OH + 3 O₂ → 2 CO₂ + 3 H₂O', CO: '2 CO + O₂ → 2 CO₂', Diamante: 'C (diamante) + O₂ → CO₂', FosforoVermelho: 'P₄ (vermelho) + 5 O₂ → P₄O₁₀', Acetona: 'C₃H₆O + 4 O₂ → 3 CO₂ + 3 H₂O', Glicerina: '2 C₃H₈O₃ + 7 O₂ → 6 CO₂ + 8 H₂O', Oleo: 'C₅₇H₁₀₄O₆ + 80 O₂ → 57 CO₂ + 52 H₂O', Parafina: 'C₂₅H₅₂ + 38 O₂ → 25 CO₂ + 26 H₂O', PalhaAco: '3 Fe + 2 O₂ → Fe₃O₄', EspumaH2: '2 H₂ + O₂ → 2 H₂O' };
+  CH4: 'CH₄ + 2 O₂ → CO₂ + 2 H₂O', Etanol: 'C₂H₅OH + 3 O₂ → 2 CO₂ + 3 H₂O', CO: '2 CO + O₂ → 2 CO₂', Diamante: 'C (diamante) + O₂ → CO₂', FosforoVermelho: 'P₄ (vermelho) + 5 O₂ → P₄O₁₀', Acetona: 'C₃H₆O + 4 O₂ → 3 CO₂ + 3 H₂O', Glicerina: '2 C₃H₈O₃ + 7 O₂ → 6 CO₂ + 8 H₂O', Oleo: 'C₅₇H₁₀₄O₆ + 80 O₂ → 57 CO₂ + 52 H₂O', Parafina: 'C₂₅H₅₂ + 38 O₂ → 25 CO₂ + 26 H₂O', PalhaAco: '3 Fe + 2 O₂ → Fe₃O₄', EspumaH2: '2 H₂ + O₂ → 2 H₂O', Gasolina: '2 C₈H₁₈ + 25 O₂ → 16 CO₂ + 18 H₂O', GLP: 'C₃H₈ + 5 O₂ → 3 CO₂ + 4 H₂O', Madeira: 'celulose + O₂ → carvão + CO₂ + H₂O', Palito: 'celulose + O₂ → carvão + CO₂ + H₂O', Papel: 'celulose + O₂ → CO₂ + H₂O + cinzas' };
 
 let ATMOSFERA = 'ar'; // 'ar' | 'vacuo' | 'N2' | 'O2'
 const temO2 = () => ATMOSFERA === 'ar' || ATMOSFERA === 'O2';
@@ -235,6 +235,14 @@ function limparCacheRegras() { cache.clear(); }
 const R = (o) => o;
 const eqIon = (c, n) => `${fmt(c)}${SUP(n)}`;
 const minus = t => t ? t.charAt(0).toLowerCase() + t.slice(1) : t;
+function vaporDe(k) {
+  const M = mat(k); if (!M) return -1;
+  const kk = 'vap:' + k; if (POR_CHAVE.has(kk)) return POR_CHAVE.get(kk);
+  return registrar({ chave: kk, nome: 'Vapor de ' + minus(M.nome.split(' (')[0]), formula: M.formula, tipo: 'composto', fixo: 2, M: M.M, Mgas: M.Mgas || M.M, comp: M.comp, d: 0.003, dG: (M.Mgas || M.M || 60) / 24465,
+    cores: [null, null, rgbHex(misturaCor(M.rgb[1], [235, 235, 240], 0.5))], cp: M.cpv || 1.5, lam: 0.02, inflam: M.inflam, tox: M.tox, vaporDe: M.id, efemero: 0.0005,
+    curio: 'Na vida real o vapor é invisível (aqui aparece clarinho). É mais pesado que o ar: escorre e se junta embaixo, e se espalha até o fogo.' });
+}
+for (const k of ['Gasolina', 'Acetona', 'Etanol']) { const M = mat(k); if (M) { M.vapor = vaporDe(k); if (!M.volatil) M.volatil = k === 'Acetona' ? 0.003 : 0.0012; } }
 
 function criarRegra(A, B) {
   if (A.inerte || B.inerte || A.chave === 'vazio') return null;
@@ -281,11 +289,12 @@ function regraAr(A, puroO2) {
   // combustão de elementos
   const re = A.reat || {}, inf = A.inflam || (re.ign ? { ign: re.ign, prod: re.comb, dH: re.dH, soPo: re.soPo } : null);
   if (inf && inf.prod) {
-    const tChama = TCHAMA[A.simb || A.chave] || 1200;
+    const base = A.vaporDe != null ? MATS[A.vaporDe] : A, gasInfl = estadoDe(A, 25) === 2;
+    const tChama = TCHAMA[base.simb || base.chave] || 1200;
     const prodA = A.chave === 'H' ? AGUA : id(inf.prod);
     if (prodA < 0) return null;
     return R({ pa: prodA, pb: id('FOGO'), p: 0.25 * rapido, tmin: inf.ign, soPo: inf.soPo, ignBloco: IGN_BLOCO[A.simb], tA: tChama * 0.7, tB: tChama, fogo: A.chama || CHAMA[A.simb] || '#ff9a2a', extra: inf.prod2 ? id(inf.prod2) : -1,
-      faiscas: !!(A.metal || A.liga), nome: `Combustão: ${A.nome}`, eq: EQ_COMB[A.simb || A.chave] || `${fmt(A.formula)} + O₂ → ${fmt(MATS[prodA].formula)}`, dH: inf.dH, combustao: true,
+      faiscas: !!(A.metal || A.liga), explosao: gasInfl, explosaoChance: 0.04, nome: `Combustão: ${A.nome}`, eq: EQ_COMB[base.simb || base.chave] || `${fmt(A.formula)} + O₂ → ${fmt(MATS[prodA].formula)}`, dH: inf.dH, combustao: true,
       nota: `Precisa chegar a ~${inf.ign} °C${inf.soPo ? ' e estar em pó (em bloco o calor se espalha rápido demais)' : ''}. Chama de ~${tChama} °C.` });
   }
   // oxidação lenta de metais quentes (formam uma casca de óxido)

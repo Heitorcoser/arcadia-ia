@@ -22,6 +22,43 @@ O iPhone não instala `.apk` e a Apple não deixa instalar apps fora da App Stor
 | **Defesa da Feira** | Estratégia | Tower Defense | Mapas de 12–25 min |
 | **Gol de Placa** | Esporte | Futebol arcade | Partidas de 2–6 min |
 | **Laboratório dos Elementos** | Simulação | Sandbox de química (educativo) | Livre |
+| **Ladeira Abaixo** | Corrida | Carrinho de rolimã (física) | Corridas de ~1 min |
+| **Zona Quente** | Tiro em primeira pessoa | FPS tático de domínio de pontos | Partidas de até 15 min |
+| **Labirinto Maluco** | Obby | Corrida em labirinto com poderes | Corridas de 4–7 min |
+
+### Labirinto Maluco
+Corrida até o terraço de um prédio de 10 andares, e cada andar é um labirinto fechado sorteado na hora.
+
+- 🛗 **Elevadores**: 10 no 1º andar, um a menos a cada andar, só 1 no 10º
+- 🏢 **Andares empilhados**: buraco no chão derruba para o andar de baixo; com **Q** a mira passa para o **andar de cima** (minimapa mostra quem está lá)
+- 🎓 **5 classes, 25 poderes**: Demolidor (buraco, marreta, cratera, bomba-relógio, terremoto), Construtor (tapar, pilar, ponte, muralha, túnel), Feiticeiro do Obby (lava, gelo, pisca-pisca, hélice, mar de lava), Trapaceiro (esteira, mola, remexer, armadilha, embaralhar) e Velocista (disparada, pulo duplo, radar, escudo, fantasma)
+- 🤖 Eventos do prédio, bots e 🌐 **online até 12**; pontos desbloqueiam poderes novos
+
+**Controles:** `WASD` anda · `Espaço` pula · mouse gira a câmera · `1`–`5` escolhe o poder · clique ou `E` usa · `Q` mira no andar de cima · `R` volta ao começo do andar
+
+### Zona Quente
+Tiro em primeira pessoa na Serra Alta: três morros fictícios ligados pela rodovia BR-707.
+
+- 🏴 **4 lados**: Bonde do Trovão, Tropa da Garça e Os Corvos (cada facção por si) e a **Força Integrada** — BOEPF, PCM e EXANTF lutando juntos, sem fogo amigo
+- 🔫 **9 armas** (pistola, revólver, 2 submetralhadoras, AK-47, M4, escopeta, fuzil de precisão com luneta, metralhadora) + granada de fragmentação e de fumaça
+- 🎯 **Balística**: bala com velocidade e queda, perda de dano, penetração (madeira, vidro, lataria), ricochete e dano por região
+- 🔊 **Sons reais** (CC0/CC-BY/domínio público): tiros gravados de perto e de longe, zunido de bala passando, vidro quebrando e impacto por material, com atraso pela velocidade do som
+- 📦 **Munição limitada** (loja de munição grátis) e ⛽ **gasolina** (posto grátis na BR); carros, viatura, blindado e helicóptero
+- 🤖 Bots com visão, audição, granadas e idas à loja; modo **Domínio** com 5 pontos; toque no celular
+- 🌐 **Online até 10** (código ou sala pública): cada um escolhe o lado, bots completam
+
+**Controles:** `WASD` anda · `Shift` corre · mouse mira/atira · botão direito mira pela alça · `R` recarrega · `G`/`T` granadas · `F` interage · `Q`/`E` inclina · `M` mapa · `Esc` pausa
+
+### Ladeira Abaixo
+Corrida de carrinho de rolimã em 3D, sem motor: quem empurra é a gravidade.
+
+- 🧮 **Física de verdade**: peso na rampa, atrito dos rolamentos (maior no paralelepípedo), arrasto do ar e aderência nas curvas; abaixado, chega a ~60 km/h numa ladeira de 10%
+- 🌬️ **Vácuo** atrás de outro carrinho, **largada** com empurrão no "JÁ!" e freio com o pé
+- 🏘️ **4 ladeiras**: Ladeira da Matriz, Rua das Bandeirinhas (festa junina), Estrada Velha da Serra e Morro do Mirante
+- 🏆 **Campeonato** com pontos e moedas, **oficina** (rolamentos, carenagem, direção, freio, pintura) e **contra o relógio** com fantasma
+- 👥 **2 jogadores** na tela dividida e 🌐 **online até 6** (código ou sala pública, bots completam)
+
+**Controles:** `A`/`D` ou setas viram · `W`/`↑`/`Shift` abaixa · `S`/`↓`/`Espaço` freia · `Esc` pausa
 
 ### Laboratório dos Elementos
 Sandbox de química com a tabela periódica inteira, para estudar e testar.
@@ -30,6 +67,8 @@ Sandbox de química com a tabela periódica inteira, para estudar e testar.
 - 🔥 Cada célula tem **temperatura**: derrete, ferve e congela nos pontos reais; densidade e condução de calor também são reais
 - 🧪 **Mais de 1.200 reações** (reatividade dos metais, solubilidade, ácido + base, combustão, termite, eletrólise, ligas…) com equação, ΔH e condições, e um **combinador** para testar qualquer par
 - 🧫 Ferramentas: aquecer, resfriar, faísca/corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra
+- 🧭 **Modo simulador**: experimentos com roteiro (objetivo, passos que se marcam sozinhos e explicação), bancada para montar o seu com quantidades, sondas com gráfico de temperatura e caderno de laboratório
+- ⛽ **Combustíveis e pirotecnia**: gasolina (o vapor escorre e leva o fogo), gás de cozinha, fósforo que risca na lixa, pólvora, pavio, madeira e papel; bico de Bunsen e chama de fósforo
 - 🏠 **Aba Casa**: detergente, sabão, água sanitária, vinagre, limão, óleo, leite, vela, palha de aço… (espuma, emulsão, sabão caseiro, leite coalhando e por que nunca jogar água em óleo quente)
 - ✨ **Faíscas** que voam e acendem o que tocam, arco elétrico e fios que esquentam com a corrente
 - 🧴 **Reagentes de laboratório**: peróxido de hidrogênio 30% e água oxigenada 3%, permanganato de potássio, água destilada e da torneira, fenolftaleína, repolho roxo, lugol, amido, glicerina e acetona (catalisadores, titulação, indicadores de pH, teste do amido)

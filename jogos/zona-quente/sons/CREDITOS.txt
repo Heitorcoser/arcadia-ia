@@ -1,0 +1,22 @@
+ZONA QUENTE — CRÉDITOS DOS SONS (todos gravações reais, convertidas para mono e cortadas)
+
+Tiros (tiro_*.wav e tiro_*_longe.wav)
+  "The Free Firearm Sound Library" — Ben Jaszczak, Brian Nelson, Kevin Heras e Matthew Nanney
+  Licença: CC0 (domínio público). https://opengameart.org/content/the-free-firearm-sound-library
+  Gravações usadas: Walther PPQ (pistola), Smith & Wesson 642 (revólver), Carl Gustav M45 (submetralhadora),
+  PPSh (submetralhadora de tambor), AK-47, AR-15 (fuzil 5.56), Remington/Benelli Nova (escopeta),
+  Tikka .30-06 (fuzil de precisão), Mosin Nagant 7.62x54R (metralhadora). "longe" = gravação a média distância.
+
+Bala passando (bala_passando.wav) — "Bullet Whizzing By", Mike Koenig — CC-BY 3.0 — https://soundbible.com/1875-bullet-whizzizsing-by.html
+Granada (granada.wav) — "Grenade Explosion", Mike Koenig — CC-BY 3.0 — https://soundbible.com/1467-Grenade-Explosion.html
+Ricochetes (ricochete1-4.wav) — "Ricochet Rapid Fire", Grant Evans — CC-BY 3.0 — https://soundbible.com/2051-Ricochet-Rapid-Fire.html
+Cápsulas caindo (capsula.wav) — "Shell Falling", Marcel — CC-BY 3.0 — https://soundbible.com/2072-Shell-Falling.html
+Passos (passo1-6.wav) — "Footsteps On Cement", Tim Fryer — Domínio público — https://soundbible.com/2057-Footsteps-On-Cement.html
+Vidro quebrando (vidro_quebrando.wav) — "Glass Break", Till Behrend — CC0 — https://opengameart.org/content/glass-break
+Impactos em vidro, metal, madeira, pedra, corpo; vidro e metal caindo; madeira quebrando (impacto_*.ogg, vidro_*.ogg, metal_caindo.ogg, madeira_quebrando.ogg)
+  "75 CC0 breaking / falling / hit sfx", rubberduck — CC0 — https://opengameart.org/content/75-cc0-breaking-falling-hit-sfx
+Explosão distante e estouro (explosao_longe.ogg, estouro.ogg) — "25 CC0 bang / firework SFX", rubberduck — CC0 — https://opengameart.org/content/25-cc0-bang-firework-sfx
+Helicóptero (helicoptero.mp3) — "Helicopter Sounds", aquinn — CC0 — https://opengameart.org/content/helicopter-sounds
+Recargas (recarga_pistola.wav) — "Handgun Reload Sound Effect", zer0_sol — CC0 — https://opengameart.org/content/handgun-reload-sound-effect
+Recargas (recarga_geral.wav, recarga_fuzil.wav, escopeta_bomba.wav) — "Gun reload sounds", SpringySpringo — CC0 — https://opengameart.org/content/gun-reload-sounds
+Motor do blindado (motor.mp3) — "Engine-loop heavy vehicle/tank", Nayckron (a partir de loop de qubodup) — CC-BY 3.0 — https://opengameart.org/content/engine-loop-heavy-vehicletank

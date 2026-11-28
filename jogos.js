@@ -371,16 +371,261 @@ const CAPA_LAB = `
   </g>
 </svg>`;
 
+const CAPA_LADEIRA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="ld-ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9e5e"/><stop offset=".55" stop-color="#ffd59a"/><stop offset="1" stop-color="#fbe7c2"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#ld-ceu)"/>
+  <circle cx="520" cy="70" r="34" fill="#fff3c4"/>
+  <g>
+    <polygon points="0,120 120,150 120,360 0,360" fill="#83c5be"/><polygon points="0,112 125,146 120,150 0,120" fill="#b6553a"/>
+    <polygon points="120,150 230,175 230,360 120,360" fill="#f4d35e"/><polygon points="118,146 236,172 230,175 120,150" fill="#b6553a"/>
+    <polygon points="640,120 520,150 520,360 640,360" fill="#f95738"/><polygon points="640,112 515,146 520,150 640,120" fill="#8f3f2a"/>
+    <polygon points="520,150 410,175 410,360 520,360" fill="#cdb4db"/><polygon points="522,146 404,172 410,175 520,150" fill="#8f3f2a"/>
+    <g fill="#2e3b55" opacity=".7"><rect x="30" y="170" width="26" height="30"/><rect x="70" y="180" width="26" height="30"/><rect x="150" y="200" width="22" height="26"/><rect x="580" y="170" width="26" height="30"/><rect x="540" y="180" width="26" height="30"/><rect x="450" y="200" width="22" height="26"/></g>
+  </g>
+  <polygon points="300,190 340,190 600,360 40,360" fill="#5a5248"/>
+  <g stroke="#7a7064" stroke-width="2" opacity=".7"><line x1="240" y1="230" x2="400" y2="230"/><line x1="200" y1="260" x2="440" y2="260"/><line x1="150" y1="295" x2="490" y2="295"/><line x1="100" y1="330" x2="540" y2="330"/></g>
+  <path d="M0 95 Q320 150 640 95" stroke="#6b4a2c" stroke-width="2" fill="none"/>
+  <g><polygon points="11,100.994140625 29,100.994140625 20,120.994140625" fill="#e63946"/><polygon points="49,111.31759765625 67,111.31759765625 58,131.31759765625" fill="#ffd166"/><polygon points="87,120.245 105,120.245 96,140.245" fill="#06d6a0"/><polygon points="125,127.77634765625 143,127.77634765625 134,147.77634765624998" fill="#118ab2"/><polygon points="163,133.91164062500002 181,133.91164062500002 172,153.91164062500002" fill="#f15bb5"/><polygon points="201,138.65087890625 219,138.65087890625 210,158.65087890625" fill="#fb8500"/><polygon points="239,141.99406249999998 257,141.99406249999998 248,161.99406249999998" fill="#e63946"/><polygon points="277,143.94119140625 295,143.94119140625 286,163.94119140625" fill="#ffd166"/><polygon points="315,144.49226562500002 333,144.49226562500002 324,164.49226562500002" fill="#06d6a0"/><polygon points="353,143.64728515625 371,143.64728515625 362,163.64728515625" fill="#118ab2"/><polygon points="391,141.40625 409,141.40625 400,161.40625" fill="#f15bb5"/><polygon points="429,137.76916015625 447,137.76916015625 438,157.76916015625" fill="#fb8500"/><polygon points="467,132.736015625 485,132.736015625 476,152.736015625" fill="#e63946"/><polygon points="505,126.30681640625001 523,126.30681640625001 514,146.30681640625" fill="#ffd166"/><polygon points="543,118.4815625 561,118.4815625 552,138.4815625" fill="#06d6a0"/><polygon points="581,109.26025390625 599,109.26025390625 590,129.26025390625" fill="#118ab2"/></g>
+  <g transform="translate(320 300) rotate(-4)">
+    <ellipse cx="0" cy="34" rx="92" ry="12" fill="rgba(0,0,0,.25)"/>
+    <rect x="-80" y="14" width="160" height="14" rx="4" fill="#b07a44"/>
+    <circle cx="-62" cy="32" r="9" fill="#c9ced6" stroke="#6b7280" stroke-width="3"/><circle cx="62" cy="32" r="9" fill="#c9ced6" stroke="#6b7280" stroke-width="3"/>
+    <rect x="-30" y="-48" width="44" height="62" rx="10" fill="#06d6a0"/>
+    <rect x="10" y="-2" width="70" height="16" rx="6" fill="#2b3f66"/>
+    <circle cx="-6" cy="-66" r="20" fill="#c68a5c"/><path d="M-28 -66 a22 22 0 0 1 44 0z" fill="#7ff0cf"/>
+    <path d="M-2 -30 Q40 -24 72 4" stroke="#d9c58a" stroke-width="4" fill="none"/>
+  </g>
+  <g stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".8"><line x1="150" y1="250" x2="90" y2="244"/><line x1="160" y1="280" x2="80" y2="276"/><line x1="170" y1="310" x2="100" y2="308"/></g>
+  <text x="24" y="52" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="#1d1300">LADEIRA</text>
+  <text x="24" y="86" font-family="Arial Black,Arial,sans-serif" font-size="34" font-weight="900" fill="#fff" stroke="#1d1300" stroke-width="2">ABAIXO</text>
+</svg>`;
+
+const CAPA_ZONA = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="zq-ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f78a8"/><stop offset=".6" stop-color="#e3a86f"/><stop offset="1" stop-color="#f0c48e"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#zq-ceu)"/>
+  <path d="M0 250 Q120 120 250 170 Q330 90 430 150 Q540 100 640 190 L640 360 L0 360z" fill="#7a6a5a"/>
+  <g>
+    <rect x="40" y="200" width="40" height="36" fill="#c9724f"/><rect x="82" y="188" width="34" height="48" fill="#e0b860"/><rect x="118" y="176" width="44" height="60" fill="#b85c3c"/><rect x="164" y="166" width="38" height="70" fill="#8ab0c4"/>
+    <rect x="204" y="150" width="46" height="86" fill="#c98a5a"/><rect x="252" y="128" width="40" height="108" fill="#d6c08a"/><rect x="294" y="112" width="48" height="124" fill="#b0503a"/><rect x="344" y="124" width="36" height="112" fill="#e3a06a"/>
+    <rect x="382" y="138" width="44" height="98" fill="#9cb87a"/><rect x="428" y="122" width="40" height="114" fill="#c97a4f"/><rect x="470" y="140" width="46" height="96" fill="#d8b06a"/><rect x="518" y="160" width="40" height="76" fill="#b6604a"/><rect x="560" y="178" width="44" height="58" fill="#8aa4b8"/>
+    <g fill="#2a3446" opacity=".75"><rect x="52" y="210" width="10" height="10"/><rect x="128" y="190" width="10" height="10"/><rect x="144" y="210" width="10" height="10"/><rect x="214" y="166" width="10" height="10"/><rect x="232" y="196" width="10" height="10"/><rect x="262" y="142" width="10" height="10"/><rect x="304" y="128" width="10" height="10"/><rect x="322" y="160" width="10" height="10"/><rect x="392" y="152" width="10" height="10"/><rect x="438" y="136" width="10" height="10"/><rect x="480" y="156" width="10" height="10"/><rect x="528" y="176" width="10" height="10"/></g>
+    <g fill="#5c6b7a"><rect x="300" y="100" width="22" height="14"/><rect x="434" y="110" width="22" height="14"/><rect x="210" y="138" width="22" height="14"/></g>
+  </g>
+  <rect x="0" y="236" width="640" height="40" fill="#34373d"/><g fill="#f3f3f3"><rect x="20" y="254" width="40" height="4"/><rect x="110" y="254" width="40" height="4"/><rect x="200" y="254" width="40" height="4"/><rect x="290" y="254" width="40" height="4"/><rect x="380" y="254" width="40" height="4"/><rect x="470" y="254" width="40" height="4"/><rect x="560" y="254" width="40" height="4"/></g>
+  <rect x="0" y="276" width="640" height="84" fill="#6d5a45"/>
+  <g transform="translate(470 58)"><ellipse cx="0" cy="0" rx="38" ry="12" fill="#1d2430"/><rect x="30" y="-4" width="56" height="7" fill="#1d2430"/><line x1="-60" y1="-16" x2="60" y2="-16" stroke="#1d2430" stroke-width="3"/><rect x="-2" y="-16" width="4" height="6" fill="#1d2430"/><line x1="-18" y1="12" x2="18" y2="12" stroke="#1d2430" stroke-width="3"/></g>
+  <g transform="translate(80 236)"><rect x="0" y="-30" width="112" height="30" rx="4" fill="#3c4a3a"/><rect x="18" y="-50" width="64" height="22" rx="3" fill="#4a5a48"/><rect x="26" y="-46" width="20" height="10" fill="#9fb4c6"/><circle cx="22" cy="2" r="11" fill="#141414"/><circle cx="90" cy="2" r="11" fill="#141414"/></g>
+  <g stroke="#ffd27a" stroke-width="2" opacity=".85"><line x1="640" y1="200" x2="560" y2="214"/><line x1="620" y1="170" x2="520" y2="190"/></g>
+  <g transform="translate(330 360)"><path d="M-170 0 L-40 -96 L10 -96 L60 -60 L230 -60 L230 -40 L70 -40 L40 0z" fill="#16181c"/><rect x="40" y="-92" width="60" height="18" rx="3" fill="#20242a"/><path d="M-12 -110 L4 -110 L8 -96 L-14 -96z" fill="#16181c"/></g>
+  <g stroke="#fff" stroke-width="2" opacity=".9"><line x1="320" y1="172" x2="320" y2="182"/><line x1="320" y1="192" x2="320" y2="202"/><line x1="305" y1="187" x2="315" y2="187"/><line x1="325" y1="187" x2="335" y2="187"/></g>
+  <text x="24" y="54" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#fff" stroke="#111" stroke-width="2">ZONA</text>
+  <text x="24" y="98" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#ffb703" stroke="#111" stroke-width="2">QUENTE</text>
+</svg>`;
+
+const CAPA_LABIRINTO = `
+<svg viewBox="0 0 640 360" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid slice">
+  <defs><linearGradient id="lm-ceu" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6aa8ff"/><stop offset=".65" stop-color="#c9d8ff"/><stop offset="1" stop-color="#2a1d5c"/></linearGradient></defs>
+  <rect width="640" height="360" fill="url(#lm-ceu)"/>
+  <g transform="translate(40 300) skewX(-28)">
+    <rect x="0" y="-40" width="150" height="40" fill="#8fb9ff"/><g fill="#5a7fd6"><rect x="0" y="-44" width="150" height="6"/><rect x="30" y="-44" width="6" height="30"/><rect x="70" y="-24" width="50" height="6"/><rect x="110" y="-44" width="6" height="26"/></g>
+  </g>
+  <g transform="translate(170 245) skewX(-28)">
+    <rect x="0" y="-40" width="160" height="40" fill="#b9a2ff"/><g fill="#7e5ce0"><rect x="0" y="-44" width="160" height="6"/><rect x="40" y="-44" width="6" height="26"/><rect x="90" y="-26" width="40" height="6"/><rect x="130" y="-44" width="6" height="30"/></g>
+    <rect x="60" y="-30" width="22" height="14" fill="#ff4b1f"/>
+  </g>
+  <g transform="translate(310 190) skewX(-28)">
+    <rect x="0" y="-40" width="170" height="40" fill="#ffb3d1"/><g fill="#d6609a"><rect x="0" y="-44" width="170" height="6"/><rect x="50" y="-44" width="6" height="30"/><rect x="100" y="-24" width="40" height="6"/></g>
+    <rect x="120" y="-36" width="22" height="14" fill="#1a1238"/>
+  </g>
+  <g transform="translate(455 135) skewX(-28)">
+    <rect x="0" y="-40" width="150" height="40" fill="#9dffc4"/><g fill="#3ddc84"><rect x="0" y="-44" width="150" height="6"/><rect x="60" y="-44" width="6" height="28"/></g>
+  </g>
+  <g transform="translate(560 70)"><rect x="-16" y="-34" width="32" height="38" fill="none" stroke="#ffc23d" stroke-width="5"/><rect x="-18" y="-40" width="36" height="7" fill="#ffc23d"/><text x="0" y="-48" text-anchor="middle" font-family="Arial Black,Arial" font-size="13" fill="#fff">TOPO</text></g>
+  <g transform="translate(250 175)"><rect x="-8" y="-28" width="16" height="18" fill="#ffd166"/><rect x="-7" y="-40" width="14" height="12" fill="#f1c27d"/><rect x="-5" y="-10" width="4" height="12" fill="#2b3a67"/><rect x="1" y="-10" width="4" height="12" fill="#2b3a67"/></g>
+  <g transform="translate(120 248)"><rect x="-8" y="-28" width="16" height="18" fill="#ff6b6b"/><rect x="-7" y="-40" width="14" height="12" fill="#c68642"/><rect x="-5" y="-10" width="4" height="12" fill="#2b3a67"/><rect x="1" y="-10" width="4" height="12" fill="#2b3a67"/></g>
+  <g fill="#5ee7ff"><polygon points="395,130 403,118 411,130 403,142"/><polygon points="205,190 211,181 217,190 211,199"/></g>
+  <g transform="translate(470 90)"><rect x="-14" y="-14" width="28" height="28" fill="#23263d"/><rect x="-9" y="-4" width="18" height="5" fill="#ff3df2"/></g>
+  <text x="24" y="58" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#fff" stroke="#1a1238" stroke-width="3">LABIRINTO</text>
+  <text x="24" y="104" font-family="Arial Black,Arial,sans-serif" font-size="40" font-weight="900" fill="#ffd166" stroke="#1a1238" stroke-width="3">MALUCO</text>
+</svg>`;
+
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.23.0";
+window.ARCADIA_VERSAO = "1.29.0";
 
 window.JOGOS = [
   {
-    id: "laboratorio-dos-elementos",
-    versao: "1.4.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    id: "labirinto-maluco",
+    versao: "1.1.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-26",
+    novidades: "Labirinto refeito: agora é um prédio de 10 andares fechados, com corredores largos e paredes até o teto. Buraco no chão derruba você para o andar de baixo, e dá para sabotar quem está no andar de cima mirando no teto (tecla Q), com minimapa mostrando quem está lá. Poderes novos: bomba-relógio, ponte, túnel e marreta; avisos quando alguém usa um poder em você.",
+    nome: "Labirinto Maluco",
+    genero: "Obby",
+    subgenero: "Corrida em labirinto com poderes",
+    corGenero: "#a855f7",
+    tags: ["Obby", "Labirinto", "3D", "Multiplayer", "Online", "Bots", "Celular"],
+    criadoEm: "2026-11-26",
+    lancadoEm: "2026-11-26T00:00:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Corridas de 4–7 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/labirinto-maluco/index.html",
+    capa: CAPA_LABIRINTO,
+    sinopse:
+      "Um prédio de 10 andares, e cada andar é um labirinto fechado sorteado na hora. Ache um elevador em cada andar (cada vez há menos) e chegue ao terraço primeiro, enquanto todo mundo usa poderes para abrir buracos, levantar muros e sabotar quem está no andar de cima.",
+    descricao: [
+      "Labirinto Maluco é uma corrida em 3D com câmera em terceira pessoa dentro de um prédio de 10 andares. Cada andar é um labirinto fechado, com corredores largos e paredes até o teto, gerado na hora. Os elevadores levam ao andar de cima: o 1º andar tem 10, o 2º tem 9… e o 10º tem um só, que leva ao terraço.",
+      "Cada jogador escolhe uma classe com poderes que mudam o labirinto em tempo real: o Demolidor abre buracos e solta bombas-relógio, o Construtor tapa buracos, faz pontes, pilares, muralhas e túneis, o Feiticeiro do Obby transforma o chão em lava, gelo, plataformas que piscam e hélices, o Trapaceiro cria esteiras, molas e armadilhas e refaz os corredores, e o Velocista corre, pula duas vezes, enxerga o caminho e atravessa paredes.",
+      "Um buraco no chão derruba quem estiver em cima para o andar de baixo. Com a tecla Q a mira passa para o andar de cima: o minimapa mostra quem está lá, e o poder cai bem em cima da cabeça de quem está na frente. Uma mola embaixo de um buraco no teto joga você para o andar de cima.",
+      "Chegar ao terraço, e ir longe no prédio, dá pontos que desbloqueiam os outros poderes de cada classe, incluindo um ultimate. Dá para jogar com 3 a 11 bots ou online com até 12 pessoas (sala por código ou pública)."
+    ],
+    mecanicas: [
+      "Prédio de 10 andares fechados, sorteados a cada partida, com corredores largos e paredes até o teto",
+      "Elevadores: 10 no 1º andar, um a menos em cada andar, 1 no último (leva ao terraço)",
+      "Buraco derruba para o andar de baixo; mola embaixo de um buraco no teto sobe um andar",
+      "Mira no andar de cima (tecla Q) com minimapa mostrando quem está lá",
+      "5 classes e 25 poderes: buraco, marreta, cratera, bomba-relógio, terremoto, tapar, pilar, ponte, muralha, túnel, lava, gelo, pisca-pisca, hélice, mar de lava, esteira, mola, remexer, armadilha, embaralhar, disparada, pulo duplo, radar, escudo e fantasma",
+      "Obby: lava, gelo, esteira, mola, chão que pisca, chão rachado que cai, hélice e buracos",
+      "Eventos malucos do prédio mexem nos andares altos sozinhos",
+      "Mana com recarga e cristais; pontos ao chegar longe desbloqueiam poderes",
+      "Bots que acham caminho, pulam obstáculos e sabotam quem está na frente ou no andar de cima",
+      "Online até 12 jogadores (código ou sala pública) e controles de toque"
+    ],
+    controles: [
+      ["WASD / setas", "Andar"],
+      ["Espaço", "Pular"],
+      ["Mouse", "Girar a câmera (clique para prender o mouse)"],
+      ["1 a 5 / roda", "Escolher o poder"],
+      ["Clique ou E", "Usar o poder no bloco mirado"],
+      ["Q ou botão direito", "Mirar neste andar ou no andar de cima"],
+      ["R", "Voltar ao começo do andar"],
+      ["Esc", "Pausa"]
+    ],
+    tecnologia: [
+      "Three.js com blocos instanciados; andares empilhados gerados por backtracking com caminhos extras, garantindo um caminho seguro até um elevador",
+      "Física própria de personagem (colisão círculo × caixas, pulo, gelo, esteira, mola) e caminho dos bots por Dijkstra com pulos sobre perigo",
+      "Online com PeerJS (WebRTC): o anfitrião decide o efeito de cada poder e manda a lista de mudanças para todos",
+      "Sons gerados com Web Audio API"
+    ]
+  },
+  {
+    id: "zona-quente",
+    versao: "1.2.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-26",
+    novidades: "Multiplayer online: até 10 pessoas por sala (código ou sala pública), cada um escolhe o lado, com bots para completar; tiros, mortes, granadas, carros e placar sincronizados. Correção: árvores não nascem mais em cima da BR, das ruas e dos becos. Mapa refeito: as ruas e a BR agora aparecem e têm o leito nivelado no morro (antes ficavam escondidas debaixo da terra), morros com encosta mais suave, becos calçados e livres, casas com puxadinho, laje com mureta (dá para se proteger no telhado), porta, ferro de espera e caixa d'água. Miras de verdade: holográfica com ponto vermelho no M4 e alça e maça com pontos verdes nas outras armas.",
+    nome: "Zona Quente",
+    genero: "Tiro em primeira pessoa",
+    subgenero: "FPS tático de domínio de pontos",
+    corGenero: "#ef4444",
+    tags: ["Tiro", "FPS", "3D", "Multiplayer", "Online", "Veículos", "Bots", "Celular"],
+    criadoEm: "2026-11-23",
+    lancadoEm: "2026-11-23T21:55:00-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Partidas de até 15 min",
+    classificacao: "16+",
+    finais: 2,
+    caminho: "jogos/zona-quente/index.html",
+    capa: CAPA_ZONA,
+    sinopse:
+      "Tiro em primeira pessoa na Serra Alta, um complexo fictício de três morros ligados pela rodovia BR-707. Três facções brigam entre si e a polícia (BOEPF, PCM e EXANTF) entra junta. Domine os pontos, economize munição (só a loja repõe) e abasteça o carro no posto.",
+    descricao: [
+      "Zona Quente é um FPS tático em 3D num mapa grande: o Morro do Jatobá, o Morro do Cajueiro e o Morro da Antena, com becos, escadarias, lajes, caixas d'água e fios, ligados pela BR-707, que tem trevo, posto de gasolina e o batalhão da polícia. Todos os nomes, lugares e grupos são inventados.",
+      "São quatro lados: Bonde do Trovão, Tropa da Garça e Os Corvos (facções que brigam cada uma por si) e a Força Integrada da polícia, em que BOEPF (Batalhão Especial para Favelas), PCM (Polícia da Comunidade) e EXANTF (Exército Anti-Facção) lutam juntos, sem fogo amigo. O modo é Domínio: cada ponto dominado rende pontos; quem chegar a 1000 (ou estiver na frente em 15 minutos) vence.",
+      "Os tiros são de verdade: a bala é um projétil com velocidade e gravidade, perde força com a distância, atravessa madeira, vidro e lataria fina, ricocheteia em ângulo rasante e não passa do blindado. Os sons de tiro são gravações reais de armas, com eco de longe e atraso do som pela distância, o zunido de bala passando perto, vidro estilhaçando e um som diferente para cada material atingido.",
+      "Munição é limitada: para repor, passe numa loja de munição (de graça). Carros gastam gasolina e só enchem no posto da BR (também de graça). Há viaturas, picapes, carros comuns, um blindado à prova de fuzil e o helicóptero da polícia, que patrulha sozinho com um atirador na porta ou pode ser pilotado."
+    ],
+    mecanicas: [
+      "9 armas: pistola, revólver, 2 submetralhadoras, AK-47, fuzil M4 (auto, rajada e semi), escopeta de bomba, fuzil de precisão com luneta e metralhadora",
+      "Balística: queda da bala, perda de dano com a distância, penetração de materiais, ricochete e dano por região (cabeça, tronco, pernas)",
+      "Recuo que você controla, espalhamento que aumenta correndo ou pulando, mira pela alça, respiração presa na luneta",
+      "Colete e capacete, curativos, dano de queda, coronhada, inclinar pela quina (Q/E), agachar e correr com fôlego",
+      "Granada de fragmentação (segure para cozinhar) e de fumaça, que corta a visão dos bots",
+      "Munição limitada com reposição grátis nas lojas; gasolina limitada, abastecida de graça no posto",
+      "Carros, picape, viatura, blindado e helicóptero com combustível, dano e atropelamento",
+      "Bots que ouvem tiros, se assustam com bala passando, jogam granada e vão à loja quando a munição acaba",
+      "Pontos de controle, renascer na base ou num ponto dominado, troca de equipamento, minimapa, mapa grande e placar",
+      "Controles de toque no celular (deitado)",
+      "Online até 10 jogadores (código ou sala pública): o anfitrião cuida dos bots, dos veículos e do placar"
+    ],
+    controles: [
+      ["WASD", "Andar · Shift corre (e prende a respiração na luneta)"],
+      ["Mouse", "Olhar · botão esquerdo atira · botão direito mira pela alça"],
+      ["R / B", "Recarregar · trocar modo de disparo"],
+      ["1 / 2 / roda", "Trocar de arma"],
+      ["G / T", "Granada (segure para cozinhar) · fumaça"],
+      ["C ou Ctrl / Espaço", "Agachar · pular"],
+      ["Q / E", "Inclinar para espiar"],
+      ["F", "Loja, pegar arma, entrar/sair do veículo · segure no posto para abastecer"],
+      ["X / V", "Curativo · coronhada"],
+      ["M / Tab / Esc", "Mapa · placar · pausa"],
+      ["Veículo", "W/S acelera, A/D vira, Espaço freia · helicóptero: Espaço sobe, Ctrl desce, Q/E de lado"]
+    ],
+    tecnologia: [
+      "Three.js com mapa gerado (terreno, casas, ruas, rodovia) e colisão por caixas em grade espacial",
+      "Balas simuladas como projéteis com raycast contra o mundo, as pessoas (cabeça/tronco/pernas) e os veículos",
+      "IA com percepção (campo de visão, fumaça, audição), caminhos por A* numa malha de navegação e estados de combate",
+      "Áudio 3D com Web Audio API (HRTF, eco, abafamento e atraso pela velocidade do som) usando gravações reais com licença livre (CC0, CC-BY e domínio público; créditos no jogo)"
+    ]
+  },
+  {
+    id: "ladeira-abaixo",
+    versao: "1.0.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
     atualizadoEm: "2026-11-23",
-    novidades: "Alimentos de verdade: comida feita de componentes reais (amido, proteína, glúten, gordura, açúcares...) que gelatinizam, coagulam, fermentam, caramelizam e douram (Maillard) nas temperaturas reais; pão, tapioca, caramelo, ovo cozido e mais, reconhecidos pelo que viraram. Dos elementos à comida: Haber-Bosch, fotossíntese de algas, açúcar e gordura sem planta. Gêiser do Mentos com microbolhas, calor latente, convecção, agitador e novos ácidos (fórmico, oxálico, lático, cítrico, vitamina C...) e reagentes (Benedict, biureto, Sudan III, indicadores).",
+    novidades: "Lançamento: corrida de carrinho de rolimã com física de verdade em 4 ladeiras, campeonato, oficina, contra o relógio com fantasma, 2 jogadores na tela e online até 6.",
+    nome: "Ladeira Abaixo",
+    genero: "Corrida",
+    subgenero: "Carrinho de rolimã (física)",
+    corGenero: "#f59e0b",
+    tags: ["Corrida", "3D", "Física", "Multiplayer", "Online", "Local", "Celular", "Controle"],
+    criadoEm: "2026-11-23",
+    lancadoEm: "2026-11-23T20:56:42-03:00", // o selo "Novo" some 2 dias depois
+    criadoPor: "Claude Opus 5.5 (Anthropic)",
+    duracao: "Corridas de ~1 min",
+    classificacao: "Livre",
+    finais: 2,
+    caminho: "jogos/ladeira-abaixo/index.html",
+    capa: CAPA_LADEIRA,
+    sinopse:
+      "Corrida de carrinho de rolimã ladeira abaixo, sem motor: quem empurra é a gravidade. Abaixe o corpo para cortar o vento, pegue o vácuo de quem vai na frente e freie com o pé antes da curva. Quatro ladeiras brasileiras, campeonato, oficina, 2 jogadores e online.",
+    descricao: [
+      "Ladeira Abaixo é uma corrida de rolimã em 3D com física calculada de verdade. A força que te leva é o peso na rampa; contra ela estão o atrito dos rolamentos (maior no paralelepípedo) e o ar, que cresce com o quadrado da velocidade. Abaixado, você tem menos área contra o vento e chega a uns 60 km/h numa ladeira de 10%.",
+      "Atrás de outro carrinho o ar já está \"aberto\" e você ganha velocidade (vácuo). Nas curvas, o que segura são as rodinhas: se a velocidade passar do que a aderência aguenta para aquele raio, o carrinho escorrega para fora e vai parar no fardo de feno, ou capota.",
+      "São 4 ladeiras: a Ladeira da Matriz (cidade histórica de paralelepípedo), a Rua das Bandeirinhas (festa junina no fim de tarde), a Estrada Velha da Serra (curvas fechadas e neblina) e o Morro do Mirante (a mais rápida, com vista do mar).",
+      "Modos: campeonato contra 5 rivais com pontos e moedas, corrida rápida, contra o relógio com o fantasma do seu recorde, 2 jogadores na mesma tela e online até 6 jogadores (sala por código ou pública, com bots para completar). Na oficina do Seu Quinzinho dá para trocar rolamentos, carenagem, direção, freio e a pintura."
+    ],
+    mecanicas: [
+      "Física real: gravidade na rampa, atrito de rolamento, arrasto do ar (½·ρ·CdA·v²) e aderência nas curvas",
+      "Abaixar para cortar o vento, frear com o pé e empurrar com os pés quando está devagar",
+      "Vácuo atrás de outro carrinho e largada com empurrão no \"JÁ!\" (dá para queimar a largada)",
+      "4 ladeiras com cidade, festa junina, serra e mirante; paralelepípedo trepida e segura menos",
+      "Campeonato com pontos, moedas e oficina (rolamentos, carenagem, direção, freio e pintura)",
+      "Contra o relógio com fantasma do recorde",
+      "2 jogadores com tela dividida e online até 6 (código ou sala pública, bots completam)",
+      "Controles de toque no celular e suporte a controle (gamepad)"
+    ],
+    controles: [
+      ["A D / ← →", "Virar"],
+      ["W, ↑ ou Shift", "Abaixar (menos vento) · parado: empurrar com os pés"],
+      ["S, ↓ ou Espaço", "Frear com o pé"],
+      ["Esc", "Pausar"],
+      ["2 jogadores", "J1: A D, W, S · J2: ← →, ↑, ↓"],
+      ["Controle", "Analógico vira, A ou RT abaixa, B ou LT freia"]
+    ],
+    tecnologia: [
+      "Three.js com ladeiras geradas de segmentos (curvatura e inclinação), público e cenários instanciados",
+      "Física em coordenadas da pista a 60 passos por segundo, com IA que calcula a velocidade segura de cada curva (v = √(μ·g/curvatura))",
+      "Online com PeerJS (WebRTC): cada jogador simula o próprio carrinho e o anfitrião repassa o estado e simula os bots",
+      "Rodas, vento e sons gerados com Web Audio API"
+    ]
+  },
+  {
+    id: "laboratorio-dos-elementos",
+    versao: "1.5.0", // a mesma do arquivo do jogo (window.VERSAO_JOGO)
+    atualizadoEm: "2026-11-23",
+    novidades: "Modo simulador: experimentos com roteiro (objetivo, passos que se marcam sozinhos e explicação no final), bancada para montar o seu com quantidades em mL e g, sondas com gráfico de temperatura e caderno de laboratório. Gasolina (o vapor escorre pelo chão), gás de cozinha, fósforo de verdade (risca na lixa), pólvora, pavio, madeira e papel. Bico de Bunsen, chama de fósforo e calor latente de fusão (o gelo para em 0 °C).",
     nome: "Laboratório dos Elementos",
     genero: "Simulação",
     subgenero: "Sandbox de química (educativo)",
@@ -409,10 +654,12 @@ window.JOGOS = [
       "Mais de 1.200 reações com equação, ΔH e condições",
       "Ferramentas: aquecer, resfriar, definir °C, faísca e corrente, ímã, martelo, fita de pH, Geiger e coleta de amostra",
       "Atmosfera de ar, oxigênio puro, nitrogênio ou vácuo",
+      "Modo simulador: roteiros guiados, bancada com quantidades, sondas com gráfico e caderno de laboratório",
+      "Combustíveis e pirotecnia: gasolina e seu vapor, gás de cozinha, fósforo (risca na lixa), pólvora, pavio, madeira e papel",
       "Aba Casa: detergente, sabão, água sanitária, vinagre, limão, óleo, leite, vela, palha de aço e outros produtos do dia a dia",
       "Faíscas que voam e acendem gases, álcool, pó de metal e espuma de hidrogênio; arco elétrico e aquecimento por corrente",
       "Reagentes de laboratório: peróxido de hidrogênio, permanganato, água destilada e da torneira, indicadores (fenolftaleína, repolho roxo), lugol e amido",
-      "29 experimentos prontos (sódio na água, termite, pasta de dente de elefante, palha de aço + bateria, repolho roxo, leite + vinagre…)",
+      "Mais de 45 experimentos prontos com roteiro (vapor de gasolina, riscar fósforo, rastilho de pólvora, vazamento de gás, curva de aquecimento, temperatura de ignição…)",
       "Simulação no organismo humano por ingestão ou inalação, com órgãos afetados e fontes",
       "Física fina sem efeitos prontos: gás dissolvido (lei de Henry), nucleação em superfícies ásperas, bolhas que grudam e se soltam pela tensão superficial, espuma com detergente",
       "Objetos soltos que boiam ou afundam pelo empuxo e giram pelo torque das bolhas: milho dançante, Mentos, rolha, gelo, pipoca que estoura a 180 °C",
