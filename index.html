@@ -2,7 +2,15 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!-- app instalável (PWA): no iPhone, Safari → Compartilhar → Adicionar à Tela de Início -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#0a0a0f">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Arcádia">
+<link rel="apple-touch-icon" href="img/app/apple-touch-icon.png">
 <title>Arcádia IA — Jogos criados por IA</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -143,7 +151,8 @@
   .warn{font-size:13px;color:#fcd34d;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:10px;padding:10px 12px;line-height:1.5;margin-top:14px}
 
   /* ---------- app ---------- */
-  .apps{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:14px;margin:0 0 34px}
+  .apps{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:14px;margin:0 0 34px}
+  @media (max-width:1100px) and (min-width:821px){ .apps{grid-template-columns:1fr 1fr} }
   .apps .intro{padding:4px 6px}
   .apps .intro h2{font-family:"Space Grotesk";font-size:22px;margin:0 0 8px}
   .apps .intro p{color:var(--muted);font-size:13.5px;line-height:1.6;margin:0}
@@ -156,6 +165,22 @@
   .app-card .dl{margin-top:auto;font-size:13px;font-weight:600;color:#c4b5fd}
   .no-app .apps{display:grid}
   .em-app .apps{display:none}
+  button.app-card{font:inherit;text-align:left;cursor:pointer}
+  /* iPhone com o app instalado: respeita o notch e a barra de baixo */
+  header{padding-top:env(safe-area-inset-top)} body{padding-bottom:env(safe-area-inset-bottom)} .wrap{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}
+  .ios-fundo{position:fixed;inset:0;z-index:200;background:rgba(3,3,6,.78);backdrop-filter:blur(6px);display:none;align-items:flex-end;justify-content:center;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
+  .ios-fundo.on{display:flex} @media (min-width:700px){ .ios-fundo{align-items:center} }
+  .ios-caixa{width:min(430px,100%);background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:22px;color:var(--text);animation:iosSobe .25s ease}
+  @keyframes iosSobe{from{transform:translateY(16px);opacity:.4}}
+  .ios-caixa h3{font-family:"Space Grotesk";font-size:21px;margin:0 0 4px} .ios-caixa .sub{color:var(--muted);font-size:13.5px;margin:0 0 16px;line-height:1.5}
+  .ios-passo{display:flex;gap:12px;align-items:center;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:9px;font-size:14px;line-height:1.45}
+  .ios-passo .n{width:28px;height:28px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;background:linear-gradient(135deg,#8b5cf6,#22d3ee);color:#fff;font-weight:800;font-size:14px}
+  .ios-passo svg{width:20px;height:20px;vertical-align:-4px;color:#60a5fa}
+  .ios-caixa .acoes{display:flex;gap:8px;margin-top:14px} .ios-caixa .acoes button{flex:1;height:44px;border-radius:12px;border:1px solid var(--line2);background:var(--surface2);color:var(--text);font:600 14px Inter,system-ui,sans-serif;cursor:pointer}
+  .ios-caixa .acoes .pri{background:linear-gradient(135deg,#8b5cf6,#6d4ae0);border:0;color:#fff}
+  .ios-aviso{position:fixed;left:12px;right:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:150;display:none;gap:10px;align-items:center;background:rgba(22,20,32,.96);border:1px solid var(--line2);border-radius:16px;padding:10px 12px;box-shadow:0 12px 30px rgba(0,0,0,.45);font-size:13.5px;line-height:1.4}
+  .ios-aviso.on{display:flex} .ios-aviso img{width:40px;height:40px;border-radius:10px} .ios-aviso span{flex:1} .ios-aviso button{height:34px;border-radius:10px;border:0;padding:0 12px;font:700 13px Inter,system-ui,sans-serif;cursor:pointer}
+  .ios-aviso .ver{background:linear-gradient(135deg,#8b5cf6,#6d4ae0);color:#fff} .ios-aviso .x{background:transparent;color:var(--muted);padding:0 6px}
   @media (max-width:820px){ .apps{grid-template-columns:1fr} }
 
   /* ---------- player ---------- */
@@ -247,7 +272,14 @@
       <b>Android</b>
       <small>Arquivo .apk para Android 8 ou mais novo. Na hora de instalar, permita a instalação de "apps desconhecidos". Os jogos têm controles de toque.</small>
       <span class="dl">Baixar .apk ↓</span>
+      <span class="dl" id="instalar-android" style="display:none;color:#86efac">ou instalar direto, sem .apk ↓</span>
     </a>
+    <button type="button" class="app-card" id="card-iphone">
+      <span class="ico"><svg viewBox="0 0 24 24" fill="#e5e7eb"><path d="M16.4 12.6c0-2.4 2-3.6 2.1-3.7-1.2-1.7-3-1.9-3.6-2-1.5-.2-3 .9-3.8.9-.8 0-2-.9-3.3-.9-1.7 0-3.3 1-4.2 2.6-1.8 3.1-.5 7.7 1.3 10.2.9 1.2 1.9 2.6 3.2 2.6 1.3-.1 1.8-.8 3.3-.8 1.6 0 2 .8 3.3.8 1.4 0 2.3-1.3 3.1-2.5 1-1.4 1.4-2.8 1.4-2.9 0 0-2.8-1.1-2.8-4.3zM13.9 5.3c.7-.9 1.2-2 1-3.2-1 0-2.3.7-3 1.6-.7.8-1.2 2-1.1 3.1 1.2.1 2.3-.6 3.1-1.5z"/></svg></span>
+      <b>iPhone e iPad</b>
+      <small>Sem loja e sem arquivo: pelo Safari, adicione a Arcádia à Tela de Início. Abre em tela cheia como um app, funciona sem internet nos jogos já abertos e se atualiza sozinha.</small>
+      <span class="dl">Ver como instalar →</span>
+    </button>
   </section>
 
   <section>
@@ -321,7 +353,7 @@
 /* Versão e cache: o app (Android/Windows) e o navegador guardam arquivos antigos por um tempo.
    Aqui o site pergunta ao servidor (sem cache) qual é a versão atual, recarrega se esta página
    estiver velha e carrega jogos.js/conta.js com ?v=versão, para nunca usar um arquivo antigo. */
-const VERSAO_HTML = "1.22.0";
+const VERSAO_HTML = "1.23.0";
 (function () {
   const carregar = v => {
     const q = v ? "?v=" + encodeURIComponent(v) : ""; let n = 0;
@@ -342,7 +374,7 @@ const VERSAO_HTML = "1.22.0";
 <script>
 window.ARCADIA_INICIAR = () => {
   const JOGOS = window.JOGOS || [];
-  if (/ArcadiaApp|Electron/.test(navigator.userAgent)) document.documentElement.classList.add("em-app");
+  if (/ArcadiaApp|Electron/.test(navigator.userAgent) || navigator.standalone || matchMedia("(display-mode: standalone)").matches) document.documentElement.classList.add("em-app");
   const LS_AV = "arcadia.avaliacoes.v1", LS_ST = "arcadia.stats.v1";
   const ler = k => { try { return JSON.parse(localStorage.getItem(k)) || {}; } catch { return {}; } };
   const gravar = (k, v, semNuvem) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} if (!semNuvem && typeof agendarNuvem === "function") agendarNuvem(); };
@@ -811,6 +843,40 @@ window.ARCADIA_INICIAR = () => {
   const app = (navigator.userAgent.match(/ArcadiaApp\/(\w+)\/([\d.]+)/) || []);
   $("#versao").textContent = "Plataforma v" + (window.ARCADIA_VERSAO || VERSAO_HTML) + (app[2] ? ` · App ${app[1]} v${app[2]}` : "");
 };
+</script>
+<!-- instalar no iPhone / iPad (e no Android sem .apk) -->
+<div class="ios-fundo" id="ios-fundo" role="dialog" aria-modal="true" aria-labelledby="ios-tit">
+  <div class="ios-caixa">
+    <h3 id="ios-tit">Instalar no iPhone ou iPad</h3>
+    <p class="sub">A Apple não deixa instalar apps fora da App Store, mas a Arcádia funciona como app direto da Tela de Início. É grátis e leva 10 segundos.</p>
+    <div class="ios-passo"><span class="n">1</span><span>Abra este site no <b>Safari</b> (no Chrome do iPhone também funciona, pelo mesmo botão).</span></div>
+    <div class="ios-passo"><span class="n">2</span><span>Toque em <b>Compartilhar</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 0-4 4m4-4 4 4"/><path d="M7 10H6a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-1"/></svg> na barra de baixo (no iPad, lá em cima).</span></div>
+    <div class="ios-passo"><span class="n">3</span><span>Role e toque em <b>Adicionar à Tela de Início</b> <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="4" width="16" height="16" rx="4"/><path d="M12 8v8m-4-4h8"/></svg>, depois em <b>Adicionar</b>.</span></div>
+    <div class="ios-passo"><span class="n">4</span><span>Pronto! Abra pelo ícone da <b>Arcádia</b>: tela cheia, sem a barra do navegador. Entre na sua conta de novo dentro do app.</span></div>
+    <div class="acoes"><button type="button" id="ios-fechar">Agora não</button><button type="button" class="pri" id="ios-ok">Entendi</button></div>
+  </div>
+</div>
+<div class="ios-aviso" id="ios-aviso"><img src="img/app/apple-touch-icon.png" alt=""><span><b>Arcádia no seu iPhone</b><br>Instale como app, direto da Tela de Início.</span><button type="button" class="ver" id="ios-ver">Como?</button><button type="button" class="x" id="ios-x" aria-label="Fechar">✕</button></div>
+<script>
+// app instalável: cópia offline (service worker), passo a passo no iPhone e botão "instalar" no Android
+(function () {
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  const $i = s => document.getElementById(s), ua = navigator.userAgent;
+  const ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1); // iPad novo se apresenta como Mac
+  const instalado = navigator.standalone || matchMedia('(display-mode: standalone)').matches;
+  const abrir = () => { $i('ios-aviso').classList.remove('on'); $i('ios-fundo').classList.add('on'); };
+  const fechar = () => $i('ios-fundo').classList.remove('on');
+  $i('card-iphone').onclick = abrir; $i('ios-ver').onclick = abrir; $i('ios-fechar').onclick = fechar; $i('ios-ok').onclick = fechar;
+  $i('ios-fundo').onclick = e => { if (e.target.id === 'ios-fundo') fechar(); };
+  $i('ios-x').onclick = () => { $i('ios-aviso').classList.remove('on'); try { localStorage.setItem('arcadia.avisoIos', String(Date.now())); } catch (e) {} };
+  // aviso discreto só no iPhone/iPad, fora do app, e no máximo uma vez por semana depois de fechado
+  let visto = 0; try { visto = +localStorage.getItem('arcadia.avisoIos') || 0; } catch (e) {}
+  if (ios && !instalado && Date.now() - visto > 7 * 864e5) setTimeout(() => $i('ios-aviso').classList.add('on'), 2500);
+  // Android/Chrome: instala direto (sem .apk) quando o navegador oferece
+  let pedido = null;
+  addEventListener('beforeinstallprompt', e => { e.preventDefault(); pedido = e; $i('instalar-android').style.display = ''; });
+  $i('instalar-android').onclick = async ev => { if (!pedido) return; ev.preventDefault(); ev.stopPropagation(); pedido.prompt(); try { await pedido.userChoice; } catch (e) {} pedido = null; $i('instalar-android').style.display = 'none'; };
+})();
 </script>
 </body>
 </html>

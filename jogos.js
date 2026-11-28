@@ -373,7 +373,7 @@ const CAPA_LAB = `
 
 // Versão da plataforma. Ao publicar qualquer mudança, aumente aqui E em versao.json
 // (o site compara as duas e recarrega sozinho quem estiver com arquivo velho em cache).
-window.ARCADIA_VERSAO = "1.22.0";
+window.ARCADIA_VERSAO = "1.23.0";
 
 window.JOGOS = [
   {
